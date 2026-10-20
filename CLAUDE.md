@@ -29,4 +29,9 @@ SureSay is a voice assistant for people with atypical speech (dysarthria): it sh
 `SURESAY_BACKEND=local` (SQLite + disk + Whisper/fuzzy) or `aws` (DynamoDB + S3 + Transcribe + Nova + AgentCore Memory). Each service sits behind a small interface, so tests run offline.
 
 ## Account status (as of 2026-10-20)
-Bedrock (`NOT_AUTHORIZED`, "Operation not allowed") and Transcribe (`SubscriptionRequiredException`) are blocked pending an AWS Support case. Polly, S3, DynamoDB and AgentCore work. Re-check with the commands in `docs/FRICTION_LOG.md`.
+Bedrock (`NOT_AUTHORIZED`, "Operation not allowed"), Transcribe (`SubscriptionRequiredException`) and AgentCore (quotas "Total Agents per Account" = 0, "Memories" = 0) are blocked pending an AWS Support case. Polly, S3, DynamoDB, Lambda work; the hub is deployed (infra/.state/outputs.env). Re-check with the commands in `docs/FRICTION_LOG.md`. When access opens: `make deploy` (agent + memory), `make eval` (Nova arms fill in), `make report`.
+
+## Gotchas
+- Two `tests` packages: run them separately (`make test` does).
+- moto's DynamoDB is not atomic under threads; never trust it for race tests.
+- Measure cloud latency on the deployed hub (`latency.py --hub-url`), not from here.

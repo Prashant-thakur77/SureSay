@@ -220,17 +220,26 @@ Full on-screen steps go in `docs/VIDEO_SCRIPT.md`. Shots: 0:00 B0 misfire → 0:
 
 Cut order if behind: Alexa skill bridge → Polly read-back (browser TTS stays) → AgentCore Runtime (go local) → control-speaker rerun → 10-foot layout.
 
-### Checklist
-- [ ] P0 repo reset
-- [ ] P1 confirm-gate-mcp with safety tests
-- [ ] P2 hub, MCP tools, device channel
-- [ ] P3 understand: ASR + ranking + abstain
-- [ ] P4 Strands agent + AgentCore app + Memory
-- [ ] P5 web client
-- [ ] P6 eval and REPORT.md
-- [ ] P7 infra deploy and teardown
-- [ ] P8 docs
-- [ ] P9 freeze
+### Checklist (updated 21 Oct)
+- [x] P0 repo reset — camera code removed, mcp 2.1.1, Makefile, CLAUDE.md, friction log
+- [x] P1 confirm-gate-mcp — 217 tests (memory, SQLite, moto); real-DynamoDB race test; standalone `confirm-gate serve` + approval page
+- [x] P2 hub — MCP at /mcp (2025-11-25), signed device channel, actions, state, Polly read-back; 29 end-to-end tests
+- [x] P3 understand — Transcribe streaming/batch + faster-whisper + text; Nova + fuzzy rankers; abstain rule tuned on dev
+- [~] P4 agent — Strands agent + AgentCore app + Memory session written; **blocked**: Bedrock (no model access) and AgentCore quotas = 0. Fallback in use: hub answers turns directly (plan §9)
+- [x] P5 web client — WCAG 2.2 AA, voice/tap/keys/switch, three themes, MCP TS SDK confirm; design pass with consent trail in progress
+- [x] P6 eval — run1 done (Claims 1–5, cost, store atomicity); Nova arms pending Bedrock; run2 + freeze in P9
+- [x] P7 infra — deploy.sh/teardown.sh; hub live on Lambda + DynamoDB + S3; AgentCore steps degrade gracefully
+- [x] P8 docs — README, REPORT, DEVPOST, VIDEO_SCRIPT, PRODUCT_FEEDBACK, architecture diagram
+- [ ] P9 freeze — rerun eval at a clean commit (run1 + run2), full test pass, redeploy, demo dry run
+
+### What changed from the plan, and why
+- `mcp` pinned to 2.1.x (Strands requires <2.2). Gate lives in the OSS package, not `suresay/gate/`.
+- Speech fallback is faster-whisper `small.en`; every result names its engine.
+- The confirmation bias is **none**: on dev, biasing recovered every genuine answer but raised false accepts; the rule ranks false accepts first.
+- Intent eval splits each speaker's own sentences in half (in-book / out-of-book) because some speakers have fewer than 40 distinct sentences.
+- Safety suite adds a scripted worst-case agent arm, so the guarantee is shown independent of any model; the Nova arms run when access opens.
+- Gate latency on DynamoDB is measured in-region on the deployed Lambda (the gate reports its own time); measured from India it is dominated by internet RTT.
+- DynamoDB lookups use a `kind` GSI (scan fallback while backfilling).
 
 ---
 
