@@ -245,6 +245,27 @@ def adapt_section(a: dict[str, Any]) -> list[str]:
     return out
 
 
+def asr_section(c: dict[str, Any], i: dict[str, Any]) -> list[str]:
+    wc, wi = read_result("confirm", "whisper/run1"), read_result("intent", "whisper/run1")
+    if not (wc and wi):
+        return []
+    rows = []
+    for label, conf, intent in ((c["asr_engine"], c, i), (wc["asr_engine"], wc, wi)):
+        b0c, ssc = conf["summary"]["b0"]["test"], conf["summary"]["suresay"]["test"]
+        gen = conf["summary"]["suresay"]["test_confirm_words_only"]
+        it = intent["summary"]["test"]
+        rows.append(f"| `{label}` | {f(b0c['false_accept_pct'])} | {f(ssc['false_accept_pct'])} | "
+                    f"{f(gen['true_accepts_recovered_pct'])} | {f(it['b0']['top1_pct'])} | {f(it['b1']['top1_pct'])} | "
+                    f"{f(it['ss_fuzzy']['top1_pct'])} | {f(it['ss_fuzzy']['correct_abstain_pct'])} |")
+    return ["## The same claims with a second recogniser", "",
+            "Everything above uses Amazon Transcribe. The same pipeline was also run with a local recogniser "
+            "(faster-whisper, CPU), each with its own dev-only tuning, to show the gate's effect does not depend on "
+            "one recogniser. Test speakers:", "",
+            "| Recogniser | false accepts B0 | false accepts SureSay | genuine answers recovered (SureSay) | "
+            "top-1 B0 | top-1 B1 | top-1 SureSay | correct \"say again\" (SureSay) |",
+            "|---|---|---|---|---|---|---|---|", *rows]
+
+
 def cost_section(c: dict[str, Any]) -> list[str]:
     rows = [f"| {k.replace('_', ' ')} | ${v:.4f} |" for k, v in c["per_1000_turns_usd"].items()]
     tok = c["usage"]["nova_tokens"]
@@ -277,8 +298,24 @@ def tuning_section(t: dict[str, Any]) -> list[str]:
     return out
 
 
-def negative_section(ck: dict[str, Any], ik: dict[str, Any]) -> list[str]:
+def filler_finding(c: dict[str, Any]) -> str | None:
+    """How many of SureSay's test false accepts were the recogniser turning an unclear word into 'yeah'/'OK'."""
+    fas = [r for r in c["rows"] if r["group"] == "test" and r["suresay"]["decision"][0] in ("choose", "yes")
+           and r["suresay"]["decision"] != r["truth"]]
+    fillers = [r for r in fas if re.sub(r"[^a-z ]", "", r["suresay"]["heard"].lower()).split()[-1:] in (["yeah"], ["ok"], ["okay"])]
+    if not fas:
+        return None
+    return (f"**Unclear words heard as \"yeah\" or \"OK\".** {len(fillers)} of SureSay's {len(fas)} false accepts on test "
+            f"speakers were the recogniser ({c['asr_engine']}) turning an unclear single word into a filler such as "
+            "\"Yeah\" or \"OK.\", which the yes/no card accepts. That card guards the high-risk actions. A stricter yes "
+            "vocabulary for that card is the candidate fix; it was found on test speakers, and dev has too few cases "
+            "to tune it honestly, so it is reported here and not changed.")
+
+
+def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] | None = None) -> list[str]:
     spk, ss_t1, b1_t1, fab = ik["worst"]
+    filler = filler_finding(c) if c else None
+    extra = [f"6. {filler}"] if filler else []
     return ["## What does not work yet (published on purpose)", "",
             f"1. **The most severe speakers lose recall to the abstain rule.** Worst test speaker: {spk}. SureSay "
             f"recovers {f(ss_t1)} of their in-book phrases at top-1, against {f(b1_t1)} for B1, because it asks again "
@@ -300,7 +337,7 @@ def negative_section(ck: dict[str, Any], ik: dict[str, Any]) -> list[str]:
             "5. **Corpus caveats.** TORGO sentences are well-known reading passages that a large recogniser may "
             "have seen in training, and the phrasebooks are sentences rather than short home commands. "
             "Confirmation words are sparse in TORGO (a few per speaker), so per-speaker confirmation numbers rest "
-            "on small counts."]
+            "on small counts.", *extra]
 
 
 def main() -> None:
@@ -352,6 +389,7 @@ def main() -> None:
         "",
     ]
     body = head + conf + [""] + intent + [""] + safety + [""] + latency + [""]
+    body += asr_section(c, i) + [""]
     adapt = load("adapt")
     if adapt:
         body += adapt_section(adapt) + [""]
@@ -359,7 +397,7 @@ def main() -> None:
         body += cost_section(cost) + [""]
     if tuning:
         body += tuning_section(tuning) + [""]
-    body += negative_section(ck, ik) + [""]
+    body += negative_section(ck, ik, c) + [""]
     (EVAL / "REPORT.md").write_text("\n".join(body))
     readme = ROOT / "README.md"
     if readme.exists():

@@ -202,3 +202,15 @@ def test_cancelled_and_assistant_cards_teach_nothing(hub: Hub) -> None:
         "pending_id": p["pending_id"], "nonce": p["nonce"], "kind": "tap", "answer": "no"}).json()
     hub.signed(device, "POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]})
     assert len(hub.s.phrasebook.list("demo")) == before
+
+
+def test_learning_never_maps_a_standard_phrase_to_a_different_action(hub: Hub) -> None:
+    """Heard 'unlock the door' but meant lock: confirming lock must not teach 'unlock the door' -> lock."""
+    device = hub.pair()
+    out = hub.say(device, "unlock the door")
+    p = out["pending"][0]
+    lock_n = next(c["n"] for c in out["result"]["candidates"] if c["text"] == "Lock the front door")
+    ev = hub.tap(device, p, lock_n).json()
+    assert hub.signed(device, "POST", "/device/confirm",
+                      {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]}).json()["status"] == "done"
+    assert not any(e["phrase"].lower() == "unlock the door" for e in hub.s.phrasebook.list("demo"))

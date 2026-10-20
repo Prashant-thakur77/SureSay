@@ -25,6 +25,8 @@ from .state import Home
 
 logger = logging.getLogger(__name__)
 
+LEARN_CONFLICT = 0.75  # a heard phrase this close to a phrase with another meaning is never learned
+
 current_user: contextvars.ContextVar[str] = contextvars.ContextVar("suresay_user", default="")
 current_caller: contextvars.ContextVar[str] = contextvars.ContextVar("suresay_caller", default="unknown")
 
@@ -156,11 +158,19 @@ class SureSay:
             option = doc["options"][int(doc.get("option") or 1) - 1]
             if not heard or option["action"] == "phrasebook_add":
                 return
-            from .rank import norm
+            from . import catalog
+            from .rank import norm, similarity
 
             book = self.phrasebook.list(doc["user_id"])
             if any(norm(e["phrase"]) == norm(heard) for e in book):
                 return
+            # Never teach a phrase that already means something else: "unlock the door" heard, "lock" chosen,
+            # must not make "unlock the door" mean lock. Learning is for mishearings, not for standard phrasings.
+            meaning = (option["action"], option["args"])
+            for known in [*book, *catalog.templates()]:
+                if (known["action"], known["args"]) != meaning and similarity(heard, known["phrase"]) >= LEARN_CONFLICT:
+                    logger.info("not learning %r: it already sounds like %r", heard, known["phrase"])
+                    return
             self.phrasebook.add(doc["user_id"], heard, option["action"], option["args"])
             logger.info("learned %r -> %s", heard, option["action"])
         except Exception:
