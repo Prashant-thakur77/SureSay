@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 820" width="1400" height="820" font-family="Atkinson Hyperlegible, Segoe UI, system-ui, sans-serif">
+  <title>SureSay architecture</title>
+  <desc>The user's device talks to the SureSay hub over a signed device channel that alone carries nonces. The Strands agent talks to the hub's MCP endpoint with an agent token and never sees a nonce. The hub uses Transcribe, Bedrock Nova 2 Lite, Polly, DynamoDB, S3 and AgentCore.</desc>
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#14213d"/>
+    </marker>
+    <marker id="ahA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9a4a00"/>
+    </marker>
+    <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M28 0H0V28" fill="none" stroke="#14213d" stroke-opacity=".05"/>
+    </pattern>
+  </defs>
+  <rect width="1400" height="820" fill="#fbf8f3"/>
+  <rect width="1400" height="820" fill="url(#grid)"/>
+
+  <text x="48" y="62" font-size="34" font-weight="700" fill="#14213d">SureSay</text>
+  <text x="200" y="62" font-size="22" font-style="italic" font-family="Georgia, 'Times New Roman', serif" fill="#3d4a63">three guesses, and nothing happens until you choose</text>
+
+  <!-- device -->
+  <rect x="48" y="110" width="300" height="430" rx="22" fill="#ffffff" stroke="#14213d" stroke-width="2.5"/>
+  <text x="72" y="148" font-size="21" font-weight="700" fill="#14213d">The user's device</text>
+  <text x="72" y="174" font-size="15" fill="#3d4a63">web client playing the Alexa+ role</text>
+  <g font-size="16" fill="#14213d">
+    <rect x="72" y="196" width="252" height="54" rx="12" fill="#f3ede3" stroke="#14213d"/>
+    <circle cx="98" cy="223" r="15" fill="#14213d"/><text x="93" y="229" fill="#fbf8f3" font-weight="700">1</text>
+    <text x="124" y="229">Turn on the bedroom fan</text>
+    <rect x="72" y="258" width="252" height="54" rx="12" fill="#ffffff" stroke="#14213d"/>
+    <circle cx="98" cy="285" r="15" fill="#14213d"/><text x="93" y="291" fill="#fbf8f3" font-weight="700">2</text>
+    <text x="124" y="291">Turn on the TV</text>
+    <rect x="72" y="320" width="252" height="54" rx="12" fill="#ffffff" stroke="#14213d"/>
+    <circle cx="98" cy="347" r="15" fill="#14213d"/><text x="93" y="353" fill="#fbf8f3" font-weight="700">3</text>
+    <text x="124" y="353">Turn off the bedroom fan</text>
+  </g>
+  <text x="72" y="404" font-size="15" fill="#14213d">● speak, type, tap, keys or one switch</text>
+  <text x="72" y="428" font-size="15" fill="#14213d">● "two", "the second one", "haan"</text>
+  <text x="72" y="452" font-size="15" fill="#14213d">● consent receipt for every change</text>
+  <rect x="72" y="472" width="252" height="48" rx="10" fill="#fdebd7" stroke="#9a4a00" stroke-width="2"/>
+  <text x="86" y="494" font-size="15" font-weight="700" fill="#6b2a00">holds the device key</text>
+  <text x="86" y="512" font-size="13" fill="#6b2a00">paired once with a 6-digit code</text>
+
+  <!-- hub -->
+  <rect x="430" y="110" width="560" height="430" rx="22" fill="#ffffff" stroke="#14213d" stroke-width="2.5"/>
+  <text x="456" y="148" font-size="21" font-weight="700" fill="#14213d">SureSay hub</text>
+  <text x="456" y="174" font-size="15" fill="#3d4a63">one app: Lambda function URL (cloud) or :9000 (local)</text>
+
+  <rect x="456" y="194" width="250" height="140" rx="14" fill="#fdebd7" stroke="#9a4a00" stroke-width="2"/>
+  <text x="472" y="222" font-size="17" font-weight="700" fill="#6b2a00">/device/*  device channel</text>
+  <text x="472" y="248" font-size="14" fill="#6b2a00">HMAC-signed, each signature once</text>
+  <text x="472" y="270" font-size="14" fill="#6b2a00">card sets <tspan font-weight="700">with their nonce</tspan></text>
+  <text x="472" y="292" font-size="14" fill="#6b2a00">evidence: tap, or voice audio the</text>
+  <text x="472" y="312" font-size="14" fill="#6b2a00">server transcribes itself</text>
+
+  <rect x="720" y="194" width="246" height="140" rx="14" fill="#eef1f7" stroke="#14213d" stroke-width="2"/>
+  <text x="736" y="222" font-size="17" font-weight="700" fill="#14213d">/mcp  MCP server</text>
+  <text x="736" y="248" font-size="14" fill="#14213d">Streamable HTTP · 2025-11-25</text>
+  <text x="736" y="270" font-size="14" fill="#14213d">understand · reads · confirm</text>
+  <text x="736" y="292" font-size="14" fill="#14213d">writes only <tspan font-weight="700">propose</tspan></text>
+  <text x="736" y="312" font-size="14" fill="#14213d">never returns a nonce</text>
+
+  <rect x="456" y="350" width="510" height="168" rx="14" fill="#14213d"/>
+  <text x="476" y="380" font-size="17" font-weight="700" fill="#fbf8f3">confirm-gate (open source, MIT)</text>
+  <g font-family="ui-monospace, 'JetBrains Mono', Menlo, monospace" font-size="13.5" fill="#f1d9b0">
+    <text x="476" y="408">001 user evidence exists          ✓</text>
+    <text x="476" y="428">002 from this user's paired device ✓</text>
+    <text x="476" y="448">003 card set open, not expired     ✓</text>
+    <text x="476" y="468">004 words clearly choose a card    ✓</text>
+    <text x="476" y="488">005 action unchanged since shown   ✓</text>
+    <text x="476" y="508">006 nonce consumed exactly once    ✓</text>
+  </g>
+  <text x="790" y="408" font-size="14" fill="#fbf8f3">→ run the one action</text>
+  <text x="790" y="430" font-size="14" fill="#fbf8f3">→ write the receipt</text>
+  <text x="790" y="466" font-size="14" fill="#c9d1e0">understand: ASR → ranker</text>
+  <text x="790" y="486" font-size="14" fill="#c9d1e0">→ 3 cards, or ask again</text>
+
+  <!-- agent -->
+  <rect x="1072" y="110" width="280" height="430" rx="22" fill="#ffffff" stroke="#14213d" stroke-width="2.5"/>
+  <text x="1096" y="148" font-size="21" font-weight="700" fill="#14213d">Strands agent</text>
+  <text x="1096" y="174" font-size="15" fill="#3d4a63">AgentCore Runtime</text>
+  <text x="1096" y="214" font-size="16" fill="#14213d">Nova 2 Lite on Bedrock</text>
+  <text x="1096" y="244" font-size="15" fill="#14213d">● calls understand</text>
+  <text x="1096" y="268" font-size="15" fill="#14213d">● answers questions</text>
+  <text x="1096" y="292" font-size="15" fill="#14213d">● may propose writes</text>
+  <text x="1096" y="316" font-size="15" fill="#14213d">● memory: AgentCore Memory</text>
+  <rect x="1096" y="346" width="232" height="108" rx="10" fill="#f3ede3" stroke="#14213d"/>
+  <text x="1110" y="372" font-size="15" font-weight="700" fill="#14213d">holds an agent token</text>
+  <text x="1110" y="396" font-size="14" fill="#14213d">no device key, no nonce:</text>
+  <text x="1110" y="418" font-size="14" fill="#14213d">it cannot confirm, even</text>
+  <text x="1110" y="438" font-size="14" fill="#14213d">holding the confirm tool</text>
+  <text x="1096" y="490" font-size="14" fill="#3d4a63">tool text (products, contacts)</text>
+  <text x="1096" y="510" font-size="14" fill="#3d4a63">is data, and injections in it</text>
+  <text x="1096" y="530" font-size="14" fill="#3d4a63">can only ever create a card</text>
+
+  <!-- arrows device <-> device channel -->
+  <path d="M348 236 H456" stroke="#9a4a00" stroke-width="3" fill="none" marker-end="url(#ahA)" marker-start="url(#ahA)"/>
+  <text x="366" y="222" font-size="13" font-weight="700" fill="#6b2a00">signed</text>
+  <path d="M348 342 H 843 V 338" stroke="#14213d" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#ah)"/>
+  <text x="354" y="334" font-size="12" fill="#14213d">confirm (MCP)</text>
+  <!-- agent -> mcp -->
+  <path d="M1072 262 H966" stroke="#14213d" stroke-width="3" fill="none" marker-end="url(#ah)" marker-start="url(#ah)"/>
+  <text x="994" y="246" font-size="13" font-weight="700" fill="#14213d">token</text>
+
+  <!-- legend -->
+  <rect x="1000" y="40" width="18" height="18" rx="4" fill="#fdebd7" stroke="#9a4a00" stroke-width="2"/>
+  <text x="1026" y="55" font-size="14" fill="#14213d">user side: carries nonces and evidence</text>
+  <rect x="1000" y="66" width="18" height="18" rx="4" fill="#eef1f7" stroke="#14213d" stroke-width="2"/>
+  <text x="1026" y="81" font-size="14" fill="#14213d">agent side: never sees a nonce</text>
+
+  <!-- AWS row -->
+  <text x="48" y="626" font-size="19" font-weight="700" fill="#14213d">AWS, each doing real work</text>
+  <g font-size="14" fill="#14213d">
+    <rect x="48" y="646" width="152" height="120" rx="14" fill="#ffffff" stroke="#14213d" stroke-width="2"/>
+    <text x="62" y="676" font-weight="700">Transcribe</text><text x="62" y="700">streaming, with a</text><text x="62" y="720">per-user custom</text><text x="62" y="740">vocabulary</text>
+    <rect x="214" y="646" width="152" height="120" rx="14" fill="#ffffff" stroke="#14213d" stroke-width="2"/>
+    <text x="228" y="676" font-weight="700">Bedrock</text><text x="228" y="700">Nova 2 Lite ranks</text><text x="228" y="720">3 guesses, abstains;</text><text x="228" y="740">runs the agent</text>
+    <rect x="380" y="646" width="152" height="120" rx="14" fill="#ffffff" stroke="#14213d" stroke-width="2"/>
+    <text x="394" y="676" font-weight="700">Polly</text><text x="394" y="700">reads the cards</text><text x="394" y="720">aloud; speaks for</text><text x="394" y="740">the user (Kajal)</text>
+    <rect x="546" y="646" width="152" height="120" rx="14" fill="#ffffff" stroke="#14213d" stroke-width="2"/>
+    <text x="560" y="676" font-weight="700">DynamoDB</text><text x="560" y="700">gate ledger with</text><text x="560" y="720">conditional writes;</text><text x="560" y="740">home state</text>
+    <rect x="712" y="646" width="152" height="120" rx="14" fill="#ffffff" stroke="#14213d" stroke-width="2"/>
+    <text x="726" y="676" font-weight="700">S3</text><text x="726" y="700">utterance and</text><text x="726" y="720">evidence audio,</text><text x="726" y="740">30-day expiry</text>
+    <rect x="878" y="646" width="152" height="120" rx="14" fill="#ffffff" stroke="#14213d" stroke-width="2"/>
+    <text x="892" y="676" font-weight="700">Lambda</text><text x="892" y="700">the hub behind a</text><text x="892" y="720">function URL, Web</text><text x="892" y="740">Adapter</text>
+    <rect x="1044" y="646" width="152" height="120" rx="14" fill="#ffffff" stroke="#14213d" stroke-width="2"/>
+    <text x="1058" y="676" font-weight="700">AgentCore</text><text x="1058" y="700">Runtime hosts</text><text x="1058" y="720">the agent; Memory</text><text x="1058" y="740">keeps phrasebooks</text>
+    <rect x="1210" y="646" width="142" height="120" rx="14" fill="#ffffff" stroke="#14213d" stroke-width="2"/>
+    <text x="1224" y="676" font-weight="700">Strands</text><text x="1224" y="700">agent loop over</text><text x="1224" y="720">MCP Streamable</text><text x="1224" y="740">HTTP</text>
+  </g>
+  <path d="M710 540 V 640" stroke="#14213d" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+</svg>
