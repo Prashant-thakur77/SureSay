@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+build/
+dist/
+
+# Node
+node_modules/
+web/dist/
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.bedrock_agentcore.yaml
+
+# Data and runtime
+data/
+var/
+eval/cache/
+infra/.build/
+*.log
+*.pid
+.DS_Store
+.vscode/
+.idea/
