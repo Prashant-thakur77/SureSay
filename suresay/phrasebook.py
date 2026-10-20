@@ -101,6 +101,32 @@ class JsonPhrasebook:
         self._path(user_id).write_text(json.dumps(entries, indent=1))
 
 
+class StorePhrasebook:
+    """Phrasebook rows in the gate's own store (DynamoDB on AWS) when AgentCore Memory is not available."""
+
+    def __init__(self, store: Any, *, seed_users: tuple[str, ...] = ("demo",)) -> None:
+        self.store = store
+        self.seed_users = seed_users
+
+    def list(self, user_id: str) -> list[dict[str, Any]]:
+        doc = self.store.get("phrasebook", user_id)
+        if doc is None:
+            if user_id not in self.seed_users:
+                return []
+            self.replace(user_id, [entry(**s, entry_id=f"ph_start{i:02d}") for i, s in enumerate(STARTER)])
+            doc = self.store.get("phrasebook", user_id)
+        return list(doc["entries"])
+
+    def add(self, user_id: str, phrase: str, action: str, args: dict[str, Any]) -> dict[str, Any]:
+        entries = [e for e in self.list(user_id) if e["phrase"].lower() != phrase.strip().lower()]
+        e = entry(phrase, action, args)
+        self.replace(user_id, [*entries, e])
+        return e
+
+    def replace(self, user_id: str, entries: list[dict[str, Any]]) -> None:
+        self.store.put("phrasebook", user_id, {"entries": list(entries)})
+
+
 class MemoryPhrasebook:
     """Phrasebook as AgentCore Memory blob events: actor = user, session = ``phrasebook``."""
 

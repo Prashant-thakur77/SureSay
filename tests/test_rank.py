@@ -99,3 +99,17 @@ def test_phrasebook_only_mode_rejects_catalog_candidates() -> None:
 def test_parse_json_handles_fences() -> None:
     assert parse_json('```json\n{"a": 1}\n```') == {"a": 1}
     assert parse_json("nothing") == {}
+
+
+def test_store_phrasebook_seeds_adds_and_replaces() -> None:
+    from confirm_gate import MemoryStore
+
+    from suresay.phrasebook import StorePhrasebook
+
+    pb = StorePhrasebook(MemoryStore(), seed_users=("demo",))
+    assert any(e["phrase"] == "fan on" for e in pb.list("demo"))
+    assert pb.list("stranger") == []
+    pb.add("demo", "my fan", "home_set", {"device": "fan", "on": True})
+    pb.add("demo", "My Fan", "home_set", {"device": "fan", "on": False})
+    mine = [e for e in pb.list("demo") if e["phrase"].lower() == "my fan"]
+    assert len(mine) == 1 and mine[0]["args"]["on"] is False

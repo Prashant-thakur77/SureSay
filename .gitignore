@@ -33,3 +33,4 @@ infra/.build/
 .idea/
 notes/
 eval/results/scratch/
+infra/.state/

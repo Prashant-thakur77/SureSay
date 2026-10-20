@@ -1,0 +1,28 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {"Sid": "Logs", "Effect": "Allow",
+     "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+     "Resource": "arn:aws:logs:${REGION}:${ACCOUNT}:log-group:/aws/lambda/${FUNCTION}*"},
+    {"Sid": "GateAndStateTable", "Effect": "Allow",
+     "Action": ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:UpdateItem", "dynamodb:Scan", "dynamodb:Query"],
+     "Resource": "arn:aws:dynamodb:${REGION}:${ACCOUNT}:table/${TABLE}"},
+    {"Sid": "EvidenceAudio", "Effect": "Allow",
+     "Action": ["s3:GetObject", "s3:PutObject"],
+     "Resource": "arn:aws:s3:::${BUCKET}/*"},
+    {"Sid": "SpeechIn", "Effect": "Allow",
+     "Action": ["transcribe:StartStreamTranscription", "transcribe:StartStreamTranscriptionWebSocket",
+                "transcribe:GetVocabulary", "transcribe:CreateVocabulary", "transcribe:ListVocabularies"],
+     "Resource": "*"},
+    {"Sid": "SpeechOut", "Effect": "Allow", "Action": ["polly:SynthesizeSpeech"], "Resource": "*"},
+    {"Sid": "Nova", "Effect": "Allow",
+     "Action": ["bedrock:InvokeModel", "bedrock:Converse"],
+     "Resource": ["arn:aws:bedrock:*::foundation-model/amazon.nova-2-lite-v1:0",
+                  "arn:aws:bedrock:${REGION}:${ACCOUNT}:inference-profile/us.amazon.nova-2-lite-v1:0"]},
+    {"Sid": "Phrasebook", "Effect": "Allow",
+     "Action": ["bedrock-agentcore:CreateEvent", "bedrock-agentcore:ListEvents", "bedrock-agentcore:GetEvent"],
+     "Resource": "arn:aws:bedrock-agentcore:${REGION}:${ACCOUNT}:memory/*"},
+    {"Sid": "Agent", "Effect": "Allow", "Action": ["bedrock-agentcore:InvokeAgentRuntime"],
+     "Resource": "arn:aws:bedrock-agentcore:${REGION}:${ACCOUNT}:runtime/*"}
+  ]
+}

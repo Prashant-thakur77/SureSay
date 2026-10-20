@@ -17,7 +17,7 @@ from mcp.server import MCPServer
 from .asr import Asr, make_asr
 from .config import Settings, settings as load_settings
 from .media import LocalMedia, Media, S3Media
-from .phrasebook import JsonPhrasebook, MemoryPhrasebook, Phrasebook
+from .phrasebook import JsonPhrasebook, MemoryPhrasebook, Phrasebook, StorePhrasebook
 from .rank import Ranker, make_ranker
 from .speech import Speaker
 from .state import Home
@@ -57,8 +57,13 @@ class SureSay:
         self.store = store
         self.home = Home(store)
         if phrasebook is None:
-            phrasebook = MemoryPhrasebook(self.cfg.memory_id, region=self.cfg.region) if self.cfg.memory_id \
-                else JsonPhrasebook(data / "phrasebooks", seed_users=(self.cfg.default_user,))
+            if self.cfg.memory_id:
+                phrasebook = MemoryPhrasebook(self.cfg.memory_id, region=self.cfg.region,
+                                              seed_users=(self.cfg.default_user,))
+            elif self.cfg.is_aws:
+                phrasebook = StorePhrasebook(store, seed_users=(self.cfg.default_user,))
+            else:
+                phrasebook = JsonPhrasebook(data / "phrasebooks", seed_users=(self.cfg.default_user,))
         self.phrasebook = phrasebook
         if media is None:
             media = S3Media(self.cfg.bucket, region=self.cfg.region) if (self.cfg.is_aws and self.cfg.bucket) \

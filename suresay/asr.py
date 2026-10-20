@@ -90,6 +90,15 @@ def wav_bytes(samples: np.ndarray) -> bytes:
 
 
 # engines --------------------------------------------------------------------------
+class UnavailableAsr:
+    """No recogniser reachable (no Transcribe access, no local model). Voice turns ask the user to type."""
+
+    name = "unavailable"
+
+    def transcribe(self, audio: bytes, *, vocabulary: list[str] | None = None, user_id: str = "") -> Heard:
+        raise RuntimeError("no speech recogniser is available: enable Amazon Transcribe or install faster-whisper")
+
+
 class TextAsr:
     name = "text"
 
@@ -329,5 +338,13 @@ def make_asr(kind: str = "auto", *, region: str = "us-east-1", language: str = "
 
             vocab = VocabularyManager(boto3.client("transcribe", region_name=region), language=language)
             return TranscribeStreamingAsr(region=region, language=language, vocab=vocab)
-        return WhisperAsr(whisper_model)
+        return WhisperAsr(whisper_model) if whisper_installed() else UnavailableAsr()
     raise ValueError(f"unknown ASR {kind!r}")
+
+
+def whisper_installed() -> bool:
+    try:
+        import faster_whisper  # noqa: F401
+    except ImportError:
+        return False
+    return True

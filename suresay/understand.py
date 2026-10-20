@@ -40,7 +40,13 @@ def understand(app: SureSay, user_id: str, *, transcript: str | None = None, aud
     if audio is None and audio_ref:
         audio = app.media.get(audio_ref)
     if audio is not None:
-        heard = app.asr.transcribe(audio, vocabulary=vocabulary(book, extra=CONFIRM_WORDS), user_id=user_id)
+        try:
+            heard = app.asr.transcribe(audio, vocabulary=vocabulary(book, extra=CONFIRM_WORDS), user_id=user_id)
+        except Exception as exc:  # no recogniser reachable: never a dead end, offer typing
+            return {"status": "ask_again", "heard": "", "asr": "unavailable", "ranker": "", "maybe": [],
+                    "reason": f"speech recognition is unavailable ({type(exc).__name__})",
+                    "timing": {"total_ms": round((time.perf_counter() - t0) * 1000, 1)},
+                    "say": "I can't hear right now. Please type it, or pick from your phrases."}
     else:
         heard = Heard(text=(transcript or "").strip(), engine="typed")
     hypotheses = [heard.text, *heard.alternatives]
