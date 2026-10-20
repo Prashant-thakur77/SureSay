@@ -1,0 +1,78 @@
+"""One user turn: audio or text in; three cards, an answer, or "please say it again" out.
+
+``understand`` never changes anything. When the best guesses are writes it opens a
+card set in the gate, and only the user's own evidence can release one of them.
+"""
+
+from __future__ import annotations
+
+import json
+import time
+from typing import TYPE_CHECKING, Any
+
+from . import catalog
+from .asr import Heard
+from .phrasebook import vocabulary
+from .rank import Ranked
+
+if TYPE_CHECKING:
+    from .app import SureSay
+
+CONFIRM_WORDS = ["yes", "no", "one", "two", "three", "cancel", "haan", "nahin"]
+
+ASK_AGAIN = "Sorry, I didn't catch that. Please say it again, or type it."
+
+
+def spoken_choices(options: list[dict[str, Any]], stage: str) -> str:
+    if stage == "final":
+        return f"{options[0]['text']}? Say yes or no."
+    if len(options) == 1:
+        return f"Did you mean: {options[0]['text']}? Say yes or one, or no."
+    words = ["One", "Two", "Three", "Four", "Five"]
+    parts = [f"{words[o['n'] - 1]}: {o['text']}." for o in options]
+    return "Did you mean " + " ".join(parts) + " Say a number, or no."
+
+
+def understand(app: SureSay, user_id: str, *, transcript: str | None = None, audio: bytes | None = None,
+               audio_ref: str | None = None) -> dict[str, Any]:
+    t0 = time.perf_counter()
+    book = app.phrasebook.list(user_id)
+    if audio is None and audio_ref:
+        audio = app.media.get(audio_ref)
+    if audio is not None:
+        heard = app.asr.transcribe(audio, vocabulary=vocabulary(book, extra=CONFIRM_WORDS), user_id=user_id)
+    else:
+        heard = Heard(text=(transcript or "").strip(), engine="typed")
+    hypotheses = [heard.text, *heard.alternatives]
+    home = app.home.status(user_id)
+    ranked: Ranked = app.ranker.rank(hypotheses, book, context={"home": home})
+    timing = {"asr_ms": round(heard.ms, 1), "rank_ms": round(ranked.ms, 1),
+              "total_ms": round((time.perf_counter() - t0) * 1000, 1)}
+    app.usage(asr_seconds=heard.audio_seconds if heard.engine.startswith("transcribe") else 0.0,
+              **ranked.usage)
+    base = {"heard": heard.text, "asr": heard.engine, "ranker": ranked.engine, "timing": timing}
+
+    if ranked.abstain or not ranked.candidates:
+        maybe = [{"text": c.text, "phrase": c.phrase} for c in ranked.candidates]
+        return {**base, "status": "ask_again", "reason": ranked.reason, "maybe": maybe, "say": ASK_AGAIN}
+
+    top = ranked.candidates[0]
+    if top.action in catalog.READ_ACTIONS:
+        result = app.read(user_id, top.action)
+        return {**base, "status": "answer", "action": top.action, "result": result,
+                "say": app.describe_read(top.action, result)}
+
+    writes = [c for c in ranked.candidates if c.action in catalog.WRITE_ACTIONS][:3]
+    ps = app.gate.propose(user_id, [(c.action, c.args, c.text) for c in writes], origin="user_words",
+                          context={"heard": heard.text, "asr": heard.engine, "ranker": ranked.engine,
+                                   "utterance_ref": audio_ref,
+                                   "confidence": [c.confidence for c in writes]})
+    view = app.gate.public_view(ps)
+    conf = {i + 1: c.confidence for i, c in enumerate(writes)}
+    options = [{**o, "confidence": conf.get(o["n"])} for o in view["options"]]
+    return {**base, "status": "choose", "pending_id": ps.pending_id, "stage": view["stage"], "candidates": options,
+            "say": spoken_choices(view["options"], view["stage"])}
+
+
+def as_json(result: dict[str, Any]) -> str:
+    return json.dumps(result, default=str)
