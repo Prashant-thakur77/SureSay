@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="SureSay: say it your way. Three big guesses, and nothing happens until you choose one." />
+    <meta name="color-scheme" content="light dark" />
+    <title>SureSay</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
+    <script>
+      // apply the saved theme and text size before first paint, so nothing flashes
+      (function () {
+        var s = {};
+        try { s = JSON.parse(localStorage.getItem("suresay.settings") || "{}") || {}; } catch (e) {}
+        var t = s.theme;
+        if (t !== "light" && t !== "dark" && t !== "contrast") {
+          var mm = window.matchMedia ? function (q) { return window.matchMedia(q).matches; } : function () { return false; };
+          t = mm("(prefers-contrast: more)") ? "contrast" : mm("(prefers-color-scheme: dark)") ? "dark" : "light";
+        }
+        var d = document.documentElement;
+        d.setAttribute("data-theme", t);
+        var k = [1, 1.25, 1.5, 2].indexOf(s.textScale) >= 0 ? s.textScale : 1;
+        d.setAttribute("data-scale", String(k));
+        d.style.fontSize = 125 * k + "%";
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript>SureSay needs JavaScript to run.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
