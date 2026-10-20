@@ -257,3 +257,26 @@ Cut order if behind: Alexa skill bridge → Polly read-back (browser TTS stays) 
 | Nova confidently wrong | High-confidence wrong top-1 on dev | Margin rule between candidates 1 and 2, tuned on dev only |
 | Live latency | understand p95 > 3 s | Cards shown as soon as the pending set exists; streaming ASR |
 | Spend | Ledger > $7 | Cache, shrink eval, ask before $10 |
+
+---
+
+## 10. How this wins, and what to add next (written 21 Oct)
+
+What judges reward, and where SureSay stands:
+
+| Judges reward | SureSay today | Next move |
+|---|---|---|
+| A named group failed today, plus a measured fix | dysarthria; TORGO held-out speakers; false accepts 62% → 1.4%; never acts on a guess | Fill the Nova column when Bedrock opens; add a "turns to success" metric (seconds and retries until the intended action runs, B0 against SureSay) |
+| An honest failure with the fix shown | worst-speaker recall and strict-confirmation retries published, with the abstain rule's trade-off | **Per-user adaptation**: learn each user's thresholds and phrase aliases from their own confirmations (every confirmed card is a labelled example), and re-run the worst speaker |
+| A reusable safety layer, not a one-off | confirm-gate-mcp, with `serve` and an approval page | A 30-second video of the gate in front of a third-party MCP server; publish to PyPI; a `GatedServer` example for a Node MCP server through the proxy |
+| Real use of the sponsor stack | Lambda, DynamoDB, S3, Polly and Transcribe live; Nova, AgentCore pending account access | When access opens: `make deploy` (agent and memory), record the agent shots, run the Nova arms of the safety suite |
+| Dignified, simple design | three cards, consent trail, receipt ticket, scan mode, calm mode | A **10-foot Fire TV-style layout** (`?tv=1`): D-pad over three cards, the same gate |
+| Speaking *for* the user, not just controlling devices | `say_for_me` speaks a confirmed sentence | A **"Speak for me" board**: favourite sentences as big tiles, reworded by Nova, spoken by Polly only after confirmation |
+| Caregiver trust | receipts per action | A **caregiver view**: a read-only receipt timeline shared by link, alerts for high-risk actions, and a weekly digest |
+| India angle | Hinglish confirmations, en-IN voice | Hindi phrasebook entries and a hi-IN Polly voice; Transcribe `hi-IN` for requests |
+
+Priority if time remains before Fri 18:00 IST:
+1. Bedrock and AgentCore access → Nova numbers and agent shots (highest value; needs AWS Support).
+2. Per-user adaptation demo on the worst speaker (it answers the negative result).
+3. Video recording (user).
+4. The 10-foot layout and the Speak-for-me board.
