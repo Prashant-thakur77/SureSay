@@ -32,6 +32,12 @@ if ! aws dynamodb describe-table --table-name "$TABLE" >/dev/null 2>&1; then
   aws dynamodb wait table-exists --table-name "$TABLE"
   aws dynamodb update-time-to-live --table-name "$TABLE" --time-to-live-specification Enabled=true,AttributeName=ttl >/dev/null
 fi
+if ! aws dynamodb describe-table --table-name "$TABLE" --query 'Table.GlobalSecondaryIndexes[].IndexName' --output text | grep -q kind-index; then
+  # Lookups by record kind (open card sets, receipts) query this index instead of scanning the table.
+  aws dynamodb update-table --table-name "$TABLE" --attribute-definitions AttributeName=kind,AttributeType=S \
+    --global-secondary-index-updates '[{"Create":{"IndexName":"kind-index","KeySchema":[{"AttributeName":"kind","KeyType":"HASH"}],"Projection":{"ProjectionType":"ALL"}}}]' >/dev/null
+  echo "creating kind-index (backfills in the background; the hub scans until it is ready)"
+fi
 
 say "S3 bucket $BUCKET"
 if ! aws s3api head-bucket --bucket "$BUCKET" 2>/dev/null; then

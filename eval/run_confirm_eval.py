@@ -12,7 +12,7 @@ Two contexts, as on screen:
 Systems:
 * B0 — plain assistant: unbiased ASR, the transcript is forced to the nearest allowed word
   (spelling + sound similarity); it never refuses.
-* SureSay — ASR biased with the confirmation vocabulary, then ``confirm_gate.consent.decide``,
+* SureSay — ASR with the bias chosen on dev (eval/tune_confirm.py), then ``confirm_gate.consent.decide``,
   which refuses anything unclear.
 
 Metrics per speaker and pooled: accuracy, **false-accept rate** (an accept decision that is not
@@ -34,7 +34,7 @@ from confirm_gate.consent import decide  # noqa: E402
 
 from eval.asr_cache import transcribe_all  # noqa: E402
 from eval.common import EVAL, SPLIT, pct, write_result  # noqa: E402
-from suresay.hub import EVIDENCE_WORDS  # noqa: E402
+from eval.common import read_result  # noqa: E402
 from suresay.rank import similarity  # noqa: E402
 
 DISTRACTORS_PER_SPEAKER = 30
@@ -97,7 +97,11 @@ def main() -> None:
     clips = load_clips(groups)
     wavs = [c["wav"] for c in clips]
     plain = transcribe_all(args.engine, "none", wavs, [])
-    biased = transcribe_all(args.engine, "confirm", wavs, EVIDENCE_WORDS)
+    tuning = (read_result("tuning") or {}).get("confirm_bias")
+    if tuning is None:
+        raise SystemExit("run eval/tune_confirm.py first (dev speakers only)")
+    chosen = tuning["candidates"][tuning["chosen"]]
+    biased = transcribe_all(args.engine, chosen["cache_tag"], wavs, chosen["words"])
     per: list[dict[str, Any]] = []
     for c in clips:
         for context in ("choose", "final"):
@@ -127,6 +131,7 @@ def main() -> None:
                             for g in groups for spk in SPLIT[g]}
         summary[system] = s
     path = write_result("confirm", {"claim": 1, "asr_engine": args.engine, "groups": groups,
+                                    "suresay_bias": tuning["chosen"],
                                     "distractors_per_speaker": DISTRACTORS_PER_SPEAKER, "summary": summary,
                                     "rows": per}, run=args.run)
     for system in ("b0", "suresay"):

@@ -35,11 +35,14 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from .app import SureSay, current_caller, current_user
 from .config import ROOT
-from .understand import CONFIRM_WORDS, understand
+from .understand import understand
 
 logger = logging.getLogger("suresay.hub")
 
-EVIDENCE_WORDS = CONFIRM_WORDS + ["number", "first", "second", "third", "none", "doosra", "pehla", "teesra"]
+# Evidence audio is transcribed WITHOUT vocabulary biasing. Chosen on dev speakers only
+# (eval/tune_confirm.py): biasing toward "yes/one/haan..." recovered every genuine answer but also pulled
+# ordinary words toward them, and the rule ranks false accepts first. See eval/REPORT.md.
+EVIDENCE_WORDS: list[str] = []
 
 
 class McpAuth:
@@ -181,7 +184,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
     app = s.mcp.streamable_http_app(stateless_http=True, json_response=True, transport_security=security)
 
     def evidence_transcribe(audio: bytes) -> str:
-        return s.asr.transcribe(audio, vocabulary=EVIDENCE_WORDS).text
+        return s.asr.transcribe(audio, vocabulary=EVIDENCE_WORDS or None).text
 
     routes: list[Any] = device_routes(
         s.gate, s.devices, transcribe=evidence_transcribe, transcriber=None,
@@ -216,6 +219,11 @@ def build_app(s: SureSay | None = None) -> Starlette:
                 lambda: understand(s, device.user_id, transcript=text, audio_ref=audio_ref))
             reply = result["say"]
         pending = await anyio.to_thread.run_sync(s.gate.device_pending, device)
+        new_id = (result or {}).get("pending_id")
+        if new_id and all(p["pending_id"] != new_id for p in pending):  # an index may lag a fresh write
+            fresh = await anyio.to_thread.run_sync(s.gate.device_view, device, new_id)
+            if fresh:
+                pending.append(fresh)
         return JSONResponse({"reply": reply, "mode": mode, "result": result, "pending": pending,
                              "ms": round((time.perf_counter() - t0) * 1000)})
 

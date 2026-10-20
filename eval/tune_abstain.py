@@ -85,7 +85,7 @@ def main() -> None:
     if not use_nova:
         result["nova_status"] = "pending: Bedrock access not available; nova rule not tuned"
     existing = json.loads((RESULTS / "tuning.json").read_text()) if (RESULTS / "tuning.json").exists() else {}
-    write_result("tuning", {**{k: v for k, v in existing.items() if k in ("nova",)}, **result,
+    write_result("tuning", {**{k: v for k, v in existing.items() if k in ("nova", "confirm_bias")}, **result,
                             "speakers": "dev only (F03, M05)", "asr_engine": args.engine})
 
 
