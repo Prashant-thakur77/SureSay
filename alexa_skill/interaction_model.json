@@ -4,118 +4,26 @@
       "invocationName": "sure say",
       "intents": [
         {
-          "name": "CallAgentIntent",
-          "slots": [
-            {
-              "name": "Room",
-              "type": "RoomType"
-            }
-          ],
-          "samples": [
-            "start sure say in {Room}",
-            "start sure say for {Room}",
-            "start sure say in the {Room}",
-            "start sure say for the {Room}",
-            "start conversation in {Room}",
-            "start conversation in the {Room}",
-            "start conversation for {Room}",
-            "connect to {Room}",
-            "connect to the {Room}",
-            "talk to {Room}",
-            "talk to the {Room}",
-            "speak with {Room}",
-            "speak with the {Room}",
-            "begin session in {Room}",
-            "begin session in the {Room}",
-            "begin session for {Room}",
-            "check on {Room}",
-            "check on the {Room}",
-            "monitor {Room}",
-            "monitor the {Room}",
-            "{Room} please",
-            "{Room}",
-            "the {Room}"
-          ]
+          "name": "CommandIntent",
+          "slots": [{"name": "utterance", "type": "AMAZON.SearchQuery"}],
+          "samples": ["to {utterance}", "please {utterance}", "i want to {utterance}", "can you {utterance}",
+                      "could you {utterance}", "i need {utterance}", "i want {utterance}"]
         },
         {
-          "name": "AMAZON.HelpIntent",
-          "samples": [
-            "help",
-            "how do I use this"
-          ]
+          "name": "ChooseIntent",
+          "slots": [{"name": "number", "type": "AMAZON.NUMBER"}, {"name": "ordinal", "type": "AMAZON.Ordinal"}],
+          "samples": ["{number}", "number {number}", "option {number}", "card {number}", "the {ordinal} one",
+                      "{ordinal}", "the {ordinal}", "{ordinal} one"]
         },
-        {
-          "name": "AMAZON.CancelIntent",
-          "samples": [
-            "cancel",
-            "never mind"
-          ]
-        },
-        {
-          "name": "AMAZON.StopIntent",
-          "samples": [
-            "stop",
-            "quit"
-          ]
-        }
+        {"name": "AMAZON.YesIntent", "samples": []},
+        {"name": "AMAZON.NoIntent", "samples": []},
+        {"name": "AMAZON.CancelIntent", "samples": []},
+        {"name": "AMAZON.StopIntent", "samples": []},
+        {"name": "AMAZON.HelpIntent", "samples": []},
+        {"name": "AMAZON.FallbackIntent", "samples": []},
+        {"name": "AMAZON.NavigateHomeIntent", "samples": []}
       ],
-      "types": [
-        {
-          "name": "RoomType",
-          "values": [
-            {
-              "name": {
-                "value": "living room",
-                "synonyms": [
-                  "lounge",
-                  "main room"
-                ]
-              }
-            },
-            {
-              "name": {
-                "value": "entrance",
-                "synonyms": [
-                  "front door",
-                  "entry"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    "dialog": {
-      "intents": [
-        {
-          "name": "CallAgentIntent",
-          "confirmationRequired": false,
-          "prompts": {},
-          "slots": [
-            {
-              "name": "Room",
-              "type": "RoomType",
-              "confirmationRequired": false,
-              "elicitationRequired": true,
-              "prompts": {
-                "elicitation": "Elicit.Slot.1234567890.Room"
-              }
-            }
-          ]
-        }
-      ],
-      "delegationStrategy": "SKILL_RESPONSE"
-    },
-    "prompts": [
-      {
-        "id": "Elicit.Slot.1234567890.Room",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "Which room? Please say living room or entrance."
-          }
-        ]
-      }
-    ]
+      "types": []
+    }
   }
 }

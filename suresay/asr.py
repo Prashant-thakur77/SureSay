@@ -159,8 +159,8 @@ class VocabularyManager:
     @staticmethod
     def _phrase(word: str) -> str | None:
         w = re.sub(r"[^A-Za-z'\- ]", "", word).strip()
-        if not w or len(w) > 256:
-            return None
+        if not w or len(w) > 256 or "'" in w:
+            return None  # Transcribe's list format rejects contractions such as "i'm"; they need no biasing
         return re.sub(r"\s+", "-", w)
 
     def name_for(self, vocabulary: list[str]) -> str | None:

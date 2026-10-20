@@ -1,295 +1,154 @@
-#!/usr/bin/env python3
-"""
-AWS Lambda function for Alexa Skill - SureSay Trigger
+"""SureSay as a classic Alexa skill: Alexa is the user's paired voice device.
 
-Usage:
-  "Alexa, call SureSay in the living room"
-  → Lambda → AgentCore Runtime (Bedrock AgentCore)
+"Alexa, ask Sure Say to turn on the fan" -> the hub's /device/turn -> Alexa reads the three guesses ->
+the user says "two" / "the second one" / "yes" / "no" -> Alexa's own speech recognition sends those words,
+signed with this skill's device key, as transcript evidence -> the gate decides and confirms.
+
+The skill holds a device key (it is a paired device, like the browser), so it can see a card set's nonce;
+the assistant on the hub never can. Standard library only, so it deploys as this one file.
+
+Environment: SURESAY_HUB_URL, SURESAY_DEVICE_ID, SURESAY_DEVICE_KEY (from ``python alexa_skill/pair.py``).
 """
 
-import boto3
+from __future__ import annotations
+
+import base64
+import hashlib
+import hmac
 import json
 import logging
 import os
-import uuid
-from datetime import datetime
+import secrets
+import time
+import urllib.request
+from typing import Any
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-# AgentCore Runtime ARN (must be set via environment variable)
-AGENT_RUNTIME_ARN = os.environ.get("BEDROCK_AGENT_RUNTIME_ARN")
-if not AGENT_RUNTIME_ARN:
-    raise ValueError("BEDROCK_AGENT_RUNTIME_ARN environment variable must be set")
+WORDS = ["one", "two", "three", "four", "five"]
 
-# Room to camera mapping (set from environment variable)
-ROOM_CAMERA_MAPPING = {
-    "living room": os.environ.get("LIVING_ROOM_CAMERA", "camera1"),
-    "living": os.environ.get("LIVING_ROOM_CAMERA", "camera1"),
-    "lounge": os.environ.get("LIVING_ROOM_CAMERA", "camera1"),
-    "main room": os.environ.get("LIVING_ROOM_CAMERA", "camera1"),
-    "entrance": os.environ.get("ENTRANCE_CAMERA", "camera2"),
-    "entry": os.environ.get("ENTRANCE_CAMERA", "camera2"),
-    "front door": os.environ.get("ENTRANCE_CAMERA", "camera2"),
-}
 
-# Bedrock AgentCore client
-agent_core_client = boto3.client('bedrock-agentcore', region_name='ap-northeast-1')
+class Hub:
+    def __init__(self) -> None:
+        self.base = os.environ["SURESAY_HUB_URL"].rstrip("/")
+        self.device_id = os.environ["SURESAY_DEVICE_ID"]
+        key = os.environ["SURESAY_DEVICE_KEY"]
+        self.key = base64.urlsafe_b64decode(key + "=" * (-len(key) % 4))
 
-def lambda_handler(event, context):
-    """
-    Alexa Skill request handler.
-    
-    Args:
-        event: Request from Alexa
-        context: Lambda execution context
-    """
-    logger.info(f"Received event: {json.dumps(event)}")
-    
-    request_type = event["request"]["type"]
-    
-    if request_type == "LaunchRequest":
-        return handle_launch_request(event)
-    elif request_type == "IntentRequest":
-        return handle_intent_request(event)
-    elif request_type == "SessionEndedRequest":
-        return handle_session_ended_request(event)
-    else:
-        return build_response("Sorry, I didn't understand that.")
+    def call(self, method: str, path: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        body = b"" if payload is None else json.dumps(payload).encode()
+        path = f"{path}?r={secrets.token_hex(6)}"
+        ts = int(time.time())
+        message = f"{method}\n{path}\n{ts}\n{hashlib.sha256(body).hexdigest()}".encode()
+        headers = {"x-device-id": self.device_id, "x-timestamp": str(ts),
+                   "x-signature": hmac.new(self.key, message, hashlib.sha256).hexdigest(),
+                   "content-type": "application/json"}
+        req = urllib.request.Request(self.base + path, data=body or None, method=method, headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=20) as resp:  # noqa: S310 (our own hub)
+                return json.loads(resp.read())
+        except urllib.error.HTTPError as exc:
+            return {"error": json.loads(exc.read() or b"{}").get("error", str(exc)), "http": exc.code}
 
-def handle_launch_request(event):
-    """
-    When skill is launched (e.g., "Alexa, open sure say")
-    """
-    speech_text = "SureSay activated. Which room's camera would you like to access? Say living room or entrance."
-    
-    return build_response(
-        speech_text,
-        should_end_session=False,
-        reprompt_text="Please say living room or entrance."
-    )
 
-def handle_intent_request(event):
-    """
-    Intent processing
-    """
-    intent_name = event["request"]["intent"]["name"]
-    
-    if intent_name == "CallAgentIntent":
-        return handle_call_agent_intent(event)
-    elif intent_name == "AMAZON.HelpIntent":
-        return handle_help_intent()
-    elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
-        return handle_cancel_intent()
-    else:
-        return build_response("Sorry, that operation is not supported.")
+def say(text: str, *, end: bool = False, reprompt: str | None = None, attrs: dict[str, Any] | None = None) -> dict[str, Any]:
+    ssml = f'<speak><prosody rate="92%">{_escape(text)}</prosody></speak>'
+    out: dict[str, Any] = {"version": "1.0", "sessionAttributes": attrs or {},
+                           "response": {"outputSpeech": {"type": "SSML", "ssml": ssml}, "shouldEndSession": end}}
+    if reprompt and not end:
+        out["response"]["reprompt"] = {"outputSpeech": {"type": "PlainText", "text": reprompt}}
+    return out
 
-def handle_call_agent_intent(event):
-    """
-    "Call SureSay in the living room" intent
-    """
-    # Get slot values
-    slots = event["request"]["intent"].get("slots", {})
-    room_slot = slots.get("Room", {})
-    
-    # Check if Room slot has a value
-    if not room_slot or "value" not in room_slot:
-        logger.warning(f"Room slot missing or empty: {room_slot}")
-        # Delegate back to Alexa to collect the slot
-        return delegate_dialog(event)
-    
-    room = room_slot.get("value", "").lower()
-    
-    # Normalize room name (handle "the living room" → "living room")
-    room = room.replace("the ", "")
-    
-    logger.info(f"Calling AgentCore for room: {room}")
-    logger.info(f"Room slot details: {room_slot}")
-    
-    # Invoke AgentCore Runtime and wait for confirmation
-    try:
-        success, message = invoke_agentcore_async(room)
-        
-        if success:
-            # Return success response to Alexa
-            speech_text = f"SureSay started for the {room}. The camera will greet you shortly."
-        else:
-            # Return error message from AgentCore invocation
-            speech_text = f"Sorry, I couldn't start SureSay. {message}"
-            logger.error(f"AgentCore invocation failed: {message}")
-    
-    except Exception as e:
-        logger.exception("Error invoking AgentCore")
-        speech_text = "Sorry, there was a problem starting SureSay. Please try again later."
-    
-    return build_response(speech_text, should_end_session=True)
 
-def handle_help_intent():
-    """
-    Help intent
-    """
-    speech_text = (
-        "SureSay is a voice-based interactive system that uses cameras. "
-        "You can say: start SureSay in the living room or entrance."
-    )
-    return build_response(speech_text, should_end_session=False)
+def _escape(text: str) -> str:
+    return text.replace("&", "and").replace("<", "").replace(">", "")
 
-def handle_cancel_intent():
-    """
-    Cancel/Stop intent
-    """
-    return build_response("Goodbye.", should_end_session=True)
 
-def handle_session_ended_request(event):
-    """
-    Session ended
-    """
-    return build_response("", should_end_session=True)
+def read_cards(p: dict[str, Any]) -> str:
+    opts = p["options"]
+    if p["stage"] == "final":
+        return f"{opts[0]['text']}? Say yes or no."
+    lead = "The assistant suggests this, you didn't ask for it. " if p.get("origin") == "assistant" else ""
+    if len(opts) == 1:
+        return f"{lead}Did you mean: {opts[0]['text']}? Say yes or no."
+    parts = " ".join(f"{WORDS[o['n'] - 1].capitalize()}: {o['text']}." for o in opts)
+    return f"{lead}Did you mean... {parts} Say a number, or no."
 
-def invoke_agentcore_async(room: str) -> tuple[bool, str]:
-    """
-    Invoke AgentCore Runtime and confirm it started successfully.
-    
-    Args:
-        room: Room name (e.g., "living room", "entrance")
-    
-    Returns:
-        tuple[bool, str]: (success, message)
-            - success: True if AgentCore invocation was successful
-            - message: Error message if failed, empty string if successful
-    """
-    # Get camera ID from room name
-    camera_id = ROOM_CAMERA_MAPPING.get(room.lower(), "camera1")
-    
-    # Validate camera ID exists
-    if camera_id not in ["camera1", "camera2"]:
-        logger.error(f"Invalid camera_id: {camera_id}")
-        return False, f"Camera for {room} is not configured."
-    
-    # Generate session ID (must be 33+ characters)
-    session_id = f"alexa-{room}-{datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:10]}"
-    
-    # Build prompt (with explicit camera ID)
-    prompt = f"""Activated via Alexa.
 
-Room: {room}
-Target Camera: {camera_id}
+def _open(hub: Hub, attrs: dict[str, Any]) -> dict[str, Any] | None:
+    pid = attrs.get("pending_id")
+    sets = hub.call("GET", "/device/pending").get("pending", [])
+    return next((p for p in sets if p["pending_id"] == pid), None) or (sets[0] if sets else None)
 
-Start a conversation session.
 
-1. First greet the user: "How can I help you?" (using {camera_id}_speak_on_camera tool)
-2. Enter LISTEN mode and capture audio input (using {camera_id}_listen_on_camera tool)
-3. Respond appropriately to what was heard (using {camera_id}_speak_on_camera tool)
-4. Return to step 2 and continue the conversation loop
+def answer(hub: Hub, attrs: dict[str, Any], words: str) -> dict[str, Any]:
+    p = _open(hub, attrs)
+    if p is None:
+        return say("There's nothing waiting for an answer. What would you like?", reprompt="What would you like?")
+    ev = hub.call("POST", "/device/evidence", {"pending_id": p["pending_id"], "nonce": p["nonce"], "kind": "transcript",
+                                                "transcript": words, "source": "alexa"})
+    if "error" in ev:
+        return say(f"That didn't work: {ev['error']}. Please say it again.", reprompt="What would you like?")
+    out = hub.call("POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]})
+    status = out.get("status")
+    if status == "done":
+        spoken = (out.get("result") or {}).get("say") if isinstance(out.get("result"), dict) else None
+        text = out.get("message", "Done.")
+        return say(f"{spoken} ... {text}" if spoken else text, end=True)
+    if status == "cancelled":
+        return say("Okay, cancelled. Nothing was changed.", end=True)
+    if status == "needs_final_yes":
+        final = next((x for x in hub.call("GET", "/device/pending").get("pending", [])
+                      if x["pending_id"] == out["pending_id"]), None)
+        if final:
+            return say(read_cards(final), reprompt="Say yes or no.", attrs={"pending_id": final["pending_id"]})
+    heard = ev.get("decision", {}).get("heard") or words
+    return say(f"I heard {heard}. {read_cards(p)}", reprompt="Say a number, or no.", attrs={"pending_id": p["pending_id"]})
 
-Important:
-- Always use {camera_id} tools exclusively ({camera_id}_speak_on_camera, {camera_id}_listen_on_camera, etc.)
-- Use a friendly and natural tone
-- Execute listen_on_camera and speak_on_camera alternately"""
-    
-    # Prepare payload
-    payload = json.dumps({"prompt": prompt}).encode('utf-8')
-    
-    logger.info(f"Invoking AgentCore Runtime: {AGENT_RUNTIME_ARN}")
-    logger.info(f"Room: {room}, Camera: {camera_id}")
-    logger.info(f"Session ID: {session_id}")
-    logger.info(f"Prompt: {prompt[:150]}...")
-    
-    try:
-        # Invoke AgentCore Runtime
-        response = agent_core_client.invoke_agent_runtime(
-            agentRuntimeArn=AGENT_RUNTIME_ARN,
-            contentType="application/json",
-            payload=payload,
-            traceId=session_id,
-        )
-        
-        # Check response status
-        status_code = response.get('ResponseMetadata', {}).get('HTTPStatusCode')
-        
-        if status_code == 200:
-            logger.info(f"AgentCore invocation successful. Session: {session_id}")
-            logger.info(f"Response metadata: {response.get('ResponseMetadata', {})}")
-            
-            # Verify response stream exists
-            if 'response' in response:
-                logger.info("AgentCore streaming started (fire-and-forget mode)")
-                return True, ""
-            else:
-                logger.warning("AgentCore response missing 'response' field")
-                return False, "The agent started but response stream is unavailable."
-        else:
-            logger.error(f"AgentCore returned unexpected status: {status_code}")
-            return False, f"Service returned status code {status_code}."
-        
-    except agent_core_client.exceptions.ResourceNotFoundException:
-        logger.exception("AgentCore Runtime not found")
-        return False, "Agent runtime is not available."
-    except agent_core_client.exceptions.AccessDeniedException:
-        logger.exception("Access denied to AgentCore")
-        return False, "Permission denied to access agent runtime."
-    except agent_core_client.exceptions.ThrottlingException:
-        logger.exception("AgentCore throttling")
-        return False, "Service is busy. Please try again in a moment."
-    except Exception as e:
-        logger.exception(f"Failed to invoke AgentCore: {e}")
-        return False, f"An error occurred: {str(e)[:100]}"
 
-def delegate_dialog(event) -> dict:
-    """
-    Delegate dialog back to Alexa to collect missing slots
-    
-    Args:
-        event: Original Alexa event
-    
-    Returns:
-        Dialog delegation response
-    """
-    logger.info("Delegating dialog to Alexa to collect slots")
-    
-    return {
-        "version": "1.0",
-        "response": {
-            "directives": [
-                {
-                    "type": "Dialog.Delegate",
-                    "updatedIntent": event["request"]["intent"]
-                }
-            ],
-            "shouldEndSession": False
-        }
-    }
+def handle(event: dict[str, Any], hub: Hub | None = None) -> dict[str, Any]:
+    hub = hub or Hub()
+    req = event["request"]
+    attrs = (event.get("session") or {}).get("attributes") or {}
+    kind = req["type"]
+    if kind == "LaunchRequest":
+        return say("Sure Say here. Tell me what you'd like, in your own words.", reprompt="What would you like?")
+    if kind == "SessionEndedRequest":
+        return {"version": "1.0", "response": {}}
+    intent = req.get("intent", {})
+    name = intent.get("name")
+    slots = {k: (v.get("value") or "") for k, v in (intent.get("slots") or {}).items()}
+    if name == "CommandIntent":
+        turn = hub.call("POST", "/device/turn", {"text": slots.get("utterance", ""), "session_id": "alexa"})
+        if "error" in turn:
+            return say(f"Sorry, {turn['error']}.", end=True)
+        result = turn.get("result") or {}
+        if turn.get("pending"):
+            p = next((x for x in turn["pending"] if x["pending_id"] == result.get("pending_id")), turn["pending"][-1])
+            return say(read_cards(p), reprompt="Say a number, or no.", attrs={"pending_id": p["pending_id"]})
+        return say(turn.get("reply") or "Sorry, please say it again.", reprompt="What would you like?")
+    if name == "ChooseIntent":
+        words = slots.get("number") or slots.get("ordinal") or ""
+        return answer(hub, attrs, f"number {words}" if words.isdigit() else words)
+    if name == "AMAZON.YesIntent":
+        return answer(hub, attrs, "yes")
+    if name in ("AMAZON.NoIntent", "AMAZON.CancelIntent"):
+        if attrs.get("pending_id"):
+            return answer(hub, attrs, "no")
+        return say("Okay.", end=True)
+    if name == "AMAZON.StopIntent":
+        return say("Goodbye.", end=True)
+    if name == "AMAZON.HelpIntent":
+        return say("Say what you'd like, for example: turn on the fan. I'll offer my best guesses, and nothing "
+                   "happens until you choose one by number.", reprompt="What would you like?")
+    if attrs.get("pending_id"):  # Fallback while cards are open: never guess
+        p = _open(hub, attrs)
+        if p:
+            return say(f"Sorry, I didn't catch that. {read_cards(p)}", reprompt="Say a number, or no.", attrs=attrs)
+    return say("Sorry, I didn't catch that. Please say it again.", reprompt="What would you like?")
 
-def build_response(
-    speech_text: str,
-    should_end_session: bool = True,
-    reprompt_text: str = None
-) -> dict:
-    """
-    Build Alexa response
-    
-    Args:
-        speech_text: Text for Alexa to speak
-        should_end_session: Whether to end the session
-        reprompt_text: Text to speak if user doesn't respond
-    """
-    response = {
-        "version": "1.0",
-        "response": {
-            "outputSpeech": {
-                "type": "PlainText",
-                "text": speech_text
-            },
-            "shouldEndSession": should_end_session
-        }
-    }
-    
-    if reprompt_text and not should_end_session:
-        response["response"]["reprompt"] = {
-            "outputSpeech": {
-                "type": "PlainText",
-                "text": reprompt_text
-            }
-        }
-    
-    return response
+
+def lambda_handler(event: dict[str, Any], context: Any = None) -> dict[str, Any]:
+    logger.info("request %s", event.get("request", {}).get("type"))
+    return handle(event)
