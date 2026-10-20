@@ -1,0 +1,32 @@
+{
+  "name": "store_atomicity",
+  "generated_at": "2026-10-20T23:53:38+0530",
+  "git_sha": "8182e5e",
+  "python": "3.13.12",
+  "stores": {
+    "memory": {
+      "trials": 150,
+      "racers": 16,
+      "trials_not_exactly_one_winner": 0,
+      "max_winners": 1
+    },
+    "sqlite": {
+      "trials": 150,
+      "racers": 16,
+      "trials_not_exactly_one_winner": 0,
+      "max_winners": 1
+    },
+    "moto_mock_not_a_real_store": {
+      "trials": 150,
+      "racers": 16,
+      "trials_not_exactly_one_winner": 62,
+      "max_winners": 4
+    },
+    "dynamodb": {
+      "trials": 150,
+      "racers": 16,
+      "trials_not_exactly_one_winner": 0,
+      "max_winners": 1
+    }
+  }
+}

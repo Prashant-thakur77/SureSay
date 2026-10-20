@@ -141,14 +141,18 @@ if [ -z "${SKIP_AGENT:-}" ]; then
       --env "SURESAY_MCP_URL=$HUB_URL/mcp" --env "SURESAY_AGENT_TOKEN=$AGENT_TOKEN" \
       --env "AGENTCORE_MEMORY_ID=$MEMORY_ID" --env "BEDROCK_MODEL_ID=us.amazon.nova-2-lite-v1:0" \
       --env "AWS_REGION=$REGION"
-  )
-  RUNTIME_ARN="$(aws bedrock-agentcore-control list-agent-runtimes --query "agentRuntimes[?agentRuntimeName=='$AGENT'].agentRuntimeArn | [0]" --output text)"
-  echo "$RUNTIME_ARN" > "$STATE/agent_runtime_arn"
-  VARS=("${VARS[@]/SURESAY_AGENT_MODE=*/SURESAY_AGENT_MODE=agent}")
-  VARS=("${VARS[@]/AGENTCORE_RUNTIME_ARN=*/AGENTCORE_RUNTIME_ARN=$RUNTIME_ARN}")
-  aws lambda update-function-configuration --function-name "$FUNCTION" --environment "$(ENV_JSON "${VARS[@]}")" >/dev/null
-  aws lambda wait function-updated-v2 --function-name "$FUNCTION"
-  echo "agent: $RUNTIME_ARN"
+  ) || echo "AgentCore Runtime deploy failed (see above; this account's 'Total Agents per Account' quota may be 0). The hub keeps answering turns directly."
+  RUNTIME_ARN="$(aws bedrock-agentcore-control list-agent-runtimes --query "agentRuntimes[?agentRuntimeName=='$AGENT'].agentRuntimeArn | [0]" --output text 2>/dev/null || true)"
+  if [ -n "$RUNTIME_ARN" ] && [ "$RUNTIME_ARN" != "None" ]; then
+    echo "$RUNTIME_ARN" > "$STATE/agent_runtime_arn"
+    VARS=("${VARS[@]/SURESAY_AGENT_MODE=*/SURESAY_AGENT_MODE=agent}")
+    VARS=("${VARS[@]/AGENTCORE_RUNTIME_ARN=*/AGENTCORE_RUNTIME_ARN=$RUNTIME_ARN}")
+    aws lambda update-function-configuration --function-name "$FUNCTION" --environment "$(ENV_JSON "${VARS[@]}")" >/dev/null
+    aws lambda wait function-updated-v2 --function-name "$FUNCTION"
+    echo "agent: $RUNTIME_ARN"
+  else
+    RUNTIME_ARN=""
+  fi
 fi
 
 say "Smoke test"

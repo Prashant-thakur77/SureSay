@@ -76,6 +76,57 @@ def http_round_trip(runs: int = RUNS) -> dict[str, Any]:
     return stats(times)
 
 
+def cloud_gate(hub_url: str, runs: int) -> dict[str, Any]:
+    """The deployed hub on Lambda (us-east-1, DynamoDB in-region): the gate's own time as it reports it,
+    and the device's full evidence + confirm round trip from wherever this script runs."""
+    import os
+    import subprocess
+
+    import httpx
+    from confirm_gate import sign_request
+    from strands.tools.mcp import MCPClient
+
+    from eval.common import ROOT
+
+    base = hub_url.rstrip("/")
+    http = httpx.Client(base_url=base, timeout=60)
+    code = subprocess.run([sys.executable, "-m", "suresay.cli", "pair"], capture_output=True, text=True, check=True,
+                          env={**os.environ, "SURESAY_BACKEND": "aws"}).stdout.strip()
+    dev = http.post("/device/pair", json={"code": code, "name": "latency"}).json()
+
+    def signed(method: str, path: str, payload: Any = None) -> dict[str, Any]:
+        body = b"" if payload is None else json.dumps(payload).encode()
+        path = f"{path}?r={time.perf_counter_ns()}"
+        ts = int(time.time())
+        h = {"x-device-id": dev["device_id"], "x-timestamp": str(ts), "content-type": "application/json",
+             "x-signature": sign_request(dev["key"], method, path, ts, body)}
+        return http.request(method, path, content=body or None, headers=h).json()
+
+    token = (ROOT / "infra/.state/agent_token").read_text().strip()
+    agent = MCPClient(url=f"{base}/mcp", headers={"Authorization": f"Bearer {token}", "X-SureSay-User": dev["user_id"]})
+    gate_ms, round_trip = [], []
+    with agent:
+        for _ in range(runs):
+            r = agent.call_tool_sync(tool_use_id="l", name="home_set", arguments={"device": "fan", "on": True})
+            pid = json.loads(r["content"][0]["text"])["pending_id"]
+            p = None
+            for _ in range(20):  # the kind index is eventually consistent
+                p = next((x for x in signed("GET", "/device/pending")["pending"] if x["pending_id"] == pid), None)
+                if p:
+                    break
+                time.sleep(0.2)
+            assert p is not None
+            t0 = time.perf_counter()
+            ev = signed("POST", "/device/evidence", {"pending_id": pid, "nonce": p["nonce"], "kind": "tap", "option": 1})
+            out = signed("POST", "/device/confirm", {"pending_id": pid, "evidence_ref": ev["evidence_ref"]})
+            round_trip.append((time.perf_counter() - t0) * 1000)
+            assert out["status"] == "done", out
+            gate_ms.append(out["timing"]["gate_ms"])
+    return {"hub": base, "store": "DynamoDB (in-region, on Lambda)", "gate_added_in_region": stats(gate_ms),
+            "device_round_trip_from_client": stats(round_trip),
+            "client_location_note": "round trip includes the internet path from the machine running this script"}
+
+
 def understand_latency(runs: int, asr: str, ranker: str) -> dict[str, Any]:
     from dataclasses import replace
 
@@ -106,7 +157,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--asr", default="whisper")
     ap.add_argument("--ranker", default="fuzzy")
-    ap.add_argument("--dynamo-table", default="")
+    ap.add_argument("--dynamo-table", default="", help="also time the gate on this table from here (adds WAN latency)")
+    ap.add_argument("--hub-url", default="", help="deployed hub: time the gate inside AWS")
     ap.add_argument("--runs", type=int, default=RUNS)
     ap.add_argument("--run", default=None)
     args = ap.parse_args()
@@ -115,6 +167,8 @@ def main() -> None:
         out["gate_sqlite"] = gate_overhead(SqliteStore(Path(tmp) / "g.db"), args.runs)
     if args.dynamo_table:
         out["gate_dynamodb"] = gate_overhead(DynamoStore(args.dynamo_table), args.runs)
+    if args.hub_url:
+        out["gate_cloud"] = cloud_gate(args.hub_url, args.runs)
     out["device_round_trip_http"] = http_round_trip(args.runs)
     out["understand"] = understand_latency(args.runs, args.asr, args.ranker)
     path = write_result("latency", out, run=args.run)
@@ -123,6 +177,10 @@ def main() -> None:
     for k in ("gate_sqlite", "gate_dynamodb"):
         if k in out:
             print(f"{k}: added p50 {out[k]['added_by_gate']['p50_ms']} ms, p95 {out[k]['added_by_gate']['p95_ms']} ms")
+    if "gate_cloud" in out:
+        g = out["gate_cloud"]
+        print(f"gate on Lambda+DynamoDB: p50 {g['gate_added_in_region']['p50_ms']} ms, p95 {g['gate_added_in_region']['p95_ms']} ms;"
+              f" device round trip p50 {g['device_round_trip_from_client']['p50_ms']} ms")
     print("device evidence+confirm over HTTP: p50", out["device_round_trip_http"]["p50_ms"], "ms")
     print("wrote", path)
 

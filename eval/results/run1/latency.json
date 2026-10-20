@@ -1,0 +1,74 @@
+{
+  "name": "latency",
+  "generated_at": "2026-10-20T23:51:56+0530",
+  "git_sha": "8182e5e",
+  "python": "3.13.12",
+  "claim": 4,
+  "runs": 100,
+  "gate_sqlite": {
+    "confirm": {
+      "n": 100,
+      "p50_ms": 0.1,
+      "p95_ms": 0.1,
+      "mean_ms": 0.1
+    },
+    "direct_call": {
+      "n": 100,
+      "p50_ms": 0.0,
+      "p95_ms": 0.0,
+      "mean_ms": 0.0
+    },
+    "added_by_gate": {
+      "n": 100,
+      "p50_ms": 0.1,
+      "p95_ms": 0.1,
+      "mean_ms": 0.1
+    }
+  },
+  "gate_cloud": {
+    "hub": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws",
+    "store": "DynamoDB (in-region, on Lambda)",
+    "gate_added_in_region": {
+      "n": 100,
+      "p50_ms": 47.1,
+      "p95_ms": 53.7,
+      "mean_ms": 47.33
+    },
+    "device_round_trip_from_client": {
+      "n": 100,
+      "p50_ms": 701.2,
+      "p95_ms": 822.3,
+      "mean_ms": 721.61
+    },
+    "client_location_note": "round trip includes the internet path from the machine running this script"
+  },
+  "device_round_trip_http": {
+    "n": 100,
+    "p50_ms": 5.2,
+    "p95_ms": 7.1,
+    "mean_ms": 4.19
+  },
+  "understand": {
+    "asr_engine": "whisper-small.en",
+    "ranker": "fuzzy",
+    "clips": 100,
+    "total": {
+      "n": 100,
+      "p50_ms": 1058.0,
+      "p95_ms": 1196.6,
+      "mean_ms": 1055.91
+    },
+    "asr": {
+      "n": 100,
+      "p50_ms": 1056.8,
+      "p95_ms": 1195.2,
+      "mean_ms": 1054.56
+    },
+    "rank": {
+      "n": 100,
+      "p50_ms": 0.9,
+      "p95_ms": 1.3,
+      "mean_ms": 0.99
+    }
+  }
+}
