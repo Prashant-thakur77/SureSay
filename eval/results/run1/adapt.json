@@ -1,0 +1,959 @@
+{
+  "name": "adapt",
+  "generated_at": "2026-10-21T03:21:15+0530",
+  "git_sha": "55ea753",
+  "python": "3.13.12",
+  "claim": "learning from confirmations",
+  "asr_engine": "transcribe-streaming",
+  "rule": {
+    "floor": 0.65,
+    "confident": 1.0,
+    "margin": 0.15
+  },
+  "summary": {
+    "without": {
+      "utterances": 33,
+      "top1_pct": 54.5,
+      "top3_pct": 54.5,
+      "asked_again_pct": 45.5
+    },
+    "with_learning": {
+      "utterances": 33,
+      "top1_pct": 54.5,
+      "top3_pct": 54.5,
+      "asked_again_pct": 45.5
+    }
+  },
+  "per_speaker": {
+    "F01": {
+      "without": {
+        "utterances": 3,
+        "top1_pct": 66.7,
+        "top3_pct": 66.7,
+        "asked_again_pct": 33.3
+      },
+      "with_learning": {
+        "utterances": 3,
+        "top1_pct": 66.7,
+        "top3_pct": 66.7,
+        "asked_again_pct": 33.3
+      }
+    },
+    "F04": {
+      "without": {
+        "utterances": 3,
+        "top1_pct": 100.0,
+        "top3_pct": 100.0,
+        "asked_again_pct": 0.0
+      },
+      "with_learning": {
+        "utterances": 3,
+        "top1_pct": 100.0,
+        "top3_pct": 100.0,
+        "asked_again_pct": 0.0
+      }
+    },
+    "M01": {
+      "without": {
+        "utterances": 3,
+        "top1_pct": 33.3,
+        "top3_pct": 33.3,
+        "asked_again_pct": 66.7
+      },
+      "with_learning": {
+        "utterances": 3,
+        "top1_pct": 33.3,
+        "top3_pct": 33.3,
+        "asked_again_pct": 66.7
+      }
+    },
+    "M03": {
+      "without": {
+        "utterances": 4,
+        "top1_pct": 100.0,
+        "top3_pct": 100.0,
+        "asked_again_pct": 0.0
+      },
+      "with_learning": {
+        "utterances": 4,
+        "top1_pct": 100.0,
+        "top3_pct": 100.0,
+        "asked_again_pct": 0.0
+      }
+    },
+    "M04": {
+      "without": {
+        "utterances": 20,
+        "top1_pct": 40.0,
+        "top3_pct": 40.0,
+        "asked_again_pct": 60.0
+      },
+      "with_learning": {
+        "utterances": 20,
+        "top1_pct": 40.0,
+        "top3_pct": 40.0,
+        "asked_again_pct": 60.0
+      }
+    }
+  },
+  "rows": [
+    {
+      "speaker": "F01",
+      "text": "yet he still thinks as swiftly as ever.",
+      "heard_first": "Yeah, he's guilty as swiftly as ever.",
+      "heard_second": "Yeah, he still thinks he.",
+      "without": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.6302,
+          0.5073,
+          0.5023
+        ]
+      },
+      "with_learning": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.6302,
+          0.5073,
+          0.5023
+        ]
+      }
+    },
+    {
+      "speaker": "F01",
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "heard_first": "the quick fuck come close with the lighting dog.",
+      "heard_second": "the quick burn fuck comes over the lady knock.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.8036,
+          0.4747,
+          0.4708
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.8036,
+          0.4747,
+          0.4708
+        ]
+      }
+    },
+    {
+      "speaker": "F01",
+      "text": "but he always answers, Banana oil!",
+      "heard_first": "he always answers banana oil.",
+      "heard_second": "but he always banana oil.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.8388,
+          0.4786,
+          0.4593
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.8388,
+          0.4786,
+          0.4593
+        ]
+      }
+    },
+    {
+      "speaker": "F04",
+      "text": "This is not a program of socialized medicine.",
+      "heard_first": "this is not a program of socialized medicine.",
+      "heard_second": "this is not a program of socialized medicine.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          1.0,
+          0.5138,
+          0.4872
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          1.0,
+          0.5138,
+          0.4872
+        ]
+      }
+    },
+    {
+      "speaker": "F04",
+      "text": "Except in the winter when the ooze or snow or ice prevents,",
+      "heard_first": "except in the winter when the os. or snow or ice prevents.",
+      "heard_second": "except in the winter when the ooze or snow or ice prevents.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          1.0,
+          0.4786,
+          0.4697
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          1.0,
+          0.4786,
+          0.4697
+        ]
+      }
+    },
+    {
+      "speaker": "F04",
+      "text": "You'd be better off taking a cold shower.",
+      "heard_first": "You'd be better off taking a cold shower.",
+      "heard_second": "You'd be better off taking a cold shower.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          1.0,
+          0.4946,
+          0.4878
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          1.0,
+          0.4946,
+          0.4878
+        ]
+      }
+    },
+    {
+      "speaker": "M01",
+      "text": "A long, flowing beard clings to his chin,",
+      "heard_first": "I long beard. to you. OK.",
+      "heard_second": "I'm be",
+      "without": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.3063,
+          0.2576,
+          0.2554
+        ]
+      },
+      "with_learning": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.3063,
+          0.2929,
+          0.2576
+        ]
+      }
+    },
+    {
+      "speaker": "M01",
+      "text": "but he always answers, \"Banana oil!\"",
+      "heard_first": "but it all. can I",
+      "heard_second": "but the owl and the banana oil.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.7198,
+          0.4639,
+          0.4623
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.7198,
+          0.4639,
+          0.4623
+        ]
+      }
+    },
+    {
+      "speaker": "M01",
+      "text": "This is not a program of socialized medicine.",
+      "heard_first": "did it not a program. Yeah. can they turn over again sorry.",
+      "heard_second": "did it not a broke.",
+      "without": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.566,
+          0.5071,
+          0.4917
+        ]
+      },
+      "with_learning": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.566,
+          0.5316,
+          0.5071
+        ]
+      }
+    },
+    {
+      "speaker": "M03",
+      "text": "When he speaks, his voice is just a bit cracked and quivers a trifle.",
+      "heard_first": "when he speaks, his voice is just a bit crackled and quivers a trifle.",
+      "heard_second": "speaks. when he speaks, his voice is just a bit cracked and quivers a trifle.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.9504,
+          0.4776,
+          0.444
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.9504,
+          0.4776,
+          0.444
+        ]
+      }
+    },
+    {
+      "speaker": "M03",
+      "text": "Well, he is nearly ninety-three years old;",
+      "heard_first": "well, he is nearly 90. 3 years old.",
+      "heard_second": "well, he is nearly 93 years old.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.8167,
+          0.4773,
+          0.4464
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.8862,
+          0.4773,
+          0.4464
+        ]
+      }
+    },
+    {
+      "speaker": "M03",
+      "text": "If you destroy confidence in banks, you do something to the economy, he said.",
+      "heard_first": "if you destroy confidence in banks, you do something in the economy, he said.",
+      "heard_second": "Yeah. if you destroy confidence in banks, you do something to the economy, he said.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.9735,
+          0.4375,
+          0.4332
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.9735,
+          0.4375,
+          0.4332
+        ]
+      }
+    },
+    {
+      "speaker": "M03",
+      "text": "he dresses himself in an ancient black frock coat,",
+      "heard_first": "he dresses himself in an ancient block black frock coat.",
+      "heard_second": "he dresses himself in an ancient black frock coat.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          1.0,
+          0.5064,
+          0.4758
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          1.0,
+          0.5064,
+          0.4758
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "usually minus several buttons;",
+      "heard_first": "you me. me. that, that will, but.",
+      "heard_second": "you you. so the button.",
+      "without": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.51,
+          0.4533,
+          0.4506
+        ]
+      },
+      "with_learning": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.5306,
+          0.4609,
+          0.4533
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "Don't ask me to carry an oily rag like that.",
+      "heard_first": "I mean. OK. and, and oil. Right, right, right, like that.",
+      "heard_second": "Don't, uh, me. to carry all he was lying like that.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.7444,
+          0.4892,
+          0.4762
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.7444,
+          0.529,
+          0.5196
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "he slowly takes a short walk in the open air each day.",
+      "heard_first": "he probably good work. in the open air. then",
+      "heard_second": "he slowly. I don't walk in the open air.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.7546,
+          0.4828,
+          0.4791
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.7546,
+          0.4853,
+          0.4832
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "Grandfather likes to be modern in his language.",
+      "heard_first": "grandfather. like, do. be my rate. and, and language.",
+      "heard_second": "grandfather liked to be in it. like when",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.715,
+          0.524,
+          0.4939
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.715,
+          0.524,
+          0.4949
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "giving those who observe him a pronounced feeling of the utmost respect.",
+      "heard_first": "Give it. so who? well, I, I don't. if, if Uh, now. Philly. of that we that.",
+      "heard_second": "Given those who are Uh but no. Sting Um, um, the amount we pay.",
+      "without": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.5921,
+          0.4682,
+          0.4427
+        ]
+      },
+      "with_learning": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.5921,
+          0.4682,
+          0.4483
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "I was conscious all the time.",
+      "heard_first": "I what all the time.",
+      "heard_second": "I would. all the time.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.7298,
+          0.569,
+          0.502
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.8903,
+          0.569,
+          0.502
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "but he always answers, \"Banana oil!\"",
+      "heard_first": "but, but I. banana oil.",
+      "heard_second": "Bye. Oh it ended. Um been in that oil.",
+      "without": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.4986,
+          0.4942,
+          0.4788
+        ]
+      },
+      "with_learning": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.529,
+          0.5209,
+          0.5062
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "She had your dark suit in greasy wash water all year.",
+      "heard_first": "he and you, you that suit in. Why you all here.",
+      "heard_second": "and you know, don't in what what are you",
+      "without": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.5688,
+          0.5027,
+          0.4714
+        ]
+      },
+      "with_learning": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.6408,
+          0.5075,
+          0.5073
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "he dresses himself in an ancient black frock coat,",
+      "heard_first": "he didn't, uh. and, and the luck. Fuck!",
+      "heard_second": "Regret didn't tell. and, and I didn't like. the code.",
+      "without": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.5156,
+          0.5061,
+          0.4868
+        ]
+      },
+      "with_learning": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.6281,
+          0.5888,
+          0.5737
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "Well, he is nearly ninety-three years old;",
+      "heard_first": "well, and 93 years old.",
+      "heard_second": "Why? he, he is really. 93 years old.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.7083,
+          0.5066,
+          0.5
+        ]
+      },
+      "with_learning": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.7083,
+          0.5916,
+          0.5066
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "heard_first": "that was. Can over, but Lady Do.",
+      "heard_second": "that good. well, uh, jump over, over that lady dog.",
+      "without": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.6367,
+          0.5026,
+          0.491
+        ]
+      },
+      "with_learning": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.6367,
+          0.5236,
+          0.5114
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "Twice each day he plays skillfully and with zest upon our small organ.",
+      "heard_first": "Wait there. it killed me. and we that. A I, I organ.",
+      "heard_second": "he played skillfully. and we that upon.",
+      "without": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.6169,
+          0.5167,
+          0.4686
+        ]
+      },
+      "with_learning": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.6169,
+          0.5167,
+          0.4871
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "He will allow a rare lie.",
+      "heard_first": "he was. I really like.",
+      "heard_second": "he will lie.",
+      "without": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.6143,
+          0.5028,
+          0.3784
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.6882,
+          0.5028,
+          0.4556
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "A long, flowing beard clings to his chin,",
+      "heard_first": "I love. Following. Ben. Mm. Don't.",
+      "heard_second": "I I love it. A long flowing be. Glen doing",
+      "without": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.6498,
+          0.4668,
+          0.4539
+        ]
+      },
+      "with_learning": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.6498,
+          0.4668,
+          0.4656
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "We have often urged him to walk more and smoke less,",
+      "heard_first": "we have early. and you walk. more. and won't let.",
+      "heard_second": "we have I didn't. Urge him to walk more. and smoke land.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.8477,
+          0.5086,
+          0.4981
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.8477,
+          0.5266,
+          0.5227
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "Except in the winter when the ooze or snow or ice prevents,",
+      "heard_first": "It's in the winter. when the open or, or, no. or I put that.",
+      "heard_second": "that in the winter when that the old or no. or I",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.7076,
+          0.4632,
+          0.4605
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.7984,
+          0.5519,
+          0.5082
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "You wished to know all about my grandfather.",
+      "heard_first": "you, you would. you know Uh, my, my, my grandfather.",
+      "heard_second": "you want to. no, uh. about my, my, my grandfather.",
+      "without": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.7975,
+          0.5027,
+          0.4589
+        ]
+      },
+      "with_learning": {
+        "abstain": false,
+        "top1": true,
+        "top3": true,
+        "conf": [
+          0.7975,
+          0.5027,
+          0.4781
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "When he speaks, his voice is just a bit cracked and quivers a trifle.",
+      "heard_first": "What, what he been Yeah. it, I think. go and I I driver.",
+      "heard_second": "when when he beat his head and Get, get a bit. good and Ququi. Um, dread reborn.",
+      "without": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.5886,
+          0.4522,
+          0.4476
+        ]
+      },
+      "with_learning": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.5886,
+          0.4758,
+          0.4476
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "Nothing is as offensive as innocence.",
+      "heard_first": "nothing. and, and, and I've been the England.",
+      "heard_second": "nothing in the.",
+      "without": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.4753,
+          0.3654,
+          0.3598
+        ]
+      },
+      "with_learning": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.4795,
+          0.3902,
+          0.3879
+        ]
+      }
+    },
+    {
+      "speaker": "M04",
+      "text": "yet he still thinks as swiftly as ever.",
+      "heard_first": "Yeah. rely. ever",
+      "heard_second": "yet he so and and ever.",
+      "without": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.6025,
+          0.509,
+          0.5043
+        ]
+      },
+      "with_learning": {
+        "abstain": true,
+        "top1": false,
+        "top3": false,
+        "conf": [
+          0.6025,
+          0.5357,
+          0.5114
+        ]
+      }
+    }
+  ]
+}

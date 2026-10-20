@@ -127,6 +127,51 @@ def cloud_gate(hub_url: str, runs: int) -> dict[str, Any]:
             "client_location_note": "round trip includes the internet path from the machine running this script"}
 
 
+def cloud_understand(hub_url: str, runs: int) -> dict[str, Any]:
+    """Dev clips sent as voice turns to the deployed hub; the hub reports understand's own time on Lambda."""
+    import base64
+    import os
+    import subprocess
+
+    import httpx
+    from confirm_gate import sign_request
+
+    from eval.asr_cache import _count_spend
+
+    rows = [json.loads(line) for line in (EVAL / "data" / "manifest.jsonl").open()]
+    clips = sorted((r for r in rows if r["speaker"] in SPLIT["dev"] and r["kind"] in ("word", "sentence")),
+                   key=lambda r: r["wav"])
+    clips = clips[:: max(1, len(clips) // runs)][:runs]
+    base = hub_url.rstrip("/")
+    http = httpx.Client(base_url=base, timeout=60)
+    code = subprocess.run([sys.executable, "-m", "suresay.cli", "pair"], capture_output=True, text=True, check=True,
+                          env={**os.environ, "SURESAY_BACKEND": "aws"}).stdout.strip()
+    dev = http.post("/device/pair", json={"code": code, "name": "latency-understand"}).json()
+
+    def signed(method: str, path: str, payload: Any = None) -> dict[str, Any]:
+        body = b"" if payload is None else json.dumps(payload).encode()
+        path = f"{path}?r={time.perf_counter_ns()}"
+        ts = int(time.time())
+        h = {"x-device-id": dev["device_id"], "x-timestamp": str(ts), "content-type": "application/json",
+             "x-signature": sign_request(dev["key"], method, path, ts, body)}
+        return http.request(method, path, content=body or None, headers=h).json()
+
+    total, asr_ms, rank_ms, engines = [], [], [], set()
+    _count_spend(len(clips))
+    for c in clips:
+        out = signed("POST", "/device/turn", {"audio_b64": base64.b64encode((DATA / c["wav"]).read_bytes()).decode()})
+        res = out.get("result") or {}
+        t = res.get("timing") or {}
+        if "total_ms" in t:
+            total.append(t["total_ms"])
+            asr_ms.append(t.get("asr_ms", 0.0))
+            rank_ms.append(t.get("rank_ms", 0.0))
+            engines.add(res.get("asr"))
+    signed("POST", "/device/reset", {})
+    return {"hub": base, "where": "measured inside the Lambda function (us-east-1)", "asr_engines": sorted(engines),
+            "clips": len(total), "total": stats(total), "asr": stats(asr_ms), "rank": stats(rank_ms)}
+
+
 def understand_latency(runs: int, asr: str, ranker: str) -> dict[str, Any]:
     from dataclasses import replace
 
@@ -169,6 +214,7 @@ def main() -> None:
         out["gate_dynamodb"] = gate_overhead(DynamoStore(args.dynamo_table), args.runs)
     if args.hub_url:
         out["gate_cloud"] = cloud_gate(args.hub_url, args.runs)
+        out["understand_cloud"] = cloud_understand(args.hub_url, args.runs)
     out["device_round_trip_http"] = http_round_trip(args.runs)
     out["understand"] = understand_latency(args.runs, args.asr, args.ranker)
     path = write_result("latency", out, run=args.run)
@@ -177,6 +223,9 @@ def main() -> None:
     for k in ("gate_sqlite", "gate_dynamodb"):
         if k in out:
             print(f"{k}: added p50 {out[k]['added_by_gate']['p50_ms']} ms, p95 {out[k]['added_by_gate']['p95_ms']} ms")
+    if "understand_cloud" in out:
+        uc = out["understand_cloud"]
+        print(f"understand on Lambda ({uc['asr_engines']}): p50 {uc['total']['p50_ms']} ms, p95 {uc['total']['p95_ms']} ms")
     if "gate_cloud" in out:
         g = out["gate_cloud"]
         print(f"gate on Lambda+DynamoDB: p50 {g['gate_added_in_region']['p50_ms']} ms, p95 {g['gate_added_in_region']['p95_ms']} ms;"

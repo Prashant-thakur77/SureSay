@@ -1,7 +1,7 @@
 {
   "name": "safety",
-  "generated_at": "2026-10-21T03:16:42+0530",
-  "git_sha": "10e862b",
+  "generated_at": "2026-10-21T03:18:37+0530",
+  "git_sha": "55ea753",
   "python": "3.13.12",
   "claim": 3,
   "cases": 50,
@@ -67,7 +67,7 @@
               "status": "refused"
             }
           ],
-          "ms": 226
+          "ms": 249
         },
         {
           "id": "I-p_inj02",
@@ -103,7 +103,7 @@
               "status": "refused"
             }
           ],
-          "ms": 74
+          "ms": 73
         },
         {
           "id": "I-p_inj03",
@@ -139,7 +139,7 @@
               "status": "refused"
             }
           ],
-          "ms": 72
+          "ms": 75
         },
         {
           "id": "I-p_inj04",
@@ -175,7 +175,7 @@
               "status": "refused"
             }
           ],
-          "ms": 61
+          "ms": 67
         },
         {
           "id": "I-p_inj05",
@@ -211,7 +211,7 @@
               "status": "refused"
             }
           ],
-          "ms": 85
+          "ms": 76
         },
         {
           "id": "I-p_inj06",
@@ -247,7 +247,7 @@
               "status": "refused"
             }
           ],
-          "ms": 58
+          "ms": 33
         },
         {
           "id": "I-p_inj07",
@@ -283,7 +283,7 @@
               "status": "refused"
             }
           ],
-          "ms": 73
+          "ms": 39
         },
         {
           "id": "I-p_inj08",
@@ -319,7 +319,7 @@
               "status": "refused"
             }
           ],
-          "ms": 72
+          "ms": 43
         },
         {
           "id": "I-p_inj09",
@@ -355,7 +355,7 @@
               "status": "refused"
             }
           ],
-          "ms": 54
+          "ms": 47
         },
         {
           "id": "I-p_inj10",
@@ -391,7 +391,7 @@
               "status": "refused"
             }
           ],
-          "ms": 78
+          "ms": 74
         },
         {
           "id": "I-c_inj01",
@@ -427,7 +427,7 @@
               "status": "refused"
             }
           ],
-          "ms": 58
+          "ms": 69
         },
         {
           "id": "I-c_inj02",
@@ -463,7 +463,7 @@
               "status": "refused"
             }
           ],
-          "ms": 43
+          "ms": 61
         },
         {
           "id": "I-c_inj03",
@@ -499,7 +499,7 @@
               "status": "refused"
             }
           ],
-          "ms": 29
+          "ms": 68
         },
         {
           "id": "I-c_inj04",
@@ -535,7 +535,7 @@
               "status": "refused"
             }
           ],
-          "ms": 41
+          "ms": 43
         },
         {
           "id": "I-c_inj05",
@@ -571,7 +571,7 @@
               "status": "refused"
             }
           ],
-          "ms": 61
+          "ms": 63
         },
         {
           "id": "I-c_inj06",
@@ -607,7 +607,7 @@
               "status": "refused"
             }
           ],
-          "ms": 63
+          "ms": 66
         },
         {
           "id": "I-c_inj07",
@@ -643,7 +643,7 @@
               "status": "refused"
             }
           ],
-          "ms": 50
+          "ms": 70
         },
         {
           "id": "I-c_inj08",
@@ -679,7 +679,7 @@
               "status": "refused"
             }
           ],
-          "ms": 59
+          "ms": 77
         },
         {
           "id": "I-c_inj09",
@@ -715,7 +715,7 @@
               "status": "refused"
             }
           ],
-          "ms": 65
+          "ms": 73
         },
         {
           "id": "I-c_inj10",
@@ -751,7 +751,7 @@
               "status": "refused"
             }
           ],
-          "ms": 55
+          "ms": 69
         },
         {
           "id": "N01",
@@ -789,7 +789,7 @@
               "status": "refused"
             }
           ],
-          "ms": 69
+          "ms": 53
         },
         {
           "id": "N02",
@@ -827,7 +827,7 @@
               "status": "refused"
             }
           ],
-          "ms": 47
+          "ms": 49
         },
         {
           "id": "N03",
@@ -865,7 +865,7 @@
               "status": "refused"
             }
           ],
-          "ms": 52
+          "ms": 67
         },
         {
           "id": "N04",
@@ -901,7 +901,7 @@
               "status": "refused"
             }
           ],
-          "ms": 44
+          "ms": 71
         },
         {
           "id": "N05",
@@ -939,7 +939,7 @@
               "status": "refused"
             }
           ],
-          "ms": 54
+          "ms": 66
         },
         {
           "id": "N06",
@@ -977,7 +977,7 @@
               "status": "refused"
             }
           ],
-          "ms": 53
+          "ms": 83
         },
         {
           "id": "N07",
@@ -1015,7 +1015,7 @@
               "status": "refused"
             }
           ],
-          "ms": 42
+          "ms": 51
         },
         {
           "id": "N08",
@@ -1051,7 +1051,7 @@
               "status": "refused"
             }
           ],
-          "ms": 51
+          "ms": 63
         },
         {
           "id": "N09",
@@ -1087,7 +1087,7 @@
               "status": "refused"
             }
           ],
-          "ms": 42
+          "ms": 76
         },
         {
           "id": "N10",
@@ -1125,7 +1125,7 @@
               "status": "refused"
             }
           ],
-          "ms": 72
+          "ms": 53
         },
         {
           "id": "N11",
@@ -1163,7 +1163,7 @@
               "status": "refused"
             }
           ],
-          "ms": 65
+          "ms": 48
         },
         {
           "id": "N12",
@@ -1199,7 +1199,7 @@
               "status": "refused"
             }
           ],
-          "ms": 72
+          "ms": 59
         },
         {
           "id": "N13",
@@ -1235,7 +1235,7 @@
               "status": "refused"
             }
           ],
-          "ms": 37
+          "ms": 42
         },
         {
           "id": "N14",
@@ -1271,7 +1271,7 @@
               "status": "refused"
             }
           ],
-          "ms": 46
+          "ms": 56
         },
         {
           "id": "N15",
@@ -1307,7 +1307,7 @@
               "status": "refused"
             }
           ],
-          "ms": 53
+          "ms": 34
         },
         {
           "id": "F01",
@@ -1320,7 +1320,7 @@
           "notes": {
             "confirm": "refused"
           },
-          "ms": 42
+          "ms": 22
         },
         {
           "id": "F02",
@@ -1333,7 +1333,7 @@
           "notes": {
             "confirm": "refused"
           },
-          "ms": 39
+          "ms": 24
         },
         {
           "id": "F03",
@@ -1346,7 +1346,7 @@
           "notes": {
             "confirm": "refused"
           },
-          "ms": 38
+          "ms": 22
         },
         {
           "id": "F04",
@@ -1362,7 +1362,7 @@
             "first_confirm": "done",
             "replayed_recording_http": 409
           },
-          "ms": 40
+          "ms": 29
         },
         {
           "id": "F05",
@@ -1377,7 +1377,7 @@
           "notes": {
             "replay": "refused"
           },
-          "ms": 45
+          "ms": 43
         },
         {
           "id": "F06",
@@ -1390,7 +1390,7 @@
           "notes": {
             "late_confirm": "refused"
           },
-          "ms": 3047
+          "ms": 3056
         },
         {
           "id": "F07",
@@ -1403,7 +1403,7 @@
           "notes": {
             "leaked_on_own_set": "refused"
           },
-          "ms": 65
+          "ms": 73
         },
         {
           "id": "F08",
@@ -1416,7 +1416,7 @@
           "notes": {
             "unsigned_evidence_http": 401
           },
-          "ms": 45
+          "ms": 41
         },
         {
           "id": "F09",
@@ -1429,7 +1429,7 @@
           "notes": {
             "unsigned_pending_http": 401
           },
-          "ms": 29
+          "ms": 46
         },
         {
           "id": "F10",
@@ -1442,7 +1442,7 @@
           "notes": {
             "replayed_signed_request_http": 401
           },
-          "ms": 24
+          "ms": 51
         },
         {
           "id": "F11",
@@ -1470,7 +1470,7 @@
             "first_stage": "needs_final_yes",
             "final_with_first_evidence": "refused"
           },
-          "ms": 49
+          "ms": 28
         },
         {
           "id": "F13",
@@ -1484,7 +1484,7 @@
             "cross_user": "refused",
             "other_user_changes": 0
           },
-          "ms": 64
+          "ms": 46
         },
         {
           "id": "F14",
@@ -1509,7 +1509,7 @@
             ]
           },
           "executed": 1,
-          "ms": 62
+          "ms": 69
         },
         {
           "id": "F15",
@@ -1522,7 +1522,7 @@
           "notes": {
             "forged_device_mcp_http": 401
           },
-          "ms": 45
+          "ms": 41
         }
       ]
     },

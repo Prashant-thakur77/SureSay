@@ -1,0 +1,100 @@
+{
+  "name": "latency",
+  "generated_at": "2026-10-21T03:39:24+0530",
+  "git_sha": "55ea753",
+  "python": "3.13.12",
+  "claim": 4,
+  "runs": 100,
+  "gate_sqlite": {
+    "confirm": {
+      "n": 100,
+      "p50_ms": 0.1,
+      "p95_ms": 0.1,
+      "mean_ms": 0.1
+    },
+    "direct_call": {
+      "n": 100,
+      "p50_ms": 0.0,
+      "p95_ms": 0.0,
+      "mean_ms": 0.0
+    },
+    "added_by_gate": {
+      "n": 100,
+      "p50_ms": 0.1,
+      "p95_ms": 0.1,
+      "mean_ms": 0.1
+    }
+  },
+  "gate_cloud": {
+    "hub": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws",
+    "store": "DynamoDB (in-region, on Lambda)",
+    "gate_added_in_region": {
+      "n": 100,
+      "p50_ms": 48.9,
+      "p95_ms": 58.1,
+      "mean_ms": 49.32
+    },
+    "device_round_trip_from_client": {
+      "n": 100,
+      "p50_ms": 709.1,
+      "p95_ms": 821.1,
+      "mean_ms": 724.0
+    },
+    "client_location_note": "round trip includes the internet path from the machine running this script"
+  },
+  "understand_cloud": {
+    "hub": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws",
+    "where": "measured inside the Lambda function (us-east-1)",
+    "asr_engines": [
+      "transcribe-streaming+vocab"
+    ],
+    "clips": 100,
+    "total": {
+      "n": 100,
+      "p50_ms": 869.6,
+      "p95_ms": 2434.6,
+      "mean_ms": 1070.45
+    },
+    "asr": {
+      "n": 100,
+      "p50_ms": 825.2,
+      "p95_ms": 2396.1,
+      "mean_ms": 1026.32
+    },
+    "rank": {
+      "n": 100,
+      "p50_ms": 1.2,
+      "p95_ms": 2.0,
+      "mean_ms": 2.27
+    }
+  },
+  "device_round_trip_http": {
+    "n": 100,
+    "p50_ms": 4.9,
+    "p95_ms": 6.4,
+    "mean_ms": 4.77
+  },
+  "understand": {
+    "asr_engine": "whisper-small.en",
+    "ranker": "fuzzy",
+    "clips": 100,
+    "total": {
+      "n": 100,
+      "p50_ms": 1038.7,
+      "p95_ms": 1198.4,
+      "mean_ms": 1041.87
+    },
+    "asr": {
+      "n": 100,
+      "p50_ms": 1035.2,
+      "p95_ms": 1197.3,
+      "mean_ms": 1040.61
+    },
+    "rank": {
+      "n": 100,
+      "p50_ms": 0.9,
+      "p95_ms": 1.2,
+      "mean_ms": 0.91
+    }
+  }
+}

@@ -24,6 +24,9 @@ _ENGINE: Any = None
 
 
 def _cache_path(engine: str, bias: str, wav: str) -> Path:
+    """Cached per engine and bias. SURESAY_EVAL_CACHE_NS gives a fresh namespace (run 2 re-transcribes)."""
+    ns = os.environ.get("SURESAY_EVAL_CACHE_NS", "")
+    engine = f"{engine}@{ns}" if ns else engine
     tag = bias.replace(":", "-")
     key = hashlib.sha1(wav.encode()).hexdigest()[:16]
     return CACHE / "asr" / engine / tag / f"{Path(wav).stem}-{key}.json"

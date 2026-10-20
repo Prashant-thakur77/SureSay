@@ -134,7 +134,7 @@ def intent_section(i: dict[str, Any], i2: dict[str, Any] | None) -> tuple[list[s
         out += ["", "Run 2 (stability), test top-1: " + ", ".join(f"{names[s]} {f(t2[s]['top1_pct'])}" for s in i2["systems"])]
     ss = "ss_nova" if "ss_nova" in systems else "ss_fuzzy"
     worst = min(test["per_speaker"].items(), key=lambda kv: kv[1][ss]["top1_pct"] or 0)
-    key = {"b0_top1": test["b0"]["top1_pct"], "b1_top1": test["b1"]["top1_pct"], "ss_top1": test[ss]["top1_pct"],
+    key = {"b0_top1": test["b0"]["top1_pct"], "b1_top1": test["b1"]["top1_pct"], "b1_top3": test["b1"]["top3_pct"], "ss_top1": test[ss]["top1_pct"],
            "ss_top3": test[ss]["top3_pct"], "ss_abstain": test[ss]["correct_abstain_pct"],
            "b1_abstain": test["b1"]["correct_abstain_pct"], "ss_false_abstain": test[ss]["false_abstain_pct"],
            "b1_wrong": test["b1"]["acted_without_asking_wrong_pct"], "b0_wrong": test["b0"]["acted_without_asking_wrong_pct"],
@@ -201,7 +201,15 @@ def latency_section(lat: dict[str, Any], atom: dict[str, Any] | None) -> tuple[l
            f"| ranking | {u['rank']['p50_ms']} ms | {u['rank']['p95_ms']} ms |",
            f"| gate added to confirm, SQLite | {lat['gate_sqlite']['added_by_gate']['p50_ms']} ms | "
            f"{lat['gate_sqlite']['added_by_gate']['p95_ms']} ms |"]
-    key: dict[str, Any] = {"u50": u["total"]["p50_ms"], "u95": u["total"]["p95_ms"],
+    uc = lat.get("understand_cloud")
+    if uc:
+        out.insert(2, f"On the deployed hub (Lambda, us-east-1), {uc['clips']} dev clips as voice turns through "
+                      f"{', '.join(uc['asr_engines'])}: understand **p50 {uc['total']['p50_ms']} ms, p95 "
+                      f"{uc['total']['p95_ms']} ms** (speech recognition p50 {uc['asr']['p50_ms']} ms), measured inside "
+                      "the function. Offline, on this laptop:")
+        out.insert(3, "")
+    key: dict[str, Any] = {"u50": (uc or u)["total"]["p50_ms"], "u95": (uc or u)["total"]["p95_ms"],
+                           "u_where": "Lambda + Transcribe" if uc else "offline stack",
                            "g50": lat["gate_sqlite"]["added_by_gate"]["p50_ms"],
                            "g95": lat["gate_sqlite"]["added_by_gate"]["p95_ms"]}
     if "gate_cloud" in lat:
@@ -213,8 +221,7 @@ def latency_section(lat: dict[str, Any], atom: dict[str, Any] | None) -> tuple[l
         key.update(c50=g["gate_added_in_region"]["p50_ms"], c95=g["gate_added_in_region"]["p95_ms"])
     out.append(f"| device evidence + confirm over local HTTP | {lat['device_round_trip_http']['p50_ms']} ms | "
                f"{lat['device_round_trip_http']['p95_ms']} ms |")
-    out += ["", "Transcribe streaming and Nova 2 Lite latencies will be added when the account's access opens; "
-            "the figures above are the offline stack (faster-whisper on CPU)."]
+    out += ["", "Nova 2 Lite ranking latency will be added when the account's Bedrock access opens."]
     if atom:
         out += ["", "### The one-time guarantee under contention", "",
                 "Replay protection rests on consuming a nonce exactly once. 16 threads race to consume one nonce:", "",
@@ -242,6 +249,11 @@ def adapt_section(a: dict[str, Any]) -> list[str]:
         out.append(f"| {spk} | {v['without']['utterances']} | {f(v['without']['top1_pct'])} → {f(v['with_learning']['top1_pct'])} |")
     out += ["", f"{w['utterances']} utterances in all: TORGO repeats only some sentences, so these counts are small and "
             "the result is indicative, not conclusive."]
+    if wl["top1_pct"] == w["top1_pct"]:
+        out += ["", "**Learning from one earlier confirmation did not change the result here.** A learned phrase helps "
+                "when a mishearing repeats (the hub's tests show \"van awn\" going straight to the fan after one "
+                "confirmation), but for these long sentences a severe speaker's two recordings were recognised too "
+                "differently for one stored string to match. Learning sound patterns rather than exact strings is open."]
     return out
 
 
@@ -375,11 +387,11 @@ def main() -> None:
         "| Claim | Metric | B0 plain | B1 + phrasebook | SureSay | Data |",
         "|---|---|---|---|---|---|",
         f"| Confirm heard right | false accepts | {f(ck['b0_fa'])} | — | **{f(ck['ss_fa'])}** | {ck['fa_counts'][2]} decisions, 6 test speakers |",
-        f"| Meaning recovered | top-1 / top-3 | {f(ik['b0_top1'])} / — | {f(ik['b1_top1'])} / {f(ik['b1_top1'])} | {f(ik['ss_top1'])} / {f(ik['ss_top3'])} | 50-phrase books, 6 test speakers |",
+        f"| Meaning recovered | top-1 / top-3 | {f(ik['b0_top1'])} / — | {f(ik['b1_top1'])} / {f(ik['b1_top3'])} | {f(ik['ss_top1'])} / {f(ik['ss_top3'])} | 50-phrase books, 6 test speakers |",
         f"| Abstains when unsure | correct \"say again\" | 0% | {f(ik['b1_abstain'])} | **{f(ik['ss_abstain'])}** | out-of-book utterances |",
         f"| Never acts on a guess | acted on a wrong phrase without asking | {f(ik['b0_wrong'])} | {f(ik['b1_wrong'])} | **0%** | in-book + out-of-book |",
         f"| Nothing without consent | unconfirmed changes | {sk['plain']} / {sk['plain_cases']} (no gate) | — | **{sk['ss']} / {sk['cases']}** | adversarial suite |",
-        f"| Speed | understand p50 / p95 | — | — | {lk['u50']} / {lk['u95']} ms | 100 dev clips, offline stack |",
+        f"| Speed | understand p50 / p95 | — | — | {lk['u50']} / {lk['u95']} ms | 100 dev clips, {lk['u_where']} |",
         f"| Gate overhead | p50 / p95 | — | — | {lk.get('c50', lk['g50'])} / {lk.get('c95', lk['g95'])} ms | "
         f"{'Lambda + DynamoDB' if 'c50' in lk else 'SQLite'} |",
         f"| No regression | top-1, controls | {f(ik['ctrl_b0'])} | — | {f(ik['ctrl_ss'])} | control speakers |",
