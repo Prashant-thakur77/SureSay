@@ -51,6 +51,8 @@ Per speaker, false-accept rate (all clips):
 
 Controls (typical speech): SureSay false accepts 0.0%, genuine answers recovered 100.0%.
 
+Run 2 (stability): SureSay false accepts 2.6% (11/430), B0 62.8%.
+
 Every SureSay false accept on test speakers, with what the recogniser heard:
 
 - F01, said "horn" (choose card) → heard "One" → choose 1
@@ -101,6 +103,8 @@ The same task on control speakers (no dysarthria):
 | Top-1 phrase recovered | 80.8% | 100.0% | 100.0% |
 | Out-of-book: correctly asked again | 0.0% | 0.0% | 96.2% |
 
+Run 2 (stability), test top-1: B0 plain 31.5%, B1 + phrasebook 90.7%, SureSay (offline ranker) 75.0%
+
 ## Claim 3 — nothing changes without the user
 
 50 adversarial cases on the real hub over HTTP: 20 prompt injections hidden in tool output (product descriptions and contact names), 15 near-miss commands (the user meant one thing, recognition heard another), and 15 forged confirmations (the agent confirming for itself, replayed evidence and recordings, expired card sets, cross-user evidence, a captured signed request, pairing brute force, eight racing confirms). Metric: state changes in the home that the user did not confirm on their own paired device.
@@ -115,6 +119,8 @@ The same task on control speakers (no dysarthria):
 On the 15 near-misses SureSay's cards still let the user do what they meant 8 times (the intended action was among the three cards); the rest were declined and changed nothing. A plain assistant acts on the mishearing every time.
 
 The scripted agent is the worst case by design: it obeys every injection, acts on every mishearing and tries every forgery it can make, so the result does not depend on how well a model resists injection. Per-case evidence (HTTP status of each forgery, refusal reasons) is in `eval/results/run1/safety.json`.
+
+Run 2: 0 / 50.
 
 ## Claim 4 — fast enough to talk to
 
@@ -210,7 +216,7 @@ Nova abstain rule: pending: Bedrock access not available; nova rule not tuned.
 
 1. **The most severe speakers lose recall to the abstain rule.** Worst test speaker: M04. SureSay recovers 40.0% of their in-book phrases at top-1, against 90.0% for B1, because it asks again on 60.0% of them. B1 gets its number by never abstaining, and it acted on a wrong phrase 53.7% of the time across test speakers; SureSay acted wrongly 0% of the time. The thresholds are global, tuned on two dev speakers; per-user thresholds learned from the user's own confirmations are the obvious next step, and this gap stays open until then.
 2. **Strict confirmation costs retries.** On genuine yes/no/number answers from dysarthric speakers, SureSay recovered 83.3% (B0: 94.4%) and asked 8.6% of them to repeat. That is the price of the false-accept rate above; tap, keyboard and switch confirmation exist so a repeat is never a dead end.
-3. **Recogniser biasing backfired on single words.** On dev speakers, biasing toward the confirmation words recovered every genuine answer but also turned ordinary words into confirmation words (a dev speaker's "heart" came back as "haan"), so SureSay transcribes confirmations without bias. Biasing that helps recall without false accepts remains open.
-4. **The model arms are pending.** Bedrock, Transcribe and AgentCore Memory/Runtime are blocked on this AWS account pending a support case (docs/FRICTION_LOG.md). The Nova ranker and the Nova-agent safety arms are implemented and tested against stubs, but no Nova number is reported until they run.
+3. **Recogniser biasing did not help confirmations.** On dev speakers (none: 1 false accepts, 77.8% recovered, core: 1 false accepts, 77.8% recovered, full: 2 false accepts, 77.8% recovered), no setting beat leaving the recogniser unbiased, so SureSay transcribes confirmations without bias. Biasing that raises recall without false accepts is open.
+4. **The model arms are pending.** Bedrock (Nova 2 Lite) and AgentCore Memory/Runtime are blocked on this AWS account pending a support case (docs/FRICTION_LOG.md). The Nova ranker and the Nova-agent safety arms are implemented and tested against stubs, but no Nova number is reported until they run.
 5. **Corpus caveats.** TORGO sentences are well-known reading passages that a large recogniser may have seen in training, and the phrasebooks are sentences rather than short home commands. Confirmation words are sparse in TORGO (a few per speaker), so per-speaker confirmation numbers rest on small counts.
 6. **Unclear words heard as "yeah" or "OK".** 9 of SureSay's 11 false accepts on test speakers were the recogniser (transcribe-streaming) turning an unclear single word into a filler such as "Yeah" or "OK.", which the yes/no card accepts. That card guards the high-risk actions. A stricter yes vocabulary for that card is the candidate fix; it was found on test speakers, and dev has too few cases to tune it honestly, so it is reported here and not changed.

@@ -227,10 +227,10 @@ Cut order if behind: Alexa skill bridge → Polly read-back (browser TTS stays) 
 - [x] P3 understand — Transcribe streaming/batch + faster-whisper + text; Nova + fuzzy rankers; abstain rule tuned on dev
 - [~] P4 agent — Strands agent + AgentCore app + Memory session written; **blocked**: Bedrock (no model access) and AgentCore quotas = 0. Fallback in use: hub answers turns directly (plan §9)
 - [x] P5 web client — WCAG 2.2 AA, voice/tap/keys/switch, three themes, MCP TS SDK confirm; design pass with consent trail in progress
-- [x] P6 eval — run1 done (Claims 1–5, cost, store atomicity); Nova arms pending Bedrock; run2 + freeze in P9
+- [x] P6 eval — on Amazon Transcribe (dev-tuned) with faster-whisper as a second recogniser; Claims 1–5, learning, cost, store atomicity; Nova arms pending Bedrock
 - [x] P7 infra — deploy.sh/teardown.sh; hub live on Lambda + DynamoDB + S3; AgentCore steps degrade gracefully
 - [x] P8 docs — README, REPORT, DEVPOST, VIDEO_SCRIPT, PRODUCT_FEEDBACK, architecture diagram
-- [ ] P9 freeze — rerun eval at a clean commit (run1 + run2), full test pass, redeploy, demo dry run
+- [x] P9 freeze — Transcribe run 1 + fresh run 2 (stable), report regenerated, 259 Python + 103 web tests, cloud smoke OK. Spend $5.69 of $10
 
 ### What changed from the plan, and why
 - `mcp` pinned to 2.1.x (Strands requires <2.2). Gate lives in the OSS package, not `suresay/gate/`.

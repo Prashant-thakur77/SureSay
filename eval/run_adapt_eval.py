@@ -47,7 +47,7 @@ def tasks(groups: list[str]) -> list[dict[str, Any]]:
                 if r["speaker"] == spk:
                     by.setdefault(r["norm"], []).append(r)
             pairs = []
-            for n, recs in by.items():
+            for recs in by.values():
                 recs = sorted(recs, key=lambda r: (r["session"], r["mic"] != "wav_headMic", r["utt"]))
                 if len(recs) >= 2:
                     pairs.append((recs[0], recs[1]))

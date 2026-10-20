@@ -324,9 +324,17 @@ def filler_finding(c: dict[str, Any]) -> str | None:
             "to tune it honestly, so it is reported here and not changed.")
 
 
-def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] | None = None) -> list[str]:
+def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] | None = None,
+                     tuning: dict[str, Any] | None = None) -> list[str]:
     spk, ss_t1, b1_t1, fab = ik["worst"]
     filler = filler_finding(c) if c else None
+    bias_text = "See Tuning."
+    if tuning and tuning.get("confirm_bias"):
+        cands = tuning["confirm_bias"]["candidates"]
+        parts = ", ".join(f"{n}: {v['false_accepts']} false accepts, {f(v['true_accepts_recovered_pct'])} recovered"
+                          for n, v in cands.items())
+        bias_text = (f"On dev speakers ({parts}), no setting beat leaving the recogniser unbiased, so SureSay "
+                     "transcribes confirmations without bias. Biasing that raises recall without false accepts is open.")
     extra = [f"6. {filler}"] if filler else []
     return ["## What does not work yet (published on purpose)", "",
             f"1. **The most severe speakers lose recall to the abstain rule.** Worst test speaker: {spk}. SureSay "
@@ -339,11 +347,8 @@ def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] |
             f"recovered {f(ck['ss_rec'])} (B0: {f(ck['b0_rec'])}) and asked {f(ck['ss_refused'])} of them to repeat. "
             "That is the price of the false-accept rate above; tap, keyboard and switch confirmation exist so a "
             "repeat is never a dead end.",
-            "3. **Recogniser biasing backfired on single words.** On dev speakers, biasing toward the confirmation "
-            "words recovered every genuine answer but also turned ordinary words into confirmation words (a dev "
-            "speaker's \"heart\" came back as \"haan\"), so SureSay transcribes confirmations without bias. "
-            "Biasing that helps recall without false accepts remains open.",
-            "4. **The model arms are pending.** Bedrock, Transcribe and AgentCore Memory/Runtime are blocked on this "
+            f"3. **Recogniser biasing did not help confirmations.** {bias_text}",
+            "4. **The model arms are pending.** Bedrock (Nova 2 Lite) and AgentCore Memory/Runtime are blocked on this "
             "AWS account pending a support case (docs/FRICTION_LOG.md). The Nova ranker and the Nova-agent safety "
             "arms are implemented and tested against stubs, but no Nova number is reported until they run.",
             "5. **Corpus caveats.** TORGO sentences are well-known reading passages that a large recogniser may "
@@ -409,15 +414,19 @@ def main() -> None:
         body += cost_section(cost) + [""]
     if tuning:
         body += tuning_section(tuning) + [""]
-    body += negative_section(ck, ik, c) + [""]
+    body += negative_section(ck, ik, c, tuning) + [""]
     (EVAL / "REPORT.md").write_text("\n".join(body))
-    readme = ROOT / "README.md"
-    if readme.exists():
-        text = readme.read_text()
-        block = "\n".join(head[head.index("## Headline") + 2: -1])
-        new = re.sub(r"(<!-- results:start -->\n).*?(<!-- results:end -->)",
-                     lambda m: m.group(1) + block + "\n" + m.group(2), text, flags=re.S)
-        readme.write_text(new)
+    block = "\n".join(head[head.index("## Headline") + 2: -1])
+    negatives = "\n".join(line for line in negative_section(ck, ik, c, tuning)[2:] if line)
+    for doc in (ROOT / "README.md", ROOT / "docs" / "DEVPOST.md"):
+        if not doc.exists():
+            continue
+        text = doc.read_text()
+        text = re.sub(r"(<!-- results:start -->\n).*?(<!-- results:end -->)",
+                      lambda m: m.group(1) + block + "\n" + m.group(2), text, flags=re.S)
+        text = re.sub(r"(<!-- negatives:start -->\n).*?(<!-- negatives:end -->)",
+                      lambda m: m.group(1) + negatives + "\n" + m.group(2), text, flags=re.S)
+        doc.write_text(text)
     print("wrote eval/REPORT.md")
 
 

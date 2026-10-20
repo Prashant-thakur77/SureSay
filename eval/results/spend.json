@@ -1,5 +1,5 @@
 {
- "transcribe_requests": 1612,
- "transcribe_usd_at_15s_min": 4.03,
+ "transcribe_requests": 2277,
+ "transcribe_usd_at_15s_min": 5.69,
  "note": "includes 100 latency requests and 2 cloud voice tests counted by hand"
 }
