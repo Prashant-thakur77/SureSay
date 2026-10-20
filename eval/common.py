@@ -63,3 +63,8 @@ def percentile(values: list[float], q: float) -> float | None:
     k = (len(s) - 1) * q
     lo, hi = int(k), min(int(k) + 1, len(s) - 1)
     return round(s[lo] + (s[hi] - s[lo]) * (k - lo), 1)
+
+
+def tuning_name(engine: str) -> str:
+    """Tuning is per recogniser: thresholds chosen for one engine's errors do not carry to another."""
+    return "tuning_" + engine.replace(".", "_").replace("-", "_")

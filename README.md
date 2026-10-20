@@ -13,7 +13,9 @@ People with dysarthria (after a stroke, or living with Parkinson's, ALS or cereb
 3. **Choose.** By voice, tap, keyboard (1, 2, 3) or single-switch scanning. Risky actions (unlock, order, call, message) ask a second yes.
 4. **Only then does it happen.** The gate checks your evidence, consumes a one-time nonce, runs exactly the card you chose, and writes a receipt that says who confirmed what, when, and how.
 
-It also speaks *for* you: confirm a phrase like "I am thirsty" and SureSay says it out loud, clearly, to the people in the room.
+It also speaks *for* you: confirm a phrase like "I am thirsty" and SureSay says it out loud, clearly, to the people in the room. And it **learns from you**: each card you confirm teaches SureSay your way of saying it, so the same mishearing goes straight to what you meant next time.
+
+**On Alexa too.** [`alexa_skill/`](alexa_skill) pairs Alexa as one of your SureSay devices. "Alexa, ask Sure Say to turn on the fan" reads the three guesses, and your spoken "the first one" goes back as signed evidence through the same gate.
 
 ## Why the agent can't confirm for you
 
@@ -67,7 +69,7 @@ The Nova 2 Lite ranker and the model-driven safety arms are built and tested aga
 
 ```bash
 make setup        # Python 3.13 venv (uv) + web client packages
-make test         # 246 tests: the gate, the hub end to end, the 50-case safety suite
+make test         # 256 tests: the gate, the hub end to end, the Alexa skill, the 50-case safety suite
 make demo         # hub + web client (+ agent when Bedrock is reachable) on http://127.0.0.1:9000
 ```
 

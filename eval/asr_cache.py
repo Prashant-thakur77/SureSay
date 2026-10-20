@@ -35,6 +35,12 @@ def _init(engine: str, threads: int) -> None:
         from suresay.asr import WhisperAsr
 
         _ENGINE = WhisperAsr(engine.split("-", 1)[1], cpu_threads=threads)
+    elif engine == "transcribe-streaming":
+        import boto3
+
+        from suresay.asr import TranscribeStreamingAsr, VocabularyManager
+
+        _ENGINE = TranscribeStreamingAsr(vocab=VocabularyManager(boto3.client("transcribe", region_name="us-east-1")))
     elif engine == "transcribe-batch":
         import boto3
 
@@ -53,7 +59,7 @@ def _work(job: tuple[str, str, str, list[str]]) -> tuple[str, dict[str, Any]]:
     return wav, heard.as_dict()
 
 
-def transcribe_all(engine: str, bias: str, wavs: list[str], vocab: list[str], *, workers: int = 3,
+def transcribe_all(engine: str, bias: str, wavs: list[str], vocab: list[str], *, workers: int | None = None,
                    threads: int = 6) -> dict[str, dict[str, Any]]:
     """{wav: Heard-as-dict} for every clip, from cache where possible."""
     out: dict[str, dict[str, Any]] = {}
@@ -64,9 +70,21 @@ def transcribe_all(engine: str, bias: str, wavs: list[str], vocab: list[str], *,
             out[wav] = json.loads(p.read_text())
         else:
             todo.append((engine, bias, wav, vocab))
+    if todo and engine.startswith("transcribe") and vocab:
+        import boto3
+
+        from suresay.asr import VocabularyManager
+
+        name = VocabularyManager(boto3.client("transcribe", region_name="us-east-1")).wait_ready(vocab)
+        if name is None:
+            raise SystemExit(f"custom vocabulary for {bias} did not become READY")
+        print(f"  custom vocabulary {name} READY", flush=True)
     if todo:
         print(f"  transcribing {len(todo)} clips with {engine} [{bias}]", flush=True)
-        with concurrent.futures.ProcessPoolExecutor(workers, initializer=_init, initargs=(engine, threads)) as pool:
+        if engine.startswith("transcribe"):
+            _count_spend(len(todo))
+        n = workers or (8 if engine.startswith("transcribe") else 3)
+        with concurrent.futures.ProcessPoolExecutor(n, initializer=_init, initargs=(engine, threads)) as pool:
             for i, (wav, heard) in enumerate(pool.map(_work, todo, chunksize=4), start=1):
                 p = _cache_path(engine, bias, wav)
                 p.parent.mkdir(parents=True, exist_ok=True)
@@ -75,3 +93,27 @@ def transcribe_all(engine: str, bias: str, wavs: list[str], vocab: list[str], *,
                 if i % 50 == 0:
                     print(f"    {i}/{len(todo)}", flush=True)
     return out
+
+
+def _count_spend(requests: int) -> None:
+    """Running tally of billed Transcribe requests (15 s minimum each), so the spend cap is visible."""
+    path = CACHE.parent / "results" / "spend.json"
+    doc = json.loads(path.read_text()) if path.exists() else {"transcribe_requests": 0}
+    doc["transcribe_requests"] += requests
+    doc["transcribe_usd_at_15s_min"] = round(doc["transcribe_requests"] * 15 * 0.0001667, 2)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(doc, indent=1))
+
+
+def prepare_vocabularies(engine: str, vocab_lists: list[list[str]]) -> None:
+    """Start creating every custom vocabulary at once; Transcribe takes minutes per vocabulary."""
+    if not engine.startswith("transcribe"):
+        return
+    import boto3
+
+    from suresay.asr import VocabularyManager
+
+    vm = VocabularyManager(boto3.client("transcribe", region_name="us-east-1"))
+    for words in vocab_lists:
+        if words:
+            vm.name_for(words)

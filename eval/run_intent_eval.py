@@ -28,8 +28,8 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from eval.asr_cache import transcribe_all  # noqa: E402
-from eval.common import EVAL, RESULTS, SPLIT, pct, write_result  # noqa: E402
+from eval.asr_cache import prepare_vocabularies, transcribe_all  # noqa: E402
+from eval.common import EVAL, SPLIT, pct, read_result, tuning_name, write_result  # noqa: E402
 from suresay.phrasebook import entry, vocabulary  # noqa: E402
 from suresay.rank import AbstainRule, FuzzyRanker, NovaRanker, bedrock_available, norm  # noqa: E402
 
@@ -67,12 +67,10 @@ def build_tasks(groups: list[str]) -> list[dict[str, Any]]:
     return tasks
 
 
-def tuned_rule(name: str) -> AbstainRule:
-    path = RESULTS / "tuning.json"
-    if path.exists():
-        t = json.loads(path.read_text()).get(name)
-        if t:
-            return AbstainRule(**t["rule"])
+def tuned_rule(name: str, engine: str) -> AbstainRule:
+    t = (read_result(tuning_name(engine)) or {}).get(name)
+    if t:
+        return AbstainRule(**t["rule"])
     return AbstainRule() if name == "fuzzy" else AbstainRule(floor=0.35, confident=0.75, margin=0.10)
 
 
@@ -144,13 +142,14 @@ def main() -> None:
     tasks = build_tasks(groups)
     nova = None
     if args.nova == "on" or (args.nova == "auto" and bedrock_available("us.amazon.nova-2-lite-v1:0")):
-        nova = NovaRanker(rule=tuned_rule("nova"))
+        nova = NovaRanker(rule=tuned_rule("nova", args.engine))
     rows: list[dict[str, Any]] = []
+    prepare_vocabularies(args.engine, [vocabulary(t["book"]) for t in tasks])
     for task in tasks:
         wavs = [r["wav"] for r in task["in_book"] + task["out_book"]]
         heard_b0 = transcribe_all(args.engine, "none", wavs, [])
         heard_b1 = transcribe_all(args.engine, f"book:{task['speaker']}", wavs, vocabulary(task["book"]))
-        rows += run_rankers(task, heard_b0, heard_b1, nova=nova, fuzzy_rule=tuned_rule("fuzzy"))
+        rows += run_rankers(task, heard_b0, heard_b1, nova=nova, fuzzy_rule=tuned_rule("fuzzy", args.engine))
     systems = ["b0", "b1", "ss_fuzzy"] + (["ss_nova"] if nova else [])
     summary: dict[str, Any] = {}
     for g in groups:
@@ -163,7 +162,7 @@ def main() -> None:
               "output": sum(r.get("ss_nova", {}).get("usage", {}).get("output_tokens", 0) for r in rows)}
     payload = {"claim": "2, 2b, 5", "asr_engine": args.engine, "groups": groups, "book_size": BOOK_SIZE,
                "systems": systems, "nova": "run" if nova else "pending: Bedrock access not available; not estimated",
-               "rules": {"fuzzy": tuned_rule("fuzzy").__dict__, "nova": tuned_rule("nova").__dict__},
+               "rules": {"fuzzy": tuned_rule("fuzzy", args.engine).__dict__, "nova": tuned_rule("nova", args.engine).__dict__},
                "tokens": tokens, "summary": summary,
                "tasks": [{"speaker": t["speaker"], "group": t["group"], "in_book": len(t["in_book"]),
                           "out_of_book": len(t["out_book"])} for t in tasks],

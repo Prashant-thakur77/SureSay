@@ -33,8 +33,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from confirm_gate.consent import decide  # noqa: E402
 
 from eval.asr_cache import transcribe_all  # noqa: E402
-from eval.common import EVAL, SPLIT, pct, write_result  # noqa: E402
-from eval.common import read_result  # noqa: E402
+from eval.common import EVAL, SPLIT, pct, read_result, tuning_name, write_result  # noqa: E402  # noqa: E402
 from suresay.rank import similarity  # noqa: E402
 
 DISTRACTORS_PER_SPEAKER = 30
@@ -97,7 +96,7 @@ def main() -> None:
     clips = load_clips(groups)
     wavs = [c["wav"] for c in clips]
     plain = transcribe_all(args.engine, "none", wavs, [])
-    tuning = (read_result("tuning") or {}).get("confirm_bias")
+    tuning = (read_result(tuning_name(args.engine)) or {}).get("confirm_bias")
     if tuning is None:
         raise SystemExit("run eval/tune_confirm.py first (dev speakers only)")
     chosen = tuning["candidates"][tuning["chosen"]]

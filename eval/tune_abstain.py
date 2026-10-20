@@ -10,15 +10,14 @@ from __future__ import annotations
 
 import argparse
 import itertools
-import json
 import sys
 from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from eval.asr_cache import transcribe_all  # noqa: E402
-from eval.common import RESULTS, write_result  # noqa: E402
+from eval.asr_cache import prepare_vocabularies, transcribe_all  # noqa: E402
+from eval.common import read_result, tuning_name, write_result  # noqa: E402
 from eval.run_intent_eval import build_tasks  # noqa: E402
 from suresay.phrasebook import vocabulary  # noqa: E402
 from suresay.rank import AbstainRule, FuzzyRanker, NovaRanker, bedrock_available, norm  # noqa: E402
@@ -31,7 +30,9 @@ def collect(engine: str, use_nova: bool) -> dict[str, list[dict[str, Any]]]:
     out: dict[str, list[dict[str, Any]]] = {"fuzzy": [], "nova": []}
     fuzzy = FuzzyRanker(AbstainRule(floor=-1, confident=-1, margin=0))
     nova = NovaRanker(rule=AbstainRule(floor=-1, confident=-1, margin=0)) if use_nova else None
-    for task in build_tasks(["dev"]):
+    tasks = build_tasks(["dev"])
+    prepare_vocabularies(engine, [vocabulary(t["book"]) for t in tasks])
+    for task in tasks:
         wavs = [r["wav"] for r in task["in_book"] + task["out_book"]]
         heard = transcribe_all(engine, f"book:{task['speaker']}", wavs, vocabulary(task["book"]))
         by_text = {norm(e["phrase"]): e["id"] for e in task["book"]}
@@ -84,8 +85,8 @@ def main() -> None:
         print(f"{name}: {best[1]} -> {best[0][0]}/{len(items)} dev utterances handled right")
     if not use_nova:
         result["nova_status"] = "pending: Bedrock access not available; nova rule not tuned"
-    existing = json.loads((RESULTS / "tuning.json").read_text()) if (RESULTS / "tuning.json").exists() else {}
-    write_result("tuning", {**{k: v for k, v in existing.items() if k in ("nova", "confirm_bias")}, **result,
+    existing = read_result(tuning_name(args.engine)) or {}
+    write_result(tuning_name(args.engine), {**{k: v for k, v in existing.items() if k in ("nova", "confirm_bias")}, **result,
                             "speakers": "dev only (F03, M05)", "asr_engine": args.engine})
 
 

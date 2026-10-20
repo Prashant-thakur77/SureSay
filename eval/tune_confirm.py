@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from confirm_gate.consent import decide  # noqa: E402
 
 from eval.asr_cache import transcribe_all  # noqa: E402
-from eval.common import read_result, write_result  # noqa: E402
+from eval.common import read_result, tuning_name, write_result  # noqa: E402
 from eval.run_confirm_eval import in_context, load_clips, score, truth_for  # noqa: E402
 
 CANDIDATES = {
@@ -45,9 +45,9 @@ def main(engine: str = "whisper-small.en") -> None:
               f"genuine answers recovered {results[name]['true_accepts_recovered_pct']}%")
     best = min(results, key=lambda n: (results[n]["false_accepts"], -(results[n]["true_accepts_recovered_pct"] or 0),
                                        len(results[n]["words"])))
-    existing = read_result("tuning") or {}
+    existing = read_result(tuning_name(engine)) or {}
     keep = {k: v for k, v in existing.items() if k in ("fuzzy", "nova", "nova_status")}
-    write_result("tuning", {**keep, "confirm_bias": {"chosen": best, "candidates": results,
+    write_result(tuning_name(engine), {**keep, "confirm_bias": {"chosen": best, "candidates": results,
                                                      "speakers": "dev only (F03, M05)", "asr_engine": engine}})
     print("chosen:", best)
 

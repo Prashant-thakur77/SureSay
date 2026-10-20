@@ -6,7 +6,6 @@ Run 1 is the headline; run 2, when present, is shown as a stability check.
 
 from __future__ import annotations
 
-import json
 import re
 import sys
 from pathlib import Path
@@ -227,6 +226,25 @@ def latency_section(lat: dict[str, Any], atom: dict[str, Any] | None) -> tuple[l
     return out, key
 
 
+def adapt_section(a: dict[str, Any]) -> list[str]:
+    w, wl = a["summary"]["without"], a["summary"]["with_learning"]
+    out = ["## Learning from confirmations", "",
+           "Each confirmed card teaches SureSay the user's way of saying it. Test: sentences a test speaker recorded "
+           "twice; the first recording is treated as confirmed once (what the recogniser heard becomes a learned "
+           "phrase), and the second recording is measured. Same phrasebook, same dev-tuned abstain rule, "
+           f"`{a['asr_engine']}`.", "",
+           "| Second recording | without learning | with learning |", "|---|---|---|",
+           f"| Top-1 meaning recovered | {f(w["top1_pct"])} | **{f(wl["top1_pct"])}** |",
+           f"| Top-3 meaning recovered | {f(w['top3_pct'])} | {f(wl['top3_pct'])} |",
+           f"| Asked to say it again | {f(w['asked_again_pct'])} | {f(wl['asked_again_pct'])} |", "",
+           "| Speaker | repeated sentences | top-1 without → with |", "|---|---|---|"]
+    for spk, v in a["per_speaker"].items():
+        out.append(f"| {spk} | {v['without']['utterances']} | {f(v['without']['top1_pct'])} → {f(v['with_learning']['top1_pct'])} |")
+    out += ["", f"{w['utterances']} utterances in all: TORGO repeats only some sentences, so these counts are small and "
+            "the result is indicative, not conclusive."]
+    return out
+
+
 def cost_section(c: dict[str, Any]) -> list[str]:
     rows = [f"| {k.replace('_', ' ')} | ${v:.4f} |" for k, v in c["per_1000_turns_usd"].items()]
     tok = c["usage"]["nova_tokens"]
@@ -288,7 +306,10 @@ def negative_section(ck: dict[str, Any], ik: dict[str, Any]) -> list[str]:
 def main() -> None:
     c, i, s, lat = load("confirm"), load("intent"), load("safety"), load("latency")
     c2, i2, s2 = read_result("confirm", "run2"), read_result("intent", "run2"), read_result("safety", "run2")
-    tuning, cost, atom = read_result("tuning"), read_result("cost"), read_result("store_atomicity")
+    from eval.common import tuning_name
+
+    tuning = read_result(tuning_name(c["asr_engine"])) if c else None
+    cost, atom = read_result("cost"), read_result("store_atomicity")
     missing = [n for n, v in (("confirm", c), ("intent", i), ("safety", s), ("latency", lat)) if v is None]
     if missing:
         raise SystemExit(f"missing results: {missing}; run make eval first")
@@ -331,6 +352,9 @@ def main() -> None:
         "",
     ]
     body = head + conf + [""] + intent + [""] + safety + [""] + latency + [""]
+    adapt = load("adapt")
+    if adapt:
+        body += adapt_section(adapt) + [""]
     if cost:
         body += cost_section(cost) + [""]
     if tuning:

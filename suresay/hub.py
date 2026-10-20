@@ -249,7 +249,8 @@ def build_app(s: SureSay | None = None) -> Starlette:
 
     async def reset(request: Request, device: Any, data: dict[str, Any]) -> Response:
         await anyio.to_thread.run_sync(s.home.reset, device.user_id)
-        return JSONResponse({"ok": True})
+        closed = await anyio.to_thread.run_sync(lambda: s.gate.withdraw_open(device.user_id, reason="reset"))
+        return JSONResponse({"ok": True, "withdrawn": closed})
 
     routes += [
         Route("/device/turn", _signed(turn, s), methods=["POST"]),
