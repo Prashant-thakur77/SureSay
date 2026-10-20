@@ -103,7 +103,11 @@ class WhisperAsr:
     _lock = threading.Lock()
     _models: dict[str, Any] = {}
 
-    def __init__(self, model: str = "small.en", *, language: str = "en", beam_size: int = 5) -> None:
+    def __init__(self, model: str = "small.en", *, language: str = "en", beam_size: int = 5,
+                 cpu_threads: int | None = None) -> None:
+        import os
+
+        self.cpu_threads = cpu_threads if cpu_threads is not None else int(os.environ.get("SURESAY_WHISPER_THREADS", "0"))
         self.model_name = model
         self.language = language
         self.beam_size = beam_size
@@ -114,7 +118,8 @@ class WhisperAsr:
             if self.model_name not in self._models:
                 from faster_whisper import WhisperModel
 
-                self._models[self.model_name] = WhisperModel(self.model_name, device="cpu", compute_type="int8")
+                self._models[self.model_name] = WhisperModel(self.model_name, device="cpu", compute_type="int8",
+                                                             cpu_threads=self.cpu_threads)
             return self._models[self.model_name]
 
     def transcribe(self, audio: bytes, *, vocabulary: list[str] | None = None, user_id: str = "") -> Heard:
