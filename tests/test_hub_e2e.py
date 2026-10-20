@@ -177,3 +177,28 @@ def test_device_routes_need_a_signature(hub: Hub, path: str) -> None:
     method = "GET" if path in ("/device/state", "/device/pending") else "POST"
     r = httpx.request(method, hub.base + path, json=None if method == "GET" else {"text": "fan on"})
     assert r.status_code == 401
+
+
+def test_a_confirmed_card_teaches_suresay_the_users_way_of_saying_it(hub: Hub) -> None:
+    device = hub.pair()
+    first = hub.say(device, "van awn")
+    pending = first["pending"][0]
+    fan_n = next(c["n"] for c in first["result"]["candidates"] if c["text"] == "Turn on the bedroom fan")
+    ev = hub.tap(device, pending, fan_n).json()
+    assert hub.signed(device, "POST", "/device/confirm",
+                      {"pending_id": pending["pending_id"], "evidence_ref": ev["evidence_ref"]}).json()["status"] == "done"
+    book = hub.s.phrasebook.list("demo")
+    assert any(e["phrase"] == "van awn" and e["action"] == "home_set" for e in book)
+    again = hub.say(device, "van awn")
+    top = again["result"]["candidates"][0]
+    assert top["text"] == "Turn on the bedroom fan" and top["confidence"] >= 0.97
+
+
+def test_cancelled_and_assistant_cards_teach_nothing(hub: Hub) -> None:
+    device = hub.pair()
+    before = len(hub.s.phrasebook.list("demo"))
+    p = hub.say(device, "TV on")["pending"][0]
+    ev = hub.signed(device, "POST", "/device/evidence", {
+        "pending_id": p["pending_id"], "nonce": p["nonce"], "kind": "tap", "answer": "no"}).json()
+    hub.signed(device, "POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]})
+    assert len(hub.s.phrasebook.list("demo")) == before

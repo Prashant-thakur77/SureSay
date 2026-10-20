@@ -38,6 +38,7 @@ class Settings:
     allowed_origins: tuple[str, ...] = field(
         default_factory=lambda: tuple(o for o in _env("SURESAY_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",") if o)
     )
+    learn: bool = field(default_factory=lambda: _env("SURESAY_LEARN", "1") not in ("0", "false", "no"))
     public_url: str = field(default_factory=lambda: _env("SURESAY_PUBLIC_URL", "http://127.0.0.1:9000"))
 
     @property

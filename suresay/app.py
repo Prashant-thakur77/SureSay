@@ -135,10 +135,36 @@ class SureSay:
                 event = {**event, "user_id": doc["user_id"]}
         event = {**event, "caller": current_caller.get()}
         self.events.append(event)
+        if event["type"] == "done" and self.cfg.learn:
+            self._learn(event)
         try:
             self.store.put("event", f"{event['at']:.6f}-{event['type']}", event)
         except Exception:
             logger.exception("could not persist event")
+
+    def _learn(self, event: dict[str, Any]) -> None:
+        """A confirmed card teaches SureSay the user's way of saying it: what was heard becomes a learned phrase.
+
+        Only for card sets that came from the user's own words, and only when the words differ from every phrase
+        already in the book, so the user's own confirmation is the label.
+        """
+        try:
+            doc = self.store.get("pending", event["pending_id"])
+            if not doc or doc.get("origin") != "user_words" or doc.get("outcome") != "confirmed":
+                return
+            heard = " ".join(str((doc.get("context") or {}).get("heard") or "").split())
+            option = doc["options"][int(doc.get("option") or 1) - 1]
+            if not heard or option["action"] == "phrasebook_add":
+                return
+            from .rank import norm
+
+            book = self.phrasebook.list(doc["user_id"])
+            if any(norm(e["phrase"]) == norm(heard) for e in book):
+                return
+            self.phrasebook.add(doc["user_id"], heard, option["action"], option["args"])
+            logger.info("learned %r -> %s", heard, option["action"])
+        except Exception:
+            logger.exception("could not learn from a confirmation")
 
     def recent_events(self, user_id: str, limit: int = 40) -> list[dict[str, Any]]:
         rows = [e for e in self.store.scan("event") if e.get("user_id") == user_id]

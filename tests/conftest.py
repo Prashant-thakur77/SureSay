@@ -57,6 +57,7 @@ class Hub:
     def signed(self, device: Device, method: str, path: str, payload: Any = None) -> httpx.Response:
         body = b"" if payload is None else json.dumps(payload).encode()
         ts = int(time.time())
+        path = f"{path}{'&' if '?' in path else '?'}r={time.perf_counter_ns()}"  # every signed request is unique
         headers = {"x-device-id": device.device_id, "x-timestamp": str(ts),
                    "x-signature": sign_request(device.key, method, path, ts, body)}
         if body:
