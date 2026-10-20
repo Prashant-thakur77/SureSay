@@ -42,8 +42,12 @@ packages = ["suresay", "mcp_server", "strands_agent"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-testpaths = ["tests", "packages/confirm-gate-mcp/tests"]
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 120
 target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+ignore = ["E501", "SIM105", "SIM108", "B008"]

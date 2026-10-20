@@ -15,7 +15,8 @@ from confirm_gate import DynamoStore, GatedServer, SqliteStore, Store
 from mcp.server import MCPServer
 
 from .asr import Asr, make_asr
-from .config import Settings, settings as load_settings
+from .config import Settings
+from .config import settings as load_settings
 from .media import LocalMedia, Media, S3Media
 from .phrasebook import JsonPhrasebook, MemoryPhrasebook, Phrasebook, StorePhrasebook
 from .rank import Ranker, make_ranker
