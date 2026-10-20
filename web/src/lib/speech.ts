@@ -5,8 +5,47 @@
  */
 
 import type { HubApi } from "./api";
+import { bytesToBase64, encodeWav } from "./audio";
 
 export type VoiceSource = "hub" | "browser" | "none";
+
+/**
+ * Browsers block sound until the person interacts with the page. Call this
+ * from a click: it plays a moment of silence through each audio path, so later
+ * read-back is allowed to play.
+ */
+export function unlockAudio(): void {
+  try {
+    const silent = new Audio(`data:audio/wav;base64,${bytesToBase64(encodeWav(new Float32Array(800)))}`);
+    silent.volume = 0;
+    void silent.play()?.catch(() => undefined);
+  } catch {
+    /* no media element */
+  }
+  try {
+    const w = window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext };
+    const Ctor = w.AudioContext ?? w.webkitAudioContext;
+    if (Ctor) {
+      const ctx = new Ctor();
+      const src = ctx.createBufferSource();
+      src.buffer = ctx.createBuffer(1, 1, 22050);
+      src.connect(ctx.destination);
+      src.start(0);
+      void ctx.resume().then(() => setTimeout(() => void ctx.close(), 200));
+    }
+  } catch {
+    /* no Web Audio */
+  }
+  try {
+    if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== "undefined") {
+      const u = new SpeechSynthesisUtterance(" ");
+      u.volume = 0;
+      window.speechSynthesis.speak(u);
+    }
+  } catch {
+    /* no speech synthesis */
+  }
+}
 
 export class Speaker {
   private audio: HTMLAudioElement | null = null;
@@ -14,11 +53,14 @@ export class Speaker {
   private cache = new Map<string, string>();
   lastSource: VoiceSource = "none";
   lastVoice = "";
+  /** Told when read-back starts and stops (the orb holds still while SureSay speaks). */
+  onSpeaking?: (speaking: boolean) => void;
 
   constructor(private readonly hub: Pick<HubApi, "speak">) {}
 
   cancel(): void {
     this.token += 1;
+    this.onSpeaking?.(false);
     if (this.audio) {
       this.audio.pause();
       this.audio.src = "";
@@ -48,10 +90,14 @@ export class Speaker {
       }
       if (my !== this.token) return;
       this.lastSource = "hub";
+      this.onSpeaking?.(true);
       await this.playMp3(b64, my, limit);
     } catch {
       if (my !== this.token) return;
+      this.onSpeaking?.(true);
       await this.browserSay(clean, my, limit);
+    } finally {
+      if (my === this.token) this.onSpeaking?.(false);
     }
   }
 

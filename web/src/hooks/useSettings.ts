@@ -13,6 +13,8 @@ export interface Settings {
   scan: boolean;
   scanSpeed: ScanSpeed;
   bigScreen: boolean;
+  /** No animation at all, whatever the device says. */
+  calm: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -23,6 +25,7 @@ export const DEFAULT_SETTINGS: Settings = {
   scan: false,
   scanSpeed: 2,
   bigScreen: false,
+  calm: false,
 };
 
 const SCALES: TextScale[] = [1, 1.25, 1.5, 2];
@@ -40,6 +43,7 @@ function load(): Settings {
     scan: s.scan === true,
     scanSpeed: SPEEDS.includes(s.scanSpeed) ? s.scanSpeed : 2,
     bigScreen: s.bigScreen === true,
+    calm: s.calm === true,
   };
 }
 
@@ -95,8 +99,9 @@ export function useSettings() {
     root.dataset.theme = theme;
     root.dataset.scale = String(settings.textScale);
     root.dataset.tv = bigScreen ? "1" : "0";
+    root.dataset.calm = settings.calm ? "1" : "0";
     root.style.fontSize = `${125 * settings.textScale}%`;
-  }, [theme, settings.textScale, bigScreen, systemTick]);
+  }, [theme, settings.textScale, settings.calm, bigScreen, systemTick]);
 
   return { settings, update, bigScreen, theme };
 }

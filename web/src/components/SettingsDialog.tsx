@@ -106,6 +106,15 @@ export function SettingsDialog({ open, settings, tvFromUrl, onChange, onClose, o
             <Toggle label="Answer by voice automatically" hint="After the cards are read, listen for your answer." checked={settings.autoVoice} onChange={(v) => onChange({ autoVoice: v })} />
           </fieldset>
           <fieldset className="choice">
+            <legend>Motion</legend>
+            <Toggle
+              label="Calm mode: no animation"
+              hint="Everything appears at once. Nothing moves, pulses or draws itself."
+              checked={settings.calm}
+              onChange={(v) => onChange({ calm: v })}
+            />
+          </fieldset>
+          <fieldset className="choice">
             <legend>Switch and screen</legend>
             <Toggle label="Single-switch scanning" hint="A highlight moves through the choices. Press any key or click to pick." checked={settings.scan} onChange={(v) => onChange({ scan: v })} />
             {settings.scan && (

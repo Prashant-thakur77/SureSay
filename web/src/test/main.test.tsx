@@ -1,11 +1,11 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import axe from "axe-core";
 import { describe, expect, it, vi } from "vitest";
 import { MainScreen } from "../components/MainScreen";
 import { PairScreen } from "../components/PairScreen";
 import { DEFAULT_SETTINGS, type Settings } from "../hooks/useSettings";
 import { Speaker } from "../lib/speech";
-import { cardSet, fakeGate, fakeHub, NONCE } from "./fixtures";
+import { cardSet, fakeGate, fakeHub, NONCE, receipt } from "./fixtures";
 
 const QUIET: Settings = { ...DEFAULT_SETTINGS, readAloud: false, autoVoice: false };
 
@@ -68,6 +68,24 @@ describe("main screen", () => {
     expect(hub.evidenceTap).toHaveBeenCalledWith(expect.objectContaining({ pending_id: "p_test0001", nonce: NONCE }), { option: 2 });
     expect(gate.confirm).toHaveBeenCalledWith("p_test0001", "ev_test");
     expect(screen.getByText(/Confirmed by your tap/)).toBeTruthy();
+
+    // the consent trail lists every one of the receipt's real checks, numbered
+    const trail = within(screen.getByRole("region", { name: /Consent trail/ }));
+    const lines = trail.getAllByRole("listitem");
+    expect(lines).toHaveLength(receipt().checks.length);
+    expect(lines[0].textContent).toContain("001");
+    expect(lines[0].textContent).toContain("Your own voice or tap");
+    expect(lines[2].textContent).toContain("Used once, never again");
+    // screen readers get one outcome announcement, not a tick per check
+    await waitFor(() => expect(screen.getByTestId("live-assertive").textContent).toBe("Done: Turn on the TV."));
+
+    // the assistant's refused attempt shows in the same readout, with the failing check marked
+    const refusal = screen.getByTestId("refusal-trail");
+    expect(refusal.textContent).toContain("001");
+    expect(refusal.textContent).toContain("Your own voice or tap");
+    expect(refusal.textContent).toContain("✗");
+    expect(refusal.textContent).toContain("— none given");
+    expect(refusal.textContent).toContain("asked by the assistant");
     expect(document.documentElement.outerHTML).not.toContain(NONCE);
     for (const spy of logs) {
       for (const call of spy.mock.calls) expect(JSON.stringify(call)).not.toContain(NONCE);

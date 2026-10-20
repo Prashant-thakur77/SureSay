@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import type { IconName } from "../lib/words";
 
-type Name = IconName | "mic" | "stop" | "gear" | "check" | "close" | "alert" | "clock" | "keyboard" | "refresh" | "list" | "shield" | "chevron" | "send" | "volume" | "door";
+type Name = IconName | "mic" | "stop" | "gear" | "check" | "close" | "alert" | "clock" | "keyboard" | "refresh" | "list" | "shield" | "chevron" | "send" | "volume" | "door" | "hand";
 
 const PATHS: Record<Name, ReactElement> = {
   bulb: (
@@ -133,6 +133,13 @@ const PATHS: Record<Name, ReactElement> = {
   ),
   chevron: <path d="M8 10l4 4 4-4" />,
   send: <path d="M3.5 11.5L20.5 4l-6.8 16.5-2.6-6.9z" />,
+  hand: (
+    <>
+      <path d="M8.5 12.5V5.8a1.5 1.5 0 0 1 3 0v5.7" />
+      <path d="M11.5 11V4.6a1.5 1.5 0 0 1 3 0V11" />
+      <path d="M14.5 11V6.2a1.5 1.5 0 0 1 3 0v7.3c0 4-2.6 7-6.4 7-2.4 0-4-1-5.3-3l-2.5-3.9a1.5 1.5 0 0 1 2.4-1.8l1.8 2" />
+    </>
+  ),
   volume: (
     <>
       <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />

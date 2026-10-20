@@ -155,6 +155,7 @@ export interface GateEvent {
   caller?: string;
   text?: string;
   receipt_id?: string;
+  checks?: Check[];
 }
 
 export interface Phrase {

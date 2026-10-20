@@ -51,6 +51,11 @@
   --shadow: 0 1px 2px rgba(20, 33, 61, 0.06), 0 8px 24px rgba(20, 33, 61, 0.08);
   --shadow-lift: 0 2px 4px rgba(20, 33, 61, 0.08), 0 14px 32px rgba(20, 33, 61, 0.14);
   --bw: 2px;
+  --hair: #dcd3c4;
+  --ticket-bg: #f6efe2;
+  --stamp: #8c2f0a;
+  --ring-idle: #a8a296;
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.13 0 0 0 0 0.24 0.055 0 0 0 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   color-scheme: light;
 }
 
@@ -82,6 +87,11 @@
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
   --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.35), 0 14px 32px rgba(0, 0, 0, 0.45);
   --bw: 2px;
+  --hair: #2a3d63;
+  --ticket-bg: #1e2f50;
+  --stamp: #ffb27a;
+  --ring-idle: #51628a;
+  --grain: none;
   color-scheme: dark;
 }
 
@@ -113,12 +123,19 @@
   --shadow: none;
   --shadow-lift: none;
   --bw: 3px;
+  --hair: #ffffff;
+  --ticket-bg: #000000;
+  --stamp: #ffd400;
+  --ring-idle: #ffffff;
+  --grain: none;
   color-scheme: dark;
 }
 
 :root {
   --radius: 16px;
   --font: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  --serif: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --mono: ui-monospace, SFMono-Regular, "Cascadia Mono", "Roboto Mono", Menlo, Consolas, "Liberation Mono", monospace;
   font-size: 125%;
 }
 
@@ -138,7 +155,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--bg);
+  background: var(--bg) var(--grain);
   color: var(--ink);
   font-family: var(--font);
   font-size: 1rem;
@@ -163,7 +180,7 @@ a {
 }
 
 code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--mono);
   font-size: 0.85em;
   overflow-wrap: anywhere;
 }
@@ -177,8 +194,13 @@ code {
   outline-offset: 3px;
 }
 
+/* Headings and regions that only receive focus from script (after an
+   outcome, a skip link) get a quieter ring than interactive controls: still
+   visible (WCAG 2.4.7), solid, 3 px, rounded. */
 [tabindex="-1"]:focus-visible {
-  outline-style: dashed;
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+  border-radius: 6px;
 }
 
 .visually-hidden {
@@ -396,7 +418,7 @@ code {
   gap: min(0.75rem, 3vw) min(1.25rem, 4vw);
   padding: 0.75rem clamp(16px, 2vw, 1.5rem);
   background: var(--surface);
-  border-bottom: var(--bw) solid var(--line-soft);
+  border-bottom: 1px solid var(--hair);
 }
 
 .wordmark {
@@ -500,8 +522,14 @@ code {
 
 @media (min-width: 64em) {
   :root:not([data-scale="1.5"]):not([data-scale="2"]):not([data-tv="1"]) .layout {
-    grid-template-columns: minmax(0, 1fr) minmax(17rem, 21rem);
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 19rem);
     align-items: start;
+  }
+}
+
+@media (min-width: 90em) {
+  :root:not([data-scale="1.5"]):not([data-scale="2"]):not([data-tv="1"]) .layout {
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 21rem);
   }
 }
 
@@ -512,7 +540,7 @@ code {
   min-height: 70vh;
   padding: clamp(16px, 3vw, 2.25rem);
   background: var(--surface);
-  border: var(--bw) solid var(--line-soft);
+  border: 1px solid var(--hair);
   border-radius: 24px;
   box-shadow: var(--shadow);
 }
@@ -635,7 +663,7 @@ code {
   align-items: center;
   gap: 1.5rem;
   padding-top: 1.25rem;
-  border-top: var(--bw) solid var(--line-soft);
+  border-top: 1px solid var(--hair);
 }
 
 .mic-wrap {
@@ -652,7 +680,7 @@ code {
   place-items: center;
   width: clamp(160px, 9rem, 72vw);
   aspect-ratio: 1;
-  margin: 0.75rem 0 0.5rem;
+  margin: 0;
   padding: 0;
   border: 4px solid var(--mic-border);
   border-radius: 50%;
@@ -675,23 +703,9 @@ code {
   outline-offset: 8px;
 }
 
-.mic__ring {
-  position: absolute;
-  inset: -16px;
-  border: 6px solid var(--accent);
-  border-radius: 50%;
-  opacity: 0;
-  pointer-events: none;
-  transition: transform 90ms linear, opacity 0.2s;
-}
-
 .mic--listening {
   background: var(--primary-bg);
   color: var(--primary-ink);
-}
-
-.mic--listening .mic__ring {
-  opacity: 1;
 }
 
 .mic--busy {
@@ -975,29 +989,6 @@ code {
 
 /* --------------------------------------------------------------- receipt -- */
 
-.receipt {
-  padding: min(1.25rem, 4vw) min(1.5rem, 4vw);
-  border: 3px solid var(--ok-ink);
-  border-radius: 20px;
-  background: var(--ok-bg);
-  color: var(--ok-ink);
-}
-
-.receipt--enter {
-  animation: slide-in 0.32s ease-out both;
-}
-
-@keyframes slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 .receipt__head {
   display: flex;
   align-items: flex-start;
@@ -1012,9 +1003,7 @@ code {
 }
 
 .receipt__title {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.4rem;
+  display: block;
   margin: 0;
   font-size: min(1.9rem, 10vw);
   overflow-wrap: anywhere;
@@ -1783,6 +1772,9 @@ code {
 
 /* ---------------------------------------------------------------- motion -- */
 
+/* Reduced motion, or Calm mode in Settings: nothing moves, pulses or draws itself.
+   Every animation here starts from its final state, so with animation off
+   everything is simply there. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1793,9 +1785,32 @@ code {
   }
   .mic:hover,
   .card:hover,
-  .card[data-scan="on"] {
-    transform: none;
+  .card[data-scan="on"],
+  .gate__btn:hover {
+    transform: none !important;
   }
+  .orb__ring {
+    transform: translate(-50%, -50%) !important;
+  }
+}
+
+:root[data-calm="1"] *,
+:root[data-calm="1"] *::before,
+:root[data-calm="1"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+:root[data-calm="1"] .mic:hover,
+:root[data-calm="1"] .card:hover,
+:root[data-calm="1"] .card[data-scan="on"],
+:root[data-calm="1"] .gate__btn:hover {
+  transform: none !important;
+}
+
+:root[data-calm="1"] .orb__ring {
+  transform: translate(-50%, -50%) !important;
 }
 
 /* High contrast: no soft shadows, every boundary drawn. */
@@ -1825,4 +1840,728 @@ code {
   [data-scan="on"] {
     outline-color: Highlight !important;
   }
+}
+
+/* ======================================================= editorial layer ==
+ * One display serif (Instrument Serif, with its italic) for headings and
+ * accents only; cards, buttons and body copy stay Atkinson Hyperlegible.
+ * A monospace face for the machine's own words: what it heard, the consent
+ * trail, receipt metadata. Hairline rules separate regions. Light theme has a
+ * faint paper grain (max ~5% ink, so accent text stays above 7:1); dark has
+ * none; high contrast has no grain, no shadows, solid colours only.
+ */
+
+.display {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  line-height: 1.05;
+}
+
+.display em {
+  font-style: italic;
+}
+
+.stage__title.display {
+  font-size: min(2.4rem, 11vw);
+  gap: 0.4rem;
+}
+
+.wordmark__say {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.18em;
+  letter-spacing: 0;
+  margin-left: 0.04em;
+}
+
+.heard {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 0.85rem;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+}
+
+.cardset__head {
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--hair);
+}
+
+/* --- empty-state hero -------------------------------------------------- */
+
+.intro--hero {
+  padding-top: clamp(0.5rem, 3vw, 2rem);
+}
+
+.hero {
+  margin: 0 auto;
+  max-width: 15em;
+  font-size: min(3.3rem, 12.5vw);
+  line-height: 1.02;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.hero em {
+  display: block;
+  margin-top: 0.08em;
+  color: var(--accent-ink);
+}
+
+/* --- onboarding steps ---------------------------------------------------- */
+
+.steps {
+  display: grid;
+  gap: 1.6rem;
+  width: 100%;
+  margin: 1.75rem 0 0;
+  padding: 1.5rem 0 0;
+  border-top: 1px solid var(--hair);
+  list-style: none;
+  text-align: left;
+}
+
+.steps__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: start;
+  align-items: center;
+  gap: 1rem;
+  animation: rise 0.5s ease-out backwards;
+  animation-delay: calc(var(--i) * 0.18s + 0.1s);
+}
+
+.steps__num {
+  display: grid;
+  place-items: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  padding-bottom: 0.08em;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  font-family: var(--serif);
+  font-size: 2.1rem;
+  font-style: italic;
+  line-height: 1;
+}
+
+.steps__text {
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+.steps__join {
+  position: absolute;
+  color: var(--accent-ink);
+  overflow: visible;
+}
+
+.steps__line,
+.steps__head {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.steps__line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: draw 0.6s ease-out backwards;
+  animation-delay: calc(var(--i) * 0.18s + 0.45s);
+}
+
+.steps__head {
+  animation: fade-in 0.2s ease-out backwards;
+  animation-delay: calc(var(--i) * 0.18s + 1s);
+}
+
+.steps__join--down {
+  left: calc(1.7rem - 8px);
+  top: calc(100% + 0.1rem);
+  width: 16px;
+  height: 1.4rem;
+}
+
+.steps__join--across {
+  display: none;
+}
+
+@media (min-width: 60em) {
+  :root:not([data-scale="1.5"]):not([data-scale="2"]) .steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3.25rem;
+  }
+  :root:not([data-scale="1.5"]):not([data-scale="2"]) .steps__item {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 0.75rem;
+  }
+  :root:not([data-scale="1.5"]):not([data-scale="2"]) .steps__join--down {
+    display: none;
+  }
+  :root:not([data-scale="1.5"]):not([data-scale="2"]) .steps__join--across {
+    display: block;
+    top: 0.95rem;
+    left: calc(3.4rem + (100% - 3.4rem + 3.25rem) / 2 - 2.25rem);
+    width: 4.5rem;
+    height: 1.7rem;
+  }
+}
+
+/* --- connector: "I heard" to card 1 -------------------------------------- */
+
+.stage {
+  position: relative;
+  overflow-x: clip;
+}
+
+.connector {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  overflow: visible;
+  color: var(--accent-ink);
+}
+
+.connector__line,
+.connector__head {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.connector__line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: draw 0.75s 0.15s ease-out backwards;
+}
+
+.connector__head {
+  animation: fade-in 0.2s 0.85s ease-out backwards;
+}
+
+.connector__dot {
+  fill: currentColor;
+  animation: fade-in 0.2s ease-out backwards;
+}
+
+/* --- listening orb ------------------------------------------------------- */
+
+.orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 1.4rem 0 0.9rem;
+}
+
+.orb__ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(100% + var(--r) * min(26px, 3.2vw));
+  aspect-ratio: 1;
+  border: 1.5px solid var(--ring-idle);
+  border-radius: 50%;
+  opacity: calc(0.7 - var(--r) * 0.13);
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(1);
+  transition: transform 90ms linear, opacity 0.3s, border-color 0.3s;
+}
+
+.orb--idle .orb__ring {
+  animation: breathe 3.8s ease-in-out infinite;
+  animation-delay: calc(var(--r) * 0.32s);
+}
+
+.orb--listening .orb__ring {
+  border-color: var(--accent);
+  border-width: 2px;
+  opacity: calc(1 - var(--r) * 0.17);
+  transform: translate(-50%, -50%) scale(calc(1 + var(--level) * (0.04 + var(--r) * 0.05)));
+}
+
+.orb--speaking .orb__ring,
+.orb--busy .orb__ring {
+  opacity: calc(0.45 - var(--r) * 0.08);
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.035);
+  }
+}
+
+/* --- consent trail -------------------------------------------------------- */
+
+.done {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(17rem, 100%), 1fr));
+  align-items: start;
+  gap: 1.25rem;
+}
+
+/* Side by side from 1280 px: the trail gets ~45% so every label stays on one
+   line, the ticket the rest. The ticket's slot is reserved from the start
+   (the ticket is laid out but transparent until it stamps in), and a faint
+   placeholder sits in it while the trail ticks. Narrower: stacked. */
+.done__slot {
+  display: none;
+}
+
+@media (min-width: 80em) {
+  :root:not([data-scale="1.5"]):not([data-scale="2"]):not([data-tv="1"]) .done {
+    grid-template-columns: minmax(0, 46fr) minmax(0, 54fr);
+  }
+  :root:not([data-scale="1.5"]):not([data-scale="2"]):not([data-tv="1"]) .done > .trail {
+    grid-area: 1 / 1;
+  }
+  :root:not([data-scale="1.5"]):not([data-scale="2"]):not([data-tv="1"]) .done > .ticket-wrap {
+    grid-area: 1 / 2;
+  }
+  :root:not([data-scale="1.5"]):not([data-scale="2"]):not([data-tv="1"]) .done__slot {
+    display: grid;
+    grid-area: 1 / 2;
+    align-self: stretch;
+    place-items: center;
+    border: 1.5px dashed var(--line);
+    border-radius: 12px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: slot-hold var(--stamp-delay) linear backwards;
+  }
+}
+
+@keyframes slot-hold {
+  from,
+  to {
+    opacity: 0.7;
+  }
+}
+
+.trail {
+  padding: 0.9rem min(0.85rem, 4vw);
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  background: var(--surface2);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.trail__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  margin: 0 0 0.6rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--hair);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.trail__meta {
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  overflow-wrap: anywhere;
+}
+
+.trail__lines {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trail__line {
+  display: grid;
+  grid-template-columns: auto auto minmax(0.5rem, 1fr) auto;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.trail__n {
+  color: var(--muted);
+}
+
+.trail__label {
+  min-width: 0;
+}
+
+.trail__leader {
+  align-self: center;
+  border-bottom: 1px dotted var(--line);
+  transform: translateY(0.2em);
+}
+
+.trail__mark {
+  display: inline-block;
+  font-weight: 700;
+  color: var(--ok-ink);
+}
+
+.trail__line--bad,
+.trail__line--bad .trail__mark,
+.trail__line--bad .trail__n {
+  color: var(--warn-ink);
+  font-weight: 700;
+}
+
+.trail__why {
+  grid-column: 2 / -1;
+  font-weight: 400;
+}
+
+.trail__foot {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--hair);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.trail__lines--tick .trail__line {
+  animation: trail-in 0.14s ease-out backwards;
+  animation-delay: calc(var(--i) * var(--tick));
+}
+
+.trail__lines--tick .trail__mark {
+  animation: tick-in 0.16s ease-out backwards;
+  animation-delay: calc(var(--i) * var(--tick) + 80ms);
+}
+
+.trail > .trail__foot {
+  animation: fade-in 0.2s ease-out backwards;
+  animation-delay: calc(var(--n) * var(--tick));
+}
+
+.trail--refusal {
+  margin-top: 0.75rem;
+}
+
+.trail--refusal .trail__head {
+  color: var(--warn-ink);
+}
+
+@keyframes trail-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+@keyframes tick-in {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+}
+
+/* --- the receipt as a ticket --------------------------------------------- */
+
+.ticket-wrap {
+  filter: drop-shadow(0 1px 1px rgba(20, 33, 61, 0.08)) drop-shadow(0 10px 18px rgba(20, 33, 61, 0.12));
+  animation: ticket-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1.12) backwards;
+  animation-delay: var(--stamp-delay);
+}
+
+.ticket {
+  --perf: 7px;
+  --perf-gap: 20px;
+  display: grid;
+  padding: calc(var(--perf) + 1rem) min(1.4rem, 4vw);
+  border-radius: 4px;
+  background: var(--ticket-bg);
+  color: var(--ink);
+  -webkit-mask:
+    radial-gradient(circle at 50% 0, #0000 var(--perf), #000 calc(var(--perf) + 0.5px)) top / var(--perf-gap) 51% repeat-x,
+    radial-gradient(circle at 50% 100%, #0000 var(--perf), #000 calc(var(--perf) + 0.5px)) bottom / var(--perf-gap) 51% repeat-x;
+  mask:
+    radial-gradient(circle at 50% 0, #0000 var(--perf), #000 calc(var(--perf) + 0.5px)) top / var(--perf-gap) 51% repeat-x,
+    radial-gradient(circle at 50% 100%, #0000 var(--perf), #000 calc(var(--perf) + 0.5px)) bottom / var(--perf-gap) 51% repeat-x;
+}
+
+.ticket__eyebrow {
+  margin-bottom: 0.5rem;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ticket .receipt__head {
+  align-items: center;
+}
+
+.ticket .receipt__icon {
+  color: var(--ink);
+}
+
+.receipt__done {
+  font-family: var(--serif);
+  font-size: 1.18em;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.ticket .why {
+  border-top: 1px solid var(--hair);
+  margin-top: 0.9rem;
+}
+
+.ticket__stub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.9rem;
+  padding-top: 1rem;
+  border-top: 2px dashed var(--line);
+}
+
+.ticket__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, auto));
+  gap: 0.35rem 1.4rem;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+
+.ticket__meta dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ticket__meta dd {
+  margin: 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.ticket__meta code {
+  font-size: 1em;
+}
+
+.stamp {
+  flex-shrink: 0;
+  width: min(6.5rem, 30vw);
+  height: auto;
+  color: var(--stamp);
+  transform: rotate(-12deg);
+  animation: stamp-in 0.5s cubic-bezier(0.2, 0.8, 0.25, 1.3) backwards;
+  animation-delay: calc(var(--stamp-delay) + 280ms);
+}
+
+.stamp__text {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.05px;
+}
+
+@keyframes ticket-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) rotate(-1deg);
+  }
+}
+
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: rotate(-32deg) scale(1.8);
+  }
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* --- first-run gate ----------------------------------------------------- */
+
+.gate {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.gate__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  width: 100%;
+  max-width: 48rem;
+  text-align: center;
+}
+
+.gate__title {
+  margin: 0.4rem 0 0;
+  font-size: min(3.8rem, 13vw);
+  text-wrap: balance;
+}
+
+.gate__title em {
+  color: var(--accent-ink);
+}
+
+.gate__lead {
+  color: var(--muted);
+  font-size: 1.15rem;
+}
+
+.gate__choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+  gap: 1rem;
+  width: 100%;
+  margin-top: 0.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--hair);
+}
+
+.gate__btn {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  min-height: max(7rem, 112px);
+  padding: 1.25rem min(1.5rem, 4vw);
+  border: var(--bw) solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.gate__btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+  border-color: var(--ink);
+}
+
+.gate__btn--voice {
+  background: var(--primary-bg);
+  border-color: var(--primary-bg);
+  color: var(--primary-ink);
+}
+
+.gate__btn--voice:hover {
+  border-color: var(--primary-bg);
+}
+
+.gate__btn:focus-visible {
+  outline-offset: 5px;
+}
+
+.gate__icon {
+  display: inline-block;
+  flex-shrink: 0;
+  width: min(3rem, 12vw);
+  height: min(3rem, 12vw);
+}
+
+.gate__name {
+  display: block;
+  font-size: min(1.5rem, 8vw);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.gate__desc {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.gate__btn--quiet .gate__desc {
+  color: var(--muted);
+}
+
+.gate__note {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* --- high contrast: solid colours, every edge drawn --------------------- */
+
+:root[data-theme="contrast"] .topbar {
+  border-bottom: 3px solid #ffffff;
+}
+
+:root[data-theme="contrast"] .ticket {
+  -webkit-mask: none;
+  mask: none;
+  border: 3px solid #ffffff;
+}
+
+:root[data-theme="contrast"] .ticket-wrap {
+  filter: none;
+}
+
+:root[data-theme="contrast"] .trail,
+:root[data-theme="contrast"] .gate__btn,
+:root[data-theme="contrast"] .steps__num {
+  border: 3px solid #ffffff;
+}
+
+:root[data-theme="contrast"] .gate__btn--voice {
+  border-color: #ffd400;
+}
+
+:root[data-theme="contrast"] .orb__ring {
+  border-color: #ffffff;
+}
+
+:root[data-theme="contrast"] .orb--listening .orb__ring {
+  border-color: #ffd400;
 }

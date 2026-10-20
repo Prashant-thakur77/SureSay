@@ -1,24 +1,10 @@
-import { forwardRef } from "react";
+import { forwardRef, useId, type CSSProperties } from "react";
+import { checkLabel, TICK_MS } from "../lib/checks";
 import type { Receipt } from "../lib/types";
 import { channelWords, iconFor, timeOf } from "../lib/words";
+import { ConsentTrail } from "./ConsentTrail";
 import { Icon } from "./Icon";
 import { useScanMark } from "./scan";
-
-const CHECK_WORDS: Record<string, string> = {
-  user_evidence_exists: "Your own answer was there",
-  evidence_is_for_this_card_set: "Your answer was for these cards",
-  card_set_exists: "The cards were real",
-  from_a_paired_device: "It came from your paired device",
-  card_set_still_open: "The cards were still open",
-  card_set_not_expired: "The cards had not timed out",
-  evidence_not_expired: "Your answer was fresh",
-  evidence_not_used: "Your answer had not been used before",
-  user_words_choose_a_card: "Your answer clearly chose a card",
-  action_unchanged_since_shown: "The action was exactly what you saw",
-  action_is_registered_write: "SureSay knows this action",
-  nonce_consumed_once: "The cards could be answered only once",
-  evidence_consumed_once: "Your answer could be used only once",
-};
 
 export function shortId(id: string): string {
   return id.length > 13 ? `${id.slice(0, 13)}…` : id;
@@ -42,7 +28,7 @@ export function Checks({ receipt }: { receipt: Receipt }) {
             </span>
             <span>
               <span className="visually-hidden">{c.ok ? "Passed: " : "Failed: "}</span>
-              {CHECK_WORDS[c.name] ?? c.name}
+              {checkLabel(c.name)}
               <code className="why__code">{c.name}</code>
             </span>
           </li>
@@ -52,28 +38,62 @@ export function Checks({ receipt }: { receipt: Receipt }) {
   );
 }
 
+/** A small round "CONFIRMED BY YOU" stamp. Decorative: the same words are in the text. */
+function Stamp() {
+  const id = useId().replace(/:/g, "");
+  return (
+    <svg className="stamp" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+      <defs>
+        <path id={`ring-${id}`} d="M60,60 m-42,0 a42,42 0 1,1 84,0 a42,42 0 1,1 -84,0" />
+      </defs>
+      <circle cx="60" cy="60" r="55" fill="none" stroke="currentColor" strokeWidth="3" />
+      <circle cx="60" cy="60" r="31" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <text className="stamp__text" fill="currentColor">
+        <textPath href={`#ring-${id}`} startOffset="0">
+          CONFIRMED BY YOU · CONFIRMED BY YOU ·
+        </textPath>
+      </text>
+      <path d="M46 61l9.5 9.5L75 50" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function clockSeconds(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? "" : d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
 interface Props {
   receipt: Receipt;
   said?: string;
   onReplay?: () => void;
 }
 
-/** "Done: …" with who confirmed it, when, and why the gate let it through. */
+/** The consent trail, then the receipt "stamps" in as a ticket. */
 export const ReceiptCard = forwardRef<HTMLHeadingElement, Props>(function ReceiptCard({ receipt, said, onReplay }, ref) {
   const when = timeOf(receipt.when.executed_at ?? receipt.when.confirmed_at);
   const option = { action: receipt.what.action, args: receipt.what.args };
   const replayScan = useScanMark("replay");
+  const delay = receipt.checks.length * TICK_MS + 180;
   return (
-    <article className="receipt receipt--enter" aria-labelledby="receipt-title">
-      <div className="receipt__head">
-        <span className="receipt__icon" aria-hidden="true">
-          <Icon name={iconFor(option)} size="100%" />
-        </span>
-        <div>
-          <h2 id="receipt-title" className="receipt__title" ref={ref} tabIndex={-1}>
-            <Icon name="check" size={30} className="receipt__check" />
-            Done: {receipt.what.shown_as}
-          </h2>
+    <div className="done" style={{ "--stamp-delay": `${delay}ms` } as CSSProperties}>
+      <ConsentTrail checks={receipt.checks} pendingId={receipt.how.pending_id} />
+      <div className="done__slot" aria-hidden="true">
+        Checking…
+      </div>
+      <div className="ticket-wrap" style={{ "--stamp-delay": `${delay}ms` } as CSSProperties}>
+      <article className="ticket" aria-labelledby="receipt-title">
+        <div className="ticket__main">
+          <p className="ticket__eyebrow">Consent receipt</p>
+          <div className="receipt__head">
+            <span className="receipt__icon" aria-hidden="true">
+              <Icon name={iconFor(option)} size="100%" />
+            </span>
+            <h2 id="receipt-title" className="receipt__title" ref={ref} tabIndex={-1}>
+              <em className="receipt__done">Done:</em> <span>{receipt.what.shown_as}</span>
+            </h2>
+          </div>
           <p className="receipt__how">
             Confirmed by {channelWords(receipt)}
             {when && <> at {when}</>}.
@@ -83,25 +103,48 @@ export const ReceiptCard = forwardRef<HTMLHeadingElement, Props>(function Receip
               <Icon name="spark" size={20} /> The assistant suggested this. You confirmed it.
             </p>
           )}
-        </div>
-      </div>
-      {said && (
-        <div className="said">
-          <p className="said__label">Said out loud for you:</p>
-          <blockquote className="said__text" lang="en">
-            {said}
-          </blockquote>
-          {onReplay && (
-            <button type="button" className="btn btn--secondary" onClick={onReplay} {...replayScan}>
-              <Icon name="volume" size={24} /> Say it again out loud
-            </button>
+          {said && (
+            <div className="said">
+              <p className="said__label">Said out loud for you:</p>
+              <blockquote className="said__text" lang="en">
+                {said}
+              </blockquote>
+              {onReplay && (
+                <button type="button" className="btn btn--secondary" onClick={onReplay} {...replayScan}>
+                  <Icon name="volume" size={24} /> Say it again out loud
+                </button>
+              )}
+            </div>
           )}
+          <Checks receipt={receipt} />
         </div>
-      )}
-      <p className="receipt__id">
-        Receipt <code>{shortId(receipt.receipt_id)}</code>
-      </p>
-      <Checks receipt={receipt} />
-    </article>
+        <div className="ticket__stub">
+          <dl className="ticket__meta">
+            <div>
+              <dt>Receipt</dt>
+              <dd>
+                <code>{shortId(receipt.receipt_id)}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>Time</dt>
+              <dd>{clockSeconds(receipt.when.executed_at ?? receipt.when.confirmed_at)}</dd>
+            </div>
+            <div>
+              <dt>Channel</dt>
+              <dd>{receipt.how.channel === "voice" ? "Voice" : "Tap"}</dd>
+            </div>
+            <div>
+              <dt>Card</dt>
+              <dd>
+                {receipt.what.option_chosen} of {receipt.what.options_shown}
+              </dd>
+            </div>
+          </dl>
+          <Stamp />
+        </div>
+      </article>
+      </div>
+    </div>
   );
 });

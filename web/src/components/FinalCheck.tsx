@@ -32,8 +32,8 @@ export function FinalCheck({ set, deadline, busy, devices, onYes, onNo, onExpire
   return (
     <section className="final" aria-labelledby="final-title">
       <div className="cardset__head">
-        <h2 id="final-title" className="stage__title">
-          Please check: this one asks twice
+        <h2 id="final-title" className="stage__title display">
+          Please <em>check</em>: this one asks twice
         </h2>
         <Countdown deadline={deadline} pendingId={set.pending_id} onExpire={onExpire} announce={announce} />
       </div>

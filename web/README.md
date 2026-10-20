@@ -51,7 +51,9 @@ Confirmation goes through the hub's MCP server: the official MCP SDK client call
 - Works at 200% text and 320 px wide with no sideways scrolling (checked in a real browser).
 - Tap to start and tap to stop. Nobody has to hold a button. Recording also stops after about 1.2 s of quiet, or after 8 s.
 - Read-aloud, answering by voice automatically, single-switch scanning (1, 1.5, 2 or 3 s per item, announced politely), text size (100–200%), theme and a big-screen (10-foot) layout. Settings are saved on this device.
-- `prefers-reduced-motion` turns off animation. With no saved theme, `prefers-color-scheme` and `prefers-contrast` choose one.
+- First run asks "Start with voice" or "Start quietly" (tap only). That click also unlocks audio, so read-back works on the first turn.
+- When something is done, a consent trail lists the gate's real checks in plain words (001 "Your own voice or tap" ✓ …), then the receipt appears as a ticket. Screen readers hear one outcome, not each tick. Refusals show in "Under the hood" in the same format, with the failing check marked ✗.
+- "Calm mode: no animation" in Settings turns every animation off, whatever the device says. `prefers-reduced-motion` does the same. With no saved theme, `prefers-color-scheme` and `prefers-contrast` choose one.
 - Plain language, short sentences. Every error says what to do next. Timed-out cards say so and offer "Say it again".
 - Settings is a modal dialog: Tab stays inside, Escape closes it, and focus goes back to the Settings button.
 

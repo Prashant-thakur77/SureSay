@@ -39,6 +39,13 @@ const TEXT_PAIRS: Array<[string, string]> = [
   ["ok-ink", "ok-bg"],
   ["assist-ink", "assist-bg"],
   ["on-ink", "ink"],
+  // receipt ticket and consent trail
+  ["ink", "ticket-bg"],
+  ["muted", "ticket-bg"],
+  ["stamp", "ticket-bg"],
+  ["ok-ink", "surface2"],
+  ["warn-ink", "surface2"],
+  ["accent-ink", "surface2"],
 ];
 
 const UI_PAIRS: Array<[string, string]> = [

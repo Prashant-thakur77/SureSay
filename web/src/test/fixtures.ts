@@ -58,7 +58,14 @@ export function hubState(pending: PendingSet[]): HubState {
     receipts: [receipt()],
     events: [
       { type: "proposed", at: 1800000000, pending_id: "p_x", origin: "assistant", options: [{ n: 1, text: "Unlock the front door", action: "door_lock", risk: "high" }] },
-      { type: "refused", at: 1800000001, pending_id: "p_x", reason: "no user evidence for this card set: only the user's own voice or tap on their paired device can confirm", caller: "agent" },
+      {
+        type: "refused",
+        at: 1800000001,
+        pending_id: "p_x",
+        reason: "no user evidence for this card set: only the user's own voice or tap on their paired device can confirm",
+        caller: "agent",
+        checks: [{ name: "user_evidence_exists", ok: false }],
+      },
       { type: "evidence", at: 1800000002, pending_id: "p_y", channel: "tap", decision: { kind: "choose", option: 1, heard: "tap: 1" } },
       { type: "done", at: 1800000003, pending_id: "p_y", text: "Turn on the bedroom fan" },
     ],

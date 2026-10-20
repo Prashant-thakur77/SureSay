@@ -4,11 +4,13 @@ import { ASK_AGAIN_TEXT } from "../hooks/useConversation";
 import type { MicState } from "../hooks/useRecorder";
 import type { HomeDevice, Phrase } from "../lib/types";
 import { CardSet } from "./CardSet";
+import { Connector } from "./Connector";
 import { FinalCheck } from "./FinalCheck";
 import { Icon } from "./Icon";
 import { MicButton, type MicMode } from "./MicButton";
 import { ReceiptCard } from "./ReceiptCard";
 import { useScanMark } from "./scan";
+import { Steps } from "./Steps";
 import { TypeBox } from "./TypeBox";
 
 export interface ConversationActions {
@@ -34,6 +36,10 @@ interface Props {
   devices?: Record<string, HomeDevice>;
   phrasebook: Phrase[];
   announce: (msg: string) => void;
+  /** SureSay is reading aloud right now. */
+  speaking?: boolean;
+  /** Anything has happened before (receipts or gate events). */
+  history?: boolean;
 }
 
 function ScanButton({ id, className = "btn btn--secondary", onClick, children, ...rest }: { id: string; className?: string; onClick: () => void; children: ReactNode; "aria-keyshortcuts"?: string }) {
@@ -56,8 +62,9 @@ export function micMode(phase: Phase): MicMode {
   return "request";
 }
 
-export function Conversation({ phase, actions, mic, level, tv, devices, phrasebook, announce }: Props) {
+export function Conversation({ phase, actions, mic, level, tv, devices, phrasebook, announce, speaking = false, history = true }: Props) {
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const heardRef = useRef<HTMLParagraphElement>(null);
   const typeRef = useRef<HTMLInputElement>(null);
   const micRef = useRef<HTMLButtonElement>(null);
 
@@ -93,16 +100,21 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
   switch (phase.kind) {
     case "idle":
       view = (
-        <div className="intro">
-          <h2 className="stage__title">What would you like?</h2>
-          <p className="stage__lead">Tap the microphone and say it your way. Nothing happens until you choose.</p>
+        <div className="intro intro--hero">
+          <h2 className="hero display">
+            Say it your way. <em>Nothing happens until you choose.</em>
+          </h2>
+          <p className="stage__lead">Tap the microphone and speak, or type below.</p>
+          {!history && <Steps />}
         </div>
       );
       break;
     case "listening":
       view = (
         <div className="intro">
-          <h2 className="stage__title">Listening…</h2>
+          <h2 className="stage__title display">
+            <em>Listening…</em>
+          </h2>
           <p className="stage__lead">Take your time. I stop when you pause.</p>
         </div>
       );
@@ -110,8 +122,8 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
     case "thinking":
       view = (
         <div className="intro" aria-busy="true">
-          <h2 className="stage__title">
-            <span className="dots" aria-hidden="true" /> Working it out…
+          <h2 className="stage__title display">
+            <span className="dots" aria-hidden="true" /> Working it <em>out…</em>
           </h2>
           {phase.typed && <p className="heard">You typed: “{phase.typed}”</p>}
         </div>
@@ -168,8 +180,8 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
     case "cancelled":
       view = (
         <div className="outcome">
-          <h2 className="stage__title" ref={headingRef} tabIndex={-1}>
-            Cancelled. Nothing was changed.
+          <h2 className="stage__title display" ref={headingRef} tabIndex={-1}>
+            Cancelled. <em>Nothing was changed.</em>
           </h2>
           <p className="stage__lead">Tap the microphone when you want to try again.</p>
         </div>
@@ -178,8 +190,9 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
     case "ask_again":
       view = (
         <div className="outcome">
-          <h2 className="stage__title" ref={headingRef} tabIndex={-1}>
-            {ASK_AGAIN_TEXT}
+          <h2 className="stage__title display" ref={headingRef} tabIndex={-1}>
+            {ASK_AGAIN_TEXT.replace("Please say it again.", "")}
+            <em>Please say it again.</em>
           </h2>
           <div className="actions">
             <ScanButton id="again" className="btn btn--primary" onClick={actions.startRequest}>
@@ -228,7 +241,7 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
     case "problem":
       view = (
         <div className="outcome outcome--problem">
-          <h2 className="stage__title" ref={headingRef} tabIndex={-1}>
+          <h2 className="stage__title display" ref={headingRef} tabIndex={-1}>
             <Icon name="alert" size={32} /> {phase.title}
           </h2>
           {phase.detail && <p className="stage__lead">{phase.detail}</p>}
@@ -255,10 +268,11 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
   return (
     <div className={`conversation conversation--${phase.kind}`}>
       {heard && (
-        <p className="heard" data-testid="heard">
+        <p className="heard" data-testid="heard" ref={heardRef}>
           I heard: “{heard}”
         </p>
       )}
+      {heard && phase.kind === "cards" && <Connector fromRef={heardRef} watch={`${phase.set.pending_id}-${tv}`} />}
       <div className="stage__view">{view}</div>
       <div className="inputs">
         <MicButton
@@ -267,6 +281,7 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
           level={mic === "recording" ? level : 0}
           onToggle={actions.toggleMic}
           answerKind={phase.kind === "cards" && phase.set.stage === "final" ? "yesno" : "number"}
+          speaking={speaking}
         />
         <TypeBox ref={typeRef} onSend={actions.sendText} onFocus={actions.stopListening} />
       </div>

@@ -28,4 +28,6 @@ export function remove(key: string): void {
 export const KEYS = {
   device: "suresay.device",
   settings: "suresay.settings",
+  /** "voice" or "quiet": the first-run choice. */
+  start: "suresay.start",
 } as const;

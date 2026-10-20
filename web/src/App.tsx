@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { MainScreen } from "./components/MainScreen";
 import { PairScreen } from "./components/PairScreen";
+import { StartGate, type StartChoice } from "./components/StartGate";
 import { useSettings } from "./hooks/useSettings";
 import { HubClient } from "./lib/api";
 import { hubBaseUrl } from "./lib/config";
@@ -17,9 +18,15 @@ function savedCreds(): DeviceCreds | null {
   return null;
 }
 
+function savedStart(): StartChoice | null {
+  const v = readJson<string>(KEYS.start);
+  return v === "voice" || v === "quiet" ? v : null;
+}
+
 export function App() {
   const { settings, update, bigScreen } = useSettings();
   const [creds, setCreds] = useState<DeviceCreds | null>(savedCreds);
+  const [start, setStart] = useState<StartChoice | null>(savedStart);
   const base = hubBaseUrl();
 
   const services = useMemo(() => {
@@ -27,6 +34,19 @@ export function App() {
     const hub = new HubClient(base, creds);
     return { hub, gate: new McpGate(hub), speaker: new Speaker(hub) };
   }, [base, creds]);
+
+  if (!start) {
+    return (
+      <StartGate
+        onChoose={(choice) => {
+          const voice = choice === "voice";
+          update({ readAloud: voice, autoVoice: voice });
+          writeJson(KEYS.start, choice);
+          setStart(choice);
+        }}
+      />
+    );
+  }
 
   if (!creds || !services) {
     return (

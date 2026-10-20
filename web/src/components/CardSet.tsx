@@ -163,8 +163,8 @@ export function CardSet({ set, deadline, busy, tv, devices, onChoose, onSpace, o
   return (
     <section className={`cardset${tv ? " cardset--tv" : ""}`} aria-labelledby="cards-title">
       <div className="cardset__head">
-        <h2 id="cards-title" className="stage__title">
-          Did you mean…
+        <h2 id="cards-title" className="stage__title display">
+          Did you <em>mean</em>…
         </h2>
         <Countdown deadline={deadline} pendingId={set.pending_id} onExpire={onExpire} announce={announce} />
       </div>

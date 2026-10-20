@@ -50,6 +50,7 @@ export interface Debug {
   confirmVia?: "mcp" | "rest";
   fallbackReason?: string;
   lastRefusal?: string;
+  lastRefusalChecks?: import("../lib/types").Check[];
   voice?: string;
 }
 
@@ -264,7 +265,7 @@ export function useConversation(deps: ConversationDeps) {
         void speak("Cancelled. Nothing was changed.");
         break;
       case "refused": {
-        setDebug((d) => ({ ...d, lastRefusal: r.reason }));
+        setDebug((d) => ({ ...d, lastRefusal: r.reason, lastRefusalChecks: r.checks }));
         if (out.via === "rest" && /already been answered/i.test(r.reason ?? "")) {
           // the MCP call may have gone through before its reply was lost
           const st = await refreshState();

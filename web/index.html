@@ -9,7 +9,7 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
     <script>
       // apply the saved theme and text size before first paint, so nothing flashes
       (function () {
@@ -25,6 +25,7 @@
         var k = [1, 1.25, 1.5, 2].indexOf(s.textScale) >= 0 ? s.textScale : 1;
         d.setAttribute("data-scale", String(k));
         d.style.fontSize = 125 * k + "%";
+        d.setAttribute("data-calm", s.calm === true ? "1" : "0");
       })();
     </script>
   </head>

@@ -4,6 +4,7 @@ import type { McpStatus } from "../lib/mcp";
 import type { HubState } from "../lib/types";
 import { capitalise, channelWords, describeEvents, deviceIcon, timeOf } from "../lib/words";
 import { Icon } from "./Icon";
+import { TrailLines } from "./ConsentTrail";
 import { Checks, shortId } from "./ReceiptCard";
 
 function wide(): boolean {
@@ -142,7 +143,19 @@ export interface McpInfo {
   error?: string;
 }
 
-export function UnderTheHood({ debug, mcp }: { debug: Debug; mcp: McpInfo }) {
+/** The newest refusal with its checks: this device's own, or the gate's latest (for example the assistant's). */
+function lastRefusal(debug: Debug, events: HubState["events"] | undefined): { reason?: string; checks: NonNullable<Debug["lastRefusalChecks"]>; who: string } | null {
+  const ev = [...(events ?? [])].reverse().find((e) => e.type === "refused" && e.checks && e.checks.length > 0);
+  if (ev?.checks) {
+    const who = ev.caller === "agent" ? "the assistant" : ev.caller?.startsWith("device:") ? "a paired device" : "an unknown caller";
+    return { reason: ev.reason, checks: ev.checks, who };
+  }
+  if (debug.lastRefusalChecks && debug.lastRefusalChecks.length > 0) return { reason: debug.lastRefusal, checks: debug.lastRefusalChecks, who: "this device" };
+  return null;
+}
+
+export function UnderTheHood({ debug, mcp, events }: { debug: Debug; mcp: McpInfo; events?: HubState["events"] }) {
+  const refusal = lastRefusal(debug, events);
   const t = debug.timing;
   const timing = t ? [t.asr_ms != null && `ASR ${t.asr_ms} ms`, t.rank_ms != null && `rank ${t.rank_ms} ms`, t.total_ms != null && `total ${t.total_ms} ms`].filter(Boolean).join(" · ") : "";
   const rows: Array<[string, ReactNode]> = [
@@ -158,7 +171,7 @@ export function UnderTheHood({ debug, mcp }: { debug: Debug; mcp: McpInfo }) {
     ],
     ["MCP", mcp.status === "connected" ? `connected${mcp.protocol ? `, protocol ${mcp.protocol}` : ""}${mcp.receipts != null ? `, receipts_list gave ${mcp.receipts}` : ""}` : mcp.status === "connecting" ? "connecting" : `not connected${mcp.error ? ` (${mcp.error})` : ""}`],
     ["Read-back voice", debug.voice ?? "—"],
-    ["Last refusal", debug.lastRefusal ?? "—"],
+    ["Last refusal", refusal?.reason ?? debug.lastRefusal ?? "—"],
   ];
   return (
     <>
@@ -175,6 +188,16 @@ export function UnderTheHood({ debug, mcp }: { debug: Debug; mcp: McpInfo }) {
           </div>
         ))}
       </dl>
+      {refusal && (
+        <div className="trail trail--refusal" data-testid="refusal-trail">
+          <p className="trail__head">
+            <span>Refused</span>
+            <span className="trail__meta">asked by {refusal.who}</span>
+          </p>
+          <TrailLines checks={refusal.checks} />
+          <p className="trail__foot">Nothing was changed.</p>
+        </div>
+      )}
     </>
   );
 }
@@ -211,7 +234,7 @@ export function SidePanel({ state, debug, mcp }: { state: HubState | null; debug
         <ActivityPanel state={state} />
       </Panel>
       <Panel id="hood" title="Under the hood" icon="gear" defaultOpen={false}>
-        <UnderTheHood debug={debug} mcp={mcp} />
+        <UnderTheHood debug={debug} mcp={mcp} events={state?.events} />
       </Panel>
     </aside>
   );

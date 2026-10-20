@@ -77,6 +77,13 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
   const recorder = useRecorder();
   const sessionId = useMemo(() => `s_${randomHex(8)}`, []);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  useEffect(() => {
+    speaker.onSpeaking = setSpeaking;
+    return () => {
+      speaker.onSpeaking = undefined;
+    };
+  }, [speaker]);
   const settingsBtn = useRef<HTMLButtonElement>(null);
   const [mcp, setMcp] = useState<McpInfo>({ status: gate.status, protocol: gate.protocol, receipts: null });
 
@@ -219,6 +226,8 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
                 devices={state?.home.devices}
                 phrasebook={phrasebook}
                 announce={(m) => announce(m, "polite")}
+                speaking={speaking}
+                history={!state || state.receipts.length > 0 || state.events.length > 0}
               />
               {settings.scan && (
                 <p className="scan-note">

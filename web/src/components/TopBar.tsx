@@ -11,7 +11,9 @@ export function Wordmark({ as: Tag = "h1" }: { as?: "h1" | "p" }) {
           <path d="M9 16.5l4.5 4.5L23 11" fill="none" stroke="var(--on-ink)" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
-      SureSay
+      <span>
+        Sure<em className="wordmark__say">Say</em>
+      </span>
     </Tag>
   );
 }
