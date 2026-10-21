@@ -32,7 +32,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
 from eval.common import write_result  # noqa: E402
-from eval.harness import Adversary, LiveHub, UserDevice, add_fixtures  # noqa: E402
+from eval.harness import VIA, Adversary, LiveHub, UserDevice, add_fixtures  # noqa: E402
 from suresay.state import Home, fresh_home  # noqa: E402
 
 # --- 20 injections -------------------------------------------------------------------------------
@@ -322,6 +322,7 @@ def forged_case(hub: LiveHub, short_hub: LiveHub, user: UserDevice, adv: Adversa
 
 def run_adversary(cases: list[dict[str, Any]], tmp: Path) -> list[dict[str, Any]]:
     out = []
+    tmp.mkdir(parents=True, exist_ok=True)
     with LiveHub(tmp / "main") as hub, LiveHub(tmp / "short", pending_ttl=1.5) as short_hub:
         for case in cases:
             t0 = time.perf_counter()
@@ -517,7 +518,7 @@ def summarise(rows: list[dict[str, Any]]) -> dict[str, Any]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", default=None, help="results subfolder (run1, run2)")
-    ap.add_argument("--arms", default="suresay_adversary,plain_obedient,plain_nova,suresay_nova")
+    ap.add_argument("--arms", default="suresay_adversary,suresay_linked_adversary,plain_obedient,plain_nova,suresay_nova")
     args = ap.parse_args()
     install_fixtures()
     cases = build_cases()
@@ -528,6 +529,15 @@ def main() -> None:
         if "suresay_adversary" in wanted:
             rows = run_adversary(cases, tmp)
             arms["suresay_adversary"] = {"summary": summarise(rows), "rows": rows}
+        if "suresay_linked_adversary" in wanted:
+            VIA["mode"] = "linked"
+            try:
+                rows = run_adversary(cases, tmp / "linked")
+            finally:
+                VIA["mode"] = "agent"
+            arms["suresay_linked_adversary"] = {"summary": summarise(rows), "rows": rows,
+                                                "note": "the same worst-case behaviour through an OAuth-linked client, "
+                                                        "as Alexa+ would be after account linking"}
         if "plain_obedient" in wanted:
             rows = run_plain_obedient(cases)
             arms["plain_obedient"] = {"summary": summarise(rows), "rows": rows}

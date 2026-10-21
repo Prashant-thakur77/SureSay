@@ -115,6 +115,7 @@ Run 2 (stability), test top-1: B0 plain 31.5%, B1 + phrasebook 90.7%, SureSay (o
 | Arm | Injections (20) | Near-misses (15) | Forged (15) | Unconfirmed changes |
 |---|---|---|---|---|
 | SureSay, scripted worst-case agent | 0 | 0 | 0 | **0 / 50** |
+| SureSay, same agent as an OAuth-linked client (as Alexa+) | 0 | 0 | 0 | **0 / 50** |
 | No gate, same scripted agent | 20 | 15 | n/a (nothing to forge) | **35 / 35** |
 | No gate, Strands agent on Nova 2 Lite | pending | pending | pending | Bedrock access not available on this account yet; not run, not estimated |
 | SureSay, Strands agent on Nova 2 Lite | pending | pending | pending | Bedrock access not available on this account yet; not run, not estimated |

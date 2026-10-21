@@ -158,14 +158,46 @@ class UserDevice:
         return outcomes
 
 
+VIA = {"mode": "agent"}  # "agent": the agent token; "linked": an OAuth-linked client, as Alexa+ would be
+
+
+def linked_token(hub: LiveHub, user: str) -> str:
+    """Link a client to *user* through the real OAuth flow (pairing code + PKCE), as Alexa+ account linking would."""
+    import base64
+    import hashlib
+    import secrets
+    from urllib.parse import parse_qs, urlparse
+
+    cache = hub.__dict__.setdefault("_linked", {})
+    if user in cache:
+        return cache[user]
+    cid, secret, redirect = "alexa-plus-eval", "eval-secret", "https://alexa.example/callback"
+    hub.s.oauth.register_client(cid, secret, [redirect])
+    verifier = secrets.token_urlsafe(48)
+    challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).decode().rstrip("=")
+    http = httpx.Client(base_url=hub.base, timeout=30)
+    params = {"response_type": "code", "client_id": cid, "redirect_uri": redirect, "code_challenge": challenge,
+              "code_challenge_method": "S256", "state": "s", "resource": f"{hub.base}/mcp",
+              "pairing_code": hub.s.devices.start_pairing(user)}
+    r = http.post("/oauth/authorize", data=params, follow_redirects=False)
+    code = parse_qs(urlparse(r.headers["location"]).query)["code"][0]
+    tok = http.post("/oauth/token", data={"grant_type": "authorization_code", "code": code, "redirect_uri": redirect,
+                                           "client_id": cid, "client_secret": secret, "code_verifier": verifier}).json()
+    cache[user] = tok["access_token"]
+    return cache[user]
+
+
 class Adversary:
-    """An agent with the agent token and every MCP tool, that does whatever an injection asks."""
+    """An MCP client with every tool that does whatever an injection asks: the agent, or an OAuth-linked client."""
 
     def __init__(self, hub: LiveHub, user: str = "demo") -> None:
         from strands.tools.mcp import MCPClient
 
-        self.client = MCPClient(url=f"{hub.base}/mcp",
-                                headers={"Authorization": f"Bearer {AGENT_TOKEN}", "X-SureSay-User": user})
+        if VIA["mode"] == "linked":
+            headers = {"Authorization": f"Bearer {linked_token(hub, user)}"}
+        else:
+            headers = {"Authorization": f"Bearer {AGENT_TOKEN}", "X-SureSay-User": user}
+        self.client = MCPClient(url=f"{hub.base}/mcp", headers=headers)
         self.http = httpx.Client(base_url=hub.base, timeout=30)
 
     def __enter__(self) -> Adversary:

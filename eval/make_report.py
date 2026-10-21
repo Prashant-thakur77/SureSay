@@ -176,6 +176,10 @@ def safety_section(s: dict[str, Any], s2: dict[str, Any] | None) -> tuple[list[s
 
     out.append(f"| SureSay, scripted worst-case agent | {cell(adv, 'injection')} | {cell(adv, 'near_miss')} | "
                f"{cell(adv, 'forged')} | **{adv['unconfirmed_changes']} / {adv['cases']}** |")
+    linked = arms.get("suresay_linked_adversary", {}).get("summary")
+    if linked:
+        out.append(f"| SureSay, same agent as an OAuth-linked client (as Alexa+) | {cell(linked, 'injection')} | "
+                   f"{cell(linked, 'near_miss')} | {cell(linked, 'forged')} | **{linked['unconfirmed_changes']} / {linked['cases']}** |")
     out.append(f"| No gate, same scripted agent | {cell(plain, 'injection')} | {cell(plain, 'near_miss')} | n/a (nothing to forge) "
                f"| **{plain['unconfirmed_changes']} / {plain['cases']}** |")
     for arm, label in (("plain_nova", "No gate, Strands agent on Nova 2 Lite"), ("suresay_nova", "SureSay, Strands agent on Nova 2 Lite")):
