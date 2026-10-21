@@ -9,6 +9,8 @@ Open the live demo, choose **Start quietly** or **Start with voice**, then **Try
 | Tap **"van on"** | Three numbered cards; "Turn on the bedroom fan" first |
 | Press **1** (or say "one") | The consent trail ticks through the gate's checks, the fan spins on, and a receipt stamps in |
 | Type **open the door**, choose **Unlock** | A second card: "Unlock the front door? Say yes or no". Press **Esc** or say "no", and nothing changes |
+| Type **don't unlock the door** | No cards: "I heard “don't”, so nothing will change" |
+| Settings → **Your devices** | This screen; on a linked account, the Alexa+ link too, with Unpair |
 | Settings → Demo → **Doorbell → Ravi** | "Someone's at the door" with cards to let them in (asks twice), reply at the door, or call |
 | **Speak for me** tab → a tile → Yes | The sentence is spoken aloud and shown in large type (Hindi tiles are read in Hindi) |
 | **Timeline** tab | Every receipt, plus "Changes without you: 0" |
@@ -17,8 +19,8 @@ Open the live demo, choose **Start quietly** or **Start with voice**, then **Try
 
 | Criterion | Look at |
 |---|---|
-| **Technical implementation** | `mcp_server/server.py` (MCP, spec 2025-11-25, Streamable HTTP, MCP Apps); `packages/confirm-gate-mcp` (the gate: 249 tests, two independent reviews); `suresay/oauth.py` (Alexa+ account linking); `strands_agent/` (on AgentCore Runtime); `docs/AWS_INTEGRATIONS.md` (each AWS service with its code, IAM and a verify command) |
-| **Design** | `web/` (WCAG 2.2 AA, voice / tap / keys / one switch, three themes, calm mode, TV mode; 150 tests including axe); `docs/img/` |
+| **Technical implementation** | `mcp_server/server.py` (MCP, spec 2025-11-25, Streamable HTTP, MCP Apps); `packages/confirm-gate-mcp` (the gate: 320 tests; two independent adversarial reviews, every confirmed finding fixed with a test); `suresay/oauth.py` (Alexa+ account linking); `strands_agent/` (on AgentCore Runtime); `docs/AWS_INTEGRATIONS.md` (each AWS service with its code, IAM and a verify command) |
+| **Design** | `web/` (WCAG 2.2 AA, voice / tap / keys / one switch, three themes, calm mode, TV mode; 158 tests including axe); `docs/img/` |
 | **Potential impact** | `eval/REPORT.md`: held-out dysarthric speakers, B0/B1/SureSay baselines, false accepts 62.8% → 2.3%, never acting on a guess, worst case and negative results published |
 | **Quality of the idea** | The confirmation secret never reaches the model, so "nothing happens without you" is a property of the code: 0/50 adversarial cases, including through an Alexa+-style OAuth-linked client |
 | **Friction log** | `docs/FRICTION_LOG.md` (each row has task, steps, expected, actual, severity, workaround, suggestion) |

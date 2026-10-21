@@ -28,7 +28,7 @@ It also speaks *for* you: confirm a phrase like "I am thirsty" and SureSay says 
 **Built for Alexa+.** SureSay's MCP server meets the Alexa+ add-on requirements ([`alexa_plus/`](alexa_plus)):
 
 - Streamable HTTP on spec 2025-11-25.
-- OAuth 2.1 account linking with PKCE S256, Protected Resource Metadata, and a bare 401. Linking means entering your SureSay pairing code.
+- OAuth 2.1 account linking with PKCE S256, Protected Resource Metadata, and a bare 401. Linking means entering your SureSay pairing code, and the link shows up under Settings, **Your devices**: unpair it and Alexa+'s access ends at once (a replayed refresh token ends it too).
 - An **MCP Apps** card UI that Alexa+ renders on an Echo Show or Fire TV screen. That screen pairs as one of your devices.
 - A ready `addon.json` with icons and a carousel image.
 
@@ -40,6 +40,8 @@ Until Alexa+ developer access opens, [`alexa_skill/`](alexa_skill) runs the same
 - **Timeline:** a carer-friendly record of every receipt, with "changes without you: 0".
 - **Doorbell:** "Someone's at the door: Ravi, your carer" opens cards (let them in, which asks twice; reply at the door; or call). Simulated.
 - **Maybe cards:** when SureSay isn't sure, it asks again *and* offers its best guesses, still confirm-only.
+- **"Don't" means nothing happens:** "don't unlock the door" sounds a lot like "unlock the door". A negated command offers no cards: SureSay says what it heard and that nothing will change.
+- **Your devices:** every screen, voice device and assistant link that can show your cards, each one a tap away from unpaired.
 - **TV mode** for big screens.
 
 ## Why the agent can't confirm for you
@@ -99,7 +101,7 @@ Code pointers, permissions and a verify command for each service: [docs/AWS_INTE
 
 ```bash
 make setup        # Python 3.13 venv (uv) + web client packages
-make test         # 328 Python tests (plus 150 web tests): the gate, the hub end to end, account linking, the Alexa skill, the 50-case safety suite
+make test         # 437 Python tests (plus 158 web tests): the gate, the hub end to end, account linking, the Alexa skill, the 50-case safety suite
 make demo         # hub + web client (+ agent when Bedrock is reachable) on http://127.0.0.1:9000
 ```
 
