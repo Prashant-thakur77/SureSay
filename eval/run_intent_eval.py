@@ -36,6 +36,7 @@ from suresay.rank import AbstainRule, FuzzyRanker, NovaRanker, bedrock_available
 BOOK_SIZE = 50
 MAX_IN = 20
 MAX_OUT = 20
+MAYBE_FLOOR = 0.50  # fixed a priori, see suresay.rank.AbstainRule.maybe_floor
 
 
 def _h(*parts: str) -> str:
@@ -117,7 +118,20 @@ def metrics(rows: list[dict[str, Any]], system: str) -> dict[str, Any]:
             return s["exact"] if k == 1 else False
         return (not s["abstain"]) and r["truth"] in s["top"][:k]
 
+    def in_cards(r: dict[str, Any]) -> bool:
+        """The intended phrase is among the cards shown, counting "maybe" cards offered while asking again."""
+        sres = r[system]
+        if system in ("b0",):
+            return sres["exact"]
+        if not sres["abstain"]:
+            return r["truth"] in sres["top"][:3]
+        conf = sres.get("conf") or []
+        return any(t == r["truth"] and c >= MAYBE_FLOOR for t, c in zip(sres["top"][:3], conf, strict=False))
+
     top1 = sum(hit(r, 1) for r in ins)
+    with_maybe = sum(in_cards(r) for r in ins)
+    maybe_on_out = sum(r[system]["abstain"] and any(c >= MAYBE_FLOOR for c in (r[system].get("conf") or [])[:1])
+                       for r in outs) if system.startswith("ss") else 0
     top3 = sum(hit(r, 3) for r in ins) if system != "b0" else None
     false_abstain = sum(r[system]["abstain"] for r in ins)
     correct_abstain = sum(r[system]["abstain"] for r in outs)
@@ -127,6 +141,7 @@ def metrics(rows: list[dict[str, Any]], system: str) -> dict[str, Any]:
     return {"in_book": len(ins), "out_of_book": len(outs), "top1_pct": pct(top1, len(ins)),
             "top3_pct": pct(top3, len(ins)) if top3 is not None else None,
             "false_abstain_pct": pct(false_abstain, len(ins)), "correct_abstain_pct": pct(correct_abstain, len(outs)),
+            "in_cards_with_maybe_pct": pct(with_maybe, len(ins)), "maybe_cards_on_out_of_book_pct": pct(maybe_on_out, len(outs)),
             "acted_without_asking_wrong_pct": pct(acted_wrong, len(ins) + len(outs)) if system in ("b0", "b1") else 0.0}
 
 

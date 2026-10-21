@@ -258,3 +258,24 @@ def test_state_counts_what_was_confirmed_and_refused(hub: Hub) -> None:
     hub.signed(device, "POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": "ev_forged"})
     stats = hub.signed(device, "GET", "/device/state").json()["stats"]
     assert stats["confirmed"] == 1 and stats["refused"] >= 1 and stats["without_you"] == 0
+
+
+def test_when_unsure_it_asks_again_and_offers_maybe_cards_that_still_need_confirming(hub: Hub) -> None:
+    device = hub.pair()
+    out = hub.say(device, "fen")  # weak: below the abstain floor, but the fan is the best guess
+    res = out["result"]
+    assert res["status"] == "ask_again"
+    assert res["pending_id"] and res["maybe"], res
+    p = next(x for x in out["pending"] if x["pending_id"] == res["pending_id"])
+    assert p["context"]["unsure"] is True
+    before = hub.s.home.get("demo")["version"]
+    assert before == hub.s.home.get("demo")["version"]
+    ev = hub.tap(device, p, 1).json()
+    done = hub.signed(device, "POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]}).json()
+    assert done["status"] == "done"
+
+
+def test_noise_opens_nothing_even_as_maybe(hub: Hub) -> None:
+    device = hub.pair()
+    out = hub.say(device, "zxqv plorf")
+    assert out["result"]["status"] == "ask_again" and out["pending"] == []

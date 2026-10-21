@@ -62,6 +62,9 @@ class AbstainRule:
     floor: float = 0.55
     confident: float = 0.80
     margin: float = 0.05
+    # When abstaining, guesses at or above this are still offered as "maybe" cards (confirm-only, like any card).
+    # Fixed at 0.50 before measuring anything, never tuned: noise scores below it, weak-but-plausible above.
+    maybe_floor: float = 0.50
 
     def should_abstain(self, scores: list[float]) -> tuple[bool, str]:
         if not scores:

@@ -1,7 +1,7 @@
 {
   "name": "intent",
-  "generated_at": "2026-10-21T03:46:15+0530",
-  "git_sha": "26e31cd",
+  "generated_at": "2026-10-21T09:00:10+0530",
+  "git_sha": "210bff6",
   "python": "3.13.12",
   "claim": "2, 2b, 5",
   "asr_engine": "transcribe-streaming",
@@ -19,12 +19,14 @@
     "fuzzy": {
       "floor": 0.65,
       "confident": 1.0,
-      "margin": 0.15
+      "margin": 0.15,
+      "maybe_floor": 0.5
     },
     "nova": {
       "floor": 0.35,
       "confident": 0.75,
-      "margin": 0.1
+      "margin": 0.1,
+      "maybe_floor": 0.5
     }
   },
   "tokens": {
@@ -40,6 +42,8 @@
         "top3_pct": null,
         "false_abstain_pct": 0.0,
         "correct_abstain_pct": 0.0,
+        "in_cards_with_maybe_pct": 31.5,
+        "maybe_cards_on_out_of_book_pct": 0.0,
         "acted_without_asking_wrong_pct": 84.3
       },
       "b1": {
@@ -49,6 +53,8 @@
         "top3_pct": 94.4,
         "false_abstain_pct": 0.0,
         "correct_abstain_pct": 0.0,
+        "in_cards_with_maybe_pct": 94.4,
+        "maybe_cards_on_out_of_book_pct": 0.0,
         "acted_without_asking_wrong_pct": 54.6
       },
       "ss_fuzzy": {
@@ -58,6 +64,8 @@
         "top3_pct": 75.0,
         "false_abstain_pct": 25.0,
         "correct_abstain_pct": 100.0,
+        "in_cards_with_maybe_pct": 92.6,
+        "maybe_cards_on_out_of_book_pct": 45.4,
         "acted_without_asking_wrong_pct": 0.0
       },
       "per_speaker": {
@@ -69,6 +77,8 @@
             "top3_pct": null,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 0.0,
+            "in_cards_with_maybe_pct": 0.0,
+            "maybe_cards_on_out_of_book_pct": 0.0,
             "acted_without_asking_wrong_pct": 100.0
           },
           "b1": {
@@ -78,6 +88,8 @@
             "top3_pct": 87.5,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 0.0,
+            "in_cards_with_maybe_pct": 87.5,
+            "maybe_cards_on_out_of_book_pct": 0.0,
             "acted_without_asking_wrong_pct": 56.2
           },
           "ss_fuzzy": {
@@ -87,6 +99,8 @@
             "top3_pct": 75.0,
             "false_abstain_pct": 25.0,
             "correct_abstain_pct": 100.0,
+            "in_cards_with_maybe_pct": 87.5,
+            "maybe_cards_on_out_of_book_pct": 37.5,
             "acted_without_asking_wrong_pct": 0.0
           }
         },
@@ -98,6 +112,8 @@
             "top3_pct": null,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 0.0,
+            "in_cards_with_maybe_pct": 80.0,
+            "maybe_cards_on_out_of_book_pct": 0.0,
             "acted_without_asking_wrong_pct": 60.0
           },
           "b1": {
@@ -107,6 +123,8 @@
             "top3_pct": 100.0,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 0.0,
+            "in_cards_with_maybe_pct": 100.0,
+            "maybe_cards_on_out_of_book_pct": 0.0,
             "acted_without_asking_wrong_pct": 50.0
           },
           "ss_fuzzy": {
@@ -116,6 +134,8 @@
             "top3_pct": 100.0,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 100.0,
+            "in_cards_with_maybe_pct": 100.0,
+            "maybe_cards_on_out_of_book_pct": 45.0,
             "acted_without_asking_wrong_pct": 0.0
           }
         },
@@ -127,6 +147,8 @@
             "top3_pct": null,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 0.0,
+            "in_cards_with_maybe_pct": 0.0,
+            "maybe_cards_on_out_of_book_pct": 0.0,
             "acted_without_asking_wrong_pct": 100.0
           },
           "b1": {
@@ -136,6 +158,8 @@
             "top3_pct": 90.0,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 0.0,
+            "in_cards_with_maybe_pct": 90.0,
+            "maybe_cards_on_out_of_book_pct": 0.0,
             "acted_without_asking_wrong_pct": 62.5
           },
           "ss_fuzzy": {
@@ -145,6 +169,8 @@
             "top3_pct": 50.0,
             "false_abstain_pct": 50.0,
             "correct_abstain_pct": 100.0,
+            "in_cards_with_maybe_pct": 85.0,
+            "maybe_cards_on_out_of_book_pct": 25.0,
             "acted_without_asking_wrong_pct": 0.0
           }
         },
@@ -156,6 +182,8 @@
             "top3_pct": null,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 0.0,
+            "in_cards_with_maybe_pct": 15.0,
+            "maybe_cards_on_out_of_book_pct": 0.0,
             "acted_without_asking_wrong_pct": 92.5
           },
           "b1": {
@@ -165,6 +193,8 @@
             "top3_pct": 95.0,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 0.0,
+            "in_cards_with_maybe_pct": 95.0,
+            "maybe_cards_on_out_of_book_pct": 0.0,
             "acted_without_asking_wrong_pct": 55.0
           },
           "ss_fuzzy": {
@@ -174,6 +204,8 @@
             "top3_pct": 85.0,
             "false_abstain_pct": 15.0,
             "correct_abstain_pct": 100.0,
+            "in_cards_with_maybe_pct": 95.0,
+            "maybe_cards_on_out_of_book_pct": 55.0,
             "acted_without_asking_wrong_pct": 0.0
           }
         },
@@ -185,6 +217,8 @@
             "top3_pct": null,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 0.0,
+            "in_cards_with_maybe_pct": 75.0,
+            "maybe_cards_on_out_of_book_pct": 0.0,
             "acted_without_asking_wrong_pct": 62.5
           },
           "b1": {
@@ -194,6 +228,8 @@
             "top3_pct": 100.0,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 0.0,
+            "in_cards_with_maybe_pct": 100.0,
+            "maybe_cards_on_out_of_book_pct": 0.0,
             "acted_without_asking_wrong_pct": 50.0
           },
           "ss_fuzzy": {
@@ -203,6 +239,8 @@
             "top3_pct": 100.0,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 100.0,
+            "in_cards_with_maybe_pct": 100.0,
+            "maybe_cards_on_out_of_book_pct": 50.0,
             "acted_without_asking_wrong_pct": 0.0
           }
         },
@@ -214,6 +252,8 @@
             "top3_pct": null,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 0.0,
+            "in_cards_with_maybe_pct": 0.0,
+            "maybe_cards_on_out_of_book_pct": 0.0,
             "acted_without_asking_wrong_pct": 100.0
           },
           "b1": {
@@ -223,6 +263,8 @@
             "top3_pct": 90.0,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 0.0,
+            "in_cards_with_maybe_pct": 90.0,
+            "maybe_cards_on_out_of_book_pct": 0.0,
             "acted_without_asking_wrong_pct": 55.0
           },
           "ss_fuzzy": {
@@ -232,6 +274,8 @@
             "top3_pct": 40.0,
             "false_abstain_pct": 60.0,
             "correct_abstain_pct": 100.0,
+            "in_cards_with_maybe_pct": 85.0,
+            "maybe_cards_on_out_of_book_pct": 55.0,
             "acted_without_asking_wrong_pct": 0.0
           }
         }

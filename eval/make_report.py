@@ -100,14 +100,21 @@ def intent_section(i: dict[str, Any], i2: dict[str, Any] | None) -> tuple[list[s
         "|---|" + "---|" * len(systems),
         "| Top-1 phrase recovered | " + " | ".join(f(test[s]["top1_pct"]) for s in systems) + " |",
         "| Top-3 phrase recovered | " + " | ".join(f(test[s]["top3_pct"]) for s in systems) + " |",
+        "| In the cards, counting \"maybe\" cards | " + " | ".join(
+            f(test[s].get("in_cards_with_maybe_pct")) if s.startswith("ss") else (f(test[s]["top3_pct"]) if s != "b0" else "—")
+            for s in systems) + " |",
         "| Out-of-book: correctly asked again | " + " | ".join(f(test[s]["correct_abstain_pct"]) for s in systems) + " |",
+        "| Out-of-book: maybe cards offered (user declines) | " + " | ".join(
+            f(test[s].get("maybe_cards_on_out_of_book_pct")) if s.startswith("ss") else "—" for s in systems) + " |",
         "| In-book: asked again needlessly | " + " | ".join(f(test[s]["false_abstain_pct"]) for s in systems) + " |",
         "| Acted on a wrong phrase without asking | " + " | ".join(
             f(test[s]["acted_without_asking_wrong_pct"]) for s in systems) + " |",
         "",
         f"Utterances: {test[systems[0]]['in_book']} in-book and {test[systems[0]]['out_of_book']} out-of-book across "
         "the test speakers. B0 has a single hypothesis, so it has no top-3. SureSay never acts without a confirmation, "
-        "so its \"acted wrongly\" is 0 by construction; what it can do is show wrong cards, which the user declines.",
+        "so its \"acted wrongly\" is 0 by construction; what it can do is show wrong cards, which the user declines. "
+        "When it is unsure it asks again *and* offers its best guesses as \"maybe\" cards (only guesses scoring at "
+        "least 0.50, a floor fixed before measuring); a maybe card needs the same confirmation as any other.",
         "",
         "Per test speaker (top-1 / correct abstain):",
         "",
@@ -139,7 +146,9 @@ def intent_section(i: dict[str, Any], i2: dict[str, Any] | None) -> tuple[list[s
            "b1_abstain": test["b1"]["correct_abstain_pct"], "ss_false_abstain": test[ss]["false_abstain_pct"],
            "b1_wrong": test["b1"]["acted_without_asking_wrong_pct"], "b0_wrong": test["b0"]["acted_without_asking_wrong_pct"],
            "ctrl_b0": (ctrl or {}).get("b0", {}).get("top1_pct"), "ctrl_ss": (ctrl or {}).get(ss, {}).get("top1_pct"),
-           "worst": (worst[0], worst[1][ss]["top1_pct"], worst[1]["b1"]["top1_pct"], worst[1][ss]["false_abstain_pct"]),
+           "worst": (worst[0], worst[1][ss]["top1_pct"], worst[1]["b1"]["top1_pct"], worst[1][ss]["false_abstain_pct"],
+                     worst[1][ss].get("in_cards_with_maybe_pct")),
+           "ss_maybe": test[ss].get("in_cards_with_maybe_pct"), "ss_maybe_oob": test[ss].get("maybe_cards_on_out_of_book_pct"),
            "ss_name": names[ss]}
     return out, key
 
@@ -326,7 +335,7 @@ def filler_finding(c: dict[str, Any]) -> str | None:
 
 def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] | None = None,
                      tuning: dict[str, Any] | None = None) -> list[str]:
-    spk, ss_t1, b1_t1, fab = ik["worst"]
+    spk, ss_t1, b1_t1, fab, ss_maybe = ik["worst"]
     filler = filler_finding(c) if c else None
     bias_text = "See Tuning."
     if tuning and tuning.get("confirm_bias"):
@@ -337,12 +346,13 @@ def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] |
                      "transcribes confirmations without bias. Biasing that raises recall without false accepts is open.")
     extra = [f"6. {filler}"] if filler else []
     return ["## What does not work yet (published on purpose)", "",
-            f"1. **The most severe speakers lose recall to the abstain rule.** Worst test speaker: {spk}. SureSay "
-            f"recovers {f(ss_t1)} of their in-book phrases at top-1, against {f(b1_t1)} for B1, because it asks again "
-            f"on {f(fab)} of them. B1 gets its number by never abstaining, and it acted on a wrong phrase "
-            f"{f(ik['b1_wrong'])} of the time across test speakers; SureSay acted wrongly 0% of the time. The thresholds are "
-            "global, tuned on two dev speakers; per-user thresholds learned from the user's own confirmations are the "
-            "obvious next step, and this gap stays open until then.",
+            f"1. **The most severe speakers lose recall to the abstain rule, and maybe cards only partly win it back.** "
+            f"Worst test speaker: {spk}. SureSay's confident cards hold their phrase {f(ss_t1)} of the time at top-1, "
+            f"against {f(b1_t1)} for B1, because it asks again on {f(fab)} of them. Offering its best guesses as maybe "
+            f"cards while asking again brings that speaker to {f(ss_maybe)} in the cards ({f(ik['ss_maybe'])} over all test "
+            f"speakers), but maybe cards also appear on {f(ik['ss_maybe_oob'])} of out-of-book utterances, where the user has "
+            "to decline them. B1 never asks and acted on a wrong phrase "
+            f"{f(ik['b1_wrong'])} of the time; SureSay acted wrongly 0% of the time. Per-user thresholds are the next step.",
             f"2. **Strict confirmation costs retries.** On genuine yes/no/number answers from dysarthric speakers, SureSay "
             f"recovered {f(ck['ss_rec'])} (B0: {f(ck['b0_rec'])}) and asked {f(ck['ss_refused'])} of them to repeat. "
             "That is the price of the false-accept rate above; tap, keyboard and switch confirmation exist so a "
@@ -393,6 +403,7 @@ def main() -> None:
         "|---|---|---|---|---|---|",
         f"| Confirm heard right | false accepts | {f(ck['b0_fa'])} | — | **{f(ck['ss_fa'])}** | {ck['fa_counts'][2]} decisions, 6 test speakers |",
         f"| Meaning recovered | top-1 / top-3 | {f(ik['b0_top1'])} / — | {f(ik['b1_top1'])} / {f(ik['b1_top3'])} | {f(ik['ss_top1'])} / {f(ik['ss_top3'])} | 50-phrase books, 6 test speakers |",
+        f"| In the cards when unsure too | counting maybe cards | — | {f(ik['b1_top3'])} (acts without asking) | **{f(ik['ss_maybe'])}** | same |",
         f"| Abstains when unsure | correct \"say again\" | 0% | {f(ik['b1_abstain'])} | **{f(ik['ss_abstain'])}** | out-of-book utterances |",
         f"| Never acts on a guess | acted on a wrong phrase without asking | {f(ik['b0_wrong'])} | {f(ik['b1_wrong'])} | **0%** | in-book + out-of-book |",
         f"| Nothing without consent | unconfirmed changes | {sk['plain']} / {sk['plain_cases']} (no gate) | — | **{sk['ss']} / {sk['cases']}** | adversarial suite |",

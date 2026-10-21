@@ -59,8 +59,20 @@ def understand(app: SureSay, user_id: str, *, transcript: str | None = None, aud
     base = {"heard": heard.text, "asr": heard.engine, "ranker": ranked.engine, "timing": timing}
 
     if ranked.abstain or not ranked.candidates:
-        maybe = [{"text": c.text, "phrase": c.phrase} for c in ranked.candidates]
-        return {**base, "status": "ask_again", "reason": ranked.reason, "maybe": maybe, "say": ASK_AGAIN}
+        maybe_floor = getattr(getattr(app.ranker, "rule", None), "maybe_floor", 0.5)
+        weak = [c for c in ranked.candidates if c.action in catalog.WRITE_ACTIONS and c.confidence >= maybe_floor][:3]
+        maybe = [{"text": c.text, "phrase": c.phrase, "confidence": c.confidence} for c in ranked.candidates]
+        out = {**base, "status": "ask_again", "reason": ranked.reason, "maybe": maybe, "say": ASK_AGAIN}
+        if weak:
+            # Not sure: ask again, and offer the best guesses as "maybe" cards. They still need the user's own
+            # confirmation, so a wrong maybe is simply declined.
+            ps = app.gate.propose(user_id, [(c.action, c.args, c.text) for c in weak], origin="user_words",
+                                  context={"heard": heard.text, "asr": heard.engine, "ranker": ranked.engine,
+                                           "utterance_ref": audio_ref, "unsure": True,
+                                           "confidence": [c.confidence for c in weak]})
+            out.update(pending_id=ps.pending_id, stage=app.gate.public_view(ps)["stage"],
+                       say="I'm not sure I got that. Please say it again, or pick one if it's right.")
+        return out
 
     top = ranked.candidates[0]
     if top.action in catalog.READ_ACTIONS:

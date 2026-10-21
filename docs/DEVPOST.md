@@ -55,6 +55,7 @@ Held-out speakers from TORGO, a public dysarthric speech corpus. Thresholds were
 |---|---|---|---|---|---|
 | Confirm heard right | false accepts | 62.8% | — | **2.6%** | 430 decisions, 6 test speakers |
 | Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers |
+| In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **93.5%** | same |
 | Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances |
 | Never acts on a guess | acted on a wrong phrase without asking | 84.3% | 53.7% | **0%** | in-book + out-of-book |
 | Nothing without consent | unconfirmed changes | 35 / 35 (no gate) | — | **0 / 50** | adversarial suite |
@@ -68,7 +69,7 @@ SureSay column: SureSay (offline ranker); the Nova 2 Lite ranker is pending Bedr
 **What doesn't work yet, published on purpose** (full list in `eval/REPORT.md`):
 
 <!-- negatives:start -->
-1. **The most severe speakers lose recall to the abstain rule.** Worst test speaker: M04. SureSay recovers 40.0% of their in-book phrases at top-1, against 90.0% for B1, because it asks again on 60.0% of them. B1 gets its number by never abstaining, and it acted on a wrong phrase 53.7% of the time across test speakers; SureSay acted wrongly 0% of the time. The thresholds are global, tuned on two dev speakers; per-user thresholds learned from the user's own confirmations are the obvious next step, and this gap stays open until then.
+1. **The most severe speakers lose recall to the abstain rule, and maybe cards only partly win it back.** Worst test speaker: M04. SureSay's confident cards hold their phrase 40.0% of the time at top-1, against 90.0% for B1, because it asks again on 60.0% of them. Offering its best guesses as maybe cards while asking again brings that speaker to 85.0% in the cards (93.5% over all test speakers), but maybe cards also appear on 47.2% of out-of-book utterances, where the user has to decline them. B1 never asks and acted on a wrong phrase 53.7% of the time; SureSay acted wrongly 0% of the time. Per-user thresholds are the next step.
 2. **Strict confirmation costs retries.** On genuine yes/no/number answers from dysarthric speakers, SureSay recovered 83.3% (B0: 94.4%) and asked 8.6% of them to repeat. That is the price of the false-accept rate above; tap, keyboard and switch confirmation exist so a repeat is never a dead end.
 3. **Recogniser biasing did not help confirmations.** On dev speakers (none: 1 false accepts, 77.8% recovered, core: 1 false accepts, 77.8% recovered, full: 2 false accepts, 77.8% recovered), no setting beat leaving the recogniser unbiased, so SureSay transcribes confirmations without bias. Biasing that raises recall without false accepts is open.
 4. **The model arms are pending.** Bedrock (Nova 2 Lite) and AgentCore Memory/Runtime are blocked on this AWS account pending a support case (docs/FRICTION_LOG.md). The Nova ranker and the Nova-agent safety arms are implemented and tested against stubs, but no Nova number is reported until they run.
