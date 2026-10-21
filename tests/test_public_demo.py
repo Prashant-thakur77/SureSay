@@ -114,3 +114,43 @@ def test_agent_sessions_are_scoped_to_the_device(demo: Hub, monkeypatch: pytest.
     d = _guest(demo)
     demo.signed(d, "POST", "/device/turn", {"text": "fan on", "session_id": "alexa"})
     assert seen and seen[0].startswith(d.device_id) and seen[0] != "alexa"
+
+
+def _agent_fails(monkeypatch: pytest.MonkeyPatch, hub: Hub, exc: Exception) -> None:
+    hub.s.cfg.__dict__["agent_mode"] = "agent"
+
+    async def run(self: Any, *a: Any) -> str:
+        raise exc
+
+    monkeypatch.setattr(hubmod.AgentBridge, "run", run)
+
+
+def _tripped(hub: Hub) -> bool:
+    return bool((hub.s.store.get("agent_health", "agent") or {}).get("down_until"))
+
+
+def test_guest_turns_never_trip_the_shared_agent_breaker(demo: Hub, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Second review, finding 9: any guest could switch every user to direct mode for five minutes."""
+    _agent_fails(monkeypatch, demo, TimeoutError("slow"))
+    for _ in range(3):
+        g = _guest(demo)
+        out = demo.signed(g, "POST", "/device/turn", {"text": "fan on"}).json()
+        assert out["mode"] == "direct" and out["result"]["status"] == "choose"  # this turn still answered
+    assert not _tripped(demo)
+
+
+def test_a_service_error_for_a_real_user_trips_the_breaker(hub: Hub, monkeypatch: pytest.MonkeyPatch) -> None:
+    from botocore.exceptions import ClientError
+
+    _agent_fails(monkeypatch, hub, ClientError({"Error": {"Code": "ThrottlingException", "Message": "quota"}}, "Invoke"))
+    hub.say(hub.pair(), "fan on")
+    assert _tripped(hub)
+
+
+def test_one_odd_failure_for_a_real_user_does_not_trip_it_but_two_do(hub: Hub, monkeypatch: pytest.MonkeyPatch) -> None:
+    _agent_fails(monkeypatch, hub, ValueError("odd output"))
+    device = hub.pair()
+    hub.say(device, "fan on")
+    assert not _tripped(hub)
+    hub.say(device, "fan on")
+    assert _tripped(hub)

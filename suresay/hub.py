@@ -207,6 +207,27 @@ class AgentBridge:
         except Exception:
             logger.exception("could not share the agent breaker")
 
+    SERVICE_ERRORS = {"ThrottlingException", "ServiceQuotaExceededException", "ServiceUnavailableException",
+                      "InternalServerException", "AccessDeniedException", "ResourceNotFoundException",
+                      "ModelNotReadyException", "ModelTimeoutException"}
+
+    def failed(self, user_id: str, exc: BaseException) -> bool:
+        """An agent turn failed. Trip the shared breaker only when the agent itself is in trouble, never on a
+        guest's turn (anyone can make one), at once for a service error, else after two failures in a minute.
+        Returns whether it tripped."""
+        if user_id.startswith("guest-"):
+            return False
+        code = str(((getattr(exc, "response", None) or {}).get("Error") or {}).get("Code") or "")
+        status = getattr(getattr(exc, "response", None), "status_code", 0) if isinstance(exc, httpx.HTTPStatusError) else 0
+        if code in self.SERVICE_ERRORS or status >= 500:
+            self.trip()
+            return True
+        minute = int(time.time() // 60)
+        if self.s.store.add("quota", f"agent_fail:{minute}", 1, expires_at=float((minute + 1) * 60)) >= 2:
+            self.trip()
+            return True
+        return False
+
     def _shared_down(self) -> bool:
         now = time.time()
         if now - self._checked_at > 10:
@@ -401,8 +422,9 @@ def build_app(s: SureSay | None = None) -> Starlette:
             try:
                 reply = await bridge.run(device.user_id, session_id, text, audio_ref)
             except Exception as exc:
-                logger.warning("agent turn failed, answering directly for %ss: %s", bridge.BREAK_SECONDS, exc)
-                bridge.trip()
+                tripped = await anyio.to_thread.run_sync(bridge.failed, device.user_id, exc)
+                logger.warning("agent turn failed (%s), answering directly%s", exc,
+                               f" for {bridge.BREAK_SECONDS:.0f}s" if tripped else "")
                 mode = "direct"
         if mode == "direct":
             result = await anyio.to_thread.run_sync(
