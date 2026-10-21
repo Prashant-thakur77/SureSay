@@ -15,7 +15,28 @@ Getting it wrong is not the worst part. Acting on it is. A misheard command swit
 3. **You choose**: say "two", "the second one", "haan", "do number", or tap, press a key, or use a single switch. Risky actions (unlock, order, call) ask a second yes.
 4. **Only then does it happen**, and a consent receipt records who confirmed what, when and how.
 
-When the phrase is something to say to people rather than to a device ("I am thirsty"), SureSay speaks it aloud for you, clearly, once you've confirmed it.
+When the phrase is something to say to people rather than to a device ("I am thirsty"), SureSay speaks it aloud for you, clearly, once you've confirmed it. Around that core:
+
+- **Speak for me:** a board of everyday sentences.
+- **Teach:** add your own phrases. SureSay also learns from your confirmations, but never a phrase that already means something else.
+- **Timeline:** for carers, a record of every receipt, with "changes without you: 0".
+- **Maybe cards:** when it's unsure, it asks again and still offers its best guesses, confirm-only.
+- **Doorbell:** "Someone's at the door: Ravi, your carer" opens cards (let them in, which asks twice; reply at the door; or call). This one is simulated, since we have no doorbell account.
+- **Big-screen TV mode.**
+
+## Alexa+
+
+SureSay is a self-hosted MCP server built to the Alexa+ add-on requirements, and its web client is a working simulated Alexa+ experience.
+
+| Alexa+ asks for | SureSay |
+|---|---|
+| MCP spec 2025-11-25, Streamable HTTP, a remote URL | `/mcp` on AWS Lambda; negotiates 2025-11-25 (and 2026-07-28) |
+| Account linking: OAuth 2.1 code flow + PKCE S256, Protected Resource Metadata (RFC 9728), auth-server metadata, Bearer in the header, 401 without `WWW-Authenticate` | All implemented and tested (`suresay/oauth.py`, `tests/test_oauth.py`). Linking means entering your SureSay pairing code |
+| Visuals through MCP Apps | `understand` carries `_meta.ui.resourceUri = ui://suresay/cards.html`: the three cards render on an Echo Show or Fire TV, and that screen can pair as one of your devices, so a tap there is your own evidence |
+| An add-on package | `alexa_plus/addon-package/addon.json`, six icon sizes, a 600×900 carousel, `/privacy`, `/terms` |
+| Fast query responses (under 500 ms) | `home_status` and typed `understand` run in milliseconds; spoken `understand` is 870 ms p50 because it includes speech recognition |
+
+A linked Alexa+ client gets exactly the agent's powers: it can understand, read and propose, never confirm. Until Alexa+ developer access opens, `alexa_skill/` runs the same flow as a classic Alexa skill. There, Alexa is a paired device, and the user's spoken "the second one" goes back as signed evidence.
 
 ![Cards](img/cards.png)
 
@@ -90,7 +111,7 @@ Everything user-facing is new:
 
 ## Open source
 
-`confirm-gate-mcp` (MIT) is the gate on its own. `confirm-gate serve --upstream <any MCP server>` puts confirm-before-act, with an approval page, in front of any MCP server. Install it from the repository: `pip install "git+https://github.com/Prashant-thakur77/SureSay#subdirectory=packages/confirm-gate-mcp"`.
+[confirm-gate-mcp](https://github.com/Prashant-thakur77/confirm-gate-mcp) (MIT, its own repository with CI on Python 3.12 and 3.13) is the gate on its own. `confirm-gate serve --upstream <any MCP server>` puts confirm-before-act, with an approval page, in front of any MCP server. Install: `pip install "git+https://github.com/Prashant-thakur77/confirm-gate-mcp"`. Why it matters: as assistants gain the power to act, prompt injection becomes a way to act. A gate that keeps the confirmation secret away from the model turns "never act without the user" from a prompt into a property of the code, for any MCP server.
 
 ## What's next
 
