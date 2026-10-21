@@ -44,6 +44,22 @@ PRODUCTS: list[dict[str, Any]] = [
 ]
 
 
+VISITORS: dict[str, dict[str, Any]] = {
+    "ravi": {"id": "ravi", "name": "Ravi", "who": "your carer", "note": "Ravi, your carer, is at the front door with your shopping.",
+             "options": [("door_lock", {"locked": False}), ("doorbell_reply", {"text": "I'm coming, please wait."}),
+                         ("call_contact", {"contact_id": "ravi"})]},
+    "delivery": {"id": "delivery", "name": "A delivery driver", "who": "with a parcel",
+                 "note": "A delivery driver is at the door with a parcel.",
+                 "options": [("doorbell_reply", {"text": "Please leave it at the door. Thank you!"}),
+                             ("doorbell_reply", {"text": "Please wait a moment, I'm coming."}),
+                             ("door_lock", {"locked": False})]},
+    "unknown": {"id": "unknown", "name": "Someone you may not know", "who": "",
+                "note": "Someone you may not know is at the front door.",
+                "options": [("doorbell_reply", {"text": "Sorry, I can't come to the door right now."}),
+                            ("call_contact", {"contact_id": "ravi"}), ("door_lock", {"locked": True})]},
+}
+
+
 def fresh_home() -> dict[str, Any]:
     return {
         "devices": copy.deepcopy(DEVICES),
@@ -54,6 +70,7 @@ def fresh_home() -> dict[str, Any]:
         "messages": [],
         "changes": [],
         "version": 0,
+        "doorbell": {"replies": []},
     }
 
 
@@ -183,6 +200,14 @@ class Home:
             return {"added": product_id, "qty": q}
 
         return self._mutate(user_id, f"cart add {product_id} x{q}", go)
+
+    def door_reply(self, user_id: str, text: str) -> dict[str, Any]:
+        """Speak through the doorbell (simulated): recorded so the user and their carer can see what was said."""
+        def go(doc: dict[str, Any]) -> dict[str, Any]:
+            doc.setdefault("doorbell", {"replies": []})["replies"].append({"text": text[:200], "at": time.time()})
+            return {"said_at_door": text[:200]}
+
+        return self._mutate(user_id, "door reply", go)
 
     def cart_order(self, user_id: str, product_id: str | None = None, qty: int | None = None) -> dict[str, Any]:
         def go(doc: dict[str, Any]) -> dict[str, Any]:

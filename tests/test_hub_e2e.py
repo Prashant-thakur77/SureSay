@@ -296,3 +296,34 @@ def test_understand_carries_an_mcp_apps_ui_for_screens(hub: Hub) -> None:
     out = hub.http.post("/mcp", headers=h, json={"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {
         "name": "understand", "arguments": {"user_id": "demo", "transcript": "van on"}}}).json()["result"]
     assert out["structuredContent"]["status"] == "choose" and "nonce" not in _json.dumps(out)
+
+
+@pytest.mark.parametrize("visitor, first", [("ravi", "Unlock the front door"),
+                                            ("delivery", "Tell them at the door: “Please leave it at the door. Thank you!”"),
+                                            ("unknown", "Tell them at the door: “Sorry, I can't come to the door right now.”")])
+def test_a_doorbell_opens_cards_from_the_door_and_unlocking_asks_twice(hub: Hub, visitor: str, first: str) -> None:
+    device = hub.pair()
+    r = hub.signed(device, "POST", "/device/doorbell", {"visitor": visitor}).json()
+    p = r["pending"]
+    assert p["origin"] == "doorbell" and p["context"]["visitor"]["id"] == visitor
+    assert p["options"][0]["text"] == first
+    assert hub.s.home.status("demo")["front_door"] == "locked"
+    if visitor == "ravi":
+        ev = hub.tap(device, p, 1).json()
+        step = hub.signed(device, "POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]}).json()
+        assert step["status"] == "needs_final_yes"
+        assert hub.s.home.status("demo")["front_door"] == "locked"
+
+
+def test_a_reply_at_the_door_is_recorded_after_confirming(hub: Hub) -> None:
+    device = hub.pair()
+    p = hub.signed(device, "POST", "/device/doorbell", {"visitor": "delivery"}).json()["pending"]
+    ev = hub.tap(device, p, 1).json()
+    done = hub.signed(device, "POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]}).json()
+    assert done["status"] == "done" and done["result"]["said_at_door"].startswith("Please leave it")
+    assert hub.s.home.get("demo")["doorbell"]["replies"][-1]["text"].startswith("Please leave it")
+
+
+def test_an_unknown_visitor_kind_is_rejected(hub: Hub) -> None:
+    device = hub.pair()
+    assert hub.signed(device, "POST", "/device/doorbell", {"visitor": "burglar"}).status_code == 400

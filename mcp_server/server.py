@@ -124,6 +124,11 @@ def register_tools(app: SureSay) -> None:
         """Say a sentence out loud, clearly, for the user to the people around them."""
         return {"say": text}
 
+    @gs.write(risk=rk("doorbell_reply"), preview=pv("doorbell_reply"), pass_user=True)
+    def doorbell_reply(text: str, user_id: str) -> dict[str, Any]:
+        """Speak a short reply to whoever is at the front door, through the doorbell (simulated)."""
+        return home.door_reply(user_id, text)
+
     @gs.write(risk=rk("phrasebook_add"), preview=pv("phrasebook_add"), pass_user=True)
     def phrasebook_add(phrase: str, action: str, args: dict[str, Any], user_id: str) -> dict[str, Any]:
         """Teach SureSay one of the user's phrases and what it means (any action above, with its args)."""

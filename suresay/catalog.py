@@ -11,7 +11,7 @@ from typing import Any
 from .state import CONTACTS, DEVICES, PRODUCTS
 
 WRITE_ACTIONS = ("home_set", "ac_set", "door_lock", "call_contact", "message_contact", "cart_add", "cart_order",
-                 "say_for_me", "phrasebook_add")
+                 "say_for_me", "phrasebook_add", "doorbell_reply")
 READ_ACTIONS = ("home_status", "cart_view")
 
 _CONTACT_NAME = {c["id"]: c["name"].split(".")[0].split(" (")[0] for c in CONTACTS}
@@ -40,6 +40,8 @@ def preview(action: str, args: dict[str, Any]) -> str:
         return "Place the order for everything in the cart"
     if action == "say_for_me":
         return f"Say out loud: “{a['text']}”"
+    if action == "doorbell_reply":
+        return f"Tell them at the door: \u201c{a['text']}\u201d"
     if action == "phrasebook_add":
         return f"Remember: “{a['phrase']}” means {preview(a['action'], a['args']).lower()}"
     if action == "home_status":
@@ -90,7 +92,7 @@ def validate(action: str, args: Any) -> dict[str, Any] | None:
             if args["product_id"] not in _PRODUCT_NAME or not 1 <= q <= 20:
                 return None
             return {"product_id": args["product_id"], "qty": q}
-        if action == "say_for_me":
+        if action in ("say_for_me", "doorbell_reply"):
             text = str(args.get("text") or "").strip()
             return {"text": text[:300]} if text else None
         if action == "phrasebook_add":

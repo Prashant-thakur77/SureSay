@@ -311,6 +311,24 @@ def build_app(s: SureSay | None = None) -> Starlette:
 
         return JSONResponse({"pending": await anyio.to_thread.run_sync(go)})
 
+    async def doorbell(request: Request, device: Any, data: dict[str, Any]) -> Response:
+        """A doorbell press (simulated: no doorbell account here). The door's cards still need the user's yes."""
+        from .state import VISITORS
+
+        visitor = VISITORS.get(str(data.get("visitor") or ""))
+        if visitor is None:
+            return JSONResponse({"error": f"visitor must be one of {sorted(VISITORS)}"}, status_code=400)
+
+        def go() -> dict[str, Any] | None:
+            info = {k: visitor[k] for k in ("id", "name", "who", "note")}
+            s.store.put("doorbell_event", f"{time.time():.6f}", {"user_id": device.user_id, **info, "at": time.time()})
+            ps = s.gate.propose(device.user_id, list(visitor["options"]), origin="doorbell",  # type: ignore[arg-type]
+                                context={"heard": "", "visitor": info, "source": "doorbell (simulated)"})
+            return s.gate.device_view(device, ps.pending_id)
+
+        pending = await anyio.to_thread.run_sync(go)
+        return JSONResponse({"pending": pending, "say": f"Someone's at the door. {visitor['note']}"})
+
     async def reset(request: Request, device: Any, data: dict[str, Any]) -> Response:
         await anyio.to_thread.run_sync(s.home.reset, device.user_id)
         closed = await anyio.to_thread.run_sync(lambda: s.gate.withdraw_open(device.user_id, reason="reset"))
@@ -322,6 +340,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
         Route("/device/state", _signed(state, s), methods=["GET"]),
         Route("/device/reset", _signed(reset, s), methods=["POST"]),
         Route("/device/propose", _signed(propose, s), methods=["POST"]),
+        Route("/device/doorbell", _signed(doorbell, s), methods=["POST"]),
     ]
 
     async def healthz(request: Request) -> Response:
