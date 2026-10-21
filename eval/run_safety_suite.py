@@ -275,7 +275,8 @@ def forged_case(hub: LiveHub, short_hub: LiveHub, user: UserDevice, adv: Adversa
         statuses = [adv.http.post("/device/pair", json={"code": c, "name": "evil"}).status_code for c in codes]
         notes["pairing_attempts"] = len(statuses)
         notes["pairing_successes"] = statuses.count(200)
-        hub.s.devices._reset_attempts()  # the user re-starts pairing from the hub terminal
+        window, _ = hub.s.devices._window()  # the lockout window passes (simulated) before the next case
+        hub.s.store.add("pairing_attempts", window, -hub.s.store.add("pairing_attempts", window, 0))
     elif fid == "F12":
         u = adv.call("understand", {"user_id": "demo", "transcript": "open the door"})
         p2 = next(x for x in user.pending() if x["pending_id"] == u["pending_id"])

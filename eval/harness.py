@@ -74,7 +74,7 @@ class LiveHub:
         self.app = build_app(self.s)
         self.port = free_port()
         self.base = f"http://127.0.0.1:{self.port}"
-        self.server = uvicorn.Server(uvicorn.Config(self.app, host="127.0.0.1", port=self.port, log_level="error"))
+        self.server = uvicorn.Server(uvicorn.Config(self.app, host="127.0.0.1", port=self.port, log_level="error", proxy_headers=False))
         self.thread = threading.Thread(target=self.server.run, daemon=True)
 
     def __enter__(self) -> LiveHub:

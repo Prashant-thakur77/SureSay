@@ -44,7 +44,16 @@ logger = logging.getLogger("suresay.hub")
 # (eval/tune_confirm.py): biasing toward "yes/one/haan..." recovered every genuine answer but also pulled
 # ordinary words toward them, and the rule ranks false accepts first. See eval/REPORT.md.
 EVIDENCE_WORDS: list[str] = []
-GUEST_VOICE_PER_DAY = 60  # public demo homes: speech recognition is paid per request, typing is free
+# Public demo limits. Each is an atomic counter in the store, so every Lambda instance shares it.
+GUEST_VOICE_PER_DAY = 60  # per demo home: speech recognition is paid per request
+GUEST_SPEAK_PER_DAY = 60  # per demo home: read-aloud is paid per character
+GUEST_SPEAK_CHARS = 240
+GUEST_TURNS_PER_DAY = 300  # per demo home: typed turns (they reach the model in agent mode)
+DEMO_VOICE_PER_DAY = 250  # all demo homes together: the spend ceiling for a day of public traffic
+DEMO_SPEAK_PER_DAY = 400
+DEMO_TURNS_PER_DAY = 4000
+DEMO_GUESTS_PER_DAY = 500
+TRY_PER_HOUR = 20  # new demo homes per source address
 MAX_AUDIO_BYTES = 2_000_000  # about a minute of 16 kHz mono speech: far more than any turn or answer
 MAX_BODY_BYTES = 4_000_000
 
@@ -285,6 +294,37 @@ def _doc_page(title: str, paras: list[str]) -> str:
             f'padding:0 20px}}</style></head><body><main><h1>SureSay: {title}</h1>{body}</main></body></html>')
 
 
+def client_ip(request: Request) -> str:
+    """The caller's address as AWS saw it. On Lambda the function URL's request context (set by the web adapter)
+    is authoritative, then the rightmost X-Forwarded-For entry (the one AWS appended). Off Lambda, the socket."""
+    if os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+        try:
+            ctx = json.loads(request.headers.get("x-amzn-request-context") or "{}")
+            ip = (ctx.get("http") or {}).get("sourceIp") or (ctx.get("identity") or {}).get("sourceIp")
+            if ip:
+                return str(ip)
+        except (ValueError, AttributeError):
+            pass
+        xff = [x.strip() for x in (request.headers.get("x-forwarded-for") or "").split(",") if x.strip()]
+        if xff:
+            return xff[-1]
+    return request.client.host if request.client else "?"
+
+
+class Quota:
+    """Fixed-window counters in the store: ``take`` is one atomic increment (DynamoDB ``ADD``)."""
+
+    def __init__(self, store: Any) -> None:
+        self.store = store
+
+    def take(self, name: str, key: str, limit: int, window: int = 86400) -> bool:
+        w = int(time.time() // window)
+        return self.store.add("quota", f"{name}:{key}:{w}", 1, expires_at=float((w + 1) * window)) <= limit
+
+
+DEMO_FULL = "the public demo has reached today's limit; please try again tomorrow"
+
+
 def build_app(s: SureSay | None = None) -> Starlette:
     s = s or SureSay()
     bridge = AgentBridge(s)
@@ -304,16 +344,24 @@ def build_app(s: SureSay | None = None) -> Starlette:
                                 if lang != "en-US" and s.asr.name.startswith("transcribe") else s.asr)
         return evidence_asr[0].transcribe(audio, vocabulary=EVIDENCE_WORDS or None).text
 
-    def guest_voice_ok(user_id: str) -> bool:
-        """Public demo homes get GUEST_VOICE_PER_DAY recognised clips a day (turns and spoken answers together)."""
+    quota = Quota(s.store)
+
+    def guest_take(user_id: str, kind: str) -> str | None:
+        """None if a demo home may do one more *kind* ("voice", "speak", "turn") today, else why not."""
         if not user_id.startswith("guest-"):
-            return True
-        key = f"{user_id}:{time.strftime('%Y-%m-%d')}"
-        used = (s.store.get("guest_usage", key) or {}).get("voice", 0)
-        if used >= GUEST_VOICE_PER_DAY:
-            return False
-        s.store.put("guest_usage", key, {"voice": used + 1, "expires_at": time.time() + 86400})
-        return True
+            return None
+        per_guest = {"voice": GUEST_VOICE_PER_DAY, "speak": GUEST_SPEAK_PER_DAY, "turn": GUEST_TURNS_PER_DAY}[kind]
+        overall = {"voice": DEMO_VOICE_PER_DAY, "speak": DEMO_SPEAK_PER_DAY, "turn": DEMO_TURNS_PER_DAY}[kind]
+        if not quota.take(f"guest_{kind}", user_id, per_guest):
+            return {"voice": "this demo home has used today's voice; please tap or type instead",
+                    "speak": "this demo home has used today's read-aloud",
+                    "turn": "this demo home has used today's turns"}[kind]
+        if not quota.take(f"demo_{kind}", "all", overall):
+            return DEMO_FULL
+        return None
+
+    def guest_voice_ok(user_id: str) -> bool:
+        return guest_take(user_id, "voice") is None
 
     def evidence_sink(audio: bytes, device: Any, pending_id: str) -> str:
         if not guest_voice_ok(device.user_id):
@@ -329,20 +377,23 @@ def build_app(s: SureSay | None = None) -> Starlette:
         """One user turn from the device: typed text or recorded audio."""
         text = str(data.get("text") or "").strip()[:500] or None
         audio_ref = None
+        audio = b""
         if len(str(data.get("audio_b64") or "")) > (MAX_AUDIO_BYTES * 4) // 3 + 4:
             return JSONResponse({"error": "audio is too long"}, status_code=413)
-        if data.get("audio_b64") and not guest_voice_ok(device.user_id):
-            return JSONResponse({"error": "this demo home has used today's voice turns; please type instead"},
-                                status_code=429)
         if data.get("audio_b64"):
             try:
                 audio = base64.b64decode(str(data["audio_b64"]), validate=True)
-            except binascii.Error:
+            except ValueError:  # binascii.Error, and non-ASCII input
                 return JSONResponse({"error": "audio_b64 is not base64"}, status_code=400)
-            audio_ref = await anyio.to_thread.run_sync(lambda: s.media.put("utterance", audio))
-        if not text and not audio_ref:
+        if not text and not audio:
             return JSONResponse({"error": "say or type something"}, status_code=400)
-        session_id = str(data.get("session_id") or device.device_id)[:64]
+        why = await anyio.to_thread.run_sync(guest_take, device.user_id, "voice" if audio else "turn")
+        if why:
+            return JSONResponse({"error": why}, status_code=429)
+        if audio:
+            audio_ref = await anyio.to_thread.run_sync(lambda: s.media.put("utterance", audio))
+        # The agent session belongs to this device: a client may name a conversation, never join another device's.
+        session_id = f"{device.device_id}-{str(data.get('session_id') or 'main')[:24]}"
         t0 = time.perf_counter()
         mode = await anyio.to_thread.run_sync(bridge.mode)
         result: dict[str, Any] | None = None
@@ -369,6 +420,11 @@ def build_app(s: SureSay | None = None) -> Starlette:
 
     async def speak(request: Request, device: Any, data: dict[str, Any]) -> Response:
         text = str(data.get("text") or "")
+        if device.user_id.startswith("guest-"):
+            text = " ".join(text.split())[:GUEST_SPEAK_CHARS]
+            why = await anyio.to_thread.run_sync(guest_take, device.user_id, "speak")
+            if why:
+                return JSONResponse({"error": why}, status_code=429)
         try:
             audio = await anyio.to_thread.run_sync(s.speaker.synth, text)
         except Exception as exc:
@@ -444,30 +500,28 @@ def build_app(s: SureSay | None = None) -> Starlette:
         Route("/device/doorbell", _signed(doorbell, s), methods=["POST"]),
     ]
 
-    tries: dict[str, list[float]] = {}
-
     async def try_demo(request: Request) -> Response:
-        """Public demo (SURESAY_PUBLIC_DEMO=1): a private sandbox home per visitor, paired at once.
+        """Public demo (SURESAY_PUBLIC_DEMO=1): a private sandbox home per visitor, with its own device at once.
 
-        Same gate, same rules; a guest can only ever touch their own simulated home. Rate-limited per address.
+        Same gate, same rules; a guest can only ever touch their own simulated home. The device is issued directly
+        (no pairing code exists for a guest), new homes are limited per source address and per day.
         """
         if not s.cfg.public_demo:
             return JSONResponse({"error": "not found"}, status_code=404)
-        ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "?")).split(",")[0]
-        now = time.time()
-        recent = [t for t in tries.get(ip, []) if now - t < 3600]
-        if len(recent) >= 20:
-            return JSONResponse({"error": "too many demo homes from here; try again later"}, status_code=429)
-        tries[ip] = [*recent, now]
 
-        def go() -> dict[str, Any]:
+        def go() -> tuple[int, dict[str, Any]]:
+            if not quota.take("try", client_ip(request), TRY_PER_HOUR, window=3600):
+                return 429, {"error": "too many demo homes from here; try again later"}
+            if not quota.take("demo_guest", "all", DEMO_GUESTS_PER_DAY):
+                return 429, {"error": DEMO_FULL}
             user = "guest-" + uuid.uuid4().hex[:10]
-            device = s.devices.pair(s.devices.start_pairing(user), name="Demo visitor")
+            device = s.devices.issue(user, name="Demo visitor")
             s.home.reset(user)
-            return {"device_id": device.device_id, "user_id": device.user_id, "key": device.key, "name": device.name,
-                    "demo": True}
+            return 200, {"device_id": device.device_id, "user_id": device.user_id, "key": device.key,
+                         "name": device.name, "demo": True}
 
-        return JSONResponse(await anyio.to_thread.run_sync(go))
+        code, body = await anyio.to_thread.run_sync(go)
+        return JSONResponse(body, status_code=code)
 
     async def healthz(request: Request) -> Response:
         return JSONResponse({"ok": True})
@@ -520,7 +574,7 @@ def main() -> None:
     port = int(os.environ.get("PORT", "9000"))
     print(f"\n  SureSay hub on http://127.0.0.1:{port}  (MCP at /mcp)\n"
           f"  Pairing code for user '{s.cfg.default_user}': {code}   (valid 10 minutes)\n", flush=True)
-    uvicorn.run(app, host=os.environ.get("HOST", "127.0.0.1"), port=port, log_level="info")
+    uvicorn.run(app, host=os.environ.get("HOST", "127.0.0.1"), port=port, log_level="info", proxy_headers=False)
 
 
 if __name__ == "__main__":

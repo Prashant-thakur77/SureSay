@@ -16,7 +16,7 @@ if [ -d "$ROOT/web/dist" ]; then mkdir -p "$OUT/web" && cp -r "$ROOT/web/dist" "
 cat > "$OUT/run.sh" <<'RUN'
 #!/bin/bash
 export PYTHONPATH="/var/task:${PYTHONPATH:-}"
-exec python -m uvicorn suresay.lambda_app:app --host 0.0.0.0 --port "${PORT:-8080}" --log-level warning
+exec python -m uvicorn suresay.lambda_app:app --host 0.0.0.0 --port "${PORT:-8080}" --log-level warning --no-proxy-headers
 RUN
 chmod +x "$OUT/run.sh"
 find "$OUT" -name "__pycache__" -type d -prune -exec rm -rf {} +
