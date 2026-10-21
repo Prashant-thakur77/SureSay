@@ -25,7 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from eval.asr_cache import prepare_vocabularies, transcribe_all  # noqa: E402
 from eval.common import EVAL, SPLIT, pct, write_result  # noqa: E402
 from eval.run_intent_eval import BOOK_SIZE, tuned_rule  # noqa: E402
-from suresay.app import NEGATIONS  # noqa: E402
+from suresay.catalog import has_negation  # noqa: E402
 from suresay.phrasebook import entry, vocabulary  # noqa: E402
 from suresay.rank import FuzzyRanker, norm  # noqa: E402
 
@@ -81,7 +81,7 @@ def main() -> None:
                          entry_id=f"ph_learned_{i:02d}")
                    for i, (a, _b) in enumerate(t["pairs"]) if heard[a["wav"]]["text"].strip()
                    and norm(heard[a["wav"]]["text"]) not in by_norm
-                   and not NEGATIONS & set(heard[a["wav"]]["text"].lower().replace("'", "").split())]
+                   and not has_negation(heard[a["wav"]]["text"])]
         for a, b in t["pairs"]:
             h = heard[b["wav"]]
             hyps = [h["text"], *h.get("alternatives", [])]

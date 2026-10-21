@@ -25,7 +25,8 @@ from .state import Home
 
 logger = logging.getLogger(__name__)
 
-NEGATIONS = {"not", "dont", "never", "no", "nahi", "nahin", "mat", "na", "without", "cant", "wont", "isnt", "nor"}
+from .catalog import NEGATIONS, has_negation  # noqa: E402,F401 (re-exported for eval/run_adapt_eval.py)
+
 LEARN_CONFLICT = 0.75  # a heard phrase this close to a phrase with another meaning is never learned
 
 current_user: contextvars.ContextVar[str] = contextvars.ContextVar("suresay_user", default="")
@@ -210,7 +211,7 @@ class SureSay:
             option = doc["options"][int(doc.get("option") or 1) - 1]
             if not heard or option["action"] == "phrasebook_add" or option.get("risk") == "high":
                 return
-            if NEGATIONS & set(heard.lower().replace("'", "").split()):
+            if has_negation(heard):
                 return
             from . import catalog
             from .rank import norm, similarity

@@ -219,10 +219,12 @@ def test_typed_words_teach_nothing(hub: Hub) -> None:
 
 
 def test_a_phrase_with_a_negation_is_never_learned(hub: Hub) -> None:
+    """Negated commands get no cards at all; a sentence to say aloud may hold one, and is still never learned."""
     device = hub.pair()
-    out = _spoken(hub, device, "van awn dont")
-    assert _confirm_text(hub, device, out, out["result"]["candidates"][0]["text"])["status"] == "done"
-    assert not any("dont" in e["phrase"] for e in hub.s.phrasebook.list("demo"))
+    hub.s.phrasebook.add("demo", "i do not feel well", "say_for_me", {"text": "I do not feel well."})
+    out = _spoken(hub, device, "i dont feel wel")
+    assert _confirm_text(hub, device, out, "Say out loud: “I do not feel well.”")["status"] == "done"
+    assert not any(e["phrase"] == "i dont feel wel" for e in hub.s.phrasebook.list("demo"))
 
 
 def test_high_risk_choices_are_never_learned(hub: Hub) -> None:
@@ -502,3 +504,21 @@ def test_the_agent_breaker_is_shared_across_hub_instances(hub: Hub) -> None:
     a._mode = b._mode = "agent"
     a.trip()
     assert b.mode() == "direct"  # a second instance (another Lambda container) sees it through the store
+
+
+@pytest.mark.parametrize("said", ["don't unlock the door", "do not open the door", "no don't call mum",
+                                  "never order milk", "dont lock the door", "nahi fan on karo"])
+def test_a_negated_command_offers_no_cards(hub: Hub, said: str) -> None:
+    """"Don't unlock the door" used to put "Unlock the front door" first. A negated command changes nothing."""
+    device = hub.pair()
+    out = hub.say(device, said)
+    assert out["result"]["status"] == "ask_again" and out["result"].get("reason") == "negation"
+    assert "nothing" in out["reply"].lower()
+    assert out["pending"] == []
+
+
+def test_negations_inside_a_sentence_to_say_are_kept(hub: Hub) -> None:
+    device = hub.pair()
+    hub.s.phrasebook.add("demo", "i do not feel well", "say_for_me", {"text": "I do not feel well."})
+    out = hub.say(device, "i do not feel well")
+    assert out["result"]["status"] == "choose" and "I do not feel well" in out["result"]["candidates"][0]["text"]

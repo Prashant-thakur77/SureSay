@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 CONFIRM_WORDS = ["yes", "no", "one", "two", "three", "cancel", "haan", "nahin"]
 
 ASK_AGAIN = "Sorry, I didn't catch that. Please say it again, or type it."
+NEGATED = "I heard “{word}”, so nothing will change. Tell me what you'd like instead."
 
 
 def spoken_choices(options: list[dict[str, Any]], stage: str) -> str:
@@ -62,6 +63,13 @@ def understand(app: SureSay, user_id: str, *, transcript: str | None = None, aud
     app.usage(asr_seconds=heard.audio_seconds if heard.engine.startswith("transcribe") else 0.0,
               **ranked.usage)
     base = {"heard": heard.text, "asr": heard.engine, "ranker": ranked.engine, "timing": timing}
+
+    # "Don't unlock the door" sounds like "unlock the door". A negated command changes nothing and offers no cards;
+    # inside a sentence to say aloud, a negation is just part of the sentence.
+    if catalog.has_negation(heard.text) and (not ranked.candidates or ranked.candidates[0].action != "say_for_me"):
+        word = next(w for w in heard.text.split() if catalog.has_negation(w))
+        return {**base, "status": "ask_again", "reason": "negation", "maybe": [],
+                "say": NEGATED.format(word=word.strip(".,!?"))}
 
     if ranked.abstain or not ranked.candidates:
         maybe_floor = getattr(getattr(app.ranker, "rule", None), "maybe_floor", 0.5)

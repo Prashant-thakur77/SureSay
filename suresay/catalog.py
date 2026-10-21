@@ -6,9 +6,18 @@ A model that invents an action or an argument has its candidate dropped.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from .state import CONTACTS, DEVICES, PRODUCTS
+
+# Words that turn a command into its refusal ("don't unlock the door"). English and Hinglish.
+NEGATIONS = frozenset({"not", "dont", "never", "no", "nahi", "nahin", "mat", "na", "without", "cant", "wont", "isnt",
+                       "nor", "doesnt", "shouldnt"})
+
+
+def has_negation(text: str) -> bool:
+    return bool(NEGATIONS & set(re.sub(r"[^a-z\s]", " ", (text or "").lower().replace("'", "").replace("’", "")).split()))
 
 WRITE_ACTIONS = ("home_set", "ac_set", "door_lock", "call_contact", "message_contact", "cart_add", "cart_order",
                  "say_for_me", "phrasebook_add", "doorbell_reply")
