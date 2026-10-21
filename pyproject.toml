@@ -25,6 +25,7 @@ dependencies = [
 
 [project.optional-dependencies]
 whisper = ["faster-whisper>=1.1"]
+nova-sonic = ["aws-sdk-bedrock-runtime>=0.12", "smithy-http[awscrt]>=0.6"]  # Amazon Nova 2 Sonic as a recogniser
 dev = ["pytest>=8", "pytest-asyncio>=0.24", "moto[dynamodb,s3]>=5", "ruff>=0.6"]
 
 [project.scripts]

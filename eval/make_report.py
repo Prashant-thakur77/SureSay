@@ -276,22 +276,27 @@ def adapt_section(a: dict[str, Any]) -> list[str]:
     return out
 
 
+OTHER_RECOGNISERS = (("whisper/run1", "a local recogniser (faster-whisper, CPU)"),
+                     ("novasonic/run1", "Amazon Nova 2 Sonic, a speech-to-speech model used as a recogniser"))
+
+
 def asr_section(c: dict[str, Any], i: dict[str, Any]) -> list[str]:
-    wc, wi = read_result("confirm", "whisper/run1"), read_result("intent", "whisper/run1")
-    if not (wc and wi):
+    others = [(read_result("confirm", run), read_result("intent", run), what) for run, what in OTHER_RECOGNISERS]
+    others = [o for o in others if o[0] and o[1]]
+    if not others:
         return []
     rows = []
-    for label, conf, intent in ((c["asr_engine"], c, i), (wc["asr_engine"], wc, wi)):
+    for label, conf, intent in ((c["asr_engine"], c, i), *((wc["asr_engine"], wc, wi) for wc, wi, _ in others)):
         b0c, ssc = conf["summary"]["b0"]["test"], conf["summary"]["suresay"]["test"]
         gen = conf["summary"]["suresay"]["test_confirm_words_only"]
         it = intent["summary"]["test"]
         rows.append(f"| `{label}` | {f(b0c['false_accept_pct'])} | {f(ssc['false_accept_pct'])} | "
                     f"{f(gen['true_accepts_recovered_pct'])} | {f(it['b0']['top1_pct'])} | {f(it['b1']['top1_pct'])} | "
                     f"{f(it['ss_fuzzy']['top1_pct'])} | {f(it['ss_fuzzy']['correct_abstain_pct'])} |")
-    return ["## The same claims with a second recogniser", "",
-            "Everything above uses Amazon Transcribe. The same pipeline was also run with a local recogniser "
-            "(faster-whisper, CPU), each with its own dev-only tuning, to show the gate's effect does not depend on "
-            "one recogniser. Test speakers:", "",
+    also = "; ".join(what for _, _, what in others)
+    return ["## The same claims with other recognisers", "",
+            f"Everything above uses Amazon Transcribe. The same pipeline was also run with {also}, each with its own "
+            "dev-only tuning, to show the gate's effect does not depend on one recogniser. Test speakers:", "",
             "| Recogniser | false accepts B0 | false accepts SureSay | genuine answers recovered (SureSay) | "
             "top-1 B0 | top-1 B1 | top-1 SureSay | correct \"say again\" (SureSay) |",
             "|---|---|---|---|---|---|---|---|", *rows]

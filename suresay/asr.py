@@ -14,6 +14,7 @@ converted to 16 kHz mono PCM16 first.
 from __future__ import annotations
 
 import asyncio
+import base64
 import hashlib
 import io
 import json
@@ -298,6 +299,140 @@ class TranscribeBatchAsr:
                      ms=(time.perf_counter() - t0) * 1000, audio_seconds=len(samples) / SAMPLE_RATE)
 
 
+class _SonicStream:
+    """The Bedrock bidirectional stream, reduced to send(event) / receive() -> bytes / close()."""
+
+    def __init__(self, stream: Any) -> None:
+        self._stream = stream
+        self._reader: Any = None
+
+    async def send(self, event: dict[str, Any]) -> None:
+        from aws_sdk_bedrock_runtime.models import (
+            BidirectionalInputPayloadPart,
+            InvokeModelWithBidirectionalStreamInputChunk,
+        )
+
+        await self._stream.input_stream.send(InvokeModelWithBidirectionalStreamInputChunk(
+            value=BidirectionalInputPayloadPart(bytes_=json.dumps({"event": event}).encode())))
+
+    async def receive(self) -> bytes | None:
+        if self._reader is None:
+            self._reader = (await self._stream.await_output())[1]
+        res = await self._reader.receive()
+        value = getattr(res, "value", None)
+        return getattr(value, "bytes_", None)
+
+    async def close(self) -> None:
+        await self._stream.input_stream.close()
+
+
+class NovaSonicAsr:
+    """Amazon Nova 2 Sonic, a speech-to-speech model, used as a recogniser.
+
+    The clip is streamed as the user's turn, followed by silence so Sonic hears the turn end; the user's words come
+    back as the USER text of the stream. As soon as Sonic starts its own reply the stream is closed, so no reply is
+    generated and only input tokens are billed (about 220 speech tokens for a short answer). No custom vocabulary.
+    Needs the ``nova-sonic`` extra (``aws-sdk-bedrock-runtime``, with the CRT transport for duplex streaming).
+    """
+
+    name = "nova-2-sonic"
+
+    def __init__(self, *, region: str = "us-east-1", model_id: str = "amazon.nova-2-sonic-v1:0",
+                 connect: Any = None, pace: float = 4.0, silence_seconds: float = 1.5, timeout: float = 15.0) -> None:
+        self.region = region
+        self.model_id = model_id
+        self._connect = connect or self._open
+        self.pace = pace  # times faster than real time; 0 sends as fast as possible
+        self.silence_seconds = silence_seconds
+        self.timeout = timeout
+        self.last_usage: dict[str, int] = {}
+
+    def transcribe(self, audio: bytes, *, vocabulary: list[str] | None = None, user_id: str = "") -> Heard:
+        t0 = time.perf_counter()
+        samples = to_pcm16k(audio)
+        pcm = pcm16_bytes(samples) + b"\x00\x00" * int(SAMPLE_RATE * self.silence_seconds)
+        text = _run(self._stream(pcm))
+        return Heard(text=text, engine=self.name, ms=(time.perf_counter() - t0) * 1000,
+                     audio_seconds=len(samples) / SAMPLE_RATE)
+
+    async def _open(self) -> _SonicStream:
+        import boto3
+        from aws_sdk_bedrock_runtime.client import (
+            AsyncBedrockRuntimeClient,
+            InvokeModelWithBidirectionalStreamOperationInput,
+        )
+        from aws_sdk_bedrock_runtime.config import AsyncBedrockRuntimeConfig
+        from smithy_http.aio.crt import AWSCRTHTTPClient
+
+        creds = boto3.Session().get_credentials().get_frozen_credentials()
+        cfg = await AsyncBedrockRuntimeConfig.resolve(
+            region=self.region, aws_access_key_id=creds.access_key, aws_secret_access_key=creds.secret_key,
+            aws_session_token=creds.token, transport=AWSCRTHTTPClient())
+        client = AsyncBedrockRuntimeClient(config=cfg)
+        stream = await client.invoke_model_with_bidirectional_stream(
+            InvokeModelWithBidirectionalStreamOperationInput(model_id=self.model_id))
+        return _SonicStream(stream)
+
+    async def _stream(self, pcm: bytes) -> str:
+        import uuid
+
+        s = await self._connect()
+        prompt, system, user = (str(uuid.uuid4()) for _ in range(3))
+        await s.send({"sessionStart": {"inferenceConfiguration": {"maxTokens": 64, "topP": 0.9, "temperature": 0.0}}})
+        await s.send({"promptStart": {"promptName": prompt, "textOutputConfiguration": {"mediaType": "text/plain"},
+                                      "audioOutputConfiguration": {"mediaType": "audio/lpcm", "sampleRateHertz": 24000,
+                                                                   "sampleSizeBits": 16, "channelCount": 1,
+                                                                   "voiceId": "matthew", "encoding": "base64",
+                                                                   "audioType": "SPEECH"}}})
+        await s.send({"contentStart": {"promptName": prompt, "contentName": system, "type": "TEXT", "interactive": False,
+                                       "role": "SYSTEM", "textInputConfiguration": {"mediaType": "text/plain"}}})
+        await s.send({"textInput": {"promptName": prompt, "contentName": system,
+                                    "content": "You are listening. Reply with one word: okay."}})
+        await s.send({"contentEnd": {"promptName": prompt, "contentName": system}})
+        await s.send({"contentStart": {"promptName": prompt, "contentName": user, "type": "AUDIO", "interactive": True,
+                                       "role": "USER", "audioInputConfiguration": {
+                                           "mediaType": "audio/lpcm", "sampleRateHertz": SAMPLE_RATE, "sampleSizeBits": 16,
+                                           "channelCount": 1, "audioType": "SPEECH", "encoding": "base64"}}})
+        chunk = 1024  # 32 ms of audio
+        for i in range(0, len(pcm), chunk):
+            await s.send({"audioInput": {"promptName": prompt, "contentName": user,
+                                         "content": base64.b64encode(pcm[i:i + chunk]).decode()}})
+            if self.pace:
+                await asyncio.sleep(chunk / 2 / SAMPLE_RATE / self.pace)
+        words: list[str] = []
+        try:
+            async with asyncio.timeout(self.timeout):
+                while True:
+                    raw = await s.receive()
+                    if raw is None:
+                        break
+                    event = json.loads(raw).get("event", {})
+                    kind = next(iter(event), "")
+                    body = event.get(kind) or {}
+                    if kind == "usageEvent":
+                        total = (body.get("details") or {}).get("total", {}).get("input", {})
+                        self.last_usage = {"speech_tokens": int(total.get("speechTokens", 0)),
+                                           "text_tokens": int(total.get("textTokens", 0))}
+                    elif kind == "textOutput" and body.get("role") == "USER":
+                        words.append(str(body.get("content", "")).strip())
+                    elif kind == "contentStart" and body.get("role") == "ASSISTANT":
+                        break  # the user's turn is over; never let it reply
+        except TimeoutError:
+            logger.info("Nova Sonic: no transcript within %.0f s", self.timeout)
+        finally:
+            for event in ({"contentEnd": {"promptName": prompt, "contentName": user}},
+                          {"promptEnd": {"promptName": prompt}}, {"sessionEnd": {}}):
+                try:
+                    await s.send(event)
+                except Exception:  # the service may already have closed its side
+                    break
+            try:
+                await s.close()
+            except Exception:
+                pass
+        return " ".join(w for w in words if w).strip()
+
+
 def _run(coro: Any) -> Any:
     try:
         asyncio.get_running_loop()
@@ -332,6 +467,8 @@ def make_asr(kind: str = "auto", *, region: str = "us-east-1", language: str = "
         return TextAsr()
     if kind == "whisper":
         return WhisperAsr(whisper_model)
+    if kind == "nova-sonic":
+        return NovaSonicAsr(region=region)
     if kind in ("transcribe", "auto"):
         if kind == "transcribe" or transcribe_available(region):
             import boto3
