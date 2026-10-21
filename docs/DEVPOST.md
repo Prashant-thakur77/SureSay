@@ -65,7 +65,9 @@ A prompt injection can make the agent *ask*. It can never make anything *happen*
 | Polly | Reads the cards aloud; speaks confirmed sentences for the user |
 | DynamoDB | The gate ledger with conditional one-time writes; home state |
 | S3 | Private, expiring utterance and evidence audio |
-| Lambda | The hub (MCP + device channel + web client) behind a function URL |
+| Lambda | The hub (MCP + device channel + web client) behind a function URL; the Alexa skill (paired as the user's voice device, about 160 ms warm) |
+| CloudWatch | Safety metrics (confirmed, refused, cancelled by caller kind) and latency through Embedded Metric Format, on a "SureSay" dashboard |
+| SNS | Opt-in carer alerts when the user confirms a high-risk action |
 
 The MCP server is self-hosted, on spec 2025-11-25 over Streamable HTTP, and both the agent and the web client call it at runtime. The web client confirms through the MCP TypeScript SDK.
 
@@ -104,16 +106,25 @@ SureSay column: SureSay (offline ranker); the Nova 2 Lite ranker is pending Bedr
 
 Everything user-facing is new:
 
-- the confirm gate (consent parser, stores, device pairing and signing, evidence, receipts, MCP proxy);
-- the SureSay hub (MCP server, device channel, understand, actions, phrasebook, Polly read-back);
-- the Strands agent, rewritten for Streamable HTTP and AgentCore Memory;
-- the web client;
-- the TORGO evaluation and the 50-case safety suite;
-- the one-command deploy and teardown, and 246 tests.
+- **The confirm gate:** the consent parser, stores, device pairing and signing, evidence, receipts and an MCP proxy. Two independent security reviews were run, and every finding was fixed with a test.
+- **The hub:**
+  - an MCP server with MCP Apps;
+  - a signed device channel;
+  - OAuth account linking;
+  - understand with maybe cards;
+  - learning from confirmations;
+  - the doorbell, speak for me and teach;
+  - the public demo;
+  - CloudWatch metrics and SNS alerts.
+- **The Strands agent** on AgentCore Runtime, with phrasebooks written through to AgentCore Memory.
+- **The Alexa skill**, deployed and flow-tested on AWS.
+- **The web client:** WCAG 2.2 AA, voice, tap, keys or one switch, three themes, TV mode.
+- **The evaluation:** TORGO on Amazon Transcribe with two runs, a 50-case safety suite with a linked-client arm, latency measured in region, per-user calibration and a Hinglish check.
+- **One-command deploy and teardown**, and more than 450 tests.
 
 ## Open source
 
-[confirm-gate-mcp](https://github.com/Prashant-thakur77/confirm-gate-mcp) (MIT, its own repository with CI on Python 3.12 and 3.13) is the gate on its own. `confirm-gate serve --upstream <any MCP server>` puts confirm-before-act, with an approval page, in front of any MCP server. Install: `pip install "git+https://github.com/Prashant-thakur77/confirm-gate-mcp"`. Why it matters: as assistants gain the power to act, prompt injection becomes a way to act. A gate that keeps the confirmation secret away from the model turns "never act without the user" from a prompt into a property of the code, for any MCP server.
+[confirm-gate-mcp](https://github.com/Prashant-thakur77/confirm-gate-mcp) (MIT, its own repository with CI on Python 3.12 and 3.13; release v0.2.0 includes the security hardening) is the gate on its own. `confirm-gate serve --upstream <any MCP server>` puts confirm-before-act, with an approval page, in front of any MCP server. Install: `pip install "git+https://github.com/Prashant-thakur77/confirm-gate-mcp"`. Why it matters: as assistants gain the power to act, prompt injection becomes a way to act. A gate that keeps the confirmation secret away from the model turns "never act without the user" from a prompt into a property of the code, for any MCP server.
 
 ## What's next
 
