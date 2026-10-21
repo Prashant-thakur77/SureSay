@@ -297,6 +297,25 @@ def asr_section(c: dict[str, Any], i: dict[str, Any]) -> list[str]:
             "|---|---|---|---|---|---|---|---|", *rows]
 
 
+def personal_section(pe: dict[str, Any]) -> list[str]:
+    out = ["## Per-user calibration", "",
+           "The abstain rule is global, tuned on two dev speakers. Simulation of learning it per user: for each test "
+           "speaker, their own first half of utterances (as if confirmed or declined in daily use) picks a personal rule "
+           "with the same grid and objective as the dev tuning; both rules are scored on the second half only.", "",
+           "| Speaker | top-1, global → personal | asked again needlessly, global → personal | correct \"say again\", global → personal |",
+           "|---|---|---|---|"]
+    for spk, v in pe["per_speaker"].items():
+        g, m = v["global"], v["personal"]
+        out.append(f"| {spk} | {f(g['top1_pct'])} → {f(m['top1_pct'])} | {f(g['asked_again_in_book_pct'])} → "
+                   f"{f(m['asked_again_in_book_pct'])} | {f(g['correct_abstain_pct'])} → {f(m['correct_abstain_pct'])} |")
+    pool = pe["pooled"]
+    out += ["", f"Pooled over {pool['utterances']} held-out utterances, handled right: {f(pool['global_handled_right_pct'])} "
+            f"global, {f(pool['personal_handled_right_pct'])} personal. A small gain, concentrated in one speaker, who "
+            "traded some caution for recall; the most severe speaker did not move. Per-user calibration is worth "
+            "keeping, but it is not the fix for the worst case: maybe cards are."]
+    return out
+
+
 def cost_section(c: dict[str, Any]) -> list[str]:
     rows = [f"| {k.replace('_', ' ')} | ${v:.4f} |" for k, v in c["per_1000_turns_usd"].items()]
     tok = c["usage"]["nova_tokens"]
@@ -434,6 +453,9 @@ def main() -> None:
     ]
     body = head + conf + [""] + intent + [""] + safety + [""] + latency + [""]
     body += asr_section(c, i) + [""]
+    pe = load("personal")
+    if pe:
+        body += personal_section(pe) + [""]
     adapt = load("adapt")
     if adapt:
         body += adapt_section(adapt) + [""]

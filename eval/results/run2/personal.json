@@ -1,0 +1,183 @@
+{
+  "name": "personal",
+  "generated_at": "2026-10-21T10:49:30+0530",
+  "git_sha": "4160c80",
+  "python": "3.13.12",
+  "what": "per-user abstain rule from the first half of each test speaker's own utterances",
+  "asr_engine": "transcribe-streaming",
+  "global_rule": {
+    "floor": 0.65,
+    "confident": 1.0,
+    "margin": 0.15,
+    "maybe_floor": 0.5
+  },
+  "per_speaker": {
+    "F01": {
+      "calibration_utterances": 8,
+      "rule": {
+        "floor": 0.6,
+        "confident": 1.0,
+        "margin": 0.1,
+        "maybe_floor": 0.5
+      },
+      "global": {
+        "in": 3,
+        "out": 5,
+        "top1_pct": 66.7,
+        "asked_again_in_book_pct": 33.3,
+        "correct_abstain_pct": 100.0,
+        "handled_right": 7,
+        "utterances": 8
+      },
+      "personal": {
+        "in": 3,
+        "out": 5,
+        "top1_pct": 66.7,
+        "asked_again_in_book_pct": 33.3,
+        "correct_abstain_pct": 100.0,
+        "handled_right": 7,
+        "utterances": 8
+      }
+    },
+    "F04": {
+      "calibration_utterances": 20,
+      "rule": {
+        "floor": 0.9,
+        "confident": 1.0,
+        "margin": 0.2,
+        "maybe_floor": 0.5
+      },
+      "global": {
+        "in": 11,
+        "out": 9,
+        "top1_pct": 100.0,
+        "asked_again_in_book_pct": 0.0,
+        "correct_abstain_pct": 100.0,
+        "handled_right": 20,
+        "utterances": 20
+      },
+      "personal": {
+        "in": 11,
+        "out": 9,
+        "top1_pct": 100.0,
+        "asked_again_in_book_pct": 0.0,
+        "correct_abstain_pct": 100.0,
+        "handled_right": 20,
+        "utterances": 20
+      }
+    },
+    "M01": {
+      "calibration_utterances": 20,
+      "rule": {
+        "floor": 0.55,
+        "confident": 1.0,
+        "margin": 0.0,
+        "maybe_floor": 0.5
+      },
+      "global": {
+        "in": 10,
+        "out": 10,
+        "top1_pct": 40.0,
+        "asked_again_in_book_pct": 60.0,
+        "correct_abstain_pct": 100.0,
+        "handled_right": 14,
+        "utterances": 20
+      },
+      "personal": {
+        "in": 10,
+        "out": 10,
+        "top1_pct": 60.0,
+        "asked_again_in_book_pct": 30.0,
+        "correct_abstain_pct": 90.0,
+        "handled_right": 16,
+        "utterances": 20
+      }
+    },
+    "M02": {
+      "calibration_utterances": 20,
+      "rule": {
+        "floor": 0.6,
+        "confident": 1.0,
+        "margin": 0.1,
+        "maybe_floor": 0.5
+      },
+      "global": {
+        "in": 11,
+        "out": 9,
+        "top1_pct": 81.8,
+        "asked_again_in_book_pct": 18.2,
+        "correct_abstain_pct": 100.0,
+        "handled_right": 18,
+        "utterances": 20
+      },
+      "personal": {
+        "in": 11,
+        "out": 9,
+        "top1_pct": 81.8,
+        "asked_again_in_book_pct": 18.2,
+        "correct_abstain_pct": 100.0,
+        "handled_right": 18,
+        "utterances": 20
+      }
+    },
+    "M03": {
+      "calibration_utterances": 20,
+      "rule": {
+        "floor": 0.9,
+        "confident": 1.0,
+        "margin": 0.2,
+        "maybe_floor": 0.5
+      },
+      "global": {
+        "in": 13,
+        "out": 7,
+        "top1_pct": 100.0,
+        "asked_again_in_book_pct": 0.0,
+        "correct_abstain_pct": 100.0,
+        "handled_right": 20,
+        "utterances": 20
+      },
+      "personal": {
+        "in": 13,
+        "out": 7,
+        "top1_pct": 100.0,
+        "asked_again_in_book_pct": 0.0,
+        "correct_abstain_pct": 100.0,
+        "handled_right": 20,
+        "utterances": 20
+      }
+    },
+    "M04": {
+      "calibration_utterances": 20,
+      "rule": {
+        "floor": 0.55,
+        "confident": 1.0,
+        "margin": 0.08,
+        "maybe_floor": 0.5
+      },
+      "global": {
+        "in": 10,
+        "out": 10,
+        "top1_pct": 60.0,
+        "asked_again_in_book_pct": 40.0,
+        "correct_abstain_pct": 100.0,
+        "handled_right": 16,
+        "utterances": 20
+      },
+      "personal": {
+        "in": 10,
+        "out": 10,
+        "top1_pct": 60.0,
+        "asked_again_in_book_pct": 40.0,
+        "correct_abstain_pct": 100.0,
+        "handled_right": 16,
+        "utterances": 20
+      }
+    }
+  },
+  "pooled": {
+    "utterances": 108,
+    "global_handled_right_pct": 88.0,
+    "personal_handled_right_pct": 89.8
+  }
+}

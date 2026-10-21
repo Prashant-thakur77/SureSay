@@ -170,6 +170,21 @@ Everything above uses Amazon Transcribe. The same pipeline was also run with a l
 | `transcribe-streaming` | 62.8% | 2.6% | 83.3% | 31.5% | 92.6% | 73.1% | 100.0% |
 | `whisper-small.en` | 62.3% | 1.4% | 69.4% | 33.3% | 98.1% | 89.8% | 100.0% |
 
+## Per-user calibration
+
+The abstain rule is global, tuned on two dev speakers. Simulation of learning it per user: for each test speaker, their own first half of utterances (as if confirmed or declined in daily use) picks a personal rule with the same grid and objective as the dev tuning; both rules are scored on the second half only.
+
+| Speaker | top-1, global → personal | asked again needlessly, global → personal | correct "say again", global → personal |
+|---|---|---|---|
+| F01 | 100.0% → 100.0% | 0.0% → 0.0% | 100.0% → 100.0% |
+| F04 | 100.0% → 100.0% | 0.0% → 0.0% | 100.0% → 100.0% |
+| M01 | 45.5% → 72.7% | 54.5% → 18.2% | 100.0% → 77.8% |
+| M02 | 80.0% → 80.0% | 20.0% → 20.0% | 100.0% → 100.0% |
+| M03 | 100.0% → 100.0% | 0.0% → 0.0% | 100.0% → 100.0% |
+| M04 | 50.0% → 50.0% | 50.0% → 50.0% | 100.0% → 100.0% |
+
+Pooled over 108 held-out utterances, handled right: 88.0% global, 89.8% personal. A small gain, concentrated in one speaker, who traded some caution for recall; the most severe speaker did not move. Per-user calibration is worth keeping, but it is not the fix for the worst case: maybe cards are.
+
 ## Learning from confirmations
 
 Each confirmed card teaches SureSay the user's way of saying it. Test: sentences a test speaker recorded twice; the first recording is treated as confirmed once (what the recogniser heard becomes a learned phrase), and the second recording is measured. Same phrasebook, same dev-tuned abstain rule, `transcribe-streaming`.
