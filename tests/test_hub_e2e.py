@@ -327,3 +327,15 @@ def test_a_reply_at_the_door_is_recorded_after_confirming(hub: Hub) -> None:
 def test_an_unknown_visitor_kind_is_rejected(hub: Hub) -> None:
     device = hub.pair()
     assert hub.signed(device, "POST", "/device/doorbell", {"visitor": "burglar"}).status_code == 400
+
+
+def test_a_failing_agent_trips_to_direct_answers(hub: Hub) -> None:
+    from suresay.hub import AgentBridge
+
+    b = AgentBridge(hub.s)
+    b._mode = "agent"
+    assert b.mode() == "agent"
+    b.trip()
+    assert b.mode() == "direct"
+    b._down_until = 0
+    assert b.mode() == "agent"

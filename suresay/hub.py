@@ -131,11 +131,20 @@ def _signed(handler: Any, s: SureSay) -> Any:
 class AgentBridge:
     """Hands a turn to the Strands agent: AgentCore Runtime, a local agent server, or nobody (direct)."""
 
+    BREAK_SECONDS = 300.0
+
     def __init__(self, s: SureSay) -> None:
         self.s = s
         self._mode: str | None = None
+        self._down_until = 0.0
+
+    def trip(self) -> None:
+        """The agent failed (e.g. no model quota): answer directly for a while instead of waiting on it each turn."""
+        self._down_until = time.time() + self.BREAK_SECONDS
 
     def mode(self) -> str:
+        if self._down_until > time.time():
+            return "direct"
         if self._mode is None:
             want = self.s.cfg.agent_mode
             if want in ("agent", "direct"):
@@ -160,7 +169,7 @@ class AgentBridge:
         payload = {"prompt": self.prompt(user_id, text, audio_ref), "user_id": user_id, "session_id": session_id}
         if self.s.cfg.agent_runtime_arn:
             return await anyio.to_thread.run_sync(self._invoke_runtime, payload, session_id)
-        async with httpx.AsyncClient(timeout=60) as client:
+        async with httpx.AsyncClient(timeout=15) as client:
             r = await client.post(self.s.cfg.agent_url, json=payload)
             r.raise_for_status()
             data = r.json()
@@ -169,7 +178,10 @@ class AgentBridge:
     def _invoke_runtime(self, payload: dict[str, Any], session_id: str) -> str:
         import boto3
 
-        client = boto3.client("bedrock-agentcore", region_name=self.s.cfg.region)
+        from botocore.config import Config
+
+        client = boto3.client("bedrock-agentcore", region_name=self.s.cfg.region,
+                              config=Config(read_timeout=12, connect_timeout=3, retries={"max_attempts": 1}))
         resp = client.invoke_agent_runtime(agentRuntimeArn=self.s.cfg.agent_runtime_arn,
                                            runtimeSessionId=(session_id + "-" + "0" * 40)[:40],
                                            payload=json.dumps(payload).encode())
@@ -251,7 +263,8 @@ def build_app(s: SureSay | None = None) -> Starlette:
             try:
                 reply = await bridge.run(device.user_id, session_id, text, audio_ref)
             except Exception as exc:
-                logger.warning("agent turn failed, answering directly: %s", exc)
+                logger.warning("agent turn failed, answering directly for %ss: %s", bridge.BREAK_SECONDS, exc)
+                bridge.trip()
                 mode = "direct"
         if mode == "direct":
             result = await anyio.to_thread.run_sync(
