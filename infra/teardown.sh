@@ -46,6 +46,12 @@ fi
 step "AgentCore Memory"
 "$PY" infra/memory.py delete --region "$REGION" || true
 
+step "SNS topic"
+aws sns delete-topic --topic-arn "arn:aws:sns:${REGION}:${ACCOUNT}:suresay-carer-alerts" 2>/dev/null || true
+
+step "CloudWatch dashboard"
+aws cloudwatch delete-dashboards --dashboard-names SureSay 2>/dev/null || true
+
 step "Transcribe vocabularies"
 for v in $(aws transcribe list-vocabularies --name-contains suresay- --query 'Vocabularies[].VocabularyName' --output text 2>/dev/null || true); do
   aws transcribe delete-vocabulary --vocabulary-name "$v" || true

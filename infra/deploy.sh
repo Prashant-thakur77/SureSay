@@ -65,6 +65,10 @@ else
   echo "Phrasebooks fall back to the DynamoDB table; the agent runs without long-term memory."
 fi
 
+say "SNS topic suresay-carer-alerts (subscribe a carer: aws sns subscribe --protocol email ...)"
+CARER_TOPIC="$(aws sns create-topic --name suresay-carer-alerts --tags Key=project,Value=suresay --query TopicArn --output text)"
+echo "$CARER_TOPIC"
+
 TOKEN_FILE="$STATE/agent_token"
 [ -f "$TOKEN_FILE" ] || "$PY" -c "import secrets; print(secrets.token_urlsafe(32))" > "$TOKEN_FILE"
 chmod 600 "$TOKEN_FILE"
@@ -76,7 +80,7 @@ if ! aws iam get-role --role-name "$ROLE" >/dev/null 2>&1; then
     --tags Key=project,Value=suresay >/dev/null
   sleep 10
 fi
-REGION="$REGION" ACCOUNT="$ACCOUNT" TABLE="$TABLE" BUCKET="$BUCKET" FUNCTION="$FUNCTION" \
+REGION="$REGION" ACCOUNT="$ACCOUNT" TABLE="$TABLE" BUCKET="$BUCKET" FUNCTION="$FUNCTION" CARER_TOPIC="$CARER_TOPIC" \
   envsubst < infra/iam/hub-policy.json.tmpl > "$STATE/hub-policy.json"
 aws iam put-role-policy --role-name "$ROLE" --policy-name suresay-hub --policy-document "file://$STATE/hub-policy.json"
 ROLE_ARN="$(aws iam get-role --role-name "$ROLE" --query Role.Arn --output text)"
@@ -104,7 +108,7 @@ VARS=(AWS_LAMBDA_EXEC_WRAPPER=/opt/bootstrap PORT=8080 AWS_LWA_READINESS_CHECK_P
       SURESAY_BACKEND=aws SURESAY_GATE_TABLE="$TABLE" SURESAY_BUCKET="$BUCKET" SURESAY_DATA_DIR=/tmp/suresay
       AGENTCORE_MEMORY_ID="$MEMORY_ID" SURESAY_AGENT_TOKEN="$AGENT_TOKEN" SURESAY_ASR=auto SURESAY_RANKER=auto
       SURESAY_AGENT_MODE="$MODE" AGENTCORE_RUNTIME_ARN="$RUNTIME_ARN" SURESAY_ALLOWED_ORIGINS="*"
-      SURESAY_PUBLIC_DEMO="${SURESAY_PUBLIC_DEMO:-1}" SURESAY_EVIDENCE_LANGUAGE="${SURESAY_EVIDENCE_LANGUAGE:-en-US}" SURESAY_OAUTH_CLIENTS="${SURESAY_OAUTH_CLIENTS:-}"
+      SURESAY_CARER_TOPIC_ARN="$CARER_TOPIC" SURESAY_PUBLIC_DEMO="${SURESAY_PUBLIC_DEMO:-1}" SURESAY_EVIDENCE_LANGUAGE="${SURESAY_EVIDENCE_LANGUAGE:-en-US}" SURESAY_OAUTH_CLIENTS="${SURESAY_OAUTH_CLIENTS:-}"
       SURESAY_PUBLIC_URL="$(aws lambda get-function-url-config --function-name "$FUNCTION" --query FunctionUrl --output text 2>/dev/null | sed 's:/*$::' || true)")
 
 say "Lambda $FUNCTION"
@@ -161,6 +165,11 @@ if [ -z "${SKIP_AGENT:-}" ]; then
     RUNTIME_ARN=""
   fi
 fi
+
+say "CloudWatch dashboard SureSay"
+REGION="$REGION" FUNCTION="$FUNCTION" envsubst '${REGION} ${FUNCTION}' < infra/dashboard.json.tmpl > "$STATE/dashboard.json"
+aws cloudwatch put-dashboard --dashboard-name SureSay --dashboard-body "file://$STATE/dashboard.json" >/dev/null && \
+  echo "https://${REGION}.console.aws.amazon.com/cloudwatch/home?region=${REGION}#dashboards:name=SureSay"
 
 say "Smoke test"
 curl -fsS "$HUB_URL/healthz" && echo

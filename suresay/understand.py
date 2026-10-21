@@ -54,6 +54,11 @@ def understand(app: SureSay, user_id: str, *, transcript: str | None = None, aud
     ranked: Ranked = app.ranker.rank(hypotheses, book, context={"home": home})
     timing = {"asr_ms": round(heard.ms, 1), "rank_ms": round(ranked.ms, 1),
               "total_ms": round((time.perf_counter() - t0) * 1000, 1)}
+    from . import metrics
+
+    metrics.emit("UnderstandMs", timing["total_ms"], "Milliseconds", Input="voice" if audio is not None else "typed")
+    if audio is not None:
+        metrics.emit("SpeechRecognitionMs", timing["asr_ms"], "Milliseconds")
     app.usage(asr_seconds=heard.audio_seconds if heard.engine.startswith("transcribe") else 0.0,
               **ranked.usage)
     base = {"heard": heard.text, "asr": heard.engine, "ranker": ranked.engine, "timing": timing}

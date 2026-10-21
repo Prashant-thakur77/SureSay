@@ -22,6 +22,7 @@
     {"Sid": "Phrasebook", "Effect": "Allow",
      "Action": ["bedrock-agentcore:CreateEvent", "bedrock-agentcore:ListEvents", "bedrock-agentcore:GetEvent"],
      "Resource": "arn:aws:bedrock-agentcore:${REGION}:${ACCOUNT}:memory/*"},
+    {"Sid": "CarerAlerts", "Effect": "Allow", "Action": ["sns:Publish"], "Resource": "${CARER_TOPIC}"},
     {"Sid": "Agent", "Effect": "Allow", "Action": ["bedrock-agentcore:InvokeAgentRuntime"],
      "Resource": "arn:aws:bedrock-agentcore:${REGION}:${ACCOUNT}:runtime/*"}
   ]

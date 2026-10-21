@@ -1,0 +1,22 @@
+{
+  "widgets": [
+    {"type": "text", "x": 0, "y": 0, "width": 24, "height": 2,
+     "properties": {"markdown": "# SureSay safety\nEvery change needs the user's own confirmation. **Refused** = someone tried to confirm without the user's evidence; **cancelled** = the user said no."}},
+    {"type": "metric", "x": 0, "y": 2, "width": 12, "height": 7,
+     "properties": {"title": "Gate events (5 min)", "region": "${REGION}", "stat": "Sum", "period": 300, "view": "timeSeries", "stacked": false,
+       "metrics": [[{"expression": "SEARCH('{SureSay,Caller,Event} MetricName=\"GateEvents\"', 'Sum', 300)", "id": "e1", "label": ""}]]}},
+    {"type": "metric", "x": 12, "y": 2, "width": 12, "height": 7,
+     "properties": {"title": "Refused confirmations by caller", "region": "${REGION}", "stat": "Sum", "period": 300, "view": "timeSeries",
+       "metrics": [[{"expression": "SEARCH('{SureSay,Caller,Event} MetricName=\"GateEvents\" Event=\"refused\"', 'Sum', 300)", "id": "r1", "label": ""}]]}},
+    {"type": "metric", "x": 0, "y": 9, "width": 12, "height": 7,
+     "properties": {"title": "understand latency (ms)", "region": "${REGION}", "period": 300, "view": "timeSeries",
+       "metrics": [["SureSay", "UnderstandMs", "Input", "voice", {"stat": "p50", "label": "voice p50"}],
+                   ["...", {"stat": "p95", "label": "voice p95"}],
+                   ["SureSay", "UnderstandMs", "Input", "typed", {"stat": "p50", "label": "typed p50"}]]}},
+    {"type": "metric", "x": 12, "y": 9, "width": 12, "height": 7,
+     "properties": {"title": "Hub (Lambda)", "region": "${REGION}", "period": 300, "view": "timeSeries",
+       "metrics": [["AWS/Lambda", "Invocations", "FunctionName", "${FUNCTION}", {"stat": "Sum"}],
+                   [".", "Errors", ".", ".", {"stat": "Sum"}],
+                   [".", "Duration", ".", ".", {"stat": "p95", "yAxis": "right"}]]}}
+  ]
+}

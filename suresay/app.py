@@ -109,6 +109,9 @@ class SureSay:
         from .oauth import OAuth
 
         self.oauth = OAuth(store, self.devices, public_url=self.cfg.public_url, clock=clock)
+        from .notify import CarerAlerts
+
+        self.carer = CarerAlerts(self.cfg.carer_topic_arn, region=self.cfg.region)
         self.oauth.register_from_env(self.cfg.oauth_clients)
         from mcp_server.server import register_tools
 
@@ -163,8 +166,16 @@ class SureSay:
                 event = {**event, "user_id": doc["user_id"]}
         event = {**event, "caller": current_caller.get()}
         self.events.append(event)
+        from . import metrics
+
+        caller = str(event.get("caller") or "unknown").split(":")[0]  # agent / device / linked: never an id
+        metrics.emit("GateEvents", 1, Event=str(event["type"]), Caller=caller)
         if event["type"] == "done" and self.cfg.learn:
             self._learn(event)
+        if event["type"] == "done" and self.carer.topic_arn and event.get("receipt_id"):
+            rec = self.store.get("receipt", event["receipt_id"])
+            if rec:
+                self.carer.on_receipt(rec.get("user_id", ""), rec)
         try:
             self.store.put("event", f"{event['at']:.6f}-{event['type']}", event)
         except Exception:
