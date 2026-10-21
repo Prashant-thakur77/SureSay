@@ -23,7 +23,7 @@ class Settings:
     gate_table: str = field(default_factory=lambda: _env("SURESAY_GATE_TABLE", "suresay-gate"))
     state_table: str = field(default_factory=lambda: _env("SURESAY_STATE_TABLE", "suresay-state"))
     bucket: str = field(default_factory=lambda: _env("SURESAY_BUCKET"))
-    asr: str = field(default_factory=lambda: _env("SURESAY_ASR", "auto"))  # auto | transcribe | whisper | text
+    asr: str = field(default_factory=lambda: _env("SURESAY_ASR", "auto"))  # auto | transcribe | nova-sonic | whisper | text
     whisper_model: str = field(default_factory=lambda: _env("SURESAY_WHISPER_MODEL", "small.en"))
     ranker: str = field(default_factory=lambda: _env("SURESAY_RANKER", "auto"))  # auto | nova | fuzzy
     nova_model_id: str = field(default_factory=lambda: _env("NOVA_MODEL_ID", "us.amazon.nova-2-lite-v1:0"))

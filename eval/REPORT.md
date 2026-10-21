@@ -160,7 +160,7 @@ Replay protection rests on consuming a nonce exactly once. 16 threads race to co
 
 The moto DynamoDB mock is not atomic under threads, so the unit tests skip it for this one property and real DynamoDB is tested instead.
 
-## The same claims with a second recogniser
+## The same claims with other recognisers
 
 Everything above uses Amazon Transcribe. The same pipeline was also run with a local recogniser (faster-whisper, CPU), each with its own dev-only tuning, to show the gate's effect does not depend on one recogniser. Test speakers:
 
