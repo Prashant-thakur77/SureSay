@@ -1,0 +1,90 @@
+{
+  "name": "clarity",
+  "generated_at": "2026-10-21T17:24:27+0530",
+  "git_sha": "e802cb9",
+  "python": "3.13.12",
+  "what": "Practice clarity score (suresay.practice.clarity) per TORGO speaker, recognised without priming",
+  "asr_engine": "transcribe-streaming",
+  "per_speaker": {
+    "F01": {
+      "severity": "severe",
+      "clips": 20,
+      "mean_clarity": 45.1
+    },
+    "M01": {
+      "severity": "severe",
+      "clips": 25,
+      "mean_clarity": 29.8
+    },
+    "M02": {
+      "severity": "severe",
+      "clips": 25,
+      "mean_clarity": 71.5
+    },
+    "M04": {
+      "severity": "severe",
+      "clips": 25,
+      "mean_clarity": 29.1
+    },
+    "M05": {
+      "severity": "moderately severe",
+      "clips": 25,
+      "mean_clarity": 66.4
+    },
+    "F03": {
+      "severity": "moderate",
+      "clips": 25,
+      "mean_clarity": 92.9
+    },
+    "F04": {
+      "severity": "mild",
+      "clips": 25,
+      "mean_clarity": 97.3
+    },
+    "M03": {
+      "severity": "mild",
+      "clips": 25,
+      "mean_clarity": 96.9
+    },
+    "FC01": {
+      "severity": "control",
+      "clips": 25,
+      "mean_clarity": 96.5
+    },
+    "FC02": {
+      "severity": "control",
+      "clips": 25,
+      "mean_clarity": 98.7
+    },
+    "FC03": {
+      "severity": "control",
+      "clips": 25,
+      "mean_clarity": 95.4
+    }
+  },
+  "groups": {
+    "severe": {
+      "speakers": 4,
+      "mean_clarity": 43.9
+    },
+    "moderately severe": {
+      "speakers": 1,
+      "mean_clarity": 66.4
+    },
+    "moderate": {
+      "speakers": 1,
+      "mean_clarity": 92.9
+    },
+    "mild": {
+      "speakers": 2,
+      "mean_clarity": 97.1
+    },
+    "control": {
+      "speakers": 3,
+      "mean_clarity": 96.9
+    }
+  },
+  "spearman_all": 0.848,
+  "spearman_dysarthric_only": 0.868,
+  "severity_source": "categories published with the TORGO corpus (Frenchay Dysarthria Assessment)"
+}

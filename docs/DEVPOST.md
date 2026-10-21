@@ -4,6 +4,8 @@
 
 **Try it live:** https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws. "Try it now" opens a private demo home, with no sign-up.
 
+**Watch the film (2:58):** https://github.com/Prashant-thakur77/SureSay/releases/latest/download/SureSay.mp4
+
 ## The problem
 
 Dysarthria makes speech hard for machines to understand, after a stroke or with Parkinson's, ALS or cerebral palsy. These are often exactly the people who would gain most from controlling their home by voice, and voice assistants fail them most. On a corpus of real dysarthric speech, a plain recogniser got the words of a sentence exactly right only a third of the time.
@@ -23,6 +25,9 @@ When the phrase is something to say to people rather than to a device ("I am thi
 - **Teach:** add your own phrases. SureSay also learns from your confirmations, but never a phrase that already means something else.
 - **Timeline:** for carers, a record of every receipt, with "changes without you: 0".
 - **Maybe cards:** when it's unsure, it asks again and still offers its best guesses, confirm-only.
+- **Talk to someone:** be understood by people, not only machines. He says what he wants to tell the person in front of him, chooses the right sentence, and SureSay says it clearly and shows it huge, turned around for someone across the table.
+- **Practice:** a few sentences a day, an honest clarity score (no phrasebook priming), progress over days, and every try teaches SureSay his voice. On TORGO the score orders speakers by severity (rank correlation 0.85).
+- **Help:** one press offers to call or message his carer; still his own yes, and the carer is alerted.
 - **"Don't" never becomes "do":** "don't unlock the door" sounds like "unlock the door", so a negated command offers no cards. SureSay says what it heard and that nothing will change.
 - **Your devices:** every screen, voice device and assistant link that can show your cards, each one a tap away from unpaired.
 - **Doorbell:** "Someone's at the door: Ravi, your carer" opens cards (let them in, which asks twice; reply at the door; or call). This one is simulated, since we have no doorbell account.

@@ -9,6 +9,9 @@ Open the live demo, choose **Start quietly** or **Start with voice**, then **Try
 | Tap **"van on"** | Three numbered cards; "Turn on the bedroom fan" first |
 | Press **1** (or say "one") | The consent trail ticks through the gate's checks, the fan spins on, and a receipt stamps in |
 | Type **open the door**, choose **Unlock** | A second card: "Unlock the front door? Say yes or no". Press **Esc** or say "no", and nothing changes |
+| **Talk to someone** tab → type *you did it i am so proud of you* → Yes → **Show it to them** | The sentence said aloud, then huge, with "Turn it around" for someone across the table |
+| **Practice** tab → a sentence (needs a microphone) | A clarity score with missed words marked, a streak, and "SureSay learned your way of saying this" |
+| **Help** (top right) | "Call Ravi" / "Message Ravi: I need help": still cards to confirm |
 | Type **don't unlock the door** | No cards: "I heard “don't”, so nothing will change" |
 | Settings → **Your devices** | This screen; on a linked account, the Alexa+ link too, with Unpair |
 | Settings → Demo → **Doorbell → Ravi** | "Someone's at the door" with cards to let them in (asks twice), reply at the door, or call |

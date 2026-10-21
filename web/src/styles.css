@@ -3912,3 +3912,7 @@ code {
 }
 .topbar__help:hover { background: #8f1d17; }
 .topbar__help:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
+.practice__live:empty { display: none; }
+.practice__now { border-radius: 22px; padding: 1.1rem 1.3rem; background: var(--surface); border: var(--bw) solid var(--accent); }
+.practice__reading { font: 700 1.9rem/1.3 var(--font); margin: 0 0 0.4rem; }
+.practice__live { display: grid; gap: 0.8rem; }

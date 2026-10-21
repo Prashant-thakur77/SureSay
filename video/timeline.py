@@ -15,9 +15,11 @@ from narration import CAPTION, LINES  # noqa: E402
 AUDIO = os.path.expanduser("~/Videos/suresay/audio")
 BUILD = os.path.expanduser("~/Videos/suresay/build")
 # scene: (lead-in before its first line, gap between its lines, hold after its last line)
-PACING = {"story": (3.0, 0.75, 3.4), "turn": (0.3, 0.5, 1.4), "demo": (0.4, 0.45, 1.0), "door": (0.2, 0.45, 0.8),
+PACING = {"story": (2.2, 0.75, 2.7), "turn": (0.3, 0.5, 0.9), "demo": (0.4, 0.45, 0.6), "door": (0.2, 0.45, 0.8),
           "agent": (0.2, 0.55, 1.0), "features": (0.2, 0.4, 0.6), "proof": (0.2, 0.5, 1.0),
-          "built": (0.2, 0.45, 0.8), "close": (0.6, 0.7, 5.6)}
+          "built": (0.2, 0.45, 1.4), "close": (0.6, 0.7, 3.4)}
+# extra room after a line: after c2 the app itself says the sentence aloud, in SureSay's own voice
+EXTRA_AFTER = {"c2": 3.1}
 
 
 def main() -> None:
@@ -31,7 +33,7 @@ def main() -> None:
             if scene != name:
                 continue
             lines.append({"id": lid, "start": round(t, 3), "dur": durs[lid], "caption": CAPTION.get(lid, text)})
-            t += durs[lid] + gap
+            t += durs[lid] + gap + EXTRA_AFTER.get(lid, 0.0)
         t += hold - gap
         scenes.append({"name": name, "start": round(start, 3), "dur": round(t - start, 3), "lines": lines})
     os.makedirs(BUILD, exist_ok=True)

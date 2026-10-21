@@ -31,8 +31,10 @@ def clarity(target: str, heard: str) -> dict[str, Any]:
         for k in range(block.size):
             hit[block.a + k] = True
     shown = (target or "").split()
-    marks = [{"word": w, "heard": hit[i] if i < len(hit) else False} for i, w in enumerate(t)]
-    return {"score": round(100 * sum(hit) / len(t)) if t else 0, "words": marks, "display": shown}
+    # show the sentence as written ("Could", "water,") whenever its words line up one to one with the compared ones
+    labels = shown if len(shown) == len(t) and all(words(a) == [b] for a, b in zip(shown, t, strict=True)) else t
+    marks = [{"word": w, "heard": hit[i]} for i, w in enumerate(labels)]
+    return {"score": round(100 * sum(hit) / len(t)) if t else 0, "words": marks}
 
 
 def sentences(book: list[dict[str, Any]]) -> list[str]:

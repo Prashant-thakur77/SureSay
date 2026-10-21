@@ -201,10 +201,12 @@ class VocabularyManager:
 class TranscribeStreamingAsr:
     """Amazon Transcribe streaming over a recorded clip (sent as fast as allowed)."""
 
-    def __init__(self, *, region: str = "us-east-1", language: str = "en-US", vocab: VocabularyManager | None = None) -> None:
+    def __init__(self, *, region: str = "us-east-1", language: str = "en-US", vocab: VocabularyManager | None = None,
+                 timeout: float = 30.0) -> None:
         self.region = region
         self.language = language
         self.vocab = vocab
+        self.timeout = timeout  # a stream that never finishes must not hang a turn
         self.name = "transcribe-streaming"
 
     def transcribe(self, audio: bytes, *, vocabulary: list[str] | None = None, user_id: str = "") -> Heard:
@@ -212,7 +214,7 @@ class TranscribeStreamingAsr:
         samples = to_pcm16k(audio)
         pcm = pcm16_bytes(samples)
         vocab_name = self.vocab.name_for(vocabulary) if (self.vocab and vocabulary) else None
-        text, alts = _run(self._stream(pcm, vocab_name))
+        text, alts = _run(asyncio.wait_for(self._stream(pcm, vocab_name), timeout=self.timeout))
         return Heard(text=text, alternatives=alts, engine=self.name + ("+vocab" if vocab_name else ""),
                      ms=(time.perf_counter() - t0) * 1000, audio_seconds=len(samples) / SAMPLE_RATE)
 

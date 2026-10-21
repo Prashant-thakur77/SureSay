@@ -80,6 +80,16 @@
   .pc .from { font-size: 66px; margin-top: 38px; opacity: .55; text-decoration: line-through; text-decoration-thickness: 4px; }
   .pc .to { font-size: 168px; font-weight: 700; line-height: 1; margin-top: 8px; font-variant-numeric: tabular-nums; }
   .pc .sub { font-size: 24px; opacity: .75; margin-top: 26px; line-height: 1.4; }
+  #proof .clarity { position: absolute; left: 160px; right: 160px; top: 120px; text-align: center; }
+  #proof .clarity h2 { font-size: 50px; }
+  #proof .clarity p { font-size: 26px; opacity: .75; margin-top: 26px; }
+  #proof .cbars { display: flex; justify-content: center; align-items: flex-end; gap: 46px; height: 420px; margin-top: 40px; }
+  #proof .cbar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; width: 210px; }
+  #proof .cbar b { font-size: 26px; margin-top: 14px; }
+  #proof .cfill { width: 150px; border-radius: 18px 18px 6px 6px; background: var(--dawn); position: relative; transform-origin: bottom; }
+  #proof .cfill.go { animation: grow .9s cubic-bezier(.2,.8,.2,1) forwards; }
+  @keyframes grow { from { opacity: 1; transform: scaleY(0); } to { opacity: 1; transform: scaleY(1); } }
+  #proof .cfill span { position: absolute; top: -52px; left: 0; right: 0; font-size: 40px; font-weight: 700; }
   #proof .foot { position: absolute; left: 120px; bottom: 210px; font-size: 26px; opacity: .7; }
 
   /* built */
@@ -155,7 +165,7 @@
 
 <!-- 7. Proof -->
 <section class="scene grain" id="proof">
-  <div class="grid">
+  <div class="grid cue go" data-out="p3-0.5">
     <div class="pc cue" data-cue="p1"><div class="q">False “yes” on dysarthric speech</div><div class="from">62.8%</div>
       <div class="to dawn" data-count="2.3" data-from="62.8" data-dec="1" data-suffix="%" data-cue-count="p1+3.6">62.8%</div>
       <div class="sub">430 decisions · 6 held-out speakers<br>never tuned on</div></div>
@@ -164,6 +174,12 @@
       <div class="sub">a plain assistant acts; SureSay asks</div></div>
     <div class="pc cue" data-cue="p2+2.4"><div class="q">Changes without consent</div><div class="from">35 / 35</div>
       <div class="to dawn" style="font-size:132px">0 / 50</div><div class="sub">adversarial attacks, including through an Alexa+-style linked client</div></div>
+  </div>
+
+  <div class="clarity cue fade" data-cue="p3-0.2">
+    <h2>Practice clarity score, by dysarthria severity</h2>
+    <div class="cbars"><div class="cbar"><div class="cfill cue" data-cue="p3+0.40" style="height:158px"><span>44%</span></div><b>Severe</b></div><div class="cbar"><div class="cfill cue" data-cue="p3+0.75" style="height:239px"><span>66%</span></div><b>Moderately severe</b></div><div class="cbar"><div class="cfill cue" data-cue="p3+1.10" style="height:334px"><span>93%</span></div><b>Moderate</b></div><div class="cbar"><div class="cfill cue" data-cue="p3+1.45" style="height:350px"><span>97%</span></div><b>Mild</b></div><div class="cbar"><div class="cfill cue" data-cue="p3+1.80" style="height:349px"><span>97%</span></div><b>Typical speech</b></div></div>
+    <p>TORGO · 11 speakers · rank correlation with severity 0.848 · a practice signal, not a medical test</p>
   </div>
   <div class="foot cue fade" data-cue="p1+1">TORGO dysarthric speech corpus · Amazon Transcribe · every number from eval/REPORT.md</div>
 </section>
@@ -188,7 +204,7 @@
       <span class="chip cue" data-cue="b1+11.7">Amazon SNS</span><span class="chip cue" data-cue="b1+12.0">Amazon CloudWatch</span>
     </div>
   </div>
-  <div class="oss cue" data-cue="b2">confirm-gate-mcp · open source (MIT)<span>confirm-before-act for any MCP server</span></div>
+  <div class="oss cue" data-cue="b1+9.6">confirm-gate-mcp · open source (MIT)<span>confirm-before-act for any MCP server</span></div>
 </section>
 
 <!-- end card -->

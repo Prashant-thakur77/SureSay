@@ -13,12 +13,15 @@ mkdirSync(FRAMES, { recursive: true });
 
 const browser = await chromium.launch({
   executablePath: `${process.env.HOME}/.cache/ms-playwright/chromium-1248/chrome-linux64/chrome`,
-  args: ["--autoplay-policy=no-user-gesture-required"],
+  args: ["--autoplay-policy=no-user-gesture-required",
+         ...(process.env.FAKE_MIC ? ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream",
+                                     `--use-file-for-fake-audio-capture=${process.env.FAKE_MIC}%noloop`] : [])],
 });
 const GRAPHICS = FLOW.startsWith("gfx-") || FLOW === "bubbles";
 const ctx = await browser.newContext(GRAPHICS
   ? { viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 }
-  : { viewport: { width: 1536, height: 864 }, deviceScaleFactor: 1.25, reducedMotion: "no-preference", colorScheme: "light" });
+  : { viewport: { width: 1536, height: 864 }, deviceScaleFactor: 1.25, reducedMotion: "no-preference", colorScheme: "light",
+      permissions: ["microphone"] });
 const page = await ctx.newPage();
 const cdp = await ctx.newCDPSession(page);
 const frames = [];
@@ -68,6 +71,59 @@ async function graphics(name) {
 }
 
 const flows = {
+  async people() {
+    await enterDemo();
+    await page.getByRole("tab", { name: "Talk to someone" }).click();
+    await wait(800);
+    await start();
+    mark("start");
+    await wait(1800);
+    await page.locator(".talk__mic").click();
+    mark("speaking");
+    await page.waitForSelector(".btn--yes, button.card", { timeout: 40000 });
+    mark("cards");
+    await wait(3000);
+    if (await page.locator(".btn--yes").count()) await page.locator(".btn--yes").first().click();
+    else await page.keyboard.press("1");
+    mark("chosen");
+    await page.waitForSelector(".spoken__text", { timeout: 20000 });
+    mark("spoken");
+    await wait(2600);
+    await page.getByRole("button", { name: /show it to them/i }).click();
+    mark("listener");
+    await wait(3600);
+    await page.getByRole("button", { name: /turn it around/i }).click();
+    mark("flipped");
+    await wait(2600);
+    mark("end");
+  },
+  async practice() {
+    await enterDemo();
+    await page.getByRole("tab", { name: "Practice" }).click();
+    await page.waitForSelector(".practice__item");
+    await wait(600);
+    await start();
+    mark("start");
+    await wait(2000);
+    await page.locator(".practice__item").first().click();
+    mark("speaking");
+    await page.waitForSelector(".practice__pct", { timeout: 40000 });
+    mark("scored");
+    await wait(4500);
+    mark("end");
+  },
+  async help() {
+    await enterDemo();
+    await start();
+    mark("start");
+    await wait(1200);
+    await page.getByRole("button", { name: "Help" }).click();
+    mark("help");
+    await page.waitForSelector("button.card", { timeout: 20000 });
+    mark("cards");
+    await wait(4000);
+    mark("end");
+  },
   "gfx-turn": () => graphics("turn"),
   "gfx-agent": () => graphics("agent"),
   "gfx-proof": () => graphics("proof"),

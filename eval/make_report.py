@@ -349,6 +349,26 @@ def sonic_note() -> list[str]:
             "compared with no phrasebook priming; the \"maybe\" column is blank where that run predates maybe cards."]
 
 
+def clarity_section(cl: dict[str, Any]) -> list[str]:
+    g = cl["groups"]
+    rows = [f"| {spk} | {v['severity']} | {f(v['mean_clarity'])} | {v['clips']} |" for spk, v in cl["per_speaker"].items()]
+    sev = {k: v["mean_clarity"] for k, v in g.items()}
+    outlier = [s for s, v in cl["per_speaker"].items() if v["severity"] == "severe" and (v["mean_clarity"] or 0) > (sev.get("moderately severe") or 101)]
+    return ["## Practice: does the clarity score mean something?", "",
+            "Practice scores a recording by the share of the sentence's words that speech recognition heard, in order, "
+            "without the user's phrasebook. On up to 25 sentence recordings per TORGO speaker, the score against the "
+            f"severity categories published with the corpus (Frenchay Dysarthria Assessment), recogniser `{cl['asr_engine']}`:", "",
+            "| Group | mean clarity |", "|---|---|",
+            *[f"| {k} | {f(v['mean_clarity'])} ({v['speakers']} speaker{'s' if v['speakers'] != 1 else ''}) |" for k, v in g.items()],
+            "", f"Spearman rank correlation between a speaker's clarity and severity: **{cl['spearman_all']}** across all "
+            f"11 speakers, {cl['spearman_dysarthric_only']} across the 8 with dysarthria.", "",
+            "| Speaker | severity | clarity | clips |", "|---|---|---|---|", *rows, "",
+            "What it does not show: the score saturates near the top, so mild dysarthria and typical speech look the same; "
+            + (f"{', '.join(outlier)} is rated severe yet scores above the moderately severe speaker; " if outlier else "")
+            + "and it is a practice signal, not a clinical measure. It does order speakers broadly by severity, which is "
+            "what a daily progress line needs."]
+
+
 def personal_section(pe: dict[str, Any]) -> list[str]:
     out = ["## Per-user calibration", "",
            "The abstain rule is global, tuned on two dev speakers. Simulation of learning it per user: for each test "
@@ -513,6 +533,9 @@ def main() -> None:
     pe = load("personal")
     if pe:
         body += personal_section(pe) + [""]
+    cl = load("clarity")
+    if cl:
+        body += clarity_section(cl) + [""]
     adapt = load("adapt")
     if adapt:
         body += adapt_section(adapt) + [""]

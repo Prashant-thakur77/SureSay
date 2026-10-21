@@ -164,19 +164,21 @@ def door() -> str:
 
 
 def features() -> str:
-    sc, m = SC["features"], marks("features")
+    """Talk to someone (listening, his sentence, said big, shown to the listener), Practice, Help, Your devices."""
+    sc = SC["features"]
     t = lambda lid: LINE[lid]["start"] - sc["start"]  # noqa: E731
-    src = f"{C}/features.mp4"
-    parts = [f"{B}/feat_{i}.mp4" for i in range(4)]
-    p0 = (m["board"] - 0.2, m["spoken"] + 2.6)
-    door_until = t("f2") + 3.0                   # "...His family sees every change on a timeline"
-    p1_len = door_until - (p0[1] - p0[0])
-    devices_on = t("f3") - 0.2
-    p2_len = devices_on - door_until
-    segment(src, *p0, parts[0])
-    segment(src, m["doorbell"] - 0.3, m["doorbell"] - 0.3 + p1_len, parts[1])
-    segment(src, m["timeline"] - 0.1, m["timeline"] + 3.6, parts[2], hold=max(0.0, p2_len - 3.7))
-    segment(src, m["devices"] - 0.1, vlen(src), parts[3], hold=6.0)
+    pe, pr, hp, ft = marks("people"), marks("practice"), marks("help"), marks("features")
+    parts = [f"{B}/feat_{i}.mp4" for i in range(6)]
+    people = f"{C}/people.mp4"
+    segment(people, pe["speaking"] - 0.2, pe["speaking"] + 2.3, parts[0])          # listening
+    talk_len = t("f2") - 2.5
+    segment(people, pe["cards"] - 0.3, pe["cards"] - 0.3 + talk_len, parts[1])     # his sentence, said, shown
+    segment(f"{C}/practice.mp4", pr["speaking"] - 0.2, pr["speaking"] + 1.6, parts[2])
+    prac_len = t("f3") - t("f2") - 1.8
+    segment(f"{C}/practice.mp4", pr["scored"] - 0.3, vlen(f"{C}/practice.mp4"), parts[3],
+            hold=max(0.0, prac_len - (vlen(f"{C}/practice.mp4") - pr["scored"] + 0.3)))
+    segment(f"{C}/help.mp4", hp["cards"] - 0.1, hp["cards"] + 2.6, parts[4])
+    segment(f"{C}/features.mp4", ft["devices"] - 0.1, vlen(f"{C}/features.mp4"), parts[5], hold=6.0)
     raw, out = f"{B}/raw_features.mp4", f"{B}/scene_features.mp4"
     concat(parts, raw, sc["dur"])
     framed(raw, out)
@@ -184,17 +186,21 @@ def features() -> str:
 
 
 def close() -> str:
+    """Tonight he helps his grandson again; the app says his words for him (the listener view, full screen); the end."""
     sc = SC["close"]
     t = lambda lid: LINE[lid]["start"] - sc["start"]  # noqa: E731
-    p0, p1 = f"{B}/close_0.mp4", f"{B}/close_1.mp4"
-    segment(f"{S}/6970243.mp4", 1.0, 1.0 + t("c2"), p0, grade="eq=saturation=0.95:brightness=0.02", zoom=0.05)
-    segment(f"{S}/6970255.mp4", 1.0, 1.0 + (t("c2") + LINE["c2"]["dur"] + 0.9 - t("c2")), p1,
-            grade="eq=saturation=0.95:brightness=0.02", zoom=0.05)
+    pe = marks("people")
+    warm = "eq=saturation=0.95:brightness=0.02,vignette=PI/6"
+    app_on = t("c2") + LINE["c2"]["dur"] + 0.25
+    parts = [f"{B}/close_{i}.mp4" for i in range(5)]
+    segment(f"{S}/6970238.mp4", 6.0, 6.0 + t("c2"), parts[0], grade=warm, zoom=0.05)            # homework, again
+    segment(f"{S}/6970243.mp4", 1.0, 1.0 + (app_on - t("c2")), parts[1], grade=warm, zoom=0.05)
+    segment(f"{C}/people.mp4", pe["listener"] + 0.4, pe["listener"] + 0.4 + (t("c3") - app_on), parts[2])  # said for him
+    segment(f"{S}/6970255.mp4", 1.0, 1.0 + (LINE["c3"]["dur"] + 0.6), parts[3], grade=warm, zoom=0.05)
     m = marks("gfx-end")
-    p2 = f"{B}/close_2.mp4"
-    segment(f"{C}/gfx-end.mp4", m["start"], m["end"], p2)
+    segment(f"{C}/gfx-end.mp4", m["start"], m["end"], parts[4], hold=3.0)
     out = f"{B}/scene_close.mp4"
-    concat([p0, p1, p2], out, sc["dur"])
+    concat(parts, out, sc["dur"])
     return out
 
 
@@ -249,10 +255,15 @@ def audio(stems: bool = False) -> str:
     for i, ln in enumerate(lines):
         inputs += ["-i", f"{HOME}/audio/lines/{ln['id']}.wav"]
         fc.append(f"[{i}:a]aresample=48000,pan=stereo|c0=c0|c1=c0,adelay={int(ln['start'] * 1000)}|{int(ln['start'] * 1000)}[l{i}]")
-    n = len(lines)
+    # the app itself, saying his words for him at the end (SureSay's real read-aloud voice, Amazon Polly Kajal)
+    c2 = LINE["c2"]
+    app_at = int((c2["start"] + c2["dur"] + 0.25) * 1000)
+    inputs += ["-i", f"{HOME}/audio/app_proud.wav"]
+    fc.append(f"[{len(lines)}:a]aresample=48000,pan=stereo|c0=c0|c1=c0,volume=1.1,adelay={app_at}|{app_at}[l{len(lines)}]")
+    n = len(lines) + 1
     fc.append("".join(f"[l{i}]" for i in range(n)) + f"amix=inputs={n}:normalize=0,apad=whole_dur={total:.2f}[voice]")
     inputs += ["-i", f"{HOME}/music/piano4.mp3", "-i", f"{HOME}/music/up3.mp3"]
-    p, u = n, n + 1
+    p, u = n, n + 1  # music inputs follow the voice lines and the app clip
     fc.append(f"[{p}:a]aresample=48000,atrim=0:{turn + 2.5:.2f},afade=t=in:st=0:d=2,afade=t=out:st={turn - 0.5:.2f}:d=3,"
               f"volume=0.85[piano]")
     fc.append(f"[{u}:a]aresample=48000,atrim=0:{total - turn + 2:.2f},afade=t=in:st=0:d=2.5,"

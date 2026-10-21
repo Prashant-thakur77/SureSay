@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { PracticeResult, PracticeState } from "../lib/types";
 import { Icon } from "./Icon";
 
@@ -25,6 +25,13 @@ export function PracticePanel({ load, submit, record, stop, recording, announce 
   const [result, setResult] = useState<PracticeResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const liveRef = useRef<HTMLDivElement>(null);
+  const showing = recording || busy || !!result || !!error;
+  useEffect(() => {
+    if (!showing) return;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    liveRef.current?.scrollIntoView?.({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
+  }, [showing, result]);
 
   const refresh = useCallback(() => load().then(setState).catch(() => setError("Practice is not available right now.")), [load]);
   useEffect(() => {
@@ -71,6 +78,37 @@ export function PracticePanel({ load, submit, record, stop, recording, announce 
           {state.attempts} {state.attempts === 1 ? "recording" : "recordings"} so far
         </p>
       )}
+      <div className="practice__live" ref={liveRef}>
+        {recording && target && (
+          <div className="practice__now">
+            <p className="practice__reading">“{target}”</p>
+            <p>Read it aloud, in your own time. I stop when you pause.</p>
+          </div>
+        )}
+        {recording && (
+          <button type="button" className="btn btn--primary btn--xl" onClick={stop}>
+            <Icon name="stop" size={26} /> I'm done
+          </button>
+        )}
+        {busy && <p role="status">Listening back…</p>}
+        {error && <p role="alert" className="practice__error">{error}</p>}
+        {result && (
+          <div className="practice__result" role="status">
+            <p className="practice__score">
+              <span className="practice__pct">{result.score}%</span> clear
+            </p>
+            <p className="practice__words" aria-label={`Words that came through: ${result.words.filter((w) => w.heard).map((w) => w.word).join(" ")}`}>
+              {result.words.map((w, i) => (
+                <span key={`${w.word}-${i}`} className={w.heard ? "pw pw--ok" : "pw pw--miss"}>
+                  {w.word}
+                </span>
+              ))}
+            </p>
+            <p className="practice__cheer">{cheer(result.score)}</p>
+            {result.learned && <p className="practice__learned"><Icon name="check" size={20} /> SureSay learned your way of saying this.</p>}
+          </div>
+        )}
+      </div>
       <ul className="practice__list" aria-label="Today's sentences">
         {(state?.today ?? []).map((s) => (
           <li key={s}>
@@ -83,29 +121,6 @@ export function PracticePanel({ load, submit, record, stop, recording, announce 
           </li>
         ))}
       </ul>
-      {recording && (
-        <button type="button" className="btn btn--primary btn--xl" onClick={stop}>
-          <Icon name="stop" size={26} /> I'm done
-        </button>
-      )}
-      {busy && <p role="status">Listening back…</p>}
-      {error && <p role="alert" className="practice__error">{error}</p>}
-      {result && (
-        <div className="practice__result" role="status">
-          <p className="practice__score">
-            <span className="practice__pct">{result.score}%</span> clear
-          </p>
-          <p className="practice__words" aria-label={`Words that came through: ${result.words.filter((w) => w.heard).map((w) => w.word).join(" ")}`}>
-            {result.words.map((w, i) => (
-              <span key={`${w.word}-${i}`} className={w.heard ? "pw pw--ok" : "pw pw--miss"}>
-                {w.word}
-              </span>
-            ))}
-          </p>
-          <p className="practice__cheer">{cheer(result.score)}</p>
-          {result.learned && <p className="practice__learned"><Icon name="check" size={20} /> SureSay learned your way of saying this.</p>}
-        </div>
-      )}
       {days.length > 0 && (
         <figure className="practice__chart">
           <figcaption>Your last {days.length} {days.length === 1 ? "day" : "days"}</figcaption>

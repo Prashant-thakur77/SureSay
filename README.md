@@ -10,7 +10,7 @@
 
 **A voice assistant for people whose speech other assistants mishear. It shows its three best guesses, and nothing happens until you choose one.**
 
-[![Watch the 3-minute film](docs/img/video-poster.jpg)](https://github.com/Prashant-thakur77/SureSay/releases/download/v1.0.0/SureSay.mp4)
+[![Watch the 3-minute film](docs/img/video-poster.jpg)](https://github.com/Prashant-thakur77/SureSay/releases/latest/download/SureSay.mp4)
 
 People with dysarthria (after a stroke, or living with Parkinson's, ALS or cerebral palsy) are the people voice assistants fail most often. A misheard command that *acts* is worse than no command at all: the wrong light, the wrong person called, the door unlocked instead of locked. SureSay turns every request into three big, numbered, read-aloud cards. You say "two", "the second one", "haan" or "do number", or you tap, press a key or hit one switch. Only that confirmation, made on your own device, can release the action, and every change leaves a consent receipt.
 
@@ -45,6 +45,11 @@ It also speaks *for* you: confirm a phrase like "I am thirsty" and SureSay says 
 - A ready `addon.json` with icons and a carousel image.
 
 Until Alexa+ developer access opens, [`alexa_skill/`](alexa_skill) runs the same flow as a classic skill: "Alexa, ask Sure Say to turn on the fan" reads the three guesses, and your spoken "the first one" goes back as signed evidence through the same gate.
+
+**Understood by people, too:**
+- **Talk to someone:** he says what he wants to tell the person in front of him; SureSay offers what it heard and his own usual sentences, he chooses, and it is said clearly and shown huge (turned around for someone across the table). Nothing is said until he chooses.
+- **Practice:** a few sentences a day, scored honestly (recognised without his phrasebook), with the words that came through marked and progress over days; every try also teaches SureSay his voice. On TORGO the score orders speakers by severity (see the report).
+- **Help:** one press offers to call or message his carer; still his own yes, and the carer is alerted.
 
 **More than commands:**
 - **Speak for me:** a board of your everyday sentences, spoken aloud after you confirm.

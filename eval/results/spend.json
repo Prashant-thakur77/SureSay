@@ -1,6 +1,6 @@
 {
- "transcribe_requests": 2387,
- "transcribe_usd_at_15s_min": 5.97,
+ "transcribe_requests": 2561,
+ "transcribe_usd_at_15s_min": 6.4,
  "note": "includes 100 latency requests and 2 cloud voice tests counted by hand; 237 requests counted on 21 Oct by a re-score run with invalid credentials (nothing was sent or billed) were removed; +1 request on 21 Oct checking Transcribe streaming on awscrt 0.32 (counted by hand); 71 Nova 2 Sonic clips recognised inside Lambda while measuring latency on 21 Oct (counted by hand; tokens not reported back, about $0.05 at the eval's measured rate) and 1 Transcribe check after switching back",
  "nova_sonic_clips": 852,
  "nova_sonic_speech_tokens": 218604,

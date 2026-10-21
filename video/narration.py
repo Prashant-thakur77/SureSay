@@ -31,23 +31,26 @@ LINES = [
                     "never to the model. A hidden prompt injection can make it ask. Never act.", 0.55, 0.42),
     ("agent", "a2", "We tested a real Amazon Nova model as the agent. Without the gate, eleven changes nobody confirmed. "
                     "With Sure Say, zero.", 0.65, 0.4),
-    # 6. Everything else
-    ("features", "f1", "Speak for me says what he can't, clearly, out loud. In English or in Hindi.", 0.6, 0.42),
-    ("features", "f2", "When the doorbell rings, the same cards let him answer safely. His family sees every change on a "
-                       "timeline. He can tap, press a key, or use a single switch.", 0.55, 0.45),
-    ("features", "f3", "And every device, every Alexa link, is his to unpair, with one tap.", 0.55, 0.42),
+    # 6. Understood by people, too
+    ("features", "f1", "And because being understood by people matters even more, there's Talk to someone. He says it his "
+                       "way, chooses the right sentence, and Sure Say says it clearly, then shows it big, for whoever is "
+                       "listening.", 0.6, 0.42),
+    ("features", "f2", "Practice, a few minutes a day, shows which words came through. And every try teaches Sure Say his "
+                       "voice.", 0.6, 0.42),
+    ("features", "f3", "One press of Help reaches his family. And every device, every Alexa link, is his to unpair.", 0.55, 0.42),
     # 7. Proof
     ("proof", "p1", "On real dysarthric speech, from speakers we never tuned on, false yeses fell from sixty three percent to "
                     "two point three.", 0.6, 0.42),
     ("proof", "p2", "It never acted on a wrong guess. And across fifty attacks: zero changes without consent.", 0.65, 0.4),
+    ("proof", "p3", "And the Practice score follows severity: forty four percent for severe dysarthria, ninety seven for "
+                    "mild.", 0.6, 0.42),
     # 8. Built on AWS, ready for Alexa+
-    ("built", "b1", "It's built to the Alexa plus add on spec, with account linking and cards on Echo Show, plus a working "
-                    "Alexa skill today. All running on A W S: Lambda, Dynamo D B, Transcribe, Polly, and Amazon Nova.",
-     0.6, 0.45),
-    ("built", "b2", "And the safety gate is open source, for any M C P server.", 0.55, 0.42),
+    ("built", "b1", "It's built to the Alexa plus add on spec, and it works as an Alexa skill today. On A W S: Lambda, "
+                    "Dynamo D B, Transcribe, Polly, and Amazon Nova.", 0.6, 0.45),
     # 9. Close
-    ("close", "c1", "Tonight, he says, lights on. Slowly. In his own way.", 0.6, 0.32),
-    ("close", "c2", "And this time, the house waits for him.", 0.75, 0.3),
+    ("close", "c1", "Tonight, he helps his grandson with his homework again.", 0.6, 0.35),
+    ("close", "c2", "You did it, he says. I am so proud of you.", 0.65, 0.32),
+    ("close", "c3", "And this time, he is heard.", 0.75, 0.3),
 ]
 
 CAPTION = {
@@ -64,8 +67,13 @@ CAPTION = {
           "With SureSay: zero.",
     "p1": "On real dysarthric speech, from speakers we never tuned on, false yeses fell from 63% to 2.3%.",
     "p2": "It never acted on a wrong guess. And across 50 attacks: zero changes without consent.",
-    "b1": "It's built to the Alexa+ add-on spec, with account linking and cards on Echo Show, plus a working Alexa skill "
-          "today. All running on AWS: Lambda, DynamoDB, Transcribe, Polly, and Amazon Nova.",
     "b2": "And the safety gate is open source, for any MCP server.",
-    "c1": "Tonight, he says “lights on.” Slowly. In his own way.",
+    "p3": "And the Practice score follows severity: 44% for severe dysarthria, 97% for mild.",
+    "c1": "Tonight, he helps his grandson with his homework again.",
+    "c2": "“You did it,” he says. “I am so proud of you.”",
+    "f1": "And because being understood by people matters even more, there's Talk to someone. He says it his way, "
+          "chooses the right sentence, and SureSay says it clearly, then shows it big, for whoever is listening.",
+    "f2": "Practice, a few minutes a day, shows which words came through. And every try teaches SureSay his voice.",
+    "b1": "It's built to the Alexa+ add-on spec, and it works as an Alexa skill today. On AWS: Lambda, DynamoDB, "
+          "Transcribe, Polly, and Amazon Nova.",
 }

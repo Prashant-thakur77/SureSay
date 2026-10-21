@@ -64,7 +64,13 @@ def _init(engine: str, threads: int) -> None:
 def _work(job: tuple[str, str, str, list[str]]) -> tuple[str, dict[str, Any]]:
     engine, bias, wav, vocab = job
     audio = (DATA / wav).read_bytes()
-    heard = _ENGINE.transcribe(audio, vocabulary=vocab or None).as_dict()
+    for attempt in range(3):  # a stream that times out is retried, never scored as silence
+        try:
+            heard = _ENGINE.transcribe(audio, vocabulary=vocab or None).as_dict()
+            break
+        except TimeoutError:
+            if attempt == 2:
+                raise
     if getattr(_ENGINE, "last_usage", None):
         heard["usage"] = dict(_ENGINE.last_usage)
     return wav, heard

@@ -13,7 +13,8 @@ from .conftest import Hub
 def test_clarity_is_the_share_of_the_sentence_that_was_recognised() -> None:
     out = clarity("I am thirsty. Could I have some water, please?", "i am thirsty could i have water")
     assert out["score"] == 78  # 7 of 9 words
-    assert [w["word"] for w in out["words"] if not w["heard"]] == ["some", "please"]
+    assert [w["word"] for w in out["words"] if not w["heard"]] == ["some", "please?"]
+    assert out["words"][0]["word"] == "I" and out["words"][3]["word"] == "Could"  # shown as written
     assert clarity("Thank you so much.", "")["score"] == 0
     assert clarity("Thank you so much.", "thank you so much")["score"] == 100
 

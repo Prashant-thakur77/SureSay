@@ -192,6 +192,36 @@ The abstain rule is global, tuned on two dev speakers. Simulation of learning it
 
 Pooled over 108 held-out utterances, handled right: 88.0% global, 89.8% personal. A small gain, concentrated in one speaker, who traded some caution for recall; the most severe speaker did not move. Per-user calibration is worth keeping, but it is not the fix for the worst case: maybe cards are.
 
+## Practice: does the clarity score mean something?
+
+Practice scores a recording by the share of the sentence's words that speech recognition heard, in order, without the user's phrasebook. On up to 25 sentence recordings per TORGO speaker, the score against the severity categories published with the corpus (Frenchay Dysarthria Assessment), recogniser `transcribe-streaming`:
+
+| Group | mean clarity |
+|---|---|
+| severe | 43.9% (4 speakers) |
+| moderately severe | 66.4% (1 speaker) |
+| moderate | 92.9% (1 speaker) |
+| mild | 97.1% (2 speakers) |
+| control | 96.9% (3 speakers) |
+
+Spearman rank correlation between a speaker's clarity and severity: **0.848** across all 11 speakers, 0.868 across the 8 with dysarthria.
+
+| Speaker | severity | clarity | clips |
+|---|---|---|---|
+| F01 | severe | 45.1% | 20 |
+| M01 | severe | 29.8% | 25 |
+| M02 | severe | 71.5% | 25 |
+| M04 | severe | 29.1% | 25 |
+| M05 | moderately severe | 66.4% | 25 |
+| F03 | moderate | 92.9% | 25 |
+| F04 | mild | 97.3% | 25 |
+| M03 | mild | 96.9% | 25 |
+| FC01 | control | 96.5% | 25 |
+| FC02 | control | 98.7% | 25 |
+| FC03 | control | 95.4% | 25 |
+
+What it does not show: the score saturates near the top, so mild dysarthria and typical speech look the same; M02 is rated severe yet scores above the moderately severe speaker; and it is a practice signal, not a clinical measure. It does order speakers broadly by severity, which is what a daily progress line needs.
+
 ## Learning from confirmations
 
 Each confirmed card teaches SureSay the user's way of saying it. Test: sentences a test speaker recorded twice; the first recording is treated as confirmed once (what the recogniser heard becomes a learned phrase), and the second recording is measured. Same phrasebook, same dev-tuned abstain rule, `transcribe-streaming`.
