@@ -42,6 +42,9 @@ STARTER: list[dict[str, Any]] = [
     {"phrase": "I am thirsty", "action": "say_for_me", "args": {"text": "I am thirsty. Could I have some water, please?"}},
     {"phrase": "thank you", "action": "say_for_me", "args": {"text": "Thank you so much."}},
     {"phrase": "pain", "action": "say_for_me", "args": {"text": "I am in pain. Please help me."}},
+    {"phrase": "paani", "action": "say_for_me", "args": {"text": "मुझे पानी चाहिए।"}},
+    {"phrase": "dhanyavaad", "action": "say_for_me", "args": {"text": "धन्यवाद।"}},
+    {"phrase": "madad", "action": "say_for_me", "args": {"text": "मुझे मदद चाहिए।"}},
 ]
 
 
