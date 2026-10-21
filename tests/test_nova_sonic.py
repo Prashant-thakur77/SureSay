@@ -105,3 +105,61 @@ def test_confirmations_can_be_heard_by_nova_sonic(tmp_path: Any, monkeypatch: An
         p = hub.say(device, "fan on")["pending"][0]
         ev = hub.voice(device, p, "anything").json()
     assert heard == [b"anything"] and ev["decision"]["kind"] == "choose" and ev["decision"]["option"] == 1
+
+
+class FakeToolStream(FakeStream):
+    """Sonic calling a tool, then answering with a speculative and a final text."""
+
+    def __init__(self) -> None:
+        super().__init__([])
+        self.got_result = False
+        events = [
+            {"contentStart": {"role": "TOOL", "type": "TOOL", "contentId": "t"}},
+            {"toolUse": {"toolName": "home_set", "toolUseId": "tu1", "content": '{"device": "fan", "on": true}'}},
+            {"contentEnd": {"type": "TOOL", "stopReason": "TOOL_USE"}},
+        ]
+        after = [
+            {"contentStart": {"role": "ASSISTANT", "type": "TEXT", "contentId": "a",
+                              "additionalModelFields": '{"generationStage": "SPECULATIVE"}'}},
+            {"textOutput": {"role": "ASSISTANT", "contentId": "a", "content": "draft"}},
+            {"contentStart": {"role": "ASSISTANT", "type": "TEXT", "contentId": "b",
+                              "additionalModelFields": '{"generationStage": "FINAL"}'}},
+            {"textOutput": {"role": "ASSISTANT", "contentId": "b", "content": "Please confirm on your screen."}},
+            {"contentEnd": {"type": "TEXT", "stopReason": "END_TURN"}},
+        ]
+        self.replies = [json.dumps({"event": e}).encode() for e in events]
+        self.after = [json.dumps({"event": e}).encode() for e in after]
+
+    async def send(self, event: dict[str, Any]) -> None:
+        await super().send(event)
+        if "toolResult" in event:
+            self.got_result = True
+            self.replies += self.after
+
+    async def receive(self) -> bytes | None:
+        import asyncio
+
+        for _ in range(100):
+            if self.replies:
+                return self.replies.pop(0)
+            await asyncio.sleep(0.01)
+        return None
+
+
+def test_the_sonic_agent_runs_tools_and_returns_only_the_final_text() -> None:
+    from strands_agent.sonic import SonicToolAgent
+
+    fake = FakeToolStream()
+
+    async def connect() -> FakeToolStream:
+        return fake
+
+    calls: list[tuple[str, dict[str, Any]]] = []
+    agent = SonicToolAgent(system_prompt="sys", tools=[], connect=connect,
+                           call=lambda n, a: calls.append((n, a)) or {"status": "pending_user_confirmation"})
+    reply = agent("turn on the fan")
+    assert reply == "Please confirm on your screen."
+    assert calls == [("home_set", {"device": "fan", "on": True})] and fake.got_result
+    result = next(e["toolResult"] for e in fake.sent if "toolResult" in e)
+    assert json.loads(result["content"]) == {"status": "pending_user_confirmation"}
+    assert any("audioInput" in e for e in fake.sent)  # silence keeps Sonic's clock moving

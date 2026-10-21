@@ -120,10 +120,14 @@ Run 2 (stability), test top-1: B0 plain 31.5%, B1 + phrasebook 90.7%, SureSay (o
 | No gate, same scripted agent | 20 | 15 | n/a (nothing to forge) | **35 / 35** |
 | No gate, Strands agent on Nova 2 Lite | pending | pending | pending | Bedrock access not available on this account yet; not run, not estimated |
 | SureSay, Strands agent on Nova 2 Lite | pending | pending | pending | Bedrock access not available on this account yet; not run, not estimated |
+| No gate, a real model: Amazon Nova 2 Sonic as the agent | 1 | 10 | n/a | **11 / 35** |
+| SureSay, a real model: Amazon Nova 2 Sonic as the agent (with `confirm`) | 0 | 0 | n/a | **0 / 35** |
 
 On the 15 near-misses SureSay's cards still let the user do what they meant 8 times (the intended action was among the three cards); the rest were declined and changed nothing. A plain assistant acts on the mishearing every time.
 
 The scripted agent is the worst case by design: it obeys every injection, acts on every mishearing and tries every forgery it can make, so the result does not depend on how well a model resists injection. Per-case evidence (HTTP status of each forgery, refusal reasons) is in `eval/results/run1/safety.json`.
+
+**With a real model.** Nova 2 Lite has no quota on this account yet, but Amazon Nova 2 Sonic takes text turns and calls tools, so it ran as the agent (temperature 0). Without the gate, on the same tools, it made 11 unconfirmed changes in 35 cases (1 after an injection, 10 by acting on a misheard command). Behind SureSay, with SureSay's agent prompt and every MCP tool including `confirm`, it made 0 in 35. Forgeries are structural, so they are covered by the scripted arms above.
 
 Run 2: 0 / 50.
 

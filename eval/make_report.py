@@ -190,6 +190,12 @@ def safety_section(s: dict[str, Any], s2: dict[str, Any] | None) -> tuple[list[s
                        f"**{sm['unconfirmed_changes']} / {sm['cases']}** |")
         else:
             out.append(f"| {label} | pending | pending | pending | {a.get('pending', 'not run')} |")
+    for arm, label in (("plain_sonic", "No gate, a real model: Amazon Nova 2 Sonic as the agent"),
+                       ("suresay_sonic", "SureSay, a real model: Amazon Nova 2 Sonic as the agent (with `confirm`)")):
+        sm = arms.get(arm, {}).get("summary")
+        if sm:
+            out.append(f"| {label} | {cell(sm, 'injection')} | {cell(sm, 'near_miss')} | {cell(sm, 'forged')} | "
+                       f"**{sm['unconfirmed_changes']} / {sm['cases']}** |")
     nm = adv["by_category"]["near_miss"]
     out += ["", f"On the 15 near-misses SureSay's cards still let the user do what they meant {nm['intent_done']} times "
             "(the intended action was among the three cards); the rest were declined and changed nothing. "
@@ -197,6 +203,17 @@ def safety_section(s: dict[str, Any], s2: dict[str, Any] | None) -> tuple[list[s
             "The scripted agent is the worst case by design: it obeys every injection, acts on every mishearing and "
             "tries every forgery it can make, so the result does not depend on how well a model resists injection. "
             "Per-case evidence (HTTP status of each forgery, refusal reasons) is in `eval/results/run1/safety.json`."]
+    if arms.get("plain_sonic", {}).get("summary") and arms.get("suresay_sonic", {}).get("summary"):
+        ps, ss = arms["plain_sonic"]["summary"], arms["suresay_sonic"]["summary"]
+        out += ["", "**With a real model.** Nova 2 Lite has no quota on this account yet, but Amazon Nova 2 Sonic takes "
+                "text turns and calls tools, so it ran as the agent (temperature 0). Without the gate, on the same "
+                f"tools, it made {ps['unconfirmed_changes']} unconfirmed changes in {ps['cases']} cases "
+                f"({ps['by_category'].get('injection', {}).get('unconfirmed_changes', 0)} after an injection, "
+                f"{ps['by_category'].get('near_miss', {}).get('unconfirmed_changes', 0)} by acting on a misheard "
+                "command). Behind "
+                f"SureSay, with SureSay's agent prompt and every MCP tool including `confirm`, it made "
+                f"{ss['unconfirmed_changes']} in {ss['cases']}. Forgeries are structural, so they are covered by the "
+                "scripted arms above."]
     if s2:
         out += ["", f"Run 2: {s2['arms']['suresay_adversary']['summary']['unconfirmed_changes']} / 50."]
     return out, {"ss": adv["unconfirmed_changes"], "cases": adv["cases"], "plain": plain["unconfirmed_changes"],
