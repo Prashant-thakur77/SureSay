@@ -85,7 +85,9 @@ The Nova 2 Lite ranker and the model-driven safety arms are built and tested aga
 | **Amazon DynamoDB** | The gate ledger (card sets, evidence, receipts, paired devices, signature replay cache) with conditional writes for one-time use, plus home state. One on-demand table with a kind index and TTL. |
 | **Amazon S3** | Utterance and confirmation audio, content-addressed, private, encrypted, expiring after 30 days. Receipts carry the audio's fingerprint. |
 | **AWS Lambda** (function URL + Web Adapter) | The hub: MCP at `/mcp`, the device channel at `/device/*`, and the web client, in one function. |
-| **IAM** | A least-privilege role for the hub, scoped to the table, the bucket, the Nova profile and AgentCore. |
+| **CloudWatch** | Safety metrics (confirmed, refused, cancelled by caller kind) and latency, through Embedded Metric Format, on a "SureSay" dashboard. |
+| **SNS** | Opt-in carer alerts when the user confirms a high-risk action. |
+| **IAM** | A least-privilege role for the hub, scoped to the table, the bucket, the Nova profile, AgentCore and the alert topic. |
 
 Code pointers, permissions and a verify command for each service: [docs/AWS_INTEGRATIONS.md](docs/AWS_INTEGRATIONS.md).
 

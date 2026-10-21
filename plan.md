@@ -292,3 +292,5 @@ Priority if time remains before Fri 18:00 IST:
 | 3 | CloudWatch metrics (Embedded Metric Format) + a "SureSay safety" dashboard | Operators and judges can see confirms, refusals and latency live | Metrics appear in CloudWatch; `deploy.sh` creates the dashboard |
 | 4 | Carer alerts via Amazon SNS (opt-in) | Caretaking: a carer hears about high-risk actions the user confirmed | Publish on high-risk receipts when `SURESAY_CARER_TOPIC_ARN` is set; test with a stub |
 | 5 | Nova quota → Nova arms | The remaining pending numbers | Run when the quota case closes |
+
+Iteration 2 status: [x] 2 per-user index + event TTL (live, backfilled) · [x] 3 EMF metrics + dashboard (live) · [x] 4 SNS carer alerts (live) · [ ] 1 review (running) · [ ] 5 Nova (quota case open)
