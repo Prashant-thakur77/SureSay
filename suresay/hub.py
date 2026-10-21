@@ -183,8 +183,18 @@ def build_app(s: SureSay | None = None) -> Starlette:
     security = TransportSecuritySettings(enable_dns_rebinding_protection=False)
     app = s.mcp.streamable_http_app(stateless_http=True, json_response=True, transport_security=security)
 
+    evidence_asr: list[Any] = []
+
     def evidence_transcribe(audio: bytes) -> str:
-        return s.asr.transcribe(audio, vocabulary=EVIDENCE_WORDS or None).text
+        """The user's confirmation audio, transcribed by the server. Hindi speakers: SURESAY_EVIDENCE_LANGUAGE=hi-IN,
+        which writes Hindi in Devanagari and English words transliterated; both are mapped by the consent parser."""
+        if not evidence_asr:
+            from .asr import TranscribeStreamingAsr
+
+            lang = s.cfg.evidence_language
+            evidence_asr.append(TranscribeStreamingAsr(region=s.cfg.region, language=lang)
+                                if lang != "en-US" and s.asr.name.startswith("transcribe") else s.asr)
+        return evidence_asr[0].transcribe(audio, vocabulary=EVIDENCE_WORDS or None).text
 
     routes: list[Any] = device_routes(
         s.gate, s.devices, transcribe=evidence_transcribe, transcriber=None,

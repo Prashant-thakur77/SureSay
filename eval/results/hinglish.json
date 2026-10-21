@@ -1,0 +1,633 @@
+{
+  "name": "hinglish",
+  "generated_at": "2026-10-21T09:04:42+0530",
+  "git_sha": "826fb3d",
+  "python": "3.13.12",
+  "what": "Polly Kajal (synthetic) -> Transcribe streaming -> consent parser",
+  "summary": {
+    "hi-IN": {
+      "phrases": 18,
+      "correct_pct": 100.0,
+      "false_accepts": 0
+    },
+    "en-IN": {
+      "phrases": 18,
+      "correct_pct": 38.9,
+      "false_accepts": 0
+    }
+  },
+  "rows": [
+    {
+      "said": "\u0939\u093e\u0901",
+      "voice_lang": "hi-IN",
+      "asr_lang": "hi-IN",
+      "stage": "final",
+      "heard": "\u0939\u093e\u0901\u0964",
+      "decision": [
+        "yes",
+        null
+      ],
+      "expected": [
+        "yes",
+        null
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "\u0939\u093e\u0901 \u091c\u0940",
+      "voice_lang": "hi-IN",
+      "asr_lang": "hi-IN",
+      "stage": "final",
+      "heard": "\u0939\u093e\u0901 \u091c\u0940\u0964",
+      "decision": [
+        "yes",
+        null
+      ],
+      "expected": [
+        "yes",
+        null
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "\u0920\u0940\u0915 \u0939\u0948",
+      "voice_lang": "hi-IN",
+      "asr_lang": "hi-IN",
+      "stage": "final",
+      "heard": "\u0920\u0940\u0915 \u0939\u0948\u0964",
+      "decision": [
+        "yes",
+        null
+      ],
+      "expected": [
+        "yes",
+        null
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "\u0928\u0939\u0940\u0902",
+      "voice_lang": "hi-IN",
+      "asr_lang": "hi-IN",
+      "stage": "final",
+      "heard": "\u0928\u0939\u0940\u0902\u0964",
+      "decision": [
+        "no",
+        null
+      ],
+      "expected": [
+        "no",
+        null
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "\u092e\u0924 \u0915\u0930\u094b",
+      "voice_lang": "hi-IN",
+      "asr_lang": "hi-IN",
+      "stage": "final",
+      "heard": "\u092e\u0924 \u0915\u0930\u094b,",
+      "decision": [
+        "no",
+        null
+      ],
+      "expected": [
+        "no",
+        null
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "\u0926\u094b \u0928\u0902\u092c\u0930",
+      "voice_lang": "hi-IN",
+      "asr_lang": "hi-IN",
+      "stage": "choose",
+      "heard": "\u0926\u094b \u0928\u0902\u092c\u0930",
+      "decision": [
+        "choose",
+        2
+      ],
+      "expected": [
+        "choose",
+        2
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "\u0928\u0902\u092c\u0930 \u0926\u094b",
+      "voice_lang": "hi-IN",
+      "asr_lang": "hi-IN",
+      "stage": "choose",
+      "heard": "\u0928\u0902\u092c\u0930 \u0926\u094b",
+      "decision": [
+        "choose",
+        2
+      ],
+      "expected": [
+        "choose",
+        2
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "\u092a\u0939\u0932\u093e",
+      "voice_lang": "hi-IN",
+      "asr_lang": "hi-IN",
+      "stage": "choose",
+      "heard": "\u092a\u0939\u0932\u093e",
+      "decision": [
+        "choose",
+        1
+      ],
+      "expected": [
+        "choose",
+        1
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "\u0926\u0942\u0938\u0930\u093e",
+      "voice_lang": "hi-IN",
+      "asr_lang": "hi-IN",
+      "stage": "choose",
+      "heard": "\u0926\u0942\u0938\u0930\u093e,",
+      "decision": [
+        "choose",
+        2
+      ],
+      "expected": [
+        "choose",
+        2
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "\u0924\u0940\u0938\u0930\u093e",
+      "voice_lang": "hi-IN",
+      "asr_lang": "hi-IN",
+      "stage": "choose",
+      "heard": "\u0924\u0940\u0938\u0930\u093e",
+      "decision": [
+        "choose",
+        3
+      ],
+      "expected": [
+        "choose",
+        3
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "\u0924\u0940\u0928 \u0928\u0902\u092c\u0930",
+      "voice_lang": "hi-IN",
+      "asr_lang": "hi-IN",
+      "stage": "choose",
+      "heard": "\u0924\u0940\u0928 \u0928\u0902\u092c\u0930",
+      "decision": [
+        "choose",
+        3
+      ],
+      "expected": [
+        "choose",
+        3
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "\u0907\u0938\u0915\u094b \u0915\u0930 \u0926\u094b",
+      "voice_lang": "hi-IN",
+      "asr_lang": "hi-IN",
+      "stage": "choose",
+      "heard": "\u0907\u0938\u0915\u094b \u0915\u0930 \u0926\u094b\u0964",
+      "decision": [
+        "unclear",
+        null
+      ],
+      "expected": [
+        "unclear",
+        null
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "Yes",
+      "voice_lang": "en-IN",
+      "asr_lang": "hi-IN",
+      "stage": "final",
+      "heard": "\u092f\u0947\u0938\u0964",
+      "decision": [
+        "yes",
+        null
+      ],
+      "expected": [
+        "yes",
+        null
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "No",
+      "voice_lang": "en-IN",
+      "asr_lang": "hi-IN",
+      "stage": "final",
+      "heard": "\u0928\u094b,",
+      "decision": [
+        "no",
+        null
+      ],
+      "expected": [
+        "no",
+        null
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "Number two",
+      "voice_lang": "en-IN",
+      "asr_lang": "hi-IN",
+      "stage": "choose",
+      "heard": "\u0928\u0902\u092c\u0930 \u0924\u094d\u0935\u094b",
+      "decision": [
+        "choose",
+        2
+      ],
+      "expected": [
+        "choose",
+        2
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "The second one",
+      "voice_lang": "en-IN",
+      "asr_lang": "hi-IN",
+      "stage": "choose",
+      "heard": "\u0925\u0947 \u0938\u0947\u0915\u0902\u0921 \u0913\u0928\u0947",
+      "decision": [
+        "choose",
+        2
+      ],
+      "expected": [
+        "choose",
+        2
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "Option three",
+      "voice_lang": "en-IN",
+      "asr_lang": "hi-IN",
+      "stage": "choose",
+      "heard": "\u0911\u092a\u094d\u0936\u0928 \u0925\u094d\u0930\u0940",
+      "decision": [
+        "choose",
+        3
+      ],
+      "expected": [
+        "choose",
+        3
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "Not two",
+      "voice_lang": "en-IN",
+      "asr_lang": "hi-IN",
+      "stage": "choose",
+      "heard": "\u0928\u094b\u091f \u0924\u094b\u0964",
+      "decision": [
+        "unclear",
+        null
+      ],
+      "expected": [
+        "unclear",
+        null
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "\u0939\u093e\u0901",
+      "voice_lang": "hi-IN",
+      "asr_lang": "en-IN",
+      "stage": "final",
+      "heard": "How",
+      "decision": [
+        "unclear",
+        null
+      ],
+      "expected": [
+        "yes",
+        null
+      ],
+      "correct": false,
+      "false_accept": false
+    },
+    {
+      "said": "\u0939\u093e\u0901 \u091c\u0940",
+      "voice_lang": "hi-IN",
+      "asr_lang": "en-IN",
+      "stage": "final",
+      "heard": "Haji",
+      "decision": [
+        "unclear",
+        null
+      ],
+      "expected": [
+        "yes",
+        null
+      ],
+      "correct": false,
+      "false_accept": false
+    },
+    {
+      "said": "\u0920\u0940\u0915 \u0939\u0948",
+      "voice_lang": "hi-IN",
+      "asr_lang": "en-IN",
+      "stage": "final",
+      "heard": "TK",
+      "decision": [
+        "unclear",
+        null
+      ],
+      "expected": [
+        "yes",
+        null
+      ],
+      "correct": false,
+      "false_accept": false
+    },
+    {
+      "said": "\u0928\u0939\u0940\u0902",
+      "voice_lang": "hi-IN",
+      "asr_lang": "en-IN",
+      "stage": "final",
+      "heard": "Nehi",
+      "decision": [
+        "unclear",
+        null
+      ],
+      "expected": [
+        "no",
+        null
+      ],
+      "correct": false,
+      "false_accept": false
+    },
+    {
+      "said": "\u092e\u0924 \u0915\u0930\u094b",
+      "voice_lang": "hi-IN",
+      "asr_lang": "en-IN",
+      "stage": "final",
+      "heard": "Matkro",
+      "decision": [
+        "unclear",
+        null
+      ],
+      "expected": [
+        "no",
+        null
+      ],
+      "correct": false,
+      "false_accept": false
+    },
+    {
+      "said": "\u0926\u094b \u0928\u0902\u092c\u0930",
+      "voice_lang": "hi-IN",
+      "asr_lang": "en-IN",
+      "stage": "choose",
+      "heard": "Though number",
+      "decision": [
+        "unclear",
+        null
+      ],
+      "expected": [
+        "choose",
+        2
+      ],
+      "correct": false,
+      "false_accept": false
+    },
+    {
+      "said": "\u0928\u0902\u092c\u0930 \u0926\u094b",
+      "voice_lang": "hi-IN",
+      "asr_lang": "en-IN",
+      "stage": "choose",
+      "heard": "Number though",
+      "decision": [
+        "unclear",
+        null
+      ],
+      "expected": [
+        "choose",
+        2
+      ],
+      "correct": false,
+      "false_accept": false
+    },
+    {
+      "said": "\u092a\u0939\u0932\u093e",
+      "voice_lang": "hi-IN",
+      "asr_lang": "en-IN",
+      "stage": "choose",
+      "heard": "Heal.",
+      "decision": [
+        "unclear",
+        null
+      ],
+      "expected": [
+        "choose",
+        1
+      ],
+      "correct": false,
+      "false_accept": false
+    },
+    {
+      "said": "\u0926\u0942\u0938\u0930\u093e",
+      "voice_lang": "hi-IN",
+      "asr_lang": "en-IN",
+      "stage": "choose",
+      "heard": "Gusra",
+      "decision": [
+        "unclear",
+        null
+      ],
+      "expected": [
+        "choose",
+        2
+      ],
+      "correct": false,
+      "false_accept": false
+    },
+    {
+      "said": "\u0924\u0940\u0938\u0930\u093e",
+      "voice_lang": "hi-IN",
+      "asr_lang": "en-IN",
+      "stage": "choose",
+      "heard": "snow",
+      "decision": [
+        "unclear",
+        null
+      ],
+      "expected": [
+        "choose",
+        3
+      ],
+      "correct": false,
+      "false_accept": false
+    },
+    {
+      "said": "\u0924\u0940\u0928 \u0928\u0902\u092c\u0930",
+      "voice_lang": "hi-IN",
+      "asr_lang": "en-IN",
+      "stage": "choose",
+      "heard": "The number.",
+      "decision": [
+        "unclear",
+        null
+      ],
+      "expected": [
+        "choose",
+        3
+      ],
+      "correct": false,
+      "false_accept": false
+    },
+    {
+      "said": "\u0907\u0938\u0915\u094b \u0915\u0930 \u0926\u094b",
+      "voice_lang": "hi-IN",
+      "asr_lang": "en-IN",
+      "stage": "choose",
+      "heard": "Isker though",
+      "decision": [
+        "unclear",
+        null
+      ],
+      "expected": [
+        "unclear",
+        null
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "Yes",
+      "voice_lang": "en-IN",
+      "asr_lang": "en-IN",
+      "stage": "final",
+      "heard": "Yes,",
+      "decision": [
+        "yes",
+        null
+      ],
+      "expected": [
+        "yes",
+        null
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "No",
+      "voice_lang": "en-IN",
+      "asr_lang": "en-IN",
+      "stage": "final",
+      "heard": "No",
+      "decision": [
+        "no",
+        null
+      ],
+      "expected": [
+        "no",
+        null
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "Number two",
+      "voice_lang": "en-IN",
+      "asr_lang": "en-IN",
+      "stage": "choose",
+      "heard": "2.",
+      "decision": [
+        "choose",
+        2
+      ],
+      "expected": [
+        "choose",
+        2
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "The second one",
+      "voice_lang": "en-IN",
+      "asr_lang": "en-IN",
+      "stage": "choose",
+      "heard": "The second one",
+      "decision": [
+        "choose",
+        2
+      ],
+      "expected": [
+        "choose",
+        2
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "Option three",
+      "voice_lang": "en-IN",
+      "asr_lang": "en-IN",
+      "stage": "choose",
+      "heard": "Option 3",
+      "decision": [
+        "choose",
+        3
+      ],
+      "expected": [
+        "choose",
+        3
+      ],
+      "correct": true,
+      "false_accept": false
+    },
+    {
+      "said": "Not two",
+      "voice_lang": "en-IN",
+      "asr_lang": "en-IN",
+      "stage": "choose",
+      "heard": "Not 2",
+      "decision": [
+        "unclear",
+        null
+      ],
+      "expected": [
+        "unclear",
+        null
+      ],
+      "correct": true,
+      "false_accept": false
+    }
+  ]
+}
