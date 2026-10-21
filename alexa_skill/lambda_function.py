@@ -46,7 +46,7 @@ class Hub:
                    "content-type": "application/json"}
         req = urllib.request.Request(self.base + path, data=body or None, method=method, headers=headers)
         try:
-            with urllib.request.urlopen(req, timeout=20) as resp:  # noqa: S310 (our own hub)
+            with urllib.request.urlopen(req, timeout=7) as resp:  # noqa: S310 (our own hub); Alexa allows ~8 s
                 return json.loads(resp.read())
         except urllib.error.HTTPError as exc:
             return {"error": json.loads(exc.read() or b"{}").get("error", str(exc)), "http": exc.code}

@@ -415,3 +415,47 @@ def _call_agent_understand(hub: Hub, user: str) -> dict[str, Any]:
     r = hub.http.post("/mcp", headers=h, json={"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {
         "name": "understand", "arguments": {"user_id": user, "transcript": "fan on"}}}).json()["result"]
     return _json.loads(r["content"][0]["text"])
+
+
+def test_oversized_audio_is_refused_before_decoding(hub: Hub) -> None:
+    """Security review finding: unbounded audio bodies (memory and Transcribe cost)."""
+    import base64 as b64
+
+    device = hub.pair()
+    big = b64.b64encode(b"x" * 2_100_000).decode()
+    r = hub.signed(device, "POST", "/device/turn", {"audio_b64": big})
+    assert r.status_code == 413
+    p = hub.say(device, "fan on")["pending"][0]
+    r = hub.signed(device, "POST", "/device/evidence", {"pending_id": p["pending_id"], "nonce": p["nonce"],
+                                                         "kind": "voice", "audio_b64": big})
+    assert r.status_code == 413
+    huge = hub.http.post("/device/turn", content=b"{" + b" " * 5_000_000 + b"}", headers={"content-type": "application/json"})
+    assert huge.status_code == 413
+
+
+def test_guest_voice_cap_covers_evidence_too(hub: Hub, monkeypatch: pytest.MonkeyPatch) -> None:
+    import base64 as b64
+
+    import suresay.hub as hubmod
+    from confirm_gate.evidence import Device
+
+    monkeypatch.setattr(hubmod, "GUEST_VOICE_PER_DAY", 1)
+    hub.s.cfg.__dict__["public_demo"] = True
+    g = hub.http.post("/device/try").json()
+    d = Device(g["device_id"], g["user_id"], g["key"], g["name"])
+    p = hub.say(d, "fan on")["pending"][0]
+    ok = hub.signed(d, "POST", "/device/evidence", {"pending_id": p["pending_id"], "nonce": p["nonce"], "kind": "voice",
+                                                    "audio_b64": b64.b64encode(b"one").decode()})
+    assert ok.status_code == 200
+    capped = hub.signed(d, "POST", "/device/evidence", {"pending_id": p["pending_id"], "nonce": p["nonce"], "kind": "voice",
+                                                        "audio_b64": b64.b64encode(b"two").decode()})
+    assert capped.status_code in (400, 429)
+
+
+def test_the_agent_breaker_is_shared_across_hub_instances(hub: Hub) -> None:
+    from suresay.hub import AgentBridge
+
+    a, b = AgentBridge(hub.s), AgentBridge(hub.s)
+    a._mode = b._mode = "agent"
+    a.trip()
+    assert b.mode() == "direct"  # a second instance (another Lambda container) sees it through the store

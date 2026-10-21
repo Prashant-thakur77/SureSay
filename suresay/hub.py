@@ -45,6 +45,36 @@ logger = logging.getLogger("suresay.hub")
 # ordinary words toward them, and the rule ranks false accepts first. See eval/REPORT.md.
 EVIDENCE_WORDS: list[str] = []
 GUEST_VOICE_PER_DAY = 60  # public demo homes: speech recognition is paid per request, typing is free
+MAX_AUDIO_BYTES = 2_000_000  # about a minute of 16 kHz mono speech: far more than any turn or answer
+MAX_BODY_BYTES = 4_000_000
+
+
+class BodyLimit:
+    """Refuse oversized request bodies with 413 before reading them into memory."""
+
+    def __init__(self, app: ASGIApp, limit: int = MAX_BODY_BYTES) -> None:
+        self.app = app
+        self.limit = limit
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        length = dict(scope["headers"]).get(b"content-length")
+        if length is not None and length.isdigit() and int(length) > self.limit:
+            await JSONResponse({"error": "request body too large"}, status_code=413)(scope, receive, send)
+            return
+        seen = 0
+
+        async def limited() -> Message:
+            nonlocal seen
+            msg = await receive()
+            seen += len(msg.get("body", b""))
+            if seen > self.limit:
+                raise ValueError("request body too large")
+            return msg
+
+        await self.app(scope, limited, send)
 
 
 class McpAuth:
@@ -156,13 +186,32 @@ class AgentBridge:
         self.s = s
         self._mode: str | None = None
         self._down_until = 0.0
+        self._checked_at = 0.0
 
     def trip(self) -> None:
-        """The agent failed (e.g. no model quota): answer directly for a while instead of waiting on it each turn."""
+        """The agent failed (e.g. no model quota): answer directly for a while instead of waiting on it each turn.
+
+        Shared through the store, so every hub instance (each Lambda container) skips the broken agent at once.
+        """
         self._down_until = time.time() + self.BREAK_SECONDS
+        try:
+            self.s.store.put("agent_health", "agent", {"down_until": self._down_until})
+        except Exception:
+            logger.exception("could not share the agent breaker")
+
+    def _shared_down(self) -> bool:
+        now = time.time()
+        if now - self._checked_at > 10:
+            self._checked_at = now
+            try:
+                doc = self.s.store.get("agent_health", "agent") or {}
+                self._down_until = max(self._down_until, float(doc.get("down_until", 0)))
+            except Exception:
+                pass
+        return self._down_until > now
 
     def mode(self) -> str:
-        if self._down_until > time.time():
+        if self._shared_down():
             return "direct"
         if self._mode is None:
             want = self.s.cfg.agent_mode
@@ -188,7 +237,7 @@ class AgentBridge:
         payload = {"prompt": self.prompt(user_id, text, audio_ref), "user_id": user_id, "session_id": session_id}
         if self.s.cfg.agent_runtime_arn:
             return await anyio.to_thread.run_sync(self._invoke_runtime, payload, session_id)
-        async with httpx.AsyncClient(timeout=15) as client:
+        async with httpx.AsyncClient(timeout=6) as client:
             r = await client.post(self.s.cfg.agent_url, json=payload)
             r.raise_for_status()
             data = r.json()
@@ -199,7 +248,7 @@ class AgentBridge:
         from botocore.config import Config
 
         client = boto3.client("bedrock-agentcore", region_name=self.s.cfg.region,
-                              config=Config(read_timeout=12, connect_timeout=3, retries={"max_attempts": 1}))
+                              config=Config(read_timeout=6, connect_timeout=2, retries={"max_attempts": 1}))
         resp = client.invoke_agent_runtime(agentRuntimeArn=self.s.cfg.agent_runtime_arn,
                                            runtimeSessionId=(session_id + "-" + "0" * 40)[:40],
                                            payload=json.dumps(payload).encode())
@@ -255,23 +304,36 @@ def build_app(s: SureSay | None = None) -> Starlette:
                                 if lang != "en-US" and s.asr.name.startswith("transcribe") else s.asr)
         return evidence_asr[0].transcribe(audio, vocabulary=EVIDENCE_WORDS or None).text
 
+    def guest_voice_ok(user_id: str) -> bool:
+        """Public demo homes get GUEST_VOICE_PER_DAY recognised clips a day (turns and spoken answers together)."""
+        if not user_id.startswith("guest-"):
+            return True
+        key = f"{user_id}:{time.strftime('%Y-%m-%d')}"
+        used = (s.store.get("guest_usage", key) or {}).get("voice", 0)
+        if used >= GUEST_VOICE_PER_DAY:
+            return False
+        s.store.put("guest_usage", key, {"voice": used + 1, "expires_at": time.time() + 86400})
+        return True
+
+    def evidence_sink(audio: bytes, device: Any, pending_id: str) -> str:
+        if not guest_voice_ok(device.user_id):
+            raise ValueError("this demo home has used today's voice answers; please tap instead")
+        return s.media.put("evidence", audio)
+
     routes: list[Any] = device_routes(
         s.gate, s.devices, transcribe=evidence_transcribe, transcriber=None,
-        media_sink=lambda audio, device, pid: s.media.put("evidence", audio),
+        media_sink=evidence_sink, max_audio_bytes=MAX_AUDIO_BYTES,
     )
 
     async def turn(request: Request, device: Any, data: dict[str, Any]) -> Response:
         """One user turn from the device: typed text or recorded audio."""
         text = str(data.get("text") or "").strip()[:500] or None
         audio_ref = None
-        if data.get("audio_b64") and device.user_id.startswith("guest-"):
-            day = time.strftime("%Y-%m-%d")
-            key = f"{device.user_id}:{day}"
-            used = (s.store.get("guest_usage", key) or {}).get("voice", 0)
-            if used >= GUEST_VOICE_PER_DAY:
-                return JSONResponse({"error": "this demo home has used today's voice turns; please type instead"},
-                                    status_code=429)
-            s.store.put("guest_usage", key, {"voice": used + 1, "expires_at": time.time() + 86400})
+        if len(str(data.get("audio_b64") or "")) > (MAX_AUDIO_BYTES * 4) // 3 + 4:
+            return JSONResponse({"error": "audio is too long"}, status_code=413)
+        if data.get("audio_b64") and not guest_voice_ok(device.user_id):
+            return JSONResponse({"error": "this demo home has used today's voice turns; please type instead"},
+                                status_code=429)
         if data.get("audio_b64"):
             try:
                 audio = base64.b64decode(str(data["audio_b64"]), validate=True)
@@ -433,6 +495,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
     app.router.routes.extend(routes)
     app.add_middleware(McpAuth, suresay=s)
     app.add_middleware(DeviceCallerTag)
+    app.add_middleware(BodyLimit)
     # Device and MCP auth are header signatures/tokens, never cookies, so "*" is safe when a screen app needs it.
     app.add_middleware(
         CORSMiddleware, allow_origins=["*"] if "*" in s.cfg.allowed_origins else list(s.cfg.allowed_origins), allow_methods=["GET", "POST", "DELETE", "OPTIONS"],

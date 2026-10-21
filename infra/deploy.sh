@@ -103,7 +103,10 @@ PYEOF
 }
 LWA="arn:aws:lambda:${REGION}:753240598075:layer:LambdaAdapterLayerX86:30"
 RUNTIME_ARN="$(cat "$STATE/agent_runtime_arn" 2>/dev/null || true)"
-MODE="direct"; [ -n "$RUNTIME_ARN" ] && MODE="agent"
+MODE="direct"
+if [ -n "$RUNTIME_ARN" ] && "$PY" -c "from suresay.rank import bedrock_available as b; import os, sys; sys.exit(0 if b(os.environ.get('NOVA_MODEL_ID', 'us.amazon.nova-2-lite-v1:0')) else 1)" 2>/dev/null; then
+  MODE="agent"
+fi
 VARS=(AWS_LAMBDA_EXEC_WRAPPER=/opt/bootstrap PORT=8080 AWS_LWA_READINESS_CHECK_PATH=/healthz
       SURESAY_BACKEND=aws SURESAY_GATE_TABLE="$TABLE" SURESAY_BUCKET="$BUCKET" SURESAY_DATA_DIR=/tmp/suresay
       AGENTCORE_MEMORY_ID="$MEMORY_ID" SURESAY_AGENT_TOKEN="$AGENT_TOKEN" SURESAY_ASR=auto SURESAY_RANKER=auto
@@ -156,7 +159,13 @@ if [ -z "${SKIP_AGENT:-}" ]; then
   RUNTIME_ARN="$(aws bedrock-agentcore-control list-agent-runtimes --query "agentRuntimes[?agentRuntimeName=='$AGENT'].agentRuntimeArn | [0]" --output text 2>/dev/null || true)"
   if [ -n "$RUNTIME_ARN" ] && [ "$RUNTIME_ARN" != "None" ]; then
     echo "$RUNTIME_ARN" > "$STATE/agent_runtime_arn"
-    VARS=("${VARS[@]/SURESAY_AGENT_MODE=*/SURESAY_AGENT_MODE=agent}")
+    if "$PY" -c "from suresay.rank import bedrock_available as b; import os, sys; sys.exit(0 if b(os.environ.get('NOVA_MODEL_ID', 'us.amazon.nova-2-lite-v1:0')) else 1)" 2>/dev/null; then
+      AGENT_MODE_SET=agent
+    else
+      AGENT_MODE_SET=direct
+      echo "Nova did not answer (quota?): the hub answers turns directly until a redeploy finds Nova working."
+    fi
+    VARS=("${VARS[@]/SURESAY_AGENT_MODE=*/SURESAY_AGENT_MODE=$AGENT_MODE_SET}")
     VARS=("${VARS[@]/AGENTCORE_RUNTIME_ARN=*/AGENTCORE_RUNTIME_ARN=$RUNTIME_ARN}")
     aws lambda update-function-configuration --function-name "$FUNCTION" --environment "$(ENV_JSON "${VARS[@]}")" >/dev/null
     aws lambda wait function-updated-v2 --function-name "$FUNCTION"
