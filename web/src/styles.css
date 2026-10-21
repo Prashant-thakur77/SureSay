@@ -3752,3 +3752,38 @@ code {
 :root[data-theme="contrast"] .pair__try-btn::after {
   background: #000000;
 }
+
+/* Your devices (Settings) */
+.devices__hint {
+  margin: 0 0 0.6rem;
+}
+
+.devices__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.devices__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 2px solid var(--line, currentColor);
+  border-radius: 14px;
+}
+
+.devices__name {
+  display: grid;
+  flex: 1 1 12rem;
+  font-weight: 700;
+}
+
+.devices__kind {
+  font-weight: 400;
+  font-size: 0.95em;
+  opacity: 0.85;
+}

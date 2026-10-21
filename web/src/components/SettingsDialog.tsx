@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 import type { ScanSpeed, Settings, TextScale, ThemeChoice } from "../hooks/useSettings";
+import type { PairedDevice } from "../lib/types";
+import { DevicesSection } from "./DevicesSection";
 import { DoorbellMenu, type VisitorId } from "./Doorbell";
 import { Icon } from "./Icon";
 
@@ -13,6 +15,8 @@ interface Props {
   onResetHome: () => Promise<void>;
   onUnpair: () => void;
   onRing?: (id: VisitorId) => void;
+  loadDevices?: () => Promise<PairedDevice[]>;
+  unpairDevice?: (deviceId: string) => Promise<void>;
 }
 
 function Choice<T extends string | number>({ legend, name, value, options, onChange }: { legend: string; name: string; value: T; options: Array<{ value: T; label: string }>; onChange: (v: T) => void }) {
@@ -50,7 +54,7 @@ function Toggle({ label, hint, checked, onChange, disabled }: { label: string; h
 }
 
 /** Settings: an accessible modal. Tab stays inside, Escape closes, focus returns to the Settings button. */
-export function SettingsDialog({ open, settings, tvFromUrl, onChange, onClose, onResetHome, onUnpair, onRing }: Props) {
+export function SettingsDialog({ open, settings, tvFromUrl, onChange, onClose, onResetHome, onUnpair, onRing, loadDevices, unpairDevice }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState("");
   const [confirmUnpair, setConfirmUnpair] = useState(false);
@@ -147,6 +151,7 @@ export function SettingsDialog({ open, settings, tvFromUrl, onChange, onClose, o
               onChange={(v) => onChange({ bigScreen: v })}
             />
           </fieldset>
+          {loadDevices && unpairDevice && <DevicesSection load={loadDevices} unpair={unpairDevice} />}
           <fieldset className="choice">
             <legend>Demo and device</legend>
             <div className="dialog__actions">

@@ -150,7 +150,8 @@ button{{font:inherit;font-weight:700;min-height:60px;padding:0 28px;border-radiu
 <body><main><h1>Link SureSay to {who}</h1>
 <p><strong>{who}</strong> is asking to act for you. Only link it if you started this from {who} yourself.
 Enter the 6-digit code shown on your SureSay screen. It will be able to suggest actions;
-only you can confirm them, on your own device. Unpair "Linked: {html.escape(p.get("client_id", ""))}" to end the link.</p>{err}
+only you can confirm them, on your own device. To end the link later, unpair it in SureSay under
+Settings, Your devices.</p>{err}
 <form method="post" action="/oauth/authorize">{hidden}
 <label for="pc">Pairing code</label><br><input id="pc" type="text" name="pairing_code" inputmode="numeric"
 autocomplete="one-time-code" maxlength="6" required autofocus><button type="submit">Link</button></form></main></body></html>"""
@@ -168,7 +169,9 @@ autocomplete="one-time-code" maxlength="6" required autofocus><button type="subm
             if err:
                 return JSONResponse({"error": "invalid_request", "error_description": err}, status_code=400)
             try:
-                device = self.devices.pair(p.get("pairing_code", ""), name=f"Linked: {p['client_id']}"[:60])
+                client = self._client(p["client_id"]) or {}
+                device = self.devices.pair(p.get("pairing_code", ""),
+                                           name=f"Linked: {client.get('name') or p['client_id']}"[:60])
             except PairingError as exc:
                 return HTMLResponse(page(p, f"That code didn't work ({exc}). Check the code on your SureSay screen."),
                                     status_code=403, headers=NO_FRAMING)

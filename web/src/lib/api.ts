@@ -7,6 +7,7 @@ import type {
   DeviceCreds,
   EvidenceResponse,
   HubState,
+  PairedDevice,
   PendingSet,
   SpeakResponse,
   TurnResponse,
@@ -38,6 +39,10 @@ export interface HubApi {
   propose(action: string, args: Record<string, unknown>): Promise<PendingSet>;
   /** Simulated doorbell press: opens the door's card set (the user still confirms). */
   doorbell(visitor: "ravi" | "delivery" | "unknown"): Promise<{ pending: PendingSet; say: string }>;
+  /** The user's own devices and assistant links. */
+  devices?(): Promise<PairedDevice[]>;
+  /** Unpair one of them (for an assistant link, that ends its access). */
+  unpairDevice?(deviceId: string): Promise<void>;
   /** The signing fetch, for the MCP transport. */
   signingFetch: (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 }
@@ -125,6 +130,14 @@ export class HubClient implements HubApi {
     } finally {
       t.done();
     }
+  }
+
+  async devices(): Promise<PairedDevice[]> {
+    return (await this.call<{ devices: PairedDevice[] }>("GET", "/device/devices")).devices;
+  }
+
+  async unpairDevice(deviceId: string): Promise<void> {
+    await this.call<{ ok: boolean }>("POST", "/device/unpair", { device_id: deviceId });
   }
 
   async pending(): Promise<PendingSet[]> {

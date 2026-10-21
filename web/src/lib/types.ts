@@ -19,6 +19,15 @@ export interface DeviceCreds {
   name: string;
 }
 
+/** One of the user's paired devices or assistant links (never its key). */
+export interface PairedDevice {
+  device_id: string;
+  name: string;
+  kind: "screen" | "voice" | "link";
+  paired_at?: number;
+  this_device: boolean;
+}
+
 export interface CardOption {
   n: number;
   text: string;

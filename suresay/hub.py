@@ -526,7 +526,32 @@ def build_app(s: SureSay | None = None) -> Starlette:
         closed = await anyio.to_thread.run_sync(lambda: s.gate.withdraw_open(device.user_id, reason="reset"))
         return JSONResponse({"ok": True, "withdrawn": closed})
 
+    async def devices(request: Request, device: Any, data: dict[str, Any]) -> Response:
+        """The user's own active devices and assistant links (never a key), so they can see and end any of them."""
+        def collect() -> list[dict[str, Any]]:
+            out = []
+            for d in s.store.scan("device", user_id=device.user_id):
+                if d.get("revoked_at") is not None:
+                    continue
+                name = str(d.get("name") or "")
+                kind = "link" if name.startswith("Linked:") else "voice" if d.get("transcriber") else "screen"
+                out.append({"device_id": d["device_id"], "name": name, "kind": kind, "paired_at": d.get("paired_at"),
+                            "this_device": d["device_id"] == device.device_id})
+            return sorted(out, key=lambda d: d.get("paired_at") or 0)
+
+        return JSONResponse({"devices": await anyio.to_thread.run_sync(collect)})
+
+    async def unpair(request: Request, device: Any, data: dict[str, Any]) -> Response:
+        """Unpair one of the user's own devices. For an assistant link, that ends the link and all its tokens."""
+        target = s.devices.get(str(data.get("device_id") or ""))
+        if target is None or target.user_id != device.user_id:
+            return JSONResponse({"error": "no such device"}, status_code=404)
+        await anyio.to_thread.run_sync(s.devices.revoke, target.device_id)
+        return JSONResponse({"ok": True})
+
     routes += [
+        Route("/device/devices", _signed(devices, s), methods=["GET"]),
+        Route("/device/unpair", _signed(unpair, s), methods=["POST"]),
         Route("/device/turn", _signed(turn, s), methods=["POST"]),
         Route("/device/speak", _signed(speak, s), methods=["POST"]),
         Route("/device/state", _signed(state, s), methods=["GET"]),

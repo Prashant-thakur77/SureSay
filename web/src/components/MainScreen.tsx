@@ -269,6 +269,8 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
 
   // guests get a slim note about the demo home, which they can hide
   const guest = isGuest(hub.creds.user_id);
+  const loadDevices = useMemo(() => (hub.devices ? () => hub.devices!() : undefined), [hub]);
+  const unpairDevice = useMemo(() => (hub.unpairDevice ? (id: string) => hub.unpairDevice!(id) : undefined), [hub]);
   const [guestNote, setGuestNote] = useState(() => guest && readJson<boolean>("suresay.guestNoteHidden") !== true);
   const startOver = useCallback(async () => {
     conv.reset();
@@ -382,6 +384,8 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
           onResetHome={resetHome}
           onUnpair={onUnpair}
           onRing={ring}
+          loadDevices={loadDevices}
+          unpairDevice={unpairDevice}
         />
         <LiveRegions assertive={assertive} polite={polite} />
       </div>
