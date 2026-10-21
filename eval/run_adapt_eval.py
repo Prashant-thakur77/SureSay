@@ -23,9 +23,9 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from eval.asr_cache import prepare_vocabularies, transcribe_all  # noqa: E402
-from suresay.app import NEGATIONS  # noqa: E402
 from eval.common import EVAL, SPLIT, pct, write_result  # noqa: E402
 from eval.run_intent_eval import BOOK_SIZE, tuned_rule  # noqa: E402
+from suresay.app import NEGATIONS  # noqa: E402
 from suresay.phrasebook import entry, vocabulary  # noqa: E402
 from suresay.rank import FuzzyRanker, norm  # noqa: E402
 
