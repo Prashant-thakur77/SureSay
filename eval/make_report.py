@@ -232,6 +232,12 @@ def latency_section(lat: dict[str, Any], atom: dict[str, Any] | None) -> tuple[l
         out.append(f"| device evidence + confirm round trip, India → us-east-1 | "
                    f"{g['device_round_trip_from_client']['p50_ms']} ms | {g['device_round_trip_from_client']['p95_ms']} ms |")
         key.update(c50=g["gate_added_in_region"]["p50_ms"], c95=g["gate_added_in_region"]["p95_ms"])
+    mt = lat.get("mcp_typed_cloud")
+    if mt:
+        out.append(f"| MCP `understand` on typed text, in the function (Alexa+ asks for < 500 ms round trip) | "
+                   f"{mt['in_function']['p50_ms']} ms | {mt['in_function']['p95_ms']} ms |")
+        out.append(f"| ...the same call's full round trip from India | {mt['round_trip_from_client']['p50_ms']} ms | "
+                   f"{mt['round_trip_from_client']['p95_ms']} ms |")
     out.append(f"| device evidence + confirm over local HTTP | {lat['device_round_trip_http']['p50_ms']} ms | "
                f"{lat['device_round_trip_http']['p95_ms']} ms |")
     out += ["", "Nova 2 Lite ranking latency will be added when the account's Bedrock access opens."]

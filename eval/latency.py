@@ -172,6 +172,28 @@ def cloud_understand(hub_url: str, runs: int) -> dict[str, Any]:
             "clips": len(total), "total": stats(total), "asr": stats(asr_ms), "rank": stats(rank_ms)}
 
 
+def cloud_mcp_typed(hub_url: str, runs: int) -> dict[str, Any]:
+    """understand on typed text through MCP on the deployed hub: the in-function time (what an MCP host in the same
+    region would add to a turn), and the round trip from here."""
+    from strands.tools.mcp import MCPClient
+
+    from eval.common import ROOT
+
+    token = (ROOT / "infra/.state/agent_token").read_text().strip()
+    client = MCPClient(url=f"{hub_url.rstrip('/')}/mcp", headers={"Authorization": f"Bearer {token}", "X-SureSay-User": "latency"})
+    phrases = ["van on", "lights off", "is the door locked", "call mum", "need bread"]
+    inside, trip = [], []
+    with client:
+        for i in range(runs):
+            t0 = time.perf_counter()
+            r = client.call_tool_sync(tool_use_id="m", name="understand",
+                                      arguments={"user_id": "latency", "transcript": phrases[i % len(phrases)]})
+            trip.append((time.perf_counter() - t0) * 1000)
+            out = json.loads(r["content"][0]["text"])
+            inside.append(out["timing"]["total_ms"])
+    return {"in_function": stats(inside), "round_trip_from_client": stats(trip)}
+
+
 def understand_latency(runs: int, asr: str, ranker: str) -> dict[str, Any]:
     from dataclasses import replace
 
@@ -215,6 +237,7 @@ def main() -> None:
     if args.hub_url:
         out["gate_cloud"] = cloud_gate(args.hub_url, args.runs)
         out["understand_cloud"] = cloud_understand(args.hub_url, args.runs)
+        out["mcp_typed_cloud"] = cloud_mcp_typed(args.hub_url, args.runs)
     out["device_round_trip_http"] = http_round_trip(args.runs)
     out["understand"] = understand_latency(args.runs, args.asr, args.ranker)
     path = write_result("latency", out, run=args.run)

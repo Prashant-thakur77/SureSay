@@ -140,6 +140,8 @@ On the deployed hub (Lambda, us-east-1), 100 dev clips as voice turns through tr
 | gate added to confirm, SQLite | 0.1 ms | 0.1 ms |
 | gate added to confirm, deployed hub (Lambda + DynamoDB, us-east-1) | 48.9 ms | 58.1 ms |
 | device evidence + confirm round trip, India → us-east-1 | 709.1 ms | 821.1 ms |
+| MCP `understand` on typed text, in the function (Alexa+ asks for < 500 ms round trip) | 7.5 ms | 8.6 ms |
+| ...the same call's full round trip from India | 276.3 ms | 329.9 ms |
 | device evidence + confirm over local HTTP | 4.9 ms | 6.4 ms |
 
 Nova 2 Lite ranking latency will be added when the account's Bedrock access opens.
