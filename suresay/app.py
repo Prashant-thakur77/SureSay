@@ -25,6 +25,7 @@ from .state import Home
 
 logger = logging.getLogger(__name__)
 
+NEGATIONS = {"not", "dont", "never", "no", "nahi", "nahin", "mat", "na", "without", "cant", "wont", "isnt", "nor"}
 LEARN_CONFLICT = 0.75  # a heard phrase this close to a phrase with another meaning is never learned
 
 current_user: contextvars.ContextVar[str] = contextvars.ContextVar("suresay_user", default="")
@@ -193,16 +194,23 @@ class SureSay:
     def _learn(self, event: dict[str, Any]) -> None:
         """A confirmed card teaches SureSay the user's way of saying it: what was heard becomes a learned phrase.
 
-        Only for card sets that came from the user's own words, and only when the words differ from every phrase
-        already in the book, so the user's own confirmation is the label.
+        Only for card sets that came from the user's own speech, recognised by the server (never typed text or
+        words an assistant passed in), and only when the words differ from every phrase already in the book, so the
+        user's own confirmation is the label. Never a phrase with a negation in it ("don't open the door"), and
+        never a high-risk choice: a wrong lesson there costs the most.
         """
         try:
             doc = self.store.get("pending", event["pending_id"])
             if not doc or doc.get("origin") != "user_words" or doc.get("outcome") != "confirmed":
                 return
-            heard = " ".join(str((doc.get("context") or {}).get("heard") or "").split())
+            context = doc.get("context") or {}
+            if str(context.get("asr") or "typed") == "typed":
+                return
+            heard = " ".join(str(context.get("heard") or "").split())
             option = doc["options"][int(doc.get("option") or 1) - 1]
-            if not heard or option["action"] == "phrasebook_add":
+            if not heard or option["action"] == "phrasebook_add" or option.get("risk") == "high":
+                return
+            if NEGATIONS & set(heard.lower().replace("'", "").split()):
                 return
             from . import catalog
             from .rank import norm, similarity

@@ -1,14 +1,15 @@
 {
   "name": "adapt",
-  "generated_at": "2026-10-21T03:21:15+0530",
-  "git_sha": "55ea753",
+  "generated_at": "2026-10-21T13:30:25+0530",
+  "git_sha": "d7b6c01",
   "python": "3.13.12",
   "claim": "learning from confirmations",
   "asr_engine": "transcribe-streaming",
   "rule": {
     "floor": 0.65,
     "confident": 1.0,
-    "margin": 0.15
+    "margin": 0.15,
+    "maybe_floor": 0.5
   },
   "summary": {
     "without": {
@@ -509,7 +510,7 @@
         "conf": [
           0.7546,
           0.4853,
-          0.4832
+          0.4828
         ]
       }
     },
@@ -638,8 +639,8 @@
         "top3": false,
         "conf": [
           0.6408,
-          0.5075,
-          0.5073
+          0.5073,
+          0.5027
         ]
       }
     },

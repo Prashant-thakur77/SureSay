@@ -179,9 +179,26 @@ def test_device_routes_need_a_signature(hub: Hub, path: str) -> None:
     assert r.status_code == 401
 
 
+def _spoken(hub: Hub, device: Any, words: str) -> dict[str, Any]:
+    """A voice turn (TextAsr in tests: the "audio" is the words), recognised by the server."""
+    import base64 as b64
+
+    r = hub.signed(device, "POST", "/device/turn", {"audio_b64": b64.b64encode(words.encode()).decode()})
+    r.raise_for_status()
+    return r.json()
+
+
+def _confirm_text(hub: Hub, device: Any, out: dict[str, Any], text: str) -> dict[str, Any]:
+    p = out["pending"][0]
+    n = next(c["n"] for c in out["result"]["candidates"] if c["text"] == text)
+    ev = hub.tap(device, p, n).json()
+    return hub.signed(device, "POST", "/device/confirm",
+                      {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]}).json()
+
+
 def test_a_confirmed_card_teaches_suresay_the_users_way_of_saying_it(hub: Hub) -> None:
     device = hub.pair()
-    first = hub.say(device, "van awn")
+    first = _spoken(hub, device, "van awn")
     pending = first["pending"][0]
     fan_n = next(c["n"] for c in first["result"]["candidates"] if c["text"] == "Turn on the bedroom fan")
     ev = hub.tap(device, pending, fan_n).json()
@@ -192,6 +209,31 @@ def test_a_confirmed_card_teaches_suresay_the_users_way_of_saying_it(hub: Hub) -
     again = hub.say(device, "van awn")
     top = again["result"]["candidates"][0]
     assert top["text"] == "Turn on the bedroom fan" and top["confidence"] >= 0.97
+
+
+def test_typed_words_teach_nothing(hub: Hub) -> None:
+    """Second review, finding 8: in agent mode the 'heard' text is the assistant's, not the user's speech."""
+    device = hub.pair()
+    assert _confirm_text(hub, device, hub.say(device, "van awn"), "Turn on the bedroom fan")["status"] == "done"
+    assert not any(e["phrase"] == "van awn" for e in hub.s.phrasebook.list("demo"))
+
+
+def test_a_phrase_with_a_negation_is_never_learned(hub: Hub) -> None:
+    device = hub.pair()
+    out = _spoken(hub, device, "van awn dont")
+    assert _confirm_text(hub, device, out, out["result"]["candidates"][0]["text"])["status"] == "done"
+    assert not any("dont" in e["phrase"] for e in hub.s.phrasebook.list("demo"))
+
+
+def test_high_risk_choices_are_never_learned(hub: Hub) -> None:
+    device = hub.pair()
+    out = _spoken(hub, device, "opun dor")
+    step = _confirm_text(hub, device, out, "Unlock the front door")
+    final = next(x for x in hub.signed(device, "GET", "/device/pending").json()["pending"] if x["pending_id"] == step["pending_id"])
+    ev = hub.tap(device, final, 1).json()
+    assert hub.signed(device, "POST", "/device/confirm",
+                      {"pending_id": final["pending_id"], "evidence_ref": ev["evidence_ref"]}).json()["status"] == "done"
+    assert not any(e["phrase"] == "opun dor" for e in hub.s.phrasebook.list("demo"))
 
 
 def test_cancelled_and_assistant_cards_teach_nothing(hub: Hub) -> None:
