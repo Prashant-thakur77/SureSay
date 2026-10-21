@@ -6,6 +6,10 @@ People with dysarthria (after a stroke, or living with Parkinson's, ALS or cereb
 
 ![Three cards after "van on" was heard](docs/img/cards.png)
 
+| | | |
+|---|---|---|
+| ![Speak for me](docs/img/speak-board.png) | ![Timeline](docs/img/timeline.png) | ![TV mode](docs/img/tv.png) |
+
 ## One turn
 
 1. **Speak.** Tap the mic and say it your way, or type it. Recognition is primed with your own phrasebook.
@@ -15,7 +19,22 @@ People with dysarthria (after a stroke, or living with Parkinson's, ALS or cereb
 
 It also speaks *for* you: confirm a phrase like "I am thirsty" and SureSay says it out loud, clearly, to the people in the room. And it **learns from you**: each card you confirm teaches SureSay your way of saying it, so the same mishearing goes straight to what you meant next time.
 
-**On Alexa too.** [`alexa_skill/`](alexa_skill) pairs Alexa as one of your SureSay devices. "Alexa, ask Sure Say to turn on the fan" reads the three guesses, and your spoken "the first one" goes back as signed evidence through the same gate.
+**Built for Alexa+.** SureSay's MCP server meets the Alexa+ add-on requirements ([`alexa_plus/`](alexa_plus)):
+
+- Streamable HTTP on spec 2025-11-25.
+- OAuth 2.1 account linking with PKCE S256, Protected Resource Metadata, and a bare 401. Linking means entering your SureSay pairing code.
+- An **MCP Apps** card UI that Alexa+ renders on an Echo Show or Fire TV screen. That screen pairs as one of your devices.
+- A ready `addon.json` with icons and a carousel image.
+
+Until Alexa+ developer access opens, [`alexa_skill/`](alexa_skill) runs the same flow as a classic skill: "Alexa, ask Sure Say to turn on the fan" reads the three guesses, and your spoken "the first one" goes back as signed evidence through the same gate.
+
+**More than commands:**
+- **Speak for me:** a board of your everyday sentences, spoken aloud after you confirm.
+- **Teach:** add your own phrases. SureSay also learns from your confirmations.
+- **Timeline:** a carer-friendly record of every receipt, with "changes without you: 0".
+- **Doorbell:** "Someone's at the door: Ravi, your carer" opens cards (let them in, which asks twice; reply at the door; or call). Simulated.
+- **Maybe cards:** when SureSay isn't sure, it asks again *and* offers its best guesses, still confirm-only.
+- **TV mode** for big screens.
 
 ## Why the agent can't confirm for you
 
@@ -66,11 +85,13 @@ The Nova 2 Lite ranker and the model-driven safety arms are built and tested aga
 | **AWS Lambda** (function URL + Web Adapter) | The hub: MCP at `/mcp`, the device channel at `/device/*`, and the web client, in one function. |
 | **IAM** | A least-privilege role for the hub, scoped to the table, the bucket, the Nova profile and AgentCore. |
 
+Code pointers, permissions and a verify command for each service: [docs/AWS_INTEGRATIONS.md](docs/AWS_INTEGRATIONS.md).
+
 ## Run it
 
 ```bash
 make setup        # Python 3.13 venv (uv) + web client packages
-make test         # 256 tests: the gate, the hub end to end, the Alexa skill, the 50-case safety suite
+make test         # 293 tests: the gate, the hub end to end, account linking, the Alexa skill, the 50-case safety suite
 make demo         # hub + web client (+ agent when Bedrock is reachable) on http://127.0.0.1:9000
 ```
 
@@ -100,7 +121,7 @@ Confirmations work in English, Hinglish and Devanagari ("doosra", "teen number",
 
 ## The open-source part
 
-[`packages/confirm-gate-mcp`](packages/confirm-gate-mcp) (MIT) is the gate on its own. Run `confirm-gate serve --upstream <any MCP server>` to put confirm-before-act in front of any MCP server; it comes with an approval page, so no SureSay is needed. Or use its `GatedServer` decorators in your own server. SureSay is built on it.
+[**confirm-gate-mcp**](https://github.com/Prashant-thakur77/confirm-gate-mcp) (MIT, its own repository with CI; source also in [`packages/confirm-gate-mcp`](packages/confirm-gate-mcp)) is the gate on its own. Run `confirm-gate serve --upstream <any MCP server>` to put confirm-before-act in front of any MCP server; it comes with an approval page, so no SureSay is needed. Or use its `GatedServer` decorators in your own server. SureSay is built on it.
 
 ## Repository
 
