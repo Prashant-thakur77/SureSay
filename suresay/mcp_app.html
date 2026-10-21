@@ -71,13 +71,19 @@ async function signed(method, path, payload) {
   return r.json();
 }
 
-async function choose(option, answer) {
+async function choose(option, answer, shownText) {
   if (!current) return;
   if (!device || !HUB.startsWith("http")) { document.getElementById("pairbox").hidden = !HUB.startsWith("http");
     show(`Say “${answer === "no" ? "none of these" : "number " + option}” to your SureSay device to confirm.`); return; }
   const sets = (await signed("GET", "/device/pending")).pending || [];
   const p = sets.find((s) => s.pending_id === current.pending_id);
   if (!p) { show("These cards have already been answered or have timed out."); return; }
+  // What was shown came from the assistant's message; what is signed is the server's card. They must agree.
+  const real = (p.options || []).find((o) => o.n === option);
+  if (shownText !== undefined && (!real || real.text !== shownText)) {
+    current = { ...current, stage: p.stage, candidates: p.options }; render();
+    show("These cards changed. Nothing was sent. Here they are as SureSay has them."); return;
+  }
   const ev = await signed("POST", "/device/evidence", { pending_id: p.pending_id, nonce: p.nonce, kind: "tap",
     ...(answer ? { answer } : { option }) });
   if (ev.error) { show(ev.error); return; }
@@ -100,18 +106,20 @@ function render() {
   document.getElementById("title").innerHTML = unsure ? "Not sure. <em>Say it again</em> — or is it one of these?" :
     res.stage === "final" ? "This one asks twice:" : "Did you <em>mean</em>…";
   list.classList.toggle("maybe", unsure);
-  (res.candidates || []).forEach((c) => {
-    const li = document.createElement("li"); const b = document.createElement("button"); b.className = "card"; b.dataset.n = c.n;
+  const cards = (res.candidates || []).filter((c) => Number.isInteger(c.n) && c.n >= 1 && c.n <= 9 && typeof c.text === "string");
+  cards.forEach((c) => {
+    const li = document.createElement("li"); const b = document.createElement("button"); b.className = "card"; b.dataset.n = String(c.n);
     b.setAttribute("aria-label", `Option ${c.n}: ${c.text}${c.risk === "high" ? ". Asks twice" : ""}${unsure ? ". Maybe" : ""}`);
-    b.innerHTML = `<span class="num" aria-hidden="true">${c.n}</span><span></span>`;
+    const num = document.createElement("span"); num.className = "num"; num.setAttribute("aria-hidden", "true"); num.textContent = String(c.n);
+    b.append(num, document.createElement("span"));
     b.lastChild.textContent = c.text;
     if (c.risk === "high") { const t = document.createElement("span"); t.className = "tag"; t.textContent = "asks twice"; b.lastChild.append(t); }
     if (unsure) { const t = document.createElement("span"); t.className = "tag"; t.textContent = "maybe"; b.lastChild.append(t); }
-    b.onclick = () => choose(res.stage === "final" ? 1 : c.n, res.stage === "final" ? "yes" : undefined);
+    b.onclick = () => choose(res.stage === "final" ? 1 : c.n, res.stage === "final" ? "yes" : undefined, c.text);
     li.append(b); list.append(li);
   });
-  document.getElementById("actions").hidden = !(res.candidates || []).length;
-  say(`${unsure ? "Not sure. " : ""}${(res.candidates || []).length} choices.`); resize();
+  document.getElementById("actions").hidden = !cards.length;
+  say(`${unsure ? "Not sure. " : ""}${cards.length} choices.`); resize();
 }
 
 function onResult(params) {
@@ -124,6 +132,7 @@ function onResult(params) {
 }
 
 window.addEventListener("message", (e) => {
+  if (e.source !== window.parent) return;  // only the host that embeds this app may talk to it
   const m = e.data || {};
   if (m.id && waiting.has(m.id)) { waiting.get(m.id)(m.result); waiting.delete(m.id); return; }
   if (m.method === "ui/notifications/tool-result") onResult(m.params);
