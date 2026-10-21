@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import time
+from collections import Counter
 from typing import TYPE_CHECKING, Any
 
 from . import catalog
@@ -64,12 +65,11 @@ def understand(app: SureSay, user_id: str, *, transcript: str | None = None, aud
               **ranked.usage)
     base = {"heard": heard.text, "asr": heard.engine, "ranker": ranked.engine, "timing": timing}
 
-    # "Don't unlock the door" sounds like "unlock the door". A negated command changes nothing and offers no cards;
-    # inside a sentence to say aloud, a negation is just part of the sentence.
-    if catalog.has_negation(heard.text) and (not ranked.candidates or ranked.candidates[0].action != "say_for_me"):
-        word = next(w for w in heard.text.split() if catalog.has_negation(w))
-        return {**base, "status": "ask_again", "reason": "negation", "maybe": [],
-                "say": NEGATED.format(word=word.strip(".,!?"))}
+    # "Don't unlock the door" sounds like "unlock the door". A negated command changes nothing and offers no cards.
+    # Inside the words of a sentence to say or a message to send ("tell mom I won't be late"), a negation is content.
+    negated = _negation_outside_content(heard.text, ranked.candidates[0] if ranked.candidates else None)
+    if negated:
+        return {**base, "status": "ask_again", "reason": "negation", "maybe": [], "say": NEGATED.format(word=negated)}
 
     if ranked.abstain or not ranked.candidates:
         maybe_floor = getattr(getattr(app.ranker, "rule", None), "maybe_floor", 0.5)
@@ -103,6 +103,23 @@ def understand(app: SureSay, user_id: str, *, transcript: str | None = None, aud
     options = [{**o, "confidence": conf.get(o["n"])} for o in view["options"]]
     return {**base, "status": "choose", "pending_id": ps.pending_id, "stage": view["stage"], "candidates": options,
             "say": spoken_choices(view["options"], view["stage"])}
+
+
+def _negation_outside_content(heard: str, top: Any) -> str | None:
+    """The negating word in *heard*, ignoring the words that are the top candidate's own sentence or message."""
+    if not catalog.has_negation(heard):
+        return None
+    content = ""
+    if top is not None and top.action in ("say_for_me", "message_contact", "doorbell_reply"):
+        if top.action == "say_for_me":
+            return None
+        content = str((top.args or {}).get("text") or "")
+    rest = Counter(catalog.negation_words(heard)) - Counter(catalog.negation_words(content))  # each word once per use
+    found = [w for w in rest if w in catalog.NEGATIONS]
+    if not found:
+        return None
+    original = next((w for w in heard.split() if catalog.has_negation(w)), found[0])
+    return original.strip(".,!?।")
 
 
 def as_json(result: dict[str, Any]) -> str:

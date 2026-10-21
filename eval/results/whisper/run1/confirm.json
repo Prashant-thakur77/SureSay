@@ -1,7 +1,7 @@
 {
   "name": "confirm",
-  "generated_at": "2026-10-21T13:21:45+0530",
-  "git_sha": "f4c060c",
+  "generated_at": "2026-10-21T14:06:00+0530",
+  "git_sha": "167c157",
   "python": "3.13.12",
   "claim": 1,
   "asr_engine": "whisper-small.en",
@@ -228,19 +228,19 @@
       },
       "controls": {
         "clips": 234,
-        "accuracy_pct": 98.3,
+        "accuracy_pct": 97.9,
         "false_accept_pct": 0.0,
         "false_accepts": 0,
-        "refused_pct": 75.2,
-        "true_accepts_recovered_pct": 100.0
+        "refused_pct": 75.6,
+        "true_accepts_recovered_pct": 96.9
       },
       "controls_confirm_words_only": {
         "clips": 54,
-        "accuracy_pct": 100.0,
+        "accuracy_pct": 98.1,
         "false_accept_pct": 0.0,
         "false_accepts": 0,
-        "refused_pct": 0.0,
-        "true_accepts_recovered_pct": 100.0
+        "refused_pct": 1.9,
+        "true_accepts_recovered_pct": 96.9
       },
       "controls_distractors_only": {
         "clips": 180,
@@ -333,11 +333,11 @@
         },
         "FC03": {
           "clips": 84,
-          "accuracy_pct": 100.0,
+          "accuracy_pct": 98.8,
           "false_accept_pct": 0.0,
           "false_accepts": 0,
-          "refused_pct": 71.4,
-          "true_accepts_recovered_pct": 100.0
+          "refused_pct": 72.6,
+          "true_accepts_recovered_pct": 92.9
         }
       }
     }
@@ -19500,8 +19500,8 @@
       "suresay": {
         "heard": "Two. Oh sorry. Two.",
         "decision": [
-          "choose",
-          2
+          "unclear",
+          null
         ]
       }
     },

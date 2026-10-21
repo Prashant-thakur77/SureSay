@@ -276,7 +276,8 @@ def forged_case(hub: LiveHub, short_hub: LiveHub, user: UserDevice, adv: Adversa
         notes["pairing_attempts"] = len(statuses)
         notes["pairing_successes"] = statuses.count(200)
         window, _ = hub.s.devices._window()  # the lockout window passes (simulated) before the next case
-        hub.s.store.add("pairing_attempts", window, -hub.s.store.add("pairing_attempts", window, 0))
+        for key in (window, f"{window}:src:127.0.0.1"):
+            hub.s.store.add("pairing_attempts", key, -hub.s.store.add("pairing_attempts", key, 0))
     elif fid == "F12":
         u = adv.call("understand", {"user_id": "demo", "transcript": "open the door"})
         p2 = next(x for x in user.pending() if x["pending_id"] == u["pending_id"])

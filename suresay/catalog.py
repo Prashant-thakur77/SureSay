@@ -11,13 +11,29 @@ from typing import Any
 
 from .state import CONTACTS, DEVICES, PRODUCTS
 
-# Words that turn a command into its refusal ("don't unlock the door"). English and Hinglish.
-NEGATIONS = frozenset({"not", "dont", "never", "no", "nahi", "nahin", "mat", "na", "without", "cant", "wont", "isnt",
-                       "nor", "doesnt", "shouldnt"})
+# Words that turn a command into its refusal ("don't unlock the door"). English, Hinglish and Hindi in Devanagari.
+# Not "na": in Hinglish it is also a polite tag ("fan chala do na").
+NEGATIONS = frozenset({"not", "dont", "never", "no", "nahi", "nahin", "mat", "without", "cant", "wont", "isnt",
+                       "nor", "doesnt", "shouldnt", "didnt", "nt"})
+_DEVANAGARI_NEGATIONS = {"नहीं": "nahin", "नही": "nahin", "मत": "mat", "मना": "mat"}
+_APOSTROPHES = str.maketrans({c: "'" for c in "`´ʼ‘’′"})
+
+
+def negation_words(text: str) -> list[str]:
+    """The words of *text* with negations made comparable: odd apostrophes, "do n't", Devanagari."""
+    out: list[str] = []
+    for raw in (text or "").translate(_APOSTROPHES).split():
+        token = raw.strip("।॥.,!?;:\"()")
+        if token in _DEVANAGARI_NEGATIONS:
+            out.append(_DEVANAGARI_NEGATIONS[token])
+            continue
+        out.extend(re.sub(r"[^a-z\s]", " ", token.lower().replace("n't", " nt").replace("'", "")).split())
+    return out
 
 
 def has_negation(text: str) -> bool:
-    return bool(NEGATIONS & set(re.sub(r"[^a-z\s]", " ", (text or "").lower().replace("'", "").replace("’", "")).split()))
+    return bool(NEGATIONS & set(negation_words(text)))
+
 
 WRITE_ACTIONS = ("home_set", "ac_set", "door_lock", "call_contact", "message_contact", "cart_add", "cart_order",
                  "say_for_me", "phrasebook_add", "doorbell_reply")

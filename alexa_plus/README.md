@@ -23,7 +23,11 @@ SureSay's MCP server meets the Alexa+ add-on requirements, so it can be onboarde
 
 ```bash
 python alexa_plus/make_addon.py https://<hub-url>      # writes addon-package/addon.json
-export SURESAY_OAUTH_CLIENTS='{"<alexa client id>": {"secret": "<secret>", "redirect_uris": ["<alexa redirect uri>"]}}'
+export SURESAY_OAUTH_CLIENTS='{"<alexa client id>": {"name": "Alexa+", "secret": "<secret>", "redirect_uris": ["<alexa redirect uri>"]}}'
 make deploy                                            # the hub picks up the OAuth client
 cd alexa_plus && alexa-ai deploy                       # then test in the Alexa+ web simulator; alexa-ai submit
 ```
+
+## Ending or renewing a link
+
+A link appears in SureSay under Settings, **Your devices**, as "Linked: Alexa+". Unpairing it ends every token at once, and a refresh token used twice ends it too (so a copied token stops working). Links made before 21 Oct 2026 carry no link record and must be linked again once.

@@ -164,3 +164,50 @@ def test_an_oversized_chunked_body_gets_413_not_500(hub: Hub) -> None:
 
     r = hub.http.post("/device/turn", content=chunks(), headers={"content-type": "application/json"})
     assert r.status_code == 413
+
+
+def test_an_http_error_from_a_local_agent_falls_back_and_trips(hub: Hub, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Third review, finding 5: failed() read httpx's Response like a dict and the turn became a 500."""
+    import httpx
+
+    req = httpx.Request("POST", "http://agent/invocations")
+    _agent_fails(monkeypatch, hub, httpx.HTTPStatusError("503", request=req, response=httpx.Response(503, request=req)))
+    out = hub.say(hub.pair(), "fan on")
+    assert out["mode"] == "direct" and _tripped(hub)
+
+
+def test_wrong_codes_from_one_address_do_not_block_the_owners_pairing(hub: Hub, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Third review, finding 3: five wrong codes from anyone used to block every pairing for ten minutes."""
+    monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "hub")
+
+    def from_ip(ip: str) -> dict[str, str]:
+        return {"x-amzn-request-context": '{"http": {"sourceIp": "%s"}}' % ip}
+
+    code = hub.s.devices.start_pairing("demo")
+    for _ in range(hub.s.devices.max_attempts):
+        assert hub.http.post("/device/pair", json={"code": "999999" if code != "999999" else "888888"},
+                             headers=from_ip("203.0.113.9")).status_code == 403
+    assert hub.http.post("/device/pair", json={"code": code}, headers=from_ip("203.0.113.9")).status_code == 403
+    assert hub.http.post("/device/pair", json={"code": code}, headers=from_ip("198.51.100.7")).status_code == 200
+
+
+def test_one_address_cannot_use_up_the_whole_demo(demo: Hub, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Third review, finding 4: one address could make guests until the shared daily pool was gone."""
+    monkeypatch.setattr(hubmod, "ADDRESS_TURNS_PER_DAY", 3)
+    monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "hub")
+
+    def guest_from(ip: str) -> Device:
+        return _guest(demo, **{"x-amzn-request-context": '{"http": {"sourceIp": "%s"}}' % ip})
+
+    a1, a2 = guest_from("203.0.113.9"), guest_from("203.0.113.9")
+    codes = [demo.signed(g, "POST", "/device/turn", {"text": "fan on"}).status_code for g in (a1, a2, a1, a2)]
+    assert codes == [200, 200, 200, 429]  # the address's share is spent, across its demo homes
+    b = guest_from("198.51.100.7")
+    assert demo.signed(b, "POST", "/device/turn", {"text": "fan on"}).status_code == 200
+
+
+def test_demo_homes_per_address_per_day_are_capped(demo: Hub, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(hubmod, "TRY_PER_DAY", 2)
+    _guest(demo)
+    _guest(demo)
+    assert demo.http.post("/device/try").status_code == 429

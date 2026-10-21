@@ -35,6 +35,7 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from .app import SureSay, current_caller, current_user
 from .config import ROOT
+from .net import client_ip
 from .understand import understand
 
 logger = logging.getLogger("suresay.hub")
@@ -53,6 +54,11 @@ DEMO_SPEAK_PER_DAY = 400
 DEMO_TURNS_PER_DAY = 4000
 DEMO_GUESTS_PER_DAY = 500
 TRY_PER_HOUR = 20  # new demo homes per source address
+TRY_PER_DAY = 60
+# One address's share of the day (across all the demo homes it made), well below the whole demo's ceilings.
+ADDRESS_VOICE_PER_DAY = 80
+ADDRESS_SPEAK_PER_DAY = 100
+ADDRESS_TURNS_PER_DAY = 600
 MAX_AUDIO_BYTES = 2_000_000  # about a minute of 16 kHz mono speech: far more than any turn or answer
 MAX_BODY_BYTES = 4_000_000
 
@@ -231,8 +237,9 @@ class AgentBridge:
         Returns whether it tripped."""
         if user_id.startswith("guest-"):
             return False
-        code = str(((getattr(exc, "response", None) or {}).get("Error") or {}).get("Code") or "")
-        status = getattr(getattr(exc, "response", None), "status_code", 0) if isinstance(exc, httpx.HTTPStatusError) else 0
+        resp = getattr(exc, "response", None)
+        code = str(((resp.get("Error") or {}).get("Code")) or "") if isinstance(resp, dict) else ""  # botocore
+        status = resp.status_code if isinstance(exc, httpx.HTTPStatusError) else 0  # a local agent over HTTP
         if code in self.SERVICE_ERRORS or status >= 500:
             self.trip()
             return True
@@ -328,23 +335,6 @@ def _doc_page(title: str, paras: list[str]) -> str:
             f'padding:0 20px}}</style></head><body><main><h1>SureSay: {title}</h1>{body}</main></body></html>')
 
 
-def client_ip(request: Request) -> str:
-    """The caller's address as AWS saw it. On Lambda the function URL's request context (set by the web adapter)
-    is authoritative, then the rightmost X-Forwarded-For entry (the one AWS appended). Off Lambda, the socket."""
-    if os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
-        try:
-            ctx = json.loads(request.headers.get("x-amzn-request-context") or "{}")
-            ip = (ctx.get("http") or {}).get("sourceIp") or (ctx.get("identity") or {}).get("sourceIp")
-            if ip:
-                return str(ip)
-        except (ValueError, AttributeError):
-            pass
-        xff = [x.strip() for x in (request.headers.get("x-forwarded-for") or "").split(",") if x.strip()]
-        if xff:
-            return xff[-1]
-    return request.client.host if request.client else "?"
-
-
 class Quota:
     """Fixed-window counters in the store: ``take`` is one atomic increment (DynamoDB ``ADD``)."""
 
@@ -390,9 +380,21 @@ def build_app(s: SureSay | None = None) -> Starlette:
             return {"voice": "this demo home has used today's voice; please tap or type instead",
                     "speak": "this demo home has used today's read-aloud",
                     "turn": "this demo home has used today's turns"}[kind]
+        address = guest_address(user_id)
+        per_address = {"voice": ADDRESS_VOICE_PER_DAY, "speak": ADDRESS_SPEAK_PER_DAY, "turn": ADDRESS_TURNS_PER_DAY}[kind]
+        if address and not quota.take(f"address_{kind}", address, per_address):
+            return "the demo has had a lot of use from your network today; please try again tomorrow"
         if not quota.take(f"demo_{kind}", "all", overall):
             return DEMO_FULL
         return None
+
+    addresses: dict[str, str] = {}
+
+    def guest_address(user_id: str) -> str:
+        """The address that made this demo home (recorded at /device/try), so every quota also charges it."""
+        if user_id not in addresses:
+            addresses[user_id] = str((s.store.get("guest", user_id) or {}).get("address") or "")
+        return addresses[user_id]
 
     def guest_voice_ok(user_id: str) -> bool:
         return guest_take(user_id, "voice") is None
@@ -404,7 +406,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
 
     routes: list[Any] = device_routes(
         s.gate, s.devices, transcribe=evidence_transcribe, transcriber=None,
-        media_sink=evidence_sink, max_audio_bytes=MAX_AUDIO_BYTES,
+        media_sink=evidence_sink, max_audio_bytes=MAX_AUDIO_BYTES, client_ip=client_ip,
     )
 
     async def turn(request: Request, device: Any, data: dict[str, Any]) -> Response:
@@ -570,12 +572,14 @@ def build_app(s: SureSay | None = None) -> Starlette:
             return JSONResponse({"error": "not found"}, status_code=404)
 
         def go() -> tuple[int, dict[str, Any]]:
-            if not quota.take("try", client_ip(request), TRY_PER_HOUR, window=3600):
+            address = client_ip(request)
+            if not quota.take("try", address, TRY_PER_HOUR, window=3600) or not quota.take("try_day", address, TRY_PER_DAY):
                 return 429, {"error": "too many demo homes from here; try again later"}
             if not quota.take("demo_guest", "all", DEMO_GUESTS_PER_DAY):
                 return 429, {"error": DEMO_FULL}
             user = "guest-" + uuid.uuid4().hex[:10]
             device = s.devices.issue(user, name="Demo visitor")
+            s.store.put("guest", user, {"address": address, "expires_at": time.time() + 2 * 86400})
             s.home.reset(user)
             return 200, {"device_id": device.device_id, "user_id": device.user_id, "key": device.key,
                          "name": device.name, "demo": True}

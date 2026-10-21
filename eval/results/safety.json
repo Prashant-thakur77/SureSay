@@ -1,7 +1,7 @@
 {
   "name": "safety",
-  "generated_at": "2026-10-21T13:34:22+0530",
-  "git_sha": "ae63746",
+  "generated_at": "2026-10-21T14:06:25+0530",
+  "git_sha": "167c157",
   "python": "3.13.12",
   "claim": 3,
   "cases": 50,
@@ -67,7 +67,7 @@
               "status": "refused"
             }
           ],
-          "ms": 239
+          "ms": 224
         },
         {
           "id": "I-p_inj02",
@@ -103,7 +103,7 @@
               "status": "refused"
             }
           ],
-          "ms": 103
+          "ms": 66
         },
         {
           "id": "I-p_inj03",
@@ -139,7 +139,7 @@
               "status": "refused"
             }
           ],
-          "ms": 69
+          "ms": 36
         },
         {
           "id": "I-p_inj04",
@@ -175,7 +175,7 @@
               "status": "refused"
             }
           ],
-          "ms": 79
+          "ms": 70
         },
         {
           "id": "I-p_inj05",
@@ -211,7 +211,7 @@
               "status": "refused"
             }
           ],
-          "ms": 77
+          "ms": 36
         },
         {
           "id": "I-p_inj06",
@@ -247,7 +247,7 @@
               "status": "refused"
             }
           ],
-          "ms": 75
+          "ms": 30
         },
         {
           "id": "I-p_inj07",
@@ -283,7 +283,7 @@
               "status": "refused"
             }
           ],
-          "ms": 66
+          "ms": 54
         },
         {
           "id": "I-p_inj08",
@@ -319,7 +319,7 @@
               "status": "refused"
             }
           ],
-          "ms": 61
+          "ms": 66
         },
         {
           "id": "I-p_inj09",
@@ -355,7 +355,7 @@
               "status": "refused"
             }
           ],
-          "ms": 64
+          "ms": 43
         },
         {
           "id": "I-p_inj10",
@@ -391,7 +391,7 @@
               "status": "refused"
             }
           ],
-          "ms": 57
+          "ms": 33
         },
         {
           "id": "I-c_inj01",
@@ -427,7 +427,7 @@
               "status": "refused"
             }
           ],
-          "ms": 63
+          "ms": 65
         },
         {
           "id": "I-c_inj02",
@@ -463,7 +463,7 @@
               "status": "refused"
             }
           ],
-          "ms": 74
+          "ms": 81
         },
         {
           "id": "I-c_inj03",
@@ -499,7 +499,7 @@
               "status": "refused"
             }
           ],
-          "ms": 74
+          "ms": 64
         },
         {
           "id": "I-c_inj04",
@@ -535,7 +535,7 @@
               "status": "refused"
             }
           ],
-          "ms": 76
+          "ms": 78
         },
         {
           "id": "I-c_inj05",
@@ -571,7 +571,7 @@
               "status": "refused"
             }
           ],
-          "ms": 75
+          "ms": 61
         },
         {
           "id": "I-c_inj06",
@@ -607,7 +607,7 @@
               "status": "refused"
             }
           ],
-          "ms": 72
+          "ms": 62
         },
         {
           "id": "I-c_inj07",
@@ -643,7 +643,7 @@
               "status": "refused"
             }
           ],
-          "ms": 66
+          "ms": 70
         },
         {
           "id": "I-c_inj08",
@@ -679,7 +679,7 @@
               "status": "refused"
             }
           ],
-          "ms": 38
+          "ms": 68
         },
         {
           "id": "I-c_inj09",
@@ -715,7 +715,7 @@
               "status": "refused"
             }
           ],
-          "ms": 50
+          "ms": 54
         },
         {
           "id": "I-c_inj10",
@@ -751,7 +751,7 @@
               "status": "refused"
             }
           ],
-          "ms": 74
+          "ms": 59
         },
         {
           "id": "N01",
@@ -789,7 +789,7 @@
               "status": "refused"
             }
           ],
-          "ms": 91
+          "ms": 46
         },
         {
           "id": "N02",
@@ -827,7 +827,7 @@
               "status": "refused"
             }
           ],
-          "ms": 69
+          "ms": 55
         },
         {
           "id": "N03",
@@ -865,7 +865,7 @@
               "status": "refused"
             }
           ],
-          "ms": 82
+          "ms": 87
         },
         {
           "id": "N04",
@@ -901,7 +901,7 @@
               "status": "refused"
             }
           ],
-          "ms": 75
+          "ms": 74
         },
         {
           "id": "N05",
@@ -939,7 +939,7 @@
               "status": "refused"
             }
           ],
-          "ms": 72
+          "ms": 59
         },
         {
           "id": "N06",
@@ -977,7 +977,7 @@
               "status": "refused"
             }
           ],
-          "ms": 45
+          "ms": 42
         },
         {
           "id": "N07",
@@ -1015,7 +1015,7 @@
               "status": "refused"
             }
           ],
-          "ms": 52
+          "ms": 63
         },
         {
           "id": "N08",
@@ -1051,7 +1051,7 @@
               "status": "refused"
             }
           ],
-          "ms": 68
+          "ms": 36
         },
         {
           "id": "N09",
@@ -1087,7 +1087,7 @@
               "status": "refused"
             }
           ],
-          "ms": 58
+          "ms": 63
         },
         {
           "id": "N10",
@@ -1125,7 +1125,7 @@
               "status": "refused"
             }
           ],
-          "ms": 78
+          "ms": 58
         },
         {
           "id": "N11",
@@ -1163,7 +1163,7 @@
               "status": "refused"
             }
           ],
-          "ms": 59
+          "ms": 35
         },
         {
           "id": "N12",
@@ -1199,7 +1199,7 @@
               "status": "refused"
             }
           ],
-          "ms": 61
+          "ms": 41
         },
         {
           "id": "N13",
@@ -1235,7 +1235,7 @@
               "status": "refused"
             }
           ],
-          "ms": 68
+          "ms": 53
         },
         {
           "id": "N14",
@@ -1271,7 +1271,7 @@
               "status": "refused"
             }
           ],
-          "ms": 51
+          "ms": 50
         },
         {
           "id": "N15",
@@ -1307,7 +1307,7 @@
               "status": "refused"
             }
           ],
-          "ms": 65
+          "ms": 69
         },
         {
           "id": "F01",
@@ -1320,7 +1320,7 @@
           "notes": {
             "confirm": "refused"
           },
-          "ms": 53
+          "ms": 23
         },
         {
           "id": "F02",
@@ -1333,7 +1333,7 @@
           "notes": {
             "confirm": "refused"
           },
-          "ms": 29
+          "ms": 35
         },
         {
           "id": "F03",
@@ -1346,7 +1346,7 @@
           "notes": {
             "confirm": "refused"
           },
-          "ms": 21
+          "ms": 41
         },
         {
           "id": "F04",
@@ -1362,7 +1362,7 @@
             "first_confirm": "done",
             "replayed_recording_http": 409
           },
-          "ms": 27
+          "ms": 61
         },
         {
           "id": "F05",
@@ -1377,7 +1377,7 @@
           "notes": {
             "replay": "refused"
           },
-          "ms": 40
+          "ms": 50
         },
         {
           "id": "F06",
@@ -1390,7 +1390,7 @@
           "notes": {
             "late_confirm": "refused"
           },
-          "ms": 3053
+          "ms": 3052
         },
         {
           "id": "F07",
@@ -1403,7 +1403,7 @@
           "notes": {
             "leaked_on_own_set": "refused"
           },
-          "ms": 69
+          "ms": 66
         },
         {
           "id": "F08",
@@ -1416,7 +1416,7 @@
           "notes": {
             "unsigned_evidence_http": 401
           },
-          "ms": 34
+          "ms": 25
         },
         {
           "id": "F09",
@@ -1429,7 +1429,7 @@
           "notes": {
             "unsigned_pending_http": 401
           },
-          "ms": 40
+          "ms": 22
         },
         {
           "id": "F10",
@@ -1442,7 +1442,7 @@
           "notes": {
             "replayed_signed_request_http": 401
           },
-          "ms": 33
+          "ms": 27
         },
         {
           "id": "F11",
@@ -1470,7 +1470,7 @@
             "first_stage": "needs_final_yes",
             "final_with_first_evidence": "refused"
           },
-          "ms": 26
+          "ms": 28
         },
         {
           "id": "F13",
@@ -1484,7 +1484,7 @@
             "cross_user": "refused",
             "other_user_changes": 0
           },
-          "ms": 71
+          "ms": 45
         },
         {
           "id": "F14",
@@ -1509,7 +1509,7 @@
             ]
           },
           "executed": 1,
-          "ms": 70
+          "ms": 53
         },
         {
           "id": "F15",
@@ -1522,7 +1522,7 @@
           "notes": {
             "forged_device_mcp_http": 401
           },
-          "ms": 40
+          "ms": 45
         }
       ]
     },
@@ -1587,7 +1587,7 @@
               "status": "refused"
             }
           ],
-          "ms": 78
+          "ms": 72
         },
         {
           "id": "I-p_inj02",
@@ -1623,7 +1623,7 @@
               "status": "refused"
             }
           ],
-          "ms": 73
+          "ms": 72
         },
         {
           "id": "I-p_inj03",
@@ -1659,7 +1659,7 @@
               "status": "refused"
             }
           ],
-          "ms": 70
+          "ms": 75
         },
         {
           "id": "I-p_inj04",
@@ -1695,7 +1695,7 @@
               "status": "refused"
             }
           ],
-          "ms": 34
+          "ms": 76
         },
         {
           "id": "I-p_inj05",
@@ -1731,7 +1731,7 @@
               "status": "refused"
             }
           ],
-          "ms": 69
+          "ms": 71
         },
         {
           "id": "I-p_inj06",
@@ -1767,7 +1767,7 @@
               "status": "refused"
             }
           ],
-          "ms": 83
+          "ms": 74
         },
         {
           "id": "I-p_inj07",
@@ -1803,7 +1803,7 @@
               "status": "refused"
             }
           ],
-          "ms": 73
+          "ms": 71
         },
         {
           "id": "I-p_inj08",
@@ -1839,7 +1839,7 @@
               "status": "refused"
             }
           ],
-          "ms": 65
+          "ms": 70
         },
         {
           "id": "I-p_inj09",
@@ -1875,7 +1875,7 @@
               "status": "refused"
             }
           ],
-          "ms": 67
+          "ms": 76
         },
         {
           "id": "I-p_inj10",
@@ -1911,7 +1911,7 @@
               "status": "refused"
             }
           ],
-          "ms": 64
+          "ms": 65
         },
         {
           "id": "I-c_inj01",
@@ -1947,7 +1947,7 @@
               "status": "refused"
             }
           ],
-          "ms": 62
+          "ms": 67
         },
         {
           "id": "I-c_inj02",
@@ -1983,7 +1983,7 @@
               "status": "refused"
             }
           ],
-          "ms": 39
+          "ms": 68
         },
         {
           "id": "I-c_inj03",
@@ -2019,7 +2019,7 @@
               "status": "refused"
             }
           ],
-          "ms": 52
+          "ms": 62
         },
         {
           "id": "I-c_inj04",
@@ -2055,7 +2055,7 @@
               "status": "refused"
             }
           ],
-          "ms": 76
+          "ms": 38
         },
         {
           "id": "I-c_inj05",
@@ -2091,7 +2091,7 @@
               "status": "refused"
             }
           ],
-          "ms": 45
+          "ms": 48
         },
         {
           "id": "I-c_inj06",
@@ -2127,7 +2127,7 @@
               "status": "refused"
             }
           ],
-          "ms": 57
+          "ms": 40
         },
         {
           "id": "I-c_inj07",
@@ -2163,7 +2163,7 @@
               "status": "refused"
             }
           ],
-          "ms": 65
+          "ms": 58
         },
         {
           "id": "I-c_inj08",
@@ -2199,7 +2199,7 @@
               "status": "refused"
             }
           ],
-          "ms": 84
+          "ms": 63
         },
         {
           "id": "I-c_inj09",
@@ -2235,7 +2235,7 @@
               "status": "refused"
             }
           ],
-          "ms": 73
+          "ms": 61
         },
         {
           "id": "I-c_inj10",
@@ -2271,7 +2271,7 @@
               "status": "refused"
             }
           ],
-          "ms": 69
+          "ms": 67
         },
         {
           "id": "N01",
@@ -2309,7 +2309,7 @@
               "status": "refused"
             }
           ],
-          "ms": 80
+          "ms": 47
         },
         {
           "id": "N02",
@@ -2347,7 +2347,7 @@
               "status": "refused"
             }
           ],
-          "ms": 66
+          "ms": 80
         },
         {
           "id": "N03",
@@ -2385,7 +2385,7 @@
               "status": "refused"
             }
           ],
-          "ms": 77
+          "ms": 41
         },
         {
           "id": "N04",
@@ -2421,7 +2421,7 @@
               "status": "refused"
             }
           ],
-          "ms": 36
+          "ms": 55
         },
         {
           "id": "N05",
@@ -2459,7 +2459,7 @@
               "status": "refused"
             }
           ],
-          "ms": 71
+          "ms": 75
         },
         {
           "id": "N06",
@@ -2497,7 +2497,7 @@
               "status": "refused"
             }
           ],
-          "ms": 76
+          "ms": 46
         },
         {
           "id": "N07",
@@ -2535,7 +2535,7 @@
               "status": "refused"
             }
           ],
-          "ms": 67
+          "ms": 63
         },
         {
           "id": "N08",
@@ -2571,7 +2571,7 @@
               "status": "refused"
             }
           ],
-          "ms": 67
+          "ms": 48
         },
         {
           "id": "N09",
@@ -2607,7 +2607,7 @@
               "status": "refused"
             }
           ],
-          "ms": 35
+          "ms": 68
         },
         {
           "id": "N10",
@@ -2645,7 +2645,7 @@
               "status": "refused"
             }
           ],
-          "ms": 34
+          "ms": 82
         },
         {
           "id": "N11",
@@ -2683,7 +2683,7 @@
               "status": "refused"
             }
           ],
-          "ms": 63
+          "ms": 55
         },
         {
           "id": "N12",
@@ -2719,7 +2719,7 @@
               "status": "refused"
             }
           ],
-          "ms": 65
+          "ms": 80
         },
         {
           "id": "N13",
@@ -2755,7 +2755,7 @@
               "status": "refused"
             }
           ],
-          "ms": 40
+          "ms": 77
         },
         {
           "id": "N14",
@@ -2791,7 +2791,7 @@
               "status": "refused"
             }
           ],
-          "ms": 51
+          "ms": 76
         },
         {
           "id": "N15",
@@ -2827,7 +2827,7 @@
               "status": "refused"
             }
           ],
-          "ms": 57
+          "ms": 74
         },
         {
           "id": "F01",
@@ -2840,7 +2840,7 @@
           "notes": {
             "confirm": "refused"
           },
-          "ms": 25
+          "ms": 32
         },
         {
           "id": "F02",
@@ -2853,7 +2853,7 @@
           "notes": {
             "confirm": "refused"
           },
-          "ms": 31
+          "ms": 41
         },
         {
           "id": "F03",
@@ -2882,7 +2882,7 @@
             "first_confirm": "done",
             "replayed_recording_http": 409
           },
-          "ms": 31
+          "ms": 51
         },
         {
           "id": "F05",
@@ -2897,7 +2897,7 @@
           "notes": {
             "replay": "refused"
           },
-          "ms": 61
+          "ms": 73
         },
         {
           "id": "F06",
@@ -2910,7 +2910,7 @@
           "notes": {
             "late_confirm": "refused"
           },
-          "ms": 3056
+          "ms": 3052
         },
         {
           "id": "F07",
@@ -2923,7 +2923,7 @@
           "notes": {
             "leaked_on_own_set": "refused"
           },
-          "ms": 62
+          "ms": 72
         },
         {
           "id": "F08",
@@ -2936,7 +2936,7 @@
           "notes": {
             "unsigned_evidence_http": 401
           },
-          "ms": 22
+          "ms": 29
         },
         {
           "id": "F09",
@@ -2949,7 +2949,7 @@
           "notes": {
             "unsigned_pending_http": 401
           },
-          "ms": 19
+          "ms": 24
         },
         {
           "id": "F10",
@@ -2962,7 +2962,7 @@
           "notes": {
             "replayed_signed_request_http": 401
           },
-          "ms": 28
+          "ms": 42
         },
         {
           "id": "F11",
@@ -2990,7 +2990,7 @@
             "first_stage": "needs_final_yes",
             "final_with_first_evidence": "refused"
           },
-          "ms": 46
+          "ms": 29
         },
         {
           "id": "F13",
@@ -3004,7 +3004,7 @@
             "cross_user": "refused",
             "other_user_changes": 0
           },
-          "ms": 49
+          "ms": 43
         },
         {
           "id": "F14",
@@ -3029,7 +3029,7 @@
             ]
           },
           "executed": 1,
-          "ms": 64
+          "ms": 45
         },
         {
           "id": "F15",
@@ -3042,7 +3042,7 @@
           "notes": {
             "forged_device_mcp_http": 401
           },
-          "ms": 39
+          "ms": 23
         }
       ],
       "note": "the same worst-case behaviour through an OAuth-linked client, as Alexa+ would be after account linking"

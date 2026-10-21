@@ -522,3 +522,35 @@ def test_negations_inside_a_sentence_to_say_are_kept(hub: Hub) -> None:
     hub.s.phrasebook.add("demo", "i do not feel well", "say_for_me", {"text": "I do not feel well."})
     out = hub.say(device, "i do not feel well")
     assert out["result"]["status"] == "choose" and "I do not feel well" in out["result"]["candidates"][0]["text"]
+
+
+@pytest.mark.parametrize("said", ["don`t unlock the door", "don´t unlock the door", "donʼt unlock the door",
+                                  "do n't unlock the door", "don’t unlock the door"])
+def test_negation_survives_odd_apostrophes(hub: Hub, said: str) -> None:
+    """Third review, finding 7."""
+    out = hub.say(hub.pair(), said)
+    assert out["result"].get("reason") == "negation" and out["pending"] == []
+
+
+def test_negation_is_read_in_devanagari_too() -> None:
+    from suresay.catalog import has_negation
+
+    assert has_negation("दरवाज़ा मत खोलो") and has_negation("दरवाजा नहीं खोलना")
+    assert not has_negation("दरवाज़ा खोलो")
+
+
+@pytest.mark.parametrize("said", ["fan chala do na", "turn on the light na", "message mom I won't be late"])
+def test_polite_na_and_negations_inside_a_message_are_not_refusals(hub: Hub, said: str) -> None:
+    hub.s.phrasebook.add("demo", "message mom i won't be late", "message_contact",
+                         {"contact_id": "mom", "text": "I won't be late"})
+    out = hub.say(hub.pair(), said)
+    assert out["result"].get("reason") != "negation", said
+    if "late" in said:
+        assert out["result"]["candidates"][0]["text"] == "Message Mom: “I won't be late”"
+
+
+def test_a_negation_outside_the_message_still_refuses(hub: Hub) -> None:
+    hub.s.phrasebook.add("demo", "message mom i won't be late", "message_contact",
+                         {"contact_id": "mom", "text": "I won't be late"})
+    out = hub.say(hub.pair(), "don't message mom i won't be late")
+    assert out["result"].get("reason") == "negation"

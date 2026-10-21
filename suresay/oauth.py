@@ -28,6 +28,8 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from starlette.routing import Route
 
+from .net import client_ip
+
 SCOPES = ["suresay.home"]
 NO_FRAMING = {"content-security-policy": "frame-ancestors 'none'", "x-frame-options": "DENY"}
 CODE_TTL = 600
@@ -170,7 +172,7 @@ autocomplete="one-time-code" maxlength="6" required autofocus><button type="subm
                 return JSONResponse({"error": "invalid_request", "error_description": err}, status_code=400)
             try:
                 client = self._client(p["client_id"]) or {}
-                device = self.devices.pair(p.get("pairing_code", ""),
+                device = self.devices.pair(p.get("pairing_code", ""), source=client_ip(request),
                                            name=f"Linked: {client.get('name') or p['client_id']}"[:60])
             except PairingError as exc:
                 return HTMLResponse(page(p, f"That code didn't work ({exc}). Check the code on your SureSay screen."),
