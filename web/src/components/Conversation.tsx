@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Phase } from "../hooks/useConversation";
 import { ASK_AGAIN_TEXT } from "../hooks/useConversation";
 import type { MicState } from "../hooks/useRecorder";
@@ -9,6 +9,7 @@ import { CardSet } from "./CardSet";
 import { Connector } from "./Connector";
 import { FinalCheck } from "./FinalCheck";
 import { Icon } from "./Icon";
+import { ListenerView } from "./ListenerView";
 import { MicButton, type MicMode } from "./MicButton";
 import { ReceiptCard } from "./ReceiptCard";
 import { useScanMark } from "./scan";
@@ -70,6 +71,7 @@ export function micMode(phase: Phase): MicMode {
 }
 
 export function Conversation({ phase, actions, mic, level, tv, devices, phrasebook, announce, speaking = false, history = true, motion = true, onBackToBoard }: Props) {
+  const [listener, setListener] = useState<string | null>(null);
   const againRef = useRef<HTMLButtonElement>(null);
   const againMark = useScanMark("again");
   const unsureId = phase.kind === "cards" && isUnsure(phase.set) ? phase.set.pending_id : "";
@@ -229,12 +231,15 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
               <h2 id="spoken-title" className="spoken__label">
                 Said out loud for you
               </h2>
-              <p className="spoken__text" lang="en">
+              <p className="spoken__text" lang={/[\u0900-\u097F]/.test(phase.said) ? "hi" : "en"}>
                 {phase.said}
               </p>
               <div className="actions">
                 <ScanButton id="replay" className="btn btn--primary btn--xl spoken__again" onClick={actions.replay}>
                   <Icon name="volume" size={28} /> Say again
+                </ScanButton>
+                <ScanButton id="show" onClick={() => setListener(phase.said ?? null)}>
+                  <Icon name="spark" size={24} /> Show it to them
                 </ScanButton>
                 {onBackToBoard && (
                   <ScanButton id="board" onClick={onBackToBoard}>
@@ -245,6 +250,7 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
             </section>
           )}
           <ReceiptCard ref={headingRef} receipt={phase.receipt} />
+          {listener && <ListenerView text={listener} onReplay={actions.replay} onClose={() => setListener(null)} />}
         </>
       );
       break;

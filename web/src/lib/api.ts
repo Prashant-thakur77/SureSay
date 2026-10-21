@@ -28,7 +28,8 @@ export interface HubApi {
   readonly creds: DeviceCreds;
   readonly base: string;
   pending(): Promise<PendingSet[]>;
-  turn(input: { text?: string; audio_b64?: string; session_id: string }): Promise<TurnResponse>;
+  /** One turn. purpose "say": sentences to say aloud to someone (Talk to someone), never an action on the home. */
+  turn(input: { text?: string; audio_b64?: string; session_id: string; purpose?: "say" }): Promise<TurnResponse>;
   evidenceTap(set: PendingSet, answer: { option: number } | { answer: "yes" | "no" }): Promise<EvidenceResponse>;
   evidenceVoice(set: PendingSet, audio_b64: string): Promise<EvidenceResponse>;
   confirmRest(pending_id: string, evidence_ref: string): Promise<ConfirmResult>;
@@ -144,7 +145,7 @@ export class HubClient implements HubApi {
     return (await this.call<{ pending: PendingSet[] }>("GET", "/device/pending")).pending;
   }
 
-  turn(input: { text?: string; audio_b64?: string; session_id: string }): Promise<TurnResponse> {
+  turn(input: { text?: string; audio_b64?: string; session_id: string; purpose?: "say" }): Promise<TurnResponse> {
     return this.call<TurnResponse>("POST", "/device/turn", input, 60000);
   }
 

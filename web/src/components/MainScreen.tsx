@@ -21,6 +21,7 @@ import { SidePanel, type DoorInfo, type McpInfo } from "./SidePanel";
 import type { VisitorId } from "./Doorbell";
 import { readJson, writeJson } from "../lib/storage";
 import { SpeakBoard } from "./SpeakBoard";
+import { TalkPanel } from "./TalkPanel";
 import { TabList, TabPanel, type TabDef } from "./Tabs";
 import { TeachPanel } from "./TeachPanel";
 import { TimelinePanel } from "./TimelinePanel";
@@ -38,10 +39,11 @@ interface Props {
   pollMs?: number;
 }
 
-export type TabId = "talk" | "speak" | "timeline" | "teach";
+export type TabId = "talk" | "people" | "speak" | "timeline" | "teach";
 
 const TABS: TabDef<TabId>[] = [
   { id: "talk", label: "Talk", icon: "mic" },
+  { id: "people", label: "Talk to someone", icon: "message" },
   { id: "speak", label: "Speak for me", icon: "speech" },
   { id: "timeline", label: "Timeline", icon: "clock" },
   { id: "teach", label: "Teach", icon: "book" },
@@ -193,7 +195,7 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
 
   const actions: ConversationActions = {
     toggleMic: conv.toggleMic,
-    startRequest: () => void conv.startRequest(),
+    startRequest: () => void conv.again(),
     sendText: (t) => void conv.sendText(t),
     choose: conv.choose,
     yes: conv.yes,
@@ -356,6 +358,19 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
                 motion={motion}
                 onBackToBoard={() => setTab("speak")}
               />
+              </TabPanel>
+              <TabPanel id="people" active={tab === "people"}>
+                <TalkPanel
+                  busy={phase.kind === "thinking" || phase.kind === "listening"}
+                  onSpeak={() => {
+                    setTab("talk");
+                    void conv.startRequest("say");
+                  }}
+                  onType={(text) => {
+                    setTab("talk");
+                    void conv.sendText(text, "say");
+                  }}
+                />
               </TabPanel>
               <TabPanel id="speak" active={tab === "speak"}>
                 <SpeakBoard phrasebook={phrasebook} busy={phase.kind === "thinking"} onSay={(text) => proposeFromTab("say_for_me", { text })} />

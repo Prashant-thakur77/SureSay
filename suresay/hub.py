@@ -36,7 +36,7 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 from .app import SureSay, current_caller, current_user
 from .config import ROOT
 from .net import client_ip
-from .understand import understand
+from .understand import understand, understand_say
 
 logger = logging.getLogger("suresay.hub")
 
@@ -438,7 +438,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
         mode = await anyio.to_thread.run_sync(bridge.mode)
         result: dict[str, Any] | None = None
         reply = ""
-        if mode == "agent":
+        if mode == "agent" and data.get("purpose") != "say":
             try:
                 reply = await bridge.run(device.user_id, session_id, text, audio_ref)
             except Exception as exc:
@@ -446,7 +446,12 @@ def build_app(s: SureSay | None = None) -> Starlette:
                 logger.warning("agent turn failed (%s), answering directly%s", exc,
                                f" for {bridge.BREAK_SECONDS:.0f}s" if tripped else "")
                 mode = "direct"
-        if mode == "direct":
+        if data.get("purpose") == "say":  # Talk to someone: sentences to say aloud, decided here, never by the agent
+            mode = "direct"
+            result = await anyio.to_thread.run_sync(
+                lambda: understand_say(s, device.user_id, transcript=text, audio_ref=audio_ref))
+            reply = result["say"]
+        elif mode == "direct":
             result = await anyio.to_thread.run_sync(
                 lambda: understand(s, device.user_id, transcript=text, audio_ref=audio_ref))
             reply = result["say"]

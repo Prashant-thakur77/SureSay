@@ -3787,3 +3787,90 @@ code {
   font-size: 0.95em;
   opacity: 0.85;
 }
+
+/* Talk to someone */
+.talk {
+  display: grid;
+  gap: 1.25rem;
+  justify-items: start;
+}
+
+.talk__mic {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 112px;
+  padding: 0 2.4rem 0 1.8rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--dawn);
+  color: #14213d;
+  font: 700 2rem/1 var(--font);
+  box-shadow: var(--shadow-lift);
+  cursor: pointer;
+}
+
+.talk__mic:focus-visible {
+  outline: 4px solid var(--focus);
+  outline-offset: 4px;
+}
+
+.talk__mic[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.talk__type {
+  width: min(100%, 720px);
+}
+
+.talk__note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* The sentence, huge, for the person listening */
+.listener {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 1.5rem;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: #fbf8f3;
+  color: #14213d;
+}
+
+.listener__label {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #3a4560;
+}
+
+.listener__text {
+  align-self: center;
+  margin: 0;
+  font: 700 clamp(2.4rem, 7vw, 6.5rem)/1.12 var(--font);
+  overflow-wrap: anywhere;
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.listener__text--flipped {
+  transform: rotate(180deg);
+}
+
+.listener__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .listener__text {
+    transition: none;
+  }
+}

@@ -126,5 +126,62 @@ def _negation_outside_content(heard: str, top: Any) -> str | None:
     return original.strip(".,!?।")
 
 
+SAY_LEAD = "Did you mean to say"
+
+
+def sentence(text: str) -> str:
+    """Heard words as a sentence to say aloud: tidy spaces, a capital, an end mark."""
+    t = " ".join("I" if w == "i" else "I'" + w[2:] if w.startswith("i'") else w for w in text.split()).strip()
+    if not t:
+        return ""
+    t = t[0].upper() + t[1:]
+    return t if t[-1] in ".!?।" else t + "."
+
+
+def understand_say(app: SureSay, user_id: str, *, transcript: str | None = None, audio_ref: str | None = None) -> dict[str, Any]:
+    """Talk to someone: up to three sentences he may mean to *say* to a person, never an action on the home.
+
+    The words as heard (tidied), and the closest sentences from his own phrasebook; a close phrasebook sentence comes
+    first, because it is how he usually says it. Every option is say_for_me, so confirming one only speaks it aloud.
+    """
+    from .rank import norm, similarity
+
+    t0 = time.perf_counter()
+    book = app.phrasebook.list(user_id)
+    if audio_ref:
+        audio = app.media.get(audio_ref)
+        try:
+            heard = app.asr.transcribe(audio, vocabulary=vocabulary(book), user_id=user_id)
+        except Exception as exc:
+            logger.warning("speech recognition failed (%s): %s", app.asr.name, exc)
+            return {"status": "ask_again", "heard": "", "asr": "unavailable", "ranker": "", "maybe": [],
+                    "say": "I can't hear right now. Please type it, or pick from your phrases."}
+    else:
+        heard = Heard(text=(transcript or "").strip(), engine="typed")
+    said = sentence(heard.text)
+    base = {"heard": heard.text, "asr": heard.engine, "ranker": "phrasebook", "purpose": "say",
+            "timing": {"asr_ms": round(heard.ms, 1), "total_ms": 0.0}}
+    if not said:
+        return {**base, "status": "ask_again", "maybe": [], "say": "I didn't catch that. Please say it again, or type it."}
+    sentences = [e for e in book if e["action"] == "say_for_me" and (e.get("args") or {}).get("text")]
+    scored = sorted(((max(similarity(heard.text, e["phrase"]), similarity(heard.text, e["args"]["text"])), e["args"]["text"])
+                     for e in sentences), reverse=True)
+    close = [(s, t) for s, t in scored if s >= 0.45 and norm(t) != norm(said)][:2]
+    options: list[tuple[str, float]] = [(said, 1.0)]
+    if close and close[0][0] >= 0.7:
+        options.insert(0, (close.pop(0)[1], round(scored[0][0], 3)))
+    options += [(t, round(s, 3)) for s, t in close]
+    options = options[:3]
+    ps = app.gate.propose(user_id, [("say_for_me", {"text": t}) for t, _ in options], origin="user_words",
+                          context={"heard": heard.text, "asr": heard.engine, "ranker": "phrasebook", "purpose": "say",
+                                   "utterance_ref": audio_ref, "confidence": [c for _, c in options]})
+    view = app.gate.public_view(ps)
+    conf = {i + 1: c for i, (_, c) in enumerate(options)}
+    base["timing"]["total_ms"] = round((time.perf_counter() - t0) * 1000, 1)
+    return {**base, "status": "choose", "pending_id": ps.pending_id, "stage": view["stage"],
+            "candidates": [{**o, "confidence": conf.get(o["n"])} for o in view["options"]],
+            "say": f"{SAY_LEAD}: " + " Or: ".join(t for t, _ in options) + " Say a number, or no."}
+
+
 def as_json(result: dict[str, Any]) -> str:
     return json.dumps(result, default=str)

@@ -350,7 +350,7 @@ export function useConversation(deps: ConversationDeps) {
 
   // -- turns ---------------------------------------------------------------------------
 
-  async function runTurn(id: number, input: { text?: string; audio_b64?: string }) {
+  async function runTurn(id: number, input: { text?: string; audio_b64?: string; purpose?: "say" }) {
     const { hub, sessionId, refreshState, announce } = depsRef.current;
     let resp;
     try {
@@ -427,7 +427,9 @@ export function useConversation(deps: ConversationDeps) {
     void refreshState();
   }
 
-  const startRequest = useCallback(async () => {
+  const purposeRef = useRef<"say" | undefined>(undefined);
+  const startRequest = useCallback(async (purpose?: "say") => {
+    purposeRef.current = purpose;
     const { recorder, announce } = depsRef.current;
     const id = begin();
     setPhase({ kind: "listening" });
@@ -450,17 +452,18 @@ export function useConversation(deps: ConversationDeps) {
     }
     setPhase({ kind: "thinking" });
     announce("Working it out.", "polite");
-    await runTurn(id, { audio_b64: rec.wavBase64 });
+    await runTurn(id, { audio_b64: rec.wavBase64, ...(purpose ? { purpose } : {}) });
   }, [begin, problem, setPhase]);
 
   const sendText = useCallback(
-    async (text: string) => {
+    async (text: string, purpose?: "say") => {
       const clean = text.trim();
       if (!clean) return;
+      purposeRef.current = purpose;
       const id = begin();
       setPhase({ kind: "thinking", typed: clean });
       depsRef.current.announce("Working it out.", "polite");
-      await runTurn(id, { text: clean });
+      await runTurn(id, { text: clean, ...(purpose ? { purpose } : {}) });
     },
     [begin, setPhase],
   );
@@ -610,6 +613,8 @@ export function useConversation(deps: ConversationDeps) {
     debug,
     toggleMic,
     startRequest,
+    /** Ask again in the same mode as the last turn (Talk to someone stays Talk to someone). */
+    again: () => startRequest(purposeRef.current),
     sendText,
     choose,
     yes,

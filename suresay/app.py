@@ -212,11 +212,13 @@ class SureSay:
             option = doc["options"][int(doc.get("option") or 1) - 1]
             if not heard or option["action"] == "phrasebook_add" or option.get("risk") == "high":
                 return
-            if has_negation(heard):
-                return
             from . import catalog
             from .rank import norm, similarity
 
+            if option["action"] == "say_for_me" and norm(str((option.get("args") or {}).get("text") or "")) == norm(heard):
+                return  # he chose his own words as heard: nothing to learn
+            if has_negation(heard):
+                return
             book = self.phrasebook.list(doc["user_id"])
             if any(norm(e["phrase"]) == norm(heard) for e in book):
                 return

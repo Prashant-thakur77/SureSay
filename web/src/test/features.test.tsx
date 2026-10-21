@@ -39,19 +39,19 @@ describe("tabs", () => {
     renderMain();
     const list = screen.getByRole("tablist", { name: "SureSay" });
     const tabs = within(list).getAllByRole("tab");
-    expect(tabs.map((t) => t.textContent)).toEqual(["Talk", "Speak for me", "Timeline", "Teach"]);
+    expect(tabs.map((t) => t.textContent)).toEqual(["Talk", "Talk to someone", "Speak for me", "Timeline", "Teach"]);
     expect(tabs[0].getAttribute("aria-selected")).toBe("true");
     expect(tabs[1].getAttribute("tabindex")).toBe("-1");
     tabs[0].focus();
     fireEvent.keyDown(tabs[0], { key: "ArrowRight" });
-    expect(screen.getByRole("tab", { name: "Speak for me" }).getAttribute("aria-selected")).toBe("true");
-    expect(document.activeElement).toBe(screen.getByRole("tab", { name: "Speak for me" }));
-    expect(screen.getByRole("tabpanel", { name: "Speak for me" })).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "Talk to someone" }).getAttribute("aria-selected")).toBe("true");
+    expect(document.activeElement).toBe(screen.getByRole("tab", { name: "Talk to someone" }));
+    expect(screen.getByRole("tabpanel", { name: "Talk to someone" })).toBeTruthy();
     fireEvent.keyDown(document.activeElement as Element, { key: "End" });
     expect(screen.getByRole("tab", { name: "Teach" }).getAttribute("aria-selected")).toBe("true");
     fireEvent.keyDown(document.activeElement as Element, { key: "ArrowRight" });
     expect(screen.getByRole("tab", { name: "Talk" }).getAttribute("aria-selected")).toBe("true");
-    for (const name of ["Talk", "Speak for me", "Timeline", "Teach"]) {
+    for (const name of ["Talk", "Talk to someone", "Speak for me", "Timeline", "Teach"]) {
       fireEvent.click(screen.getByRole("tab", { name }));
       await screen.findByRole("tabpanel", { name });
       expect(await axeViolations(), name).toEqual([]);
