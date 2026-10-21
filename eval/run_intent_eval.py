@@ -28,6 +28,10 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import os  # noqa: E402
+
+NOVA_MODEL = os.environ.get("NOVA_MODEL_ID", "us.amazon.nova-2-lite-v1:0")
+
 from eval.asr_cache import prepare_vocabularies, transcribe_all  # noqa: E402
 from eval.common import EVAL, SPLIT, pct, read_result, tuning_name, write_result  # noqa: E402
 from suresay.phrasebook import entry, vocabulary  # noqa: E402
@@ -156,7 +160,7 @@ def main() -> None:
     groups = args.groups.split(",")
     tasks = build_tasks(groups)
     nova = None
-    if args.nova == "on" or (args.nova == "auto" and bedrock_available("us.amazon.nova-2-lite-v1:0")):
+    if args.nova == "on" or (args.nova == "auto" and bedrock_available(NOVA_MODEL)):
         nova = NovaRanker(rule=tuned_rule("nova", args.engine))
     rows: list[dict[str, Any]] = []
     prepare_vocabularies(args.engine, [vocabulary(t["book"]) for t in tasks])

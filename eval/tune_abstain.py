@@ -16,6 +16,10 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import os  # noqa: E402
+
+NOVA_MODEL = os.environ.get("NOVA_MODEL_ID", "us.amazon.nova-2-lite-v1:0")
+
 from eval.asr_cache import prepare_vocabularies, transcribe_all  # noqa: E402
 from eval.common import read_result, tuning_name, write_result  # noqa: E402
 from eval.run_intent_eval import build_tasks  # noqa: E402
@@ -66,7 +70,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--engine", default="whisper-small.en")
     args = ap.parse_args()
-    use_nova = bedrock_available("us.amazon.nova-2-lite-v1:0")
+    use_nova = bedrock_available(NOVA_MODEL)
     data = collect(args.engine, use_nova)
     result: dict[str, Any] = {}
     for name, items in data.items():

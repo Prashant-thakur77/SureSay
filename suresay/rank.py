@@ -184,7 +184,7 @@ Reply with JSON only, no prose:
 class NovaRanker:
     """Amazon Nova 2 Lite via the Bedrock Converse API, temperature 0."""
 
-    def __init__(self, *, model_id: str = "us.amazon.nova-2-lite-v1:0", region: str = "us-east-1",
+    def __init__(self, *, model_id: str | None = None, region: str = "us-east-1",
                  rule: AbstainRule | None = None, client: Any | None = None, top_k: int = 3,
                  max_tokens: int = 500) -> None:
         if client is None:
@@ -193,8 +193,10 @@ class NovaRanker:
 
             client = boto3.client("bedrock-runtime", region_name=region,
                                   config=Config(retries={"max_attempts": 4, "mode": "adaptive"}, read_timeout=30))
+        import os
+
         self.client = client
-        self.model_id = model_id
+        self.model_id = model_id or os.environ.get("NOVA_MODEL_ID", "us.amazon.nova-2-lite-v1:0")
         self.rule = rule or AbstainRule(floor=0.35, confident=0.75, margin=0.10)
         self.top_k = top_k
         self.max_tokens = max_tokens

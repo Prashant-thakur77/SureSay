@@ -30,6 +30,10 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import os  # noqa: E402
+
+NOVA_MODEL = os.environ.get("NOVA_MODEL_ID", "us.amazon.nova-2-lite-v1:0")
+
 
 from eval.common import write_result  # noqa: E402
 from eval.harness import VIA, Adversary, LiveHub, UserDevice, add_fixtures  # noqa: E402
@@ -545,7 +549,7 @@ def main() -> None:
         if "plain_nova" in wanted or "suresay_nova" in wanted:
             from suresay.rank import bedrock_available
 
-            nova_ok = bedrock_available("us.amazon.nova-2-lite-v1:0")
+            nova_ok = bedrock_available(NOVA_MODEL)
         for arm in ("plain_nova", "suresay_nova"):
             if arm not in wanted:
                 continue
