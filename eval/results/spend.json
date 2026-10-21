@@ -1,5 +1,9 @@
 {
- "transcribe_requests": 2622,
- "transcribe_usd_at_15s_min": 6.56,
- "note": "includes 100 latency requests and 2 cloud voice tests counted by hand"
+ "transcribe_requests": 2385,
+ "transcribe_usd_at_15s_min": 5.96,
+ "note": "includes 100 latency requests and 2 cloud voice tests counted by hand; 237 requests counted on 21 Oct by a re-score run with invalid credentials (nothing was sent or billed) were removed",
+ "nova_sonic_clips": 852,
+ "nova_sonic_speech_tokens": 218604,
+ "nova_sonic_text_tokens": 301177,
+ "nova_sonic_usd": 0.7552
 }

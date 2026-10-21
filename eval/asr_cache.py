@@ -92,8 +92,6 @@ def transcribe_all(engine: str, bias: str, wavs: list[str], vocab: list[str], *,
         print(f"  custom vocabulary {name} READY", flush=True)
     if todo:
         print(f"  transcribing {len(todo)} clips with {engine} [{bias}]", flush=True)
-        if engine.startswith("transcribe"):
-            _count_spend(len(todo))
         n = workers or (8 if engine.startswith("transcribe") else 4 if engine in NO_VOCABULARY else 3)
         with concurrent.futures.ProcessPoolExecutor(n, initializer=_init, initargs=(engine, threads)) as pool:
             for i, (wav, heard) in enumerate(pool.map(_work, todo, chunksize=4), start=1):
@@ -101,6 +99,8 @@ def transcribe_all(engine: str, bias: str, wavs: list[str], vocab: list[str], *,
                 p.parent.mkdir(parents=True, exist_ok=True)
                 p.write_text(json.dumps(heard))
                 out[wav] = heard
+                if engine.startswith("transcribe"):
+                    _count_spend(1)  # counted per completed request, so a failed run books nothing
                 if "usage" in heard:
                     _count_nova_sonic(heard["usage"])
                 if i % 50 == 0:

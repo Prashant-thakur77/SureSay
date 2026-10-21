@@ -290,16 +290,33 @@ def asr_section(c: dict[str, Any], i: dict[str, Any]) -> list[str]:
         b0c, ssc = conf["summary"]["b0"]["test"], conf["summary"]["suresay"]["test"]
         gen = conf["summary"]["suresay"]["test_confirm_words_only"]
         it = intent["summary"]["test"]
+        maybe = it["ss_fuzzy"].get("in_cards_with_maybe_pct")
         rows.append(f"| `{label}` | {f(b0c['false_accept_pct'])} | {f(ssc['false_accept_pct'])} | "
                     f"{f(gen['true_accepts_recovered_pct'])} | {f(it['b0']['top1_pct'])} | {f(it['b1']['top1_pct'])} | "
-                    f"{f(it['ss_fuzzy']['top1_pct'])} | {f(it['ss_fuzzy']['correct_abstain_pct'])} |")
-    also = "; ".join(what for _, _, what in others)
+                    f"{f(it['ss_fuzzy']['top1_pct'])} | {f(maybe) if maybe is not None else '—'} | "
+                    f"{f(it['ss_fuzzy']['correct_abstain_pct'])} |")
+    also = " and with ".join(what for _, _, what in others)
     return ["## The same claims with other recognisers", "",
             f"Everything above uses Amazon Transcribe. The same pipeline was also run with {also}, each with its own "
             "dev-only tuning, to show the gate's effect does not depend on one recogniser. Test speakers:", "",
             "| Recogniser | false accepts B0 | false accepts SureSay | genuine answers recovered (SureSay) | "
-            "top-1 B0 | top-1 B1 | top-1 SureSay | correct \"say again\" (SureSay) |",
-            "|---|---|---|---|---|---|---|---|", *rows]
+            "top-1 B0 | top-1 B1 | top-1 SureSay | in the cards, with maybe cards (SureSay) | "
+            "correct \"say again\" (SureSay) |",
+            "|---|---|---|---|---|---|---|---|---|", *rows, "", *sonic_note()]
+
+
+def sonic_note() -> list[str]:
+    spend = read_result("spend") or {}
+    if not spend.get("nova_sonic_clips"):
+        return []
+    per = spend["nova_sonic_usd"] / spend["nova_sonic_clips"]
+    prices = (read_result("cost") or {}).get("prices", {})
+    tr = prices.get("transcribe_streaming_per_second", 0) * prices.get("transcribe_min_seconds_per_request", 0)
+    return [f"Nova 2 Sonic ran on {spend['nova_sonic_clips']} clips for ${spend['nova_sonic_usd']:.2f} at list price "
+            f"(${per * 1000:.2f} per 1,000 clips, input tokens only: the stream is closed before Sonic replies), against "
+            f"${tr * 1000:.2f} per 1,000 short clips for Amazon Transcribe streaming (its 15-second minimum per request). "
+            "Sonic has no custom vocabulary, so it is "
+            "compared with no phrasebook priming; the \"maybe\" column is blank where that run predates maybe cards."]
 
 
 def personal_section(pe: dict[str, Any]) -> list[str]:

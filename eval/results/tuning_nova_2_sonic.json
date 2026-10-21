@@ -1,0 +1,79 @@
+{
+  "name": "tuning_nova_2_sonic",
+  "generated_at": "2026-10-21T14:16:35+0530",
+  "git_sha": "fc5a23f",
+  "python": "3.13.12",
+  "confirm_bias": {
+    "chosen": "none",
+    "candidates": {
+      "none": {
+        "words": [],
+        "cache_tag": "none",
+        "clips": 154,
+        "accuracy_pct": 90.9,
+        "false_accept_pct": 1.3,
+        "false_accepts": 2,
+        "refused_pct": 74.0,
+        "true_accepts_recovered_pct": 88.9
+      },
+      "core": {
+        "words": [
+          "yes",
+          "no",
+          "one",
+          "two",
+          "three"
+        ],
+        "cache_tag": "confirm-core",
+        "clips": 154,
+        "accuracy_pct": 90.9,
+        "false_accept_pct": 1.3,
+        "false_accepts": 2,
+        "refused_pct": 74.0,
+        "true_accepts_recovered_pct": 88.9
+      },
+      "full": {
+        "words": [
+          "yes",
+          "no",
+          "one",
+          "two",
+          "three",
+          "cancel",
+          "haan",
+          "nahin",
+          "number",
+          "first",
+          "second",
+          "third",
+          "none",
+          "doosra",
+          "pehla",
+          "teesra"
+        ],
+        "cache_tag": "confirm",
+        "clips": 154,
+        "accuracy_pct": 90.9,
+        "false_accept_pct": 1.3,
+        "false_accepts": 2,
+        "refused_pct": 74.0,
+        "true_accepts_recovered_pct": 88.9
+      }
+    },
+    "speakers": "dev only (F03, M05)",
+    "asr_engine": "nova-2-sonic"
+  },
+  "fuzzy": {
+    "rule": {
+      "floor": 0.65,
+      "confident": 1.0,
+      "margin": 0.1,
+      "maybe_floor": 0.5
+    },
+    "dev_objective": 79,
+    "dev_utterances": 80
+  },
+  "nova_status": "pending: Bedrock access not available; nova rule not tuned",
+  "speakers": "dev only (F03, M05)",
+  "asr_engine": "nova-2-sonic"
+}

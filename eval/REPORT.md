@@ -162,12 +162,15 @@ The moto DynamoDB mock is not atomic under threads, so the unit tests skip it fo
 
 ## The same claims with other recognisers
 
-Everything above uses Amazon Transcribe. The same pipeline was also run with a local recogniser (faster-whisper, CPU), each with its own dev-only tuning, to show the gate's effect does not depend on one recogniser. Test speakers:
+Everything above uses Amazon Transcribe. The same pipeline was also run with a local recogniser (faster-whisper, CPU) and with Amazon Nova 2 Sonic, a speech-to-speech model used as a recogniser, each with its own dev-only tuning, to show the gate's effect does not depend on one recogniser. Test speakers:
 
-| Recogniser | false accepts B0 | false accepts SureSay | genuine answers recovered (SureSay) | top-1 B0 | top-1 B1 | top-1 SureSay | correct "say again" (SureSay) |
-|---|---|---|---|---|---|---|---|
-| `transcribe-streaming` | 62.8% | 2.3% | 80.6% | 31.5% | 92.6% | 73.1% | 100.0% |
-| `whisper-small.en` | 62.3% | 1.4% | 66.7% | 33.3% | 98.1% | 89.8% | 100.0% |
+| Recogniser | false accepts B0 | false accepts SureSay | genuine answers recovered (SureSay) | top-1 B0 | top-1 B1 | top-1 SureSay | in the cards, with maybe cards (SureSay) | correct "say again" (SureSay) |
+|---|---|---|---|---|---|---|---|---|
+| `transcribe-streaming` | 62.8% | 2.3% | 80.6% | 31.5% | 92.6% | 73.1% | 93.5% | 100.0% |
+| `whisper-small.en` | 62.3% | 1.4% | 66.7% | 33.3% | 98.1% | 89.8% | — | 100.0% |
+| `nova-2-sonic` | 63.5% | 1.9% | 80.6% | 37.0% | 94.4% | 65.7% | 93.5% | 100.0% |
+
+Nova 2 Sonic ran on 852 clips for $0.76 at list price ($0.89 per 1,000 clips, input tokens only: the stream is closed before Sonic replies), against $2.50 per 1,000 short clips for Amazon Transcribe streaming (its 15-second minimum per request). Sonic has no custom vocabulary, so it is compared with no phrasebook priming; the "maybe" column is blank where that run predates maybe cards.
 
 ## Per-user calibration
 
