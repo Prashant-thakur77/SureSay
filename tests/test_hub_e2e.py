@@ -214,3 +214,47 @@ def test_learning_never_maps_a_standard_phrase_to_a_different_action(hub: Hub) -
     assert hub.signed(device, "POST", "/device/confirm",
                       {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]}).json()["status"] == "done"
     assert not any(e["phrase"].lower() == "unlock the door" for e in hub.s.phrasebook.list("demo"))
+
+
+def test_the_device_can_propose_a_card_from_a_tap_but_it_still_needs_confirming(hub: Hub) -> None:
+    device = hub.pair()
+    r = hub.signed(device, "POST", "/device/propose", {"action": "say_for_me", "args": {"text": "I am thirsty."}}).json()
+    p = r["pending"]
+    assert p["origin"] == "user_words" and p["options"][0]["text"] == "Say out loud: “I am thirsty.”"
+    assert p["nonce"]
+    ev = hub.tap(device, p, 1).json()
+    done = hub.signed(device, "POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]}).json()
+    assert done["status"] == "done" and done["result"] == {"say": "I am thirsty."}
+
+
+@pytest.mark.parametrize("payload", [
+    {"action": "home_status", "args": {}},
+    {"action": "rm_rf", "args": {}},
+    {"action": "home_set", "args": {"device": "garage", "on": True}},
+    {"action": "phrasebook_add", "args": {"phrase": "x", "action": "phrasebook_add", "args": {}}},
+])
+def test_device_proposals_are_checked_against_the_catalog(hub: Hub, payload: dict[str, Any]) -> None:
+    device = hub.pair()
+    r = hub.signed(device, "POST", "/device/propose", payload)
+    assert r.status_code == 400
+
+
+def test_teaching_a_phrase_from_the_device_goes_through_the_gate(hub: Hub) -> None:
+    device = hub.pair()
+    p = hub.signed(device, "POST", "/device/propose", {"action": "phrasebook_add", "args": {
+        "phrase": "my fan", "action": "home_set", "args": {"device": "fan", "on": True}}}).json()["pending"]
+    assert not any(e["phrase"] == "my fan" for e in hub.s.phrasebook.list("demo"))
+    ev = hub.tap(device, p, 1).json()
+    hub.signed(device, "POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]})
+    assert any(e["phrase"] == "my fan" for e in hub.s.phrasebook.list("demo"))
+    assert hub.say(device, "my fan")["result"]["candidates"][0]["text"] == "Turn on the bedroom fan"
+
+
+def test_state_counts_what_was_confirmed_and_refused(hub: Hub) -> None:
+    device = hub.pair()
+    p = hub.say(device, "fan on")["pending"][0]
+    ev = hub.tap(device, p, 1).json()
+    hub.signed(device, "POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]})
+    hub.signed(device, "POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": "ev_forged"})
+    stats = hub.signed(device, "GET", "/device/state").json()["stats"]
+    assert stats["confirmed"] == 1 and stats["refused"] >= 1 and stats["without_you"] == 0

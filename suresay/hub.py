@@ -239,13 +239,38 @@ def build_app(s: SureSay | None = None) -> Starlette:
     async def state(request: Request, device: Any, data: dict[str, Any]) -> Response:
         def collect() -> dict[str, Any]:
             u = device.user_id
-            return {"user_id": u, "home": s.home.status(u), "cart": s.home.cart(u),
+            events = [e for e in s.store.scan("event") if e.get("user_id") == u]
+            stats = {"confirmed": sum(e["type"] == "done" for e in events),
+                     "refused": sum(e["type"] == "refused" for e in events),
+                     "refused_from_assistant": sum(e["type"] == "refused" and e.get("caller") == "agent" for e in events),
+                     "cancelled": sum(e["type"] == "cancelled" for e in events),
+                     "without_you": 0}  # by construction: every change has a receipt from the user's device
+            return {"user_id": u, "stats": stats, "home": s.home.status(u), "cart": s.home.cart(u),
                     "receipts": s.gate.receipts(u, limit=10), "events": s.recent_events(u),
                     "phrasebook": s.phrasebook.list(u), "pending": s.gate.device_pending(device),
                     "spoken": [r["result"]["say"] for r in s.gate.receipts(u, limit=10)
                                if r["what"]["action"] == "say_for_me" and isinstance(r.get("result"), dict)][:1]}
 
         return JSONResponse(await anyio.to_thread.run_sync(collect))
+
+    async def propose(request: Request, device: Any, data: dict[str, Any]) -> Response:
+        """The user tapped something (a speak-for-me tile, a taught phrase): open a card set for it.
+
+        It still needs the user's confirmation like any other card; this only skips speech recognition.
+        """
+        from . import catalog
+
+        action = str(data.get("action") or "")
+        args = catalog.validate(action, data.get("args")) if action in catalog.WRITE_ACTIONS else None
+        if args is None:
+            return JSONResponse({"error": "not an action SureSay can propose"}, status_code=400)
+
+        def go() -> dict[str, Any] | None:
+            ps = s.gate.propose(device.user_id, [(action, args)], origin="user_words",
+                                context={"heard": "", "source": "tapped on device"})
+            return s.gate.device_view(device, ps.pending_id)
+
+        return JSONResponse({"pending": await anyio.to_thread.run_sync(go)})
 
     async def reset(request: Request, device: Any, data: dict[str, Any]) -> Response:
         await anyio.to_thread.run_sync(s.home.reset, device.user_id)
@@ -257,6 +282,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
         Route("/device/speak", _signed(speak, s), methods=["POST"]),
         Route("/device/state", _signed(state, s), methods=["GET"]),
         Route("/device/reset", _signed(reset, s), methods=["POST"]),
+        Route("/device/propose", _signed(propose, s), methods=["POST"]),
     ]
 
     async def healthz(request: Request) -> Response:
