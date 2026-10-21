@@ -378,3 +378,40 @@ def test_guest_voice_turns_are_capped(hub: Hub, monkeypatch: pytest.MonkeyPatch)
     codes = [hub.signed(d, "POST", "/device/turn", {"audio_b64": audio}).status_code for _ in range(3)]
     assert codes == [200, 200, 429]
     assert hub.signed(d, "POST", "/device/turn", {"text": "fan on"}).status_code == 200
+
+
+def test_understand_cannot_target_another_user(hub: Hub) -> None:
+    """Security review finding: understand trusted the user_id argument (cross-tenant read and card injection)."""
+    import json as _json
+    import time as _t
+
+    from confirm_gate import sign_request
+
+    hub.s.cfg.__dict__["public_demo"] = True
+    g = hub.http.post("/device/try").json()
+    body = _json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {
+        "name": "understand", "arguments": {"user_id": "demo", "transcript": "fan on"}}}).encode()
+    ts = int(_t.time())
+    headers = {"content-type": "application/json", "accept": "application/json, text/event-stream",
+               "mcp-protocol-version": "2025-11-25", "x-device-id": g["device_id"], "x-timestamp": str(ts),
+               "x-signature": sign_request(g["key"], "POST", "/mcp", ts, body)}
+    r = hub.http.post("/mcp", content=body, headers=headers).json()["result"]
+    victim = hub.pair("demo")
+    assert hub.s.gate.device_pending(victim) == []  # nothing landed on the victim's device
+    assert r.get("isError") or "not your" in r["content"][0]["text"].lower() or \
+        _json.loads(r["content"][0]["text"]).get("status") == "refused"
+
+
+def test_understand_for_the_callers_own_user_still_works(hub: Hub) -> None:
+    out = _call_agent_understand(hub, "demo")
+    assert out["status"] == "choose"
+
+
+def _call_agent_understand(hub: Hub, user: str) -> dict[str, Any]:
+    import json as _json
+
+    h = {"content-type": "application/json", "accept": "application/json, text/event-stream",
+         "mcp-protocol-version": "2025-11-25", "authorization": "Bearer agent-secret", "x-suresay-user": user}
+    r = hub.http.post("/mcp", headers=h, json={"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {
+        "name": "understand", "arguments": {"user_id": user, "transcript": "fan on"}}}).json()["result"]
+    return _json.loads(r["content"][0]["text"])

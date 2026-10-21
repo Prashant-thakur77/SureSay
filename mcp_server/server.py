@@ -38,8 +38,11 @@ def register_tools(app: SureSay) -> None:
         tell the user the options briefly), "answer" for a question about the home (say the answer),
         or "ask_again" when it is not sure (ask them to say it again). It never changes anything.
         """
+        caller_user = app.user()  # the authenticated identity: the agent's X-SureSay-User, a device's or a linked user's
+        if user_id and user_id != caller_user:
+            return {"status": "refused", "reason": "not your user: understand acts only for the authenticated user"}
         ref = check_ref(audio_ref) if audio_ref else None
-        return run_understand(app, user_id, transcript=transcript or None, audio_ref=ref)
+        return run_understand(app, caller_user, transcript=transcript or None, audio_ref=ref)
 
     # reads ------------------------------------------------------------------------------
     @gs.read(pass_user=True)

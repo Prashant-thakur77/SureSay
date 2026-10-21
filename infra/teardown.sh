@@ -30,6 +30,13 @@ aws lambda delete-function-url-config --function-name "$FUNCTION" 2>/dev/null ||
 aws lambda delete-function --function-name "$FUNCTION" 2>/dev/null || true
 aws logs delete-log-group --log-group-name "/aws/lambda/$FUNCTION" 2>/dev/null || true
 
+step "Alexa skill Lambda"
+aws lambda delete-function --function-name suresay-alexa-skill 2>/dev/null || true
+aws logs delete-log-group --log-group-name /aws/lambda/suresay-alexa-skill 2>/dev/null || true
+aws iam detach-role-policy --role-name suresay-alexa-role --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole 2>/dev/null || true
+aws iam delete-role --role-name suresay-alexa-role 2>/dev/null || true
+rm -f "$STATE/alexa_device.env"
+
 step "IAM"
 aws iam delete-role-policy --role-name "$ROLE" --policy-name suresay-hub 2>/dev/null || true
 aws iam delete-role --role-name "$ROLE" 2>/dev/null || true

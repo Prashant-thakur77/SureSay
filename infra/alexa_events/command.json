@@ -1,0 +1,2 @@
+{"version": "1.0", "session": {"new": true, "attributes": {}}, "request": {"type": "IntentRequest", "requestId": "test", "locale": "en-US",
+ "intent": {"name": "CommandIntent", "slots": {"utterance": {"name": "utterance", "value": "van on"}}}}}

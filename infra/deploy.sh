@@ -166,6 +166,44 @@ if [ -z "${SKIP_AGENT:-}" ]; then
   fi
 fi
 
+if [ -z "${SKIP_ALEXA:-}" ]; then
+  say "Alexa skill Lambda suresay-alexa-skill (paired as the user's Alexa device)"
+  AROLE="suresay-alexa-role"
+  if ! aws iam get-role --role-name "$AROLE" >/dev/null 2>&1; then
+    aws iam create-role --role-name "$AROLE" --assume-role-policy-document file://infra/iam/alexa-trust.json --tags Key=project,Value=suresay >/dev/null
+    aws iam attach-role-policy --role-name "$AROLE" --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    sleep 10
+  fi
+  AROLE_ARN="$(aws iam get-role --role-name "$AROLE" --query Role.Arn --output text)"
+  if [ ! -f "$STATE/alexa_device.env" ]; then
+    ACODE="$(SURESAY_BACKEND=aws SURESAY_GATE_TABLE="$TABLE" AWS_REGION="$REGION" "$PY" -m suresay.cli pair)"
+    "$PY" alexa_skill/pair.py "$HUB_URL" "$ACODE" > "$STATE/alexa_device.env"
+    chmod 600 "$STATE/alexa_device.env"
+  fi
+  AENV="$("$PY" - "$STATE/alexa_device.env" <<'PYEOF'
+import json, sys
+pairs = dict(l.strip().split("=", 1) for l in open(sys.argv[1]) if "=" in l)
+print(json.dumps({"Variables": pairs}))
+PYEOF
+)"
+  (cd alexa_skill && rm -f ../infra/.build/alexa.zip && mkdir -p ../infra/.build && zip -q ../infra/.build/alexa.zip lambda_function.py)
+  if ! aws lambda get-function --function-name suresay-alexa-skill >/dev/null 2>&1; then
+    aws lambda create-function --function-name suresay-alexa-skill --runtime python3.12 --role "$AROLE_ARN" \
+      --handler lambda_function.lambda_handler --timeout 15 --zip-file fileb://infra/.build/alexa.zip \
+      --environment "$AENV" --tags project=suresay >/dev/null
+    aws lambda wait function-active-v2 --function-name suresay-alexa-skill
+  else
+    aws lambda update-function-code --function-name suresay-alexa-skill --zip-file fileb://infra/.build/alexa.zip >/dev/null
+    aws lambda wait function-updated-v2 --function-name suresay-alexa-skill
+    aws lambda update-function-configuration --function-name suresay-alexa-skill --environment "$AENV" >/dev/null
+    aws lambda wait function-updated-v2 --function-name suresay-alexa-skill
+  fi
+  aws lambda invoke --function-name suresay-alexa-skill --cli-binary-format raw-in-base64-out \
+    --payload file://infra/alexa_events/command.json "$STATE/alexa_test.json" >/dev/null
+  echo "skill test: $("$PY" -c "import json,sys; print(json.load(open(sys.argv[1]))['response']['outputSpeech']['ssml'][:140])" "$STATE/alexa_test.json")"
+  echo "Alexa skill endpoint ARN: $(aws lambda get-function --function-name suresay-alexa-skill --query Configuration.FunctionArn --output text)"
+fi
+
 say "CloudWatch dashboard SureSay"
 REGION="$REGION" FUNCTION="$FUNCTION" envsubst '${REGION} ${FUNCTION}' < infra/dashboard.json.tmpl > "$STATE/dashboard.json"
 aws cloudwatch put-dashboard --dashboard-name SureSay --dashboard-body "file://$STATE/dashboard.json" >/dev/null && \
