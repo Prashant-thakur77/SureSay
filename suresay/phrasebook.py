@@ -191,3 +191,38 @@ class MemoryPhrasebook:
         for e in entries:
             self._put(user_id, {"op": "add", "entry": e})
         self._cache[user_id] = (time.time(), list(entries))
+
+
+class MirroredPhrasebook:
+    """Fast reads from the gate's store; every change also written to AgentCore Memory.
+
+    Reading a phrasebook back out of Memory means replaying its events, which took seconds on a cold start and
+    blew a voice assistant's response budget. So the store (DynamoDB) answers reads, and Memory keeps the durable,
+    agent-visible history of what the user taught SureSay. A Memory failure never blocks the user.
+    """
+
+    def __init__(self, primary: Phrasebook, mirror: Phrasebook) -> None:
+        self.primary = primary
+        self.mirror = mirror
+
+    def list(self, user_id: str) -> list[dict[str, Any]]:
+        return self.primary.list(user_id)
+
+    def add(self, user_id: str, phrase: str, action: str, args: dict[str, Any]) -> dict[str, Any]:
+        e = self.primary.add(user_id, phrase, action, args)
+        try:
+            self.mirror.add(user_id, phrase, action, args)
+        except Exception:
+            import logging
+
+            logging.getLogger(__name__).exception("could not mirror a phrase to AgentCore Memory")
+        return e
+
+    def replace(self, user_id: str, entries: list[dict[str, Any]]) -> None:
+        self.primary.replace(user_id, entries)
+        try:
+            self.mirror.replace(user_id, entries)
+        except Exception:
+            import logging
+
+            logging.getLogger(__name__).exception("could not mirror a phrasebook to AgentCore Memory")

@@ -113,3 +113,33 @@ def test_store_phrasebook_seeds_adds_and_replaces() -> None:
     pb.add("demo", "My Fan", "home_set", {"device": "fan", "on": False})
     mine = [e for e in pb.list("demo") if e["phrase"].lower() == "my fan"]
     assert len(mine) == 1 and mine[0]["args"]["on"] is False
+
+
+def test_mirrored_phrasebook_reads_fast_and_writes_both() -> None:
+    from confirm_gate import MemoryStore
+
+    from suresay.phrasebook import MirroredPhrasebook, StorePhrasebook
+
+    class Broken:
+        def add(self, *a: Any) -> None:
+            raise RuntimeError("memory down")
+
+        def replace(self, *a: Any) -> None:
+            raise RuntimeError("memory down")
+
+        def list(self, *a: Any) -> list[Any]:
+            raise AssertionError("reads must never go to the mirror")
+
+    mirror_calls: list[str] = []
+
+    class Mirror(Broken):
+        def add(self, user: str, phrase: str, *a: Any) -> None:
+            mirror_calls.append(phrase)
+
+    pb = MirroredPhrasebook(StorePhrasebook(MemoryStore(), seed_users=("demo",)), Mirror())
+    assert any(e["phrase"] == "fan on" for e in pb.list("demo"))
+    pb.add("demo", "my fan", "home_set", {"device": "fan", "on": True})
+    assert mirror_calls == ["my fan"]
+    down = MirroredPhrasebook(StorePhrasebook(MemoryStore(), seed_users=("demo",)), Broken())
+    down.add("demo", "still works", "home_set", {"device": "fan", "on": True})
+    assert any(e["phrase"] == "still works" for e in down.list("demo"))

@@ -18,7 +18,7 @@ from .asr import Asr, make_asr
 from .config import Settings
 from .config import settings as load_settings
 from .media import LocalMedia, Media, S3Media
-from .phrasebook import JsonPhrasebook, MemoryPhrasebook, Phrasebook, StorePhrasebook
+from .phrasebook import JsonPhrasebook, MemoryPhrasebook, MirroredPhrasebook, Phrasebook, StorePhrasebook
 from .rank import Ranker, make_ranker
 from .speech import Speaker
 from .state import Home
@@ -82,8 +82,9 @@ class SureSay:
         self.home = Home(store)
         if phrasebook is None:
             if self.cfg.memory_id:
-                phrasebook = MemoryPhrasebook(self.cfg.memory_id, region=self.cfg.region,
-                                              seed_users=(self.cfg.default_user,))
+                phrasebook = MirroredPhrasebook(
+                    StorePhrasebook(store, seed_users=(self.cfg.default_user,)),
+                    MemoryPhrasebook(self.cfg.memory_id, region=self.cfg.region, seed_users=()))
             elif self.cfg.is_aws:
                 phrasebook = StorePhrasebook(store, seed_users=(self.cfg.default_user,))
             else:
@@ -130,7 +131,15 @@ class SureSay:
     def ranker(self) -> Ranker:
         with self._lock:
             if self._ranker is None:
-                self._ranker = make_ranker(self.cfg.ranker, model_id=self.cfg.nova_model_id, region=self.cfg.region)
+                kind = self.cfg.ranker
+                if kind == "auto":  # share the probe's answer for 10 minutes so cold starts don't each pay for it
+                    cached = self.store.get("health", "ranker") or {}
+                    if cached.get("until", 0) > time.time():
+                        kind = cached["kind"]
+                self._ranker = make_ranker(kind, model_id=self.cfg.nova_model_id, region=self.cfg.region)
+                if self.cfg.ranker == "auto":
+                    self.store.put("health", "ranker", {"kind": "nova" if self._ranker.name.startswith("nova") else "fuzzy",
+                                                        "until": time.time() + 600})
                 logger.info("Ranker: %s", self._ranker.name)
             return self._ranker
 

@@ -269,10 +269,13 @@ def parse_json(text: str) -> dict[str, Any]:
 
 
 def bedrock_available(model_id: str, region: str = "us-east-1") -> bool:
+    """One quick call: a throttled or blocked model must not cost seconds of retries on a cold start."""
     import boto3
+    from botocore.config import Config
 
     try:
-        boto3.client("bedrock-runtime", region_name=region).converse(
+        cfg = Config(retries={"max_attempts": 1, "mode": "standard"}, connect_timeout=2, read_timeout=4)
+        boto3.client("bedrock-runtime", region_name=region, config=cfg).converse(
             modelId=model_id, messages=[{"role": "user", "content": [{"text": "ok"}]}],
             inferenceConfig={"maxTokens": 1})
         return True
