@@ -30,6 +30,7 @@ SureSay is a voice assistant for people with atypical speech (dysarthria): it sh
 
 ## Account status (as of 2026-10-21 09:40 IST)
 Live: Transcribe, Polly, S3, DynamoDB, Lambda hub, AgentCore Runtime (`suresay_agent`) and Memory (`suresay_memory`). Bedrock Nova 2 Lite is AUTHORIZED but every on-demand quota is 0; increases requested for the global profile (L-D5F39C2F, L-71C69B70). When approved: set `NOVA_MODEL_ID=global.amazon.nova-2-lite-v1:0`, run `make deploy`, then the Nova eval arms (`run_intent_eval.py --nova on`, `run_safety_suite.py`), then `make report`.
+Amazon Nova 2 Sonic (`amazon.nova-2-sonic-v1:0`) DOES work (21 Oct): `suresay.asr.NovaSonicAsr`, eval engine `nova-2-sonic` (results in `eval/results/novasonic/`). It needs the `nova-sonic` extra, the CRT transport, IAM `bedrock:InvokeModel` on the model, and a redeploy after IAM changes (old containers keep getting AccessDenied). `amazon.nova-sonic-v1:0` is "invalid model identifier".
 
 ## Gotchas
 - Two `tests` packages: run them separately (`make test` does).
