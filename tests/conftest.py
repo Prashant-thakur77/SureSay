@@ -17,7 +17,6 @@ from confirm_gate import MemoryStore, sign_request
 from confirm_gate.evidence import Device
 
 from suresay.app import SureSay
-from suresay.config import ROOT as ROOT_DIR
 from suresay.asr import TextAsr
 from suresay.config import Settings
 from suresay.hub import build_app

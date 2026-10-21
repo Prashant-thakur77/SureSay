@@ -436,8 +436,9 @@ def test_oversized_audio_is_refused_before_decoding(hub: Hub) -> None:
 def test_guest_voice_cap_covers_evidence_too(hub: Hub, monkeypatch: pytest.MonkeyPatch) -> None:
     import base64 as b64
 
-    import suresay.hub as hubmod
     from confirm_gate.evidence import Device
+
+    import suresay.hub as hubmod
 
     monkeypatch.setattr(hubmod, "GUEST_VOICE_PER_DAY", 1)
     hub.s.cfg.__dict__["public_demo"] = True

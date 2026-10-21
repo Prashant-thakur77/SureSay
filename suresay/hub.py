@@ -12,7 +12,6 @@ Run: ``python -m suresay.hub`` (or ``suresay-hub``). Prints a pairing code for t
 from __future__ import annotations
 
 import base64
-import binascii
 import hmac
 import json
 import logging
