@@ -34,3 +34,4 @@ infra/.build/
 notes/
 eval/results/scratch/
 infra/.state/
+video/node_modules
