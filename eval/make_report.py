@@ -405,6 +405,10 @@ def main() -> None:
         "; controls = " + ", ".join(SPLIT["controls"]) + ". Prompts and thresholds were tuned on dev only. "
         + SEVERITY_NOTE,
         "",
+        "**Revisions:** on 21 Oct an independent security review hardened the consent parser (hesitations, questions and "
+        "qualifiers such as \"ok hang on\" or \"okay, who is it\" are never a yes; unreadable Hindi words count as unknown). "
+        "Claim 1 was recomputed from the same cached transcripts and did not change.",
+        "",
         "**Baselines, one change at a time:** B0 = plain assistant (recogniser, top transcript acts); "
         "B1 = + the user's phrasebook (biased recognition, nearest phrase acts); SureSay = + ranked candidates, "
         "abstaining, and the confirm gate.",

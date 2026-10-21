@@ -6,6 +6,8 @@ People with dysarthria (after a stroke, or living with Parkinson's, ALS or cereb
 
 **Try it live:** [https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws](https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws). Choose "Try it now" for your own private demo home (simulated devices; no sign-up). Try "van on", the doorbell, or Speak for me.
 
+![SureSay: "van on" becomes three cards; the user picks one; the consent trail checks it; the fan turns on](docs/img/demo.gif)
+
 ![Three cards after "van on" was heard](docs/img/cards.png)
 
 | | | |
