@@ -25,7 +25,7 @@ def speech(resp: dict[str, Any]) -> str:
 
 @pytest.fixture()
 def alexa(hub: Hub, monkeypatch: pytest.MonkeyPatch) -> Any:
-    device = hub.pair()
+    device = hub.pair(transcriber="alexa")
     monkeypatch.setenv("SURESAY_HUB_URL", hub.base)
     monkeypatch.setenv("SURESAY_DEVICE_ID", device.device_id)
     monkeypatch.setenv("SURESAY_DEVICE_KEY", device.key)

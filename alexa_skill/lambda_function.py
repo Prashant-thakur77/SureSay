@@ -100,7 +100,7 @@ def answer(hub: Hub, attrs: dict[str, Any], words: str) -> dict[str, Any]:
             return _read_waiting(sets, "That question has closed, so nothing was changed. ")
         return _read_waiting(sets, "There's nothing waiting for an answer. " if not sets else "")
     ev = hub.call("POST", "/device/evidence", {"pending_id": p["pending_id"], "nonce": p["nonce"], "kind": "transcript",
-                                                "transcript": words, "source": "alexa"})
+                                                "transcript": words})
     if "error" in ev:
         return say(f"That didn't work: {ev['error']}. Please say it again.", reprompt="What would you like?")
     out = hub.call("POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]})

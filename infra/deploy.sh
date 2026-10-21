@@ -65,7 +65,7 @@ else
   echo "Phrasebooks fall back to the DynamoDB table; the agent runs without long-term memory."
 fi
 
-say "SNS topic suresay-carer-alerts (subscribe a carer: aws sns subscribe --protocol email ...)"
+say "SNS topic suresay-carer-alerts (subscribe a carer with a user_id filter policy: see suresay/notify.py)"
 CARER_TOPIC="$(aws sns create-topic --name suresay-carer-alerts --tags Key=project,Value=suresay --query TopicArn --output text)"
 echo "$CARER_TOPIC"
 
@@ -185,10 +185,13 @@ if [ -z "${SKIP_ALEXA:-}" ]; then
   fi
   AROLE_ARN="$(aws iam get-role --role-name "$AROLE" --query Role.Arn --output text)"
   if [ ! -f "$STATE/alexa_device.env" ]; then
-    ACODE="$(SURESAY_BACKEND=aws SURESAY_GATE_TABLE="$TABLE" AWS_REGION="$REGION" "$PY" -m suresay.cli pair)"
+    ACODE="$(SURESAY_BACKEND=aws SURESAY_GATE_TABLE="$TABLE" AWS_REGION="$REGION" "$PY" -m suresay.cli pair --transcriber alexa)"
     "$PY" alexa_skill/pair.py "$HUB_URL" "$ACODE" > "$STATE/alexa_device.env"
     chmod 600 "$STATE/alexa_device.env"
   fi
+  # Alexa recognises speech itself: only this device may send transcript evidence (idempotent; older pairings too).
+  SURESAY_BACKEND=aws SURESAY_GATE_TABLE="$TABLE" AWS_REGION="$REGION" "$PY" -m suresay.cli voice-device \
+    "$(grep SURESAY_DEVICE_ID "$STATE/alexa_device.env" | cut -d= -f2)" alexa
   AENV="$("$PY" - "$STATE/alexa_device.env" <<'PYEOF'
 import json, os, sys
 pairs = dict(l.strip().split("=", 1) for l in open(sys.argv[1]) if "=" in l)

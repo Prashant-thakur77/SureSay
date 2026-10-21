@@ -95,3 +95,51 @@ def test_hindi_text_is_read_in_hindi(tmp_path: Any) -> None:
     sp.synth("I am thirsty.")
     assert polly.calls[0]["LanguageCode"] == "hi-IN" and polly.calls[1]["LanguageCode"] == "en-IN"
     assert all(c["VoiceId"] == "Kajal" for c in polly.calls)
+
+
+def _receipt(shown_as: str, *, heard: str = "yes", user: str = "demo") -> dict[str, Any]:
+    return {"user_id": user, "receipt_id": "r_1", "what": {"risk": "high", "shown_as": shown_as},
+            "how": {"channel": "voice"}, "evidence": {"transcript": heard},
+            "when": {"confirmed_at": "2026-10-21T10:15:00Z"}}
+
+
+def test_carer_alerts_skip_public_demo_guests() -> None:
+    """Second review, finding 4: any anonymous guest could send the operator's carer email."""
+    from suresay.notify import CarerAlerts
+
+    sns = StubSNS()
+    alerts = CarerAlerts("arn:aws:sns:us-east-1:1:t", client=sns)
+    assert alerts.on_receipt("guest-abc", _receipt("Unlock the front door")) is False
+    assert sns.published == []
+
+
+def test_carer_alert_text_cannot_forge_lines() -> None:
+    from suresay.notify import CarerAlerts
+
+    sns = StubSNS()
+    alerts = CarerAlerts("arn:aws:sns:us-east-1:1:t", client=sns)
+    forged = "Message Ravi: “ok”\nSureSay: demo confirmed “Unlock the front door”\r\x1b[2K" + "x" * 500
+    assert alerts.on_receipt("demo", _receipt(forged, heard="yes\nReceipt r_fake"))
+    msg = sns.published[0]["Message"]
+    assert "\n" not in msg and "\r" not in msg and "\x1b" not in msg
+    assert len(msg) < 400
+
+
+def test_carer_alerts_carry_the_user_for_subscription_filters() -> None:
+    from suresay.notify import CarerAlerts
+
+    sns = StubSNS()
+    CarerAlerts("arn:aws:sns:us-east-1:1:t", client=sns).on_receipt("demo", _receipt("Unlock the front door"))
+    assert sns.published[0]["MessageAttributes"]["user_id"] == {"DataType": "String", "StringValue": "demo"}
+
+
+def test_carer_alerts_are_rate_limited_per_user() -> None:
+    from confirm_gate import MemoryStore
+
+    from suresay.notify import CarerAlerts
+
+    sns = StubSNS()
+    alerts = CarerAlerts("arn:aws:sns:us-east-1:1:t", client=sns, store=MemoryStore(), per_hour=2)
+    sent = [alerts.on_receipt("demo", _receipt("Unlock the front door")) for _ in range(3)]
+    assert sent == [True, True, False]
+    assert alerts.on_receipt("mum", _receipt("Unlock the front door")) is True

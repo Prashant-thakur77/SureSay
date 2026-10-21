@@ -47,8 +47,8 @@ class Hub:
         self.base = base
         self.http = httpx.Client(base_url=base, timeout=30)
 
-    def pair(self, user: str = "demo") -> Device:
-        code = self.s.devices.start_pairing(user)
+    def pair(self, user: str = "demo", *, transcriber: str = "") -> Device:
+        code = self.s.devices.start_pairing(user, transcriber=transcriber)
         r = self.http.post("/device/pair", json={"code": code, "name": "test"})
         r.raise_for_status()
         d = r.json()

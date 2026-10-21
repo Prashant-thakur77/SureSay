@@ -2,7 +2,7 @@
 
     python alexa_skill/pair.py https://<hub-url> <pairing-code>
 
-The pairing code comes from the hub's terminal or ``python -m suresay.cli pair``. Put the three printed
+The pairing code comes from the hub's terminal or ``python -m suresay.cli pair --transcriber alexa``. Put the three printed
 values in the skill Lambda's environment. Keep the key secret: it is what lets Alexa answer cards.
 """
 

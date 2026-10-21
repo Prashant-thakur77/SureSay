@@ -112,7 +112,7 @@ class SureSay:
         self.oauth = OAuth(store, self.devices, public_url=self.cfg.public_url, clock=clock)
         from .notify import CarerAlerts
 
-        self.carer = CarerAlerts(self.cfg.carer_topic_arn, region=self.cfg.region)
+        self.carer = CarerAlerts(self.cfg.carer_topic_arn, region=self.cfg.region, store=store)
         self.oauth.register_from_env(self.cfg.oauth_clients)
         from mcp_server.server import register_tools
 
