@@ -154,3 +154,13 @@ def test_one_odd_failure_for_a_real_user_does_not_trip_it_but_two_do(hub: Hub, m
     assert not _tripped(hub)
     hub.say(device, "fan on")
     assert _tripped(hub)
+
+
+def test_an_oversized_chunked_body_gets_413_not_500(hub: Hub) -> None:
+    """Second review, finding 11: without a content-length the limit raised inside the app (a 500)."""
+    def chunks() -> Any:
+        for _ in range(60):
+            yield b" " * 100_000
+
+    r = hub.http.post("/device/turn", content=chunks(), headers={"content-type": "application/json"})
+    assert r.status_code == 413

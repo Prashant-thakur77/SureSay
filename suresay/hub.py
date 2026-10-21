@@ -73,16 +73,30 @@ class BodyLimit:
             await JSONResponse({"error": "request body too large"}, status_code=413)(scope, receive, send)
             return
         seen = 0
+        started = False
 
         async def limited() -> Message:
             nonlocal seen
             msg = await receive()
             seen += len(msg.get("body", b""))
             if seen > self.limit:
-                raise ValueError("request body too large")
+                raise _TooLarge
             return msg
 
-        await self.app(scope, limited, send)
+        async def tracked(msg: Message) -> None:
+            nonlocal started
+            started = started or msg["type"] == "http.response.start"
+            await send(msg)
+
+        try:
+            await self.app(scope, limited, tracked)
+        except _TooLarge:  # a chunked body with no content-length went over the limit while being read
+            if not started:
+                await JSONResponse({"error": "request body too large"}, status_code=413)(scope, receive, send)
+
+
+class _TooLarge(Exception):
+    pass
 
 
 class McpAuth:
