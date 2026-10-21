@@ -339,3 +339,25 @@ def test_a_failing_agent_trips_to_direct_answers(hub: Hub) -> None:
     assert b.mode() == "direct"
     b._down_until = 0
     assert b.mode() == "agent"
+
+
+def test_public_demo_gives_each_visitor_a_private_sandbox(hub: Hub) -> None:
+    hub.s.cfg.__dict__["public_demo"] = True  # frozen dataclass: tests flip the flag directly
+    a = hub.http.post("/device/try").json()
+    b = hub.http.post("/device/try").json()
+    assert a["user_id"].startswith("guest-") and a["user_id"] != b["user_id"] and a["key"]
+    from confirm_gate.evidence import Device
+
+    da = Device(a["device_id"], a["user_id"], a["key"], a["name"])
+    out = hub.say(da, "van on")
+    assert out["result"]["candidates"][0]["text"] == "Turn on the bedroom fan"
+    p = out["pending"][0]
+    ev = hub.tap(da, p, 1).json()
+    hub.signed(da, "POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]})
+    assert hub.s.home.status(a["user_id"])["devices"]["fan"]["on"] is True
+    assert hub.s.home.status(b["user_id"])["devices"]["fan"]["on"] is False
+    assert hub.s.home.status("demo")["devices"]["fan"]["on"] is False
+
+
+def test_public_demo_is_off_unless_enabled(hub: Hub) -> None:
+    assert hub.http.post("/device/try").status_code == 404

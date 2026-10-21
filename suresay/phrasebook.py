@@ -83,7 +83,7 @@ class JsonPhrasebook:
     def list(self, user_id: str) -> list[dict[str, Any]]:
         p = self._path(user_id)
         if not p.exists():
-            if user_id in self.seed_users:
+            if user_id in self.seed_users or user_id.startswith("guest-"):
                 self.replace(user_id, [entry(**s, entry_id=f"ph_start{i:02d}") for i, s in enumerate(STARTER)])
             else:
                 return []
@@ -111,7 +111,7 @@ class StorePhrasebook:
     def list(self, user_id: str) -> list[dict[str, Any]]:
         doc = self.store.get("phrasebook", user_id)
         if doc is None:
-            if user_id not in self.seed_users:
+            if user_id not in self.seed_users and not user_id.startswith("guest-"):
                 return []
             self.replace(user_id, [entry(**s, entry_id=f"ph_start{i:02d}") for i, s in enumerate(STARTER)])
             doc = self.store.get("phrasebook", user_id)
@@ -171,7 +171,7 @@ class MemoryPhrasebook:
                 elif blob.get("op") == "clear":
                     entries = {}
         result = list(entries.values())
-        if not result and user_id in self.seed_users and not hit:
+        if not result and (user_id in self.seed_users or user_id.startswith("guest-")) and not hit:
             self.replace(user_id, [entry(**s, entry_id=f"ph_start{i:02d}") for i, s in enumerate(STARTER)])
             return self.list(user_id)
         self._cache[user_id] = (time.time(), result)

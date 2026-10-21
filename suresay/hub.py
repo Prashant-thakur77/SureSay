@@ -18,6 +18,7 @@ import json
 import logging
 import os
 import time
+import uuid
 from typing import Any
 
 import anyio
@@ -355,11 +356,36 @@ def build_app(s: SureSay | None = None) -> Starlette:
         Route("/device/doorbell", _signed(doorbell, s), methods=["POST"]),
     ]
 
+    tries: dict[str, list[float]] = {}
+
+    async def try_demo(request: Request) -> Response:
+        """Public demo (SURESAY_PUBLIC_DEMO=1): a private sandbox home per visitor, paired at once.
+
+        Same gate, same rules; a guest can only ever touch their own simulated home. Rate-limited per address.
+        """
+        if not s.cfg.public_demo:
+            return JSONResponse({"error": "not found"}, status_code=404)
+        ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "?")).split(",")[0]
+        now = time.time()
+        recent = [t for t in tries.get(ip, []) if now - t < 3600]
+        if len(recent) >= 20:
+            return JSONResponse({"error": "too many demo homes from here; try again later"}, status_code=429)
+        tries[ip] = [*recent, now]
+
+        def go() -> dict[str, Any]:
+            user = "guest-" + uuid.uuid4().hex[:10]
+            device = s.devices.pair(s.devices.start_pairing(user), name="Demo visitor")
+            s.home.reset(user)
+            return {"device_id": device.device_id, "user_id": device.user_id, "key": device.key, "name": device.name,
+                    "demo": True}
+
+        return JSONResponse(await anyio.to_thread.run_sync(go))
+
     async def healthz(request: Request) -> Response:
         return JSONResponse({"ok": True})
 
     async def info(request: Request) -> Response:
-        return JSONResponse({"name": "suresay", "mcp": "/mcp", "transport": "streamable-http",
+        return JSONResponse({"name": "suresay", "mcp": "/mcp", "transport": "streamable-http", "public_demo": s.cfg.public_demo,
                              "protocol_versions": ["2025-11-25", "2026-07-28"], "backend": s.cfg.backend,
                              "turn_mode": bridge._mode or "not yet decided"})
 
@@ -369,7 +395,8 @@ def build_app(s: SureSay | None = None) -> Starlette:
     async def terms(request: Request) -> Response:
         return HTMLResponse(_doc_page("Terms of use", TERMS))
 
-    routes += [Route("/healthz", healthz), Route("/api/info", info), Route("/privacy", privacy), Route("/terms", terms)]
+    routes += [Route("/healthz", healthz), Route("/api/info", info), Route("/privacy", privacy), Route("/terms", terms),
+               Route("/device/try", try_demo, methods=["POST"])]
     brand = ROOT / "alexa_plus" / "assets"
     if brand.exists():
         routes.append(Mount("/brand", app=StaticFiles(directory=brand), name="brand"))

@@ -39,6 +39,7 @@ class Settings:
         default_factory=lambda: tuple(o for o in _env("SURESAY_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",") if o)
     )
     evidence_language: str = field(default_factory=lambda: _env("SURESAY_EVIDENCE_LANGUAGE", "en-US"))  # hi-IN for Hindi
+    public_demo: bool = field(default_factory=lambda: _env("SURESAY_PUBLIC_DEMO") in ("1", "true", "yes"))
     learn: bool = field(default_factory=lambda: _env("SURESAY_LEARN", "1") not in ("0", "false", "no"))
     public_url: str = field(default_factory=lambda: _env("SURESAY_PUBLIC_URL"))  # "" = derive from the request
     oauth_clients: str = field(default_factory=lambda: _env("SURESAY_OAUTH_CLIENTS"))  # JSON, see suresay/oauth.py
