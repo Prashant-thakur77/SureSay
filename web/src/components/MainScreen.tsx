@@ -6,7 +6,7 @@ import { useMotionOK } from "../hooks/useMotion";
 import { useRecorder } from "../hooks/useRecorder";
 import { useScan, type ScanItem } from "../hooks/useScan";
 import { tvFromUrl, type Settings } from "../hooks/useSettings";
-import type { HubApi } from "../lib/api";
+import { isGuest, type HubApi } from "../lib/api";
 import type { ConfirmChannel } from "../lib/mcp";
 import { randomHex } from "../lib/sign.js";
 import type { Speaker } from "../lib/speech";
@@ -267,6 +267,20 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
     else el.removeAttribute("inert");
   }, [settingsOpen]);
 
+  // guests get a slim note about the demo home, which they can hide
+  const guest = isGuest(hub.creds.user_id);
+  const [guestNote, setGuestNote] = useState(() => guest && readJson<boolean>("suresay.guestNoteHidden") !== true);
+  const startOver = useCallback(async () => {
+    conv.reset();
+    try {
+      await hub.reset();
+      await refresh();
+      announce("Your demo home is back to the start.", "polite");
+    } catch {
+      announce("I couldn't start over just now. Please try again.", "polite");
+    }
+  }, [conv, hub, refresh, announce]);
+
   const closeSettings = useCallback(() => setSettingsOpen(false), []);
   const resetHome = useCallback(async () => {
     await hub.reset();
@@ -285,6 +299,28 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
             onSettings={() => setSettingsOpen(true)}
             sideToggle={bigScreen ? { open: sideOpen, onToggle: () => setSideOpen((o) => !o) } : undefined}
           />
+          {guestNote && (
+            <div className="guest-note" role="region" aria-label="About this demo">
+              <Icon name="spark" size={22} />
+              <p>
+                <strong>Demo home:</strong> the devices, contacts and shop are simulated. Try “van on”, the doorbell, or Speak for me.
+              </p>
+              <button type="button" className="linkish" onClick={() => void startOver()}>
+                Start over
+              </button>
+              <button
+                type="button"
+                className="btn btn--icon guest-note__hide"
+                aria-label="Hide the demo note"
+                onClick={() => {
+                  setGuestNote(false);
+                  writeJson("suresay.guestNoteHidden", true);
+                }}
+              >
+                <Icon name="close" size={22} />
+              </button>
+            </div>
+          )}
           {connection !== "ok" && (
             <div className={`banner ${connection === "unpaired" ? "banner--warn" : ""}`} role="status" data-scan-exempt>
               <Icon name="alert" size={24} />

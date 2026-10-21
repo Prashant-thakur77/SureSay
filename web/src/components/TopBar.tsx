@@ -57,10 +57,16 @@ export const TopBar = forwardRef<HTMLButtonElement, Props>(function TopBar({ use
       </a>
       <Wordmark />
       <div className="topbar__meta">
-        <span className="chip chip--user">
-          <span className="visually-hidden">Signed in as </span>
-          <span aria-hidden="true">User:</span> {user}
-        </span>
+        {user.startsWith("guest-") ? (
+          <span className="chip chip--user chip--demo">
+            <span className="visually-hidden">Using a </span>Demo<span className="visually-hidden"> home</span>
+          </span>
+        ) : (
+          <span className="chip chip--user">
+            <span className="visually-hidden">Signed in as </span>
+            <span aria-hidden="true">User:</span> {user}
+          </span>
+        )}
         <McpChip mcp={mcp} />
       </div>
       {sideToggle && (

@@ -3674,3 +3674,81 @@ code {
 :root[data-theme="contrast"] .visitor-art__person {
   fill: #000000;
 }
+
+/* --- public demo ---------------------------------------------------------- */
+
+.pair__try {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--hair);
+}
+
+.pair__try-btn {
+  position: relative;
+  min-height: max(5rem, 80px);
+  font-size: min(1.35rem, 7vw);
+}
+
+.pair__try-btn::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 8px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--dawn);
+}
+
+.pair__try-desc {
+  color: var(--muted);
+}
+
+.guest-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.8rem;
+  padding: 0.5rem clamp(16px, 2vw, 1.5rem);
+  border-bottom: 1px solid var(--hair);
+  background: var(--surface2);
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.guest-note p {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.linkish {
+  min-height: 44px;
+  padding: 0 0.4rem;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  cursor: pointer;
+}
+
+.guest-note__hide {
+  min-width: 44px;
+  border-color: transparent;
+}
+
+.chip--demo {
+  border-color: var(--hue-3);
+}
+
+:root[data-theme="contrast"] .guest-note {
+  border-bottom: 3px solid #ffffff;
+}
+
+:root[data-theme="contrast"] .pair__try-btn::after {
+  background: #000000;
+}

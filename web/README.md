@@ -24,6 +24,8 @@ SURESAY_ASR=text SURESAY_RANKER=fuzzy SURESAY_AGENT_MODE=direct .venv/bin/python
 
 Hub address: `VITE_HUB_URL` when it is set at build time. If not, the dev server (port 5173) uses `http://127.0.0.1:9000`, and anywhere else the app uses its own origin.
 
+Public demo: when the hub runs with `SURESAY_PUBLIC_DEMO=1` (it reports `public_demo` in `/api/info`), the pairing screen offers "Try it now — your own demo home". That calls `POST /device/try`, which pairs a private guest home at once. Guests see a slim "Demo home" note with "Start over" (it resets the same guest), and the user chip reads "Demo".
+
 Live check against a running hub (it uses the one-time pairing code, so run it once per hub start):
 
 ```bash

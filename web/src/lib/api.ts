@@ -69,6 +69,34 @@ export async function pairDevice(base: string, code: string, name: string): Prom
   return { device_id: data.device_id, user_id: data.user_id, key: data.key, name: data.name };
 }
 
+/** Public facts about the hub (unsigned): is the public demo on? */
+export async function hubInfo(base: string): Promise<{ public_demo?: boolean }> {
+  try {
+    const res = await fetch(hubUrl("/api/info", base).href);
+    if (!res.ok) return {};
+    return (await res.json()) as { public_demo?: boolean };
+  } catch {
+    return {};
+  }
+}
+
+/** A private demo home for this visitor, paired at once (unsigned). 404: demo off. 429: too many from here. */
+export async function tryDemo(base: string): Promise<DeviceCreds> {
+  let res: Response;
+  try {
+    res = await fetch(hubUrl("/device/try", base).href, { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
+  } catch {
+    throw new HubError(0, "network");
+  }
+  if (!res.ok) throw new HubError(res.status, await readError(res));
+  const data = (await res.json()) as DeviceCreds;
+  return { device_id: data.device_id, user_id: data.user_id, key: data.key, name: data.name };
+}
+
+export function isGuest(userId: string | undefined): boolean {
+  return !!userId && userId.startsWith("guest-");
+}
+
 export class HubClient implements HubApi {
   readonly signingFetch: HubApi["signingFetch"];
 
