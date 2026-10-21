@@ -13,7 +13,8 @@ function stored(key: string): unknown {
 describe("first-run gate", () => {
   it("asks how to start, with the first choice focused and no axe violations", async () => {
     render(<App />);
-    expect(screen.getByRole("heading", { level: 1, name: "How would you like to start?" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 1, name: "Say it your way. Nothing happens until you choose." })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "How would you like to start?" })).toBeTruthy();
     const voice = screen.getByRole("button", { name: "Start with voice" });
     const quiet = screen.getByRole("button", { name: "Start quietly" });
     // native buttons: Enter and Space work on them without extra code

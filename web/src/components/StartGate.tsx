@@ -22,12 +22,29 @@ export function StartGate({ onChoose }: { onChoose: (choice: StartChoice) => voi
 
   return (
     <div className="gate">
-      <main className="gate__inner" aria-labelledby="gate-title">
+      <main className="gate__inner" aria-labelledby="gate-hero">
+        <div className="sky" aria-hidden="true">
+          <span className="sky__glow sky__glow--a" />
+          <span className="sky__glow sky__glow--b" />
+          <span className="sky__stars" />
+        </div>
         <Wordmark as="p" />
-        <h1 id="gate-title" className="gate__title display">
-          How would you like to <em>start?</em>
+        <p className="gate__badge">For speech that other assistants mishear</p>
+        <h1 id="gate-hero" className="gate__hero display">
+          Say it your way. <em>Nothing happens until you choose.</em>
         </h1>
-        <p className="gate__lead">Say it your way. Nothing happens until you choose.</p>
+        <div className="gate__fan" aria-hidden="true">
+          {FAN.map(([long, short], i) => (
+            <span key={long} className={`fan-card fan-card--${i + 1}`}>
+              <b>{i + 1}</b>
+              <span className="long">{long}</span>
+              <span className="short">{short}</span>
+            </span>
+          ))}
+        </div>
+        <h2 id="gate-title" className="gate__title display">
+          How would you like to <em>start?</em>
+        </h2>
         <div className="gate__choices">
           <button
             ref={first}
@@ -71,6 +88,36 @@ export function StartGate({ onChoose }: { onChoose: (choice: StartChoice) => voi
         </div>
         <p className="gate__note">You can change this any time in Settings.</p>
       </main>
+      <section className="gate__features" aria-label="What SureSay does">
+        {FEATURES.map((f) => (
+          <article key={f.badge} className="feature">
+            <p className="feature__badge">
+              <Icon name={f.icon} size={18} /> {f.badge}
+            </p>
+            <h3 className="feature__title">{f.title}</h3>
+            <ul className="feature__list">
+              {f.points.map((pt) => (
+                <li key={pt}>
+                  <Icon name="check" size={20} /> {pt}
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </section>
     </div>
   );
 }
+
+const FAN: Array<[string, string]> = [["Turn on the bedroom fan", "Fan on"], ["Turn on the TV", "TV on"], ["Turn off the fan", "Fan off"]];
+
+const FEATURES: Array<{ badge: string; icon: "mic" | "message" | "spark" | "shield"; title: string; points: string[] }> = [
+  { badge: "Talk", icon: "mic", title: "Three guesses, never a guess acted on",
+    points: ["Big, numbered cards, read aloud", "Answer by voice, tap, key or one switch", "Risky things ask twice"] },
+  { badge: "Talk to someone", icon: "message", title: "Understood by people, too",
+    points: ["Say it your way, choose the right sentence", "Said clearly, out loud", "Shown huge, turned around for them"] },
+  { badge: "Practice", icon: "spark", title: "A little every day",
+    points: ["Five sentences a day", "An honest clarity score", "Every try teaches SureSay your voice"] },
+  { badge: "Safe by design", icon: "shield", title: "Only you can confirm",
+    points: ["The AI can suggest, never confirm", "Every change leaves a receipt", "Help reaches your family in one press"] },
+];
