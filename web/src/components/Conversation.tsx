@@ -297,7 +297,9 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
     case "reply":
       view = (
         <div className="outcome">
-          <p className="answer-label">{phase.kind === "answer" ? "Here is your answer:" : "The assistant says:"}</p>
+          <p className="answer-label">
+            {phase.kind === "answer" ? (phase.unchanged ? "Nothing was changed." : "Here is your answer:") : "The assistant says:"}
+          </p>
           <h2 className="answer-text" ref={headingRef} tabIndex={-1}>
             {phase.text}
           </h2>

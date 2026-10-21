@@ -70,6 +70,18 @@ describe("try-it chips", () => {
   });
 });
 
+describe("a negated command", () => {
+  it("says nothing will change, not that it didn't catch it", async () => {
+    const { hub } = renderMain();
+    const say = "I heard “don't”, so nothing will change. Tell me what you'd like instead.";
+    hub.turn.mockResolvedValue({ reply: say, mode: "direct", result: { status: "ask_again", reason: "negation", heard: "don't unlock the door", asr: "typed", ranker: "fuzzy", timing: {}, say, maybe: [] }, pending: [], ms: 3 });
+    fireEvent.click(screen.getByRole("button", { name: /van on.*fan on, misheard/ }));
+    await screen.findByRole("heading", { name: /nothing will change/i });
+    expect(screen.queryByText(/didn't catch/i)).toBeNull();
+    expect(screen.queryByRole("button", { name: /Option 1/ })).toBeNull();
+  });
+});
+
 describe("speak for me", () => {
   it("builds tiles from say_for_me phrases plus starters", () => {
     const tiles = boardTiles(hubState([]).phrasebook);

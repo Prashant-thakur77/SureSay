@@ -38,7 +38,7 @@ export type Phase =
   | { kind: "done"; receipt: Receipt; said?: string; atDoor?: string; heardAnswer?: string }
   | { kind: "cancelled" }
   | { kind: "ask_again"; heard?: string; maybe: Array<{ text: string; phrase: string }>; phrases: boolean }
-  | { kind: "answer"; text: string; heard?: string }
+  | { kind: "answer"; text: string; heard?: string; unchanged?: boolean }
   | { kind: "reply"; text: string }
   | { kind: "problem"; title: string; detail?: string; expired?: boolean };
 
@@ -399,6 +399,11 @@ export function useConversation(deps: ConversationDeps) {
           announce(ASK_AGAIN_TEXT, "assertive");
           void speak(r.say || ASK_AGAIN_TEXT);
         }
+      } else if (r.status === "ask_again" && r.reason === "negation") {
+        // "don't unlock the door": no cards, and the screen says the same as the voice: nothing will change
+        setPhase({ kind: "answer", text: r.say, heard: r.heard, unchanged: true });
+        announce(r.say, "assertive");
+        void speak(r.say);
       } else if (r.status === "ask_again") {
         setPhase({ kind: "ask_again", heard: r.heard, maybe: r.maybe ?? [], phrases: false });
         announce(ASK_AGAIN_TEXT, "assertive");

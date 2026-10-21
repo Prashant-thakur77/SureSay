@@ -72,6 +72,8 @@ export interface Timing {
 
 export interface UnderstandResult {
   status: "choose" | "ask_again" | "answer";
+  /** Why it asks again: "negation" means a negated command, so nothing will change. */
+  reason?: string;
   heard: string;
   asr: string;
   ranker: string;
@@ -80,7 +82,6 @@ export interface UnderstandResult {
   candidates?: Candidate[];
   pending_id?: string;
   stage?: Stage;
-  reason?: string;
   maybe?: Array<{ text: string; phrase: string }>;
   action?: string;
   result?: unknown;
