@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import json
 from typing import Any
 
 import pytest
@@ -181,7 +182,7 @@ def test_wrong_codes_from_one_address_do_not_block_the_owners_pairing(hub: Hub, 
     monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "hub")
 
     def from_ip(ip: str) -> dict[str, str]:
-        return {"x-amzn-request-context": '{"http": {"sourceIp": "%s"}}' % ip}
+        return {"x-amzn-request-context": json.dumps({"http": {"sourceIp": ip}})}
 
     code = hub.s.devices.start_pairing("demo")
     for _ in range(hub.s.devices.max_attempts):
@@ -197,7 +198,7 @@ def test_one_address_cannot_use_up_the_whole_demo(demo: Hub, monkeypatch: pytest
     monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "hub")
 
     def guest_from(ip: str) -> Device:
-        return _guest(demo, **{"x-amzn-request-context": '{"http": {"sourceIp": "%s"}}' % ip})
+        return _guest(demo, **{"x-amzn-request-context": json.dumps({"http": {"sourceIp": ip}})})
 
     a1, a2 = guest_from("203.0.113.9"), guest_from("203.0.113.9")
     codes = [demo.signed(g, "POST", "/device/turn", {"text": "fan on"}).status_code for g in (a1, a2, a1, a2)]
