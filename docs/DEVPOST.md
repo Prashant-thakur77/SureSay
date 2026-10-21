@@ -2,6 +2,8 @@
 
 **SureSay lets the people voice assistants mishear confirm what they meant before anything happens.**
 
+**Try it live:** https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws. "Try it now" opens a private demo home, with no sign-up.
+
 ## The problem
 
 Dysarthria makes speech hard for machines to understand, after a stroke or with Parkinson's, ALS or cerebral palsy. These are often exactly the people who would gain most from controlling their home by voice, and voice assistants fail them most. On a corpus of real dysarthric speech, a plain recogniser got the words of a sentence exactly right only a third of the time.

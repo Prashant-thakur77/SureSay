@@ -4,6 +4,8 @@
 
 People with dysarthria (after a stroke, or living with Parkinson's, ALS or cerebral palsy) are the people voice assistants fail most often. A misheard command that *acts* is worse than no command at all: the wrong light, the wrong person called, the door unlocked instead of locked. SureSay turns every request into three big, numbered, read-aloud cards. You say "two", "the second one", "haan" or "do number", or you tap, press a key or hit one switch. Only that confirmation, made on your own device, can release the action, and every change leaves a consent receipt.
 
+**Try it live:** [https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws](https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws). Choose "Try it now" for your own private demo home (simulated devices; no sign-up). Try "van on", the doorbell, or Speak for me.
+
 ![Three cards after "van on" was heard](docs/img/cards.png)
 
 | | | |
