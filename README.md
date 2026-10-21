@@ -61,7 +61,7 @@ Held-out TORGO dysarthric speakers (dev F03 and M05 for tuning; test F01, F04, M
 <!-- results:start -->
 | Claim | Metric | B0 plain | B1 + phrasebook | SureSay | Data |
 |---|---|---|---|---|---|
-| Confirm heard right | false accepts | 62.8% | — | **2.6%** | 430 decisions, 6 test speakers |
+| Confirm heard right | false accepts | 62.8% | — | **2.3%** | 430 decisions, 6 test speakers |
 | Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers |
 | In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **93.5%** | same |
 | Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances |

@@ -1,7 +1,7 @@
 {
   "name": "confirm",
-  "generated_at": "2026-10-20T23:20:23+0530",
-  "git_sha": "503baa5",
+  "generated_at": "2026-10-21T13:21:45+0530",
+  "git_sha": "f4c060c",
   "python": "3.13.12",
   "claim": 1,
   "asr_engine": "whisper-small.en",
@@ -183,31 +183,31 @@
         "accuracy_pct": 92.8,
         "false_accept_pct": 1.4,
         "false_accepts": 6,
-        "refused_pct": 81.4,
-        "true_accepts_recovered_pct": 69.4
+        "refused_pct": 81.9,
+        "true_accepts_recovered_pct": 66.7
       },
       "test_confirm_words_only": {
         "clips": 70,
-        "accuracy_pct": 84.3,
+        "accuracy_pct": 82.9,
         "false_accept_pct": 0.0,
         "false_accepts": 0,
-        "refused_pct": 14.3,
-        "true_accepts_recovered_pct": 69.4
+        "refused_pct": 15.7,
+        "true_accepts_recovered_pct": 66.7
       },
       "test_distractors_only": {
         "clips": 360,
-        "accuracy_pct": 94.4,
+        "accuracy_pct": 94.7,
         "false_accept_pct": 1.7,
         "false_accepts": 6,
-        "refused_pct": 94.4,
+        "refused_pct": 94.7,
         "true_accepts_recovered_pct": null
       },
       "dev": {
         "clips": 154,
-        "accuracy_pct": 89.0,
+        "accuracy_pct": 89.6,
         "false_accept_pct": 1.9,
         "false_accepts": 3,
-        "refused_pct": 72.1,
+        "refused_pct": 72.7,
         "true_accepts_recovered_pct": 88.9
       },
       "dev_confirm_words_only": {
@@ -220,10 +220,10 @@
       },
       "dev_distractors_only": {
         "clips": 120,
-        "accuracy_pct": 89.2,
+        "accuracy_pct": 90.0,
         "false_accept_pct": 2.5,
         "false_accepts": 3,
-        "refused_pct": 89.2,
+        "refused_pct": 90.0,
         "true_accepts_recovered_pct": null
       },
       "controls": {
@@ -280,8 +280,8 @@
           "accuracy_pct": 88.9,
           "false_accept_pct": 2.8,
           "false_accepts": 2,
-          "refused_pct": 77.8,
-          "true_accepts_recovered_pct": 66.7
+          "refused_pct": 80.6,
+          "true_accepts_recovered_pct": 50.0
         },
         "M03": {
           "clips": 71,
@@ -309,10 +309,10 @@
         },
         "M05": {
           "clips": 76,
-          "accuracy_pct": 90.8,
+          "accuracy_pct": 92.1,
           "false_accept_pct": 3.9,
           "false_accepts": 3,
-          "refused_pct": 69.7,
+          "refused_pct": 71.1,
           "true_accepts_recovered_pct": 100.0
         },
         "FC01": {
@@ -6136,7 +6136,7 @@
       "suresay": {
         "heard": "Wow. Yeah.",
         "decision": [
-          "yes",
+          "unclear",
           null
         ]
       }
@@ -7436,7 +7436,7 @@
       "suresay": {
         "heard": "No, this is good.",
         "decision": [
-          "no",
+          "unclear",
           null
         ]
       }
@@ -14794,7 +14794,7 @@
       "suresay": {
         "heard": "No I'm not.",
         "decision": [
-          "no",
+          "unclear",
           null
         ]
       }

@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from confirm_gate.consent import decide  # noqa: E402
 
 from eval.asr_cache import _count_spend  # noqa: E402
-from eval.common import CACHE, pct, write_result  # noqa: E402
+from eval.common import CACHE, pct, read_result, write_result  # noqa: E402
 
 # (what is said, Polly language, card stage, expected decision)
 PHRASES: list[tuple[str, str, str, tuple[str, int | None]]] = [
@@ -61,20 +61,27 @@ def main() -> None:
 
     from suresay.asr import TranscribeStreamingAsr, wav_bytes
 
+    def row(text: str, lang: str, asr_lang: str, stage: str, heard: str, want: tuple[str, int | None]) -> dict[str, Any]:
+        d = decide(heard, 3 if stage == "choose" else 1, stage=stage)  # type: ignore[arg-type]
+        got = (d.kind, d.option)
+        return {"said": text, "voice_lang": lang, "asr_lang": asr_lang, "stage": stage, "heard": heard,
+                "decision": list(got), "expected": list(want), "correct": got == want,
+                "false_accept": got[0] in ("choose", "yes") and got != want}
+
     rows: list[dict[str, Any]] = []
-    for asr_lang in ("hi-IN", "en-IN"):
+    if "--rescore" in sys.argv:  # the parser changed: decide again on the transcripts already recorded (no AWS calls)
+        old = read_result("hinglish")
+        if old is None:
+            raise SystemExit("no earlier hinglish result to rescore")
+        rows = [row(r["said"], r["voice_lang"], r["asr_lang"], r["stage"], r["heard"], tuple(r["expected"]))  # type: ignore[arg-type]
+                for r in old["rows"]]
+    for asr_lang in () if rows else ("hi-IN", "en-IN"):
         asr = TranscribeStreamingAsr(language=asr_lang)
         _count_spend(len(PHRASES))
         for text, lang, stage, want in PHRASES:
             pcm = synth(text, lang)
             samples = np.frombuffer(pcm, dtype="<i2").astype(np.float32) / 32768
-            heard = asr.transcribe(wav_bytes(samples)).text
-            d = decide(heard, 3 if stage == "choose" else 1, stage=stage)  # type: ignore[arg-type]
-            got = (d.kind, d.option)
-            accept_wrong = got[0] in ("choose", "yes") and got != want
-            rows.append({"said": text, "voice_lang": lang, "asr_lang": asr_lang, "stage": stage, "heard": heard,
-                         "decision": list(got), "expected": list(want), "correct": got == want,
-                         "false_accept": accept_wrong})
+            rows.append(row(text, lang, asr_lang, stage, asr.transcribe(wav_bytes(samples)).text, want))
     summary = {}
     for asr_lang in ("hi-IN", "en-IN"):
         rs = [r for r in rows if r["asr_lang"] == asr_lang]

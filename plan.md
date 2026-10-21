@@ -266,7 +266,7 @@ What judges reward, and where SureSay stands:
 
 | Judges reward | SureSay today | Next move |
 |---|---|---|
-| A named group failed today, plus a measured fix | dysarthria; TORGO held-out speakers; false accepts 62% → 1.4%; never acts on a guess | Fill the Nova column when Bedrock opens; add a "turns to success" metric (seconds and retries until the intended action runs, B0 against SureSay) |
+| A named group failed today, plus a measured fix | dysarthria; TORGO held-out speakers; false accepts 62.8% → 2.3% (Transcribe); never acts on a guess | Fill the Nova column when Bedrock opens; add a "turns to success" metric (seconds and retries until the intended action runs, B0 against SureSay) |
 | An honest failure with the fix shown | worst-speaker recall and strict-confirmation retries published, with the abstain rule's trade-off | **Per-user adaptation**: learn each user's thresholds and phrase aliases from their own confirmations (every confirmed card is a labelled example), and re-run the worst speaker |
 | A reusable safety layer, not a one-off | confirm-gate-mcp, with `serve` and an approval page | A 30-second video of the gate in front of a third-party MCP server; publish to PyPI; a `GatedServer` example for a Node MCP server through the proxy |
 | Real use of the sponsor stack | Lambda, DynamoDB, S3, Polly and Transcribe live; Nova, AgentCore pending account access | When access opens: `make deploy` (agent and memory), record the agent shots, run the Nova arms of the safety suite |
