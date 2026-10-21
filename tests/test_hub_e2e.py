@@ -279,3 +279,20 @@ def test_noise_opens_nothing_even_as_maybe(hub: Hub) -> None:
     device = hub.pair()
     out = hub.say(device, "zxqv plorf")
     assert out["result"]["status"] == "ask_again" and out["pending"] == []
+
+
+def test_understand_carries_an_mcp_apps_ui_for_screens(hub: Hub) -> None:
+    import json as _json
+
+    h = {"content-type": "application/json", "accept": "application/json, text/event-stream",
+         "mcp-protocol-version": "2025-11-25", "authorization": "Bearer agent-secret"}
+    # 2025-11-25 hosts (Alexa+) find the UI through the tool's _meta.ui.resourceUri and the ui:// resource.
+    tools = hub.http.post("/mcp", headers=h, json={"jsonrpc": "2.0", "id": 2, "method": "tools/list"}).json()["result"]["tools"]
+    und = next(t for t in tools if t["name"] == "understand")
+    assert und["_meta"]["ui"]["resourceUri"] == "ui://suresay/cards.html"
+    res = hub.http.post("/mcp", headers=h, json={"jsonrpc": "2.0", "id": 3, "method": "resources/read",
+                                                 "params": {"uri": "ui://suresay/cards.html"}}).json()["result"]["contents"][0]
+    assert res["mimeType"] == "text/html;profile=mcp-app" and "ui/initialize" in res["text"]
+    out = hub.http.post("/mcp", headers=h, json={"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {
+        "name": "understand", "arguments": {"user_id": "demo", "transcript": "van on"}}}).json()["result"]
+    assert out["structuredContent"]["status"] == "choose" and "nonce" not in _json.dumps(out)

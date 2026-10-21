@@ -28,7 +28,7 @@ from mcp.server.transport_security import TransportSecuritySettings
 from starlette.applications import Starlette
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
+from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
@@ -181,6 +181,31 @@ class AgentBridge:
         return str(data.get("response") or data.get("result") or data)
 
 
+PRIVACY = [
+    "SureSay stores what it needs to act for you and to prove you agreed: your phrasebook, your home's simulated "
+    "state, the card sets it offered, your confirmations (taps, or the audio of your spoken answer and its "
+    "transcript), and a consent receipt for each action.",
+    "Audio is stored privately, encrypted, and deleted after 30 days. Receipts keep a fingerprint of the audio, not "
+    "the audio itself, after that.",
+    "Speech is recognised with Amazon Transcribe and read aloud with Amazon Polly; ranking may use Amazon Bedrock. "
+    "Nothing is sold or shared with third parties.",
+    "To delete your data, unpair your devices and ask the operator to remove your user record.",
+]
+TERMS = [
+    "SureSay is a research prototype built for a hackathon. Devices, contacts and the shop are simulated.",
+    "SureSay never acts without your own confirmation, but you remain responsible for what you confirm.",
+    "Do not rely on SureSay for emergencies; call your local emergency number.",
+]
+
+
+def _doc_page(title: str, paras: list[str]) -> str:
+    body = "".join(f"<p>{p}</p>" for p in paras)
+    return (f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" '
+            f'content="width=device-width, initial-scale=1"><title>SureSay {title}</title><style>body{{margin:0;'
+            f'background:#fbf8f3;color:#14213d;font:19px/1.6 system-ui,sans-serif}}main{{max-width:680px;margin:6vh auto;'
+            f'padding:0 20px}}</style></head><body><main><h1>SureSay: {title}</h1>{body}</main></body></html>')
+
+
 def build_app(s: SureSay | None = None) -> Starlette:
     s = s or SureSay()
     bridge = AgentBridge(s)
@@ -307,15 +332,25 @@ def build_app(s: SureSay | None = None) -> Starlette:
                              "protocol_versions": ["2025-11-25", "2026-07-28"], "backend": s.cfg.backend,
                              "turn_mode": bridge._mode or "not yet decided"})
 
-    routes += [Route("/healthz", healthz), Route("/api/info", info)]
+    async def privacy(request: Request) -> Response:
+        return HTMLResponse(_doc_page("Privacy", PRIVACY))
+
+    async def terms(request: Request) -> Response:
+        return HTMLResponse(_doc_page("Terms of use", TERMS))
+
+    routes += [Route("/healthz", healthz), Route("/api/info", info), Route("/privacy", privacy), Route("/terms", terms)]
+    brand = ROOT / "alexa_plus" / "assets"
+    if brand.exists():
+        routes.append(Mount("/brand", app=StaticFiles(directory=brand), name="brand"))
     routes += s.oauth.routes()
     dist = ROOT / "web" / "dist"
     if dist.exists():
         routes.append(Mount("/", app=StaticFiles(directory=dist, html=True), name="web"))
     app.router.routes.extend(routes)
     app.add_middleware(McpAuth, suresay=s)
+    # Device and MCP auth are header signatures/tokens, never cookies, so "*" is safe when a screen app needs it.
     app.add_middleware(
-        CORSMiddleware, allow_origins=list(s.cfg.allowed_origins), allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+        CORSMiddleware, allow_origins=["*"] if "*" in s.cfg.allowed_origins else list(s.cfg.allowed_origins), allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
         allow_headers=["content-type", "authorization", "x-device-id", "x-timestamp", "x-signature",
                        "mcp-session-id", "mcp-protocol-version", "last-event-id"],
         expose_headers=["mcp-session-id", "mcp-protocol-version"],

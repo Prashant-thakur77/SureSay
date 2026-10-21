@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SureSay cards</title>
+<style>
+  :root { --bg:#fbf8f3; --ink:#14213d; --muted:#3d4a63; --card:#fff; --line:#14213d; --c1:#c2410c; --c2:#0f766e; --c3:#6d28d9;
+          --ok:#0f5132; --okbg:#e3f1e8; --warn:#6b2a00; --warnbg:#fdebd7; }
+  :root[data-theme="dark"] { --bg:#0e1626; --ink:#f4f1ea; --muted:#c9d1e0; --card:#17223a; --line:#f4f1ea;
+          --c1:#fb923c; --c2:#2dd4bf; --c3:#a78bfa; --ok:#b9f0cf; --okbg:#143524; --warn:#ffd8b0; --warnbg:#3a2410; }
+  * { box-sizing:border-box } html,body { margin:0; background:var(--bg); color:var(--ink); font:20px/1.4 system-ui,sans-serif }
+  main { padding:16px }
+  .heard { color:var(--muted); font-style:italic; margin:0 0 8px }
+  h1 { font-size:1.3rem; margin:0 0 12px }
+  ol { list-style:none; margin:0; padding:0; display:grid; gap:12px }
+  .card { display:flex; align-items:center; gap:16px; width:100%; min-height:88px; padding:14px 18px; border-radius:18px;
+          border:2px solid var(--line); background:var(--card); color:var(--ink); font:inherit; font-size:1.35rem;
+          font-weight:700; text-align:left; cursor:pointer; border-left-width:10px }
+  .card[data-n="1"] { border-left-color:var(--c1) } .card[data-n="2"] { border-left-color:var(--c2) } .card[data-n="3"] { border-left-color:var(--c3) }
+  .num { flex:none; width:52px; height:52px; border-radius:50%; display:grid; place-items:center; color:#fff; font-size:1.5rem }
+  .card[data-n="1"] .num { background:#c2410c } .card[data-n="2"] .num { background:#0f766e } .card[data-n="3"] .num { background:#6d28d9 }
+  .tag { display:inline-block; font-size:.8rem; font-weight:700; border:2px solid currentColor; border-radius:999px; padding:0 8px; margin-left:8px }
+  .maybe .card { border-style:dashed; font-weight:600 }
+  .row { display:flex; gap:12px; flex-wrap:wrap; margin-top:14px }
+  button.plain { min-height:56px; padding:0 20px; border-radius:14px; border:2px solid var(--line); background:var(--card); color:var(--ink); font:inherit; font-weight:700 }
+  .note { margin-top:14px; padding:12px 14px; border-radius:14px; background:var(--warnbg); color:var(--warn) }
+  .done { margin-top:14px; padding:14px; border-radius:14px; background:var(--okbg); color:var(--ok); font-weight:700 }
+  input { font:inherit; font-size:1.4rem; width:8ch; letter-spacing:.2em; padding:8px 12px; border:2px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink) }
+  :focus-visible { outline:4px solid #f59e0b; outline-offset:3px }
+  @media (prefers-reduced-motion:no-preference) { .card { transition:transform .15s } .card:hover { transform:translateY(-2px) } }
+</style>
+</head>
+<body>
+<main>
+  <div id="live" aria-live="assertive" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"></div>
+  <p class="heard" id="heard" hidden></p>
+  <h1 id="title">SureSay</h1>
+  <ol id="cards" aria-label="Choices"></ol>
+  <div class="row" id="actions" hidden><button class="plain" id="none">None of these</button></div>
+  <div id="pairbox" class="note" hidden>
+    <p style="margin:0 0 8px">To confirm on this screen, pair it once with the code from your SureSay app.
+       Your assistant can't confirm for you; only your own tap or voice can.</p>
+    <label for="code">Pairing code</label> <input id="code" inputmode="numeric" maxlength="6"> <button class="plain" id="pair">Pair</button>
+  </div>
+  <div id="result" role="status"></div>
+</main>
+<script>
+const HUB = "__SURESAY_HUB__";
+const enc = new TextEncoder();
+const hex = (b) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
+const b64url = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - s.length % 4) % 4)), (c) => c.charCodeAt(0));
+let device = null; try { device = JSON.parse(localStorage.getItem("suresay.mcpapp.device") || "null"); } catch {}
+let current = null; let nextId = 1; const waiting = new Map();
+
+function rpc(method, params) { const id = nextId++; parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
+  return new Promise((res) => waiting.set(id, res)); }
+function notify(method, params) { parent.postMessage({ jsonrpc: "2.0", method, params }, "*"); }
+function say(t) { document.getElementById("live").textContent = t; }
+function resize() { notify("ui/notifications/size-changed", { width: document.body.scrollWidth, height: document.body.scrollHeight }); }
+
+async function signed(method, path, payload) {
+  const body = payload === undefined ? "" : JSON.stringify(payload);
+  const full = path + "?r=" + hex(crypto.getRandomValues(new Uint8Array(6)));
+  const ts = Math.floor(Date.now() / 1000);
+  const key = await crypto.subtle.importKey("raw", b64url(device.key), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const msg = `${method}\n${full}\n${ts}\n${hex(await crypto.subtle.digest("SHA-256", enc.encode(body)))}`;
+  const sig = hex(await crypto.subtle.sign("HMAC", key, enc.encode(msg)));
+  const r = await fetch(HUB + full, { method, body: body || undefined, headers: { "content-type": "application/json",
+    "x-device-id": device.device_id, "x-timestamp": String(ts), "x-signature": sig } });
+  return r.json();
+}
+
+async function choose(option, answer) {
+  if (!current) return;
+  if (!device || !HUB.startsWith("http")) { document.getElementById("pairbox").hidden = !HUB.startsWith("http");
+    show(`Say “${answer === "no" ? "none of these" : "number " + option}” to your SureSay device to confirm.`); return; }
+  const sets = (await signed("GET", "/device/pending")).pending || [];
+  const p = sets.find((s) => s.pending_id === current.pending_id);
+  if (!p) { show("These cards have already been answered or have timed out."); return; }
+  const ev = await signed("POST", "/device/evidence", { pending_id: p.pending_id, nonce: p.nonce, kind: "tap",
+    ...(answer ? { answer } : { option }) });
+  if (ev.error) { show(ev.error); return; }
+  const out = await signed("POST", "/device/confirm", { pending_id: p.pending_id, evidence_ref: ev.evidence_ref });
+  if (out.status === "needs_final_yes") {
+    const fin = ((await signed("GET", "/device/pending")).pending || []).find((s) => s.pending_id === out.pending_id);
+    if (fin) { current = { ...current, pending_id: fin.pending_id, stage: "final", candidates: fin.options }; render(); show(`${fin.options[0].text}? Tap again to confirm, or None.`); return; }
+  }
+  show(out.message || out.reason || out.status);
+  if (out.status === "done" || out.status === "cancelled") { document.getElementById("cards").replaceChildren(); document.getElementById("actions").hidden = true; }
+}
+
+function show(text) { const r = document.getElementById("result"); r.className = "done"; r.textContent = text; say(text); resize(); }
+
+function render() {
+  const res = current; const list = document.getElementById("cards"); list.replaceChildren();
+  const heard = document.getElementById("heard");
+  if (res.heard) { heard.hidden = false; heard.textContent = `I heard: “${res.heard}”`; }
+  const unsure = res.status === "ask_again";
+  document.getElementById("title").innerHTML = unsure ? "Not sure. <em>Say it again</em> — or is it one of these?" :
+    res.stage === "final" ? "This one asks twice:" : "Did you <em>mean</em>…";
+  list.classList.toggle("maybe", unsure);
+  (res.candidates || []).forEach((c) => {
+    const li = document.createElement("li"); const b = document.createElement("button"); b.className = "card"; b.dataset.n = c.n;
+    b.setAttribute("aria-label", `Option ${c.n}: ${c.text}${c.risk === "high" ? ". Asks twice" : ""}${unsure ? ". Maybe" : ""}`);
+    b.innerHTML = `<span class="num" aria-hidden="true">${c.n}</span><span></span>`;
+    b.lastChild.textContent = c.text;
+    if (c.risk === "high") { const t = document.createElement("span"); t.className = "tag"; t.textContent = "asks twice"; b.lastChild.append(t); }
+    if (unsure) { const t = document.createElement("span"); t.className = "tag"; t.textContent = "maybe"; b.lastChild.append(t); }
+    b.onclick = () => choose(res.stage === "final" ? 1 : c.n, res.stage === "final" ? "yes" : undefined);
+    li.append(b); list.append(li);
+  });
+  document.getElementById("actions").hidden = !(res.candidates || []).length;
+  say(`${unsure ? "Not sure. " : ""}${(res.candidates || []).length} choices.`); resize();
+}
+
+function onResult(params) {
+  let data = params && params.structuredContent;
+  if (!data && params && params.content) { try { data = JSON.parse(params.content[0].text); } catch {} }
+  if (!data) return;
+  if (data.status === "answer") { show(data.say); return; }
+  if (!data.pending_id) { show(data.say || "Please say it again."); return; }
+  current = data; render();
+}
+
+window.addEventListener("message", (e) => {
+  const m = e.data || {};
+  if (m.id && waiting.has(m.id)) { waiting.get(m.id)(m.result); waiting.delete(m.id); return; }
+  if (m.method === "ui/notifications/tool-result") onResult(m.params);
+  if (m.method === "ui/notifications/host-context-changed" && m.params && m.params.theme) document.documentElement.dataset.theme = m.params.theme;
+});
+document.getElementById("none").onclick = () => choose(undefined, "no");
+document.getElementById("pair").onclick = async () => {
+  const r = await fetch(HUB + "/device/pair", { method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ code: document.getElementById("code").value.trim(), name: "Assistant screen (MCP App)" }) });
+  const j = await r.json(); if (r.status !== 200) { show(j.error || "That code didn't work."); return; }
+  device = j; try { localStorage.setItem("suresay.mcpapp.device", JSON.stringify(j)); } catch {}
+  document.getElementById("pairbox").hidden = true; show("Paired. Tap a card to confirm it.");
+};
+rpc("ui/initialize", { protocolVersion: "2026-01-26", appInfo: { name: "SureSay cards", version: "1.0.0" }, appCapabilities: {} })
+  .then((r) => { if (r && r.hostContext && r.hostContext.theme) document.documentElement.dataset.theme = r.hostContext.theme;
+                 notify("ui/notifications/initialized", {}); resize(); });
+</script>
+</body>
+</html>

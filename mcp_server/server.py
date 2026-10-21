@@ -30,7 +30,7 @@ def register_tools(app: SureSay) -> None:
     home = app.home
 
     # understanding ------------------------------------------------------------------------
-    @mcp.tool(annotations=ToolAnnotations(read_only_hint=True))
+    @mcp.tool(annotations=ToolAnnotations(read_only_hint=True), meta={"ui": {"resourceUri": "ui://suresay/cards.html"}})
     def understand(user_id: str, transcript: str = "", audio_ref: str = "") -> dict[str, Any]:
         """Work out what the user meant. Give the transcript they typed, or the audio_ref of what they said.
 

@@ -38,6 +38,27 @@ INSTRUCTIONS = (
 )
 
 
+CARDS_UI = "ui://suresay/cards.html"
+
+
+def build_apps(cfg: Settings) -> Any:
+    """MCP Apps (io.modelcontextprotocol/ui): the three cards as a UI the assistant's screen can render.
+
+    The page can pair that screen as a SureSay device, so a tap there is the user's own evidence.
+    """
+    from pathlib import Path
+
+    from mcp.server.apps import Apps, ResourceCsp
+
+    html = (Path(__file__).with_name("mcp_app.html")).read_text().replace("__SURESAY_HUB__", cfg.public_url or "")
+    apps = Apps()
+    apps.add_html_resource(CARDS_UI, html, name="SureSay cards", title="SureSay: three guesses",
+                           description="SureSay's candidate cards, confirmable only by the user's own tap",
+                           csp=ResourceCsp(connect_domains=[cfg.public_url]) if cfg.public_url else None,
+                           prefers_border=False)
+    return apps
+
+
 class SureSay:
     def __init__(
         self,
@@ -80,7 +101,8 @@ class SureSay:
         self.events: collections.deque[dict[str, Any]] = collections.deque(maxlen=300)
         self._usage = {"asr_seconds": 0.0, "input_tokens": 0, "output_tokens": 0, "turns": 0}
 
-        self.mcp = MCPServer("suresay", title="SureSay", instructions=INSTRUCTIONS, version="0.1.0")
+        self.mcp = MCPServer("suresay", title="SureSay", instructions=INSTRUCTIONS, version="0.1.0",
+                             extensions=[build_apps(self.cfg)])
         self.gated = GatedServer(self.mcp, store=store, clock=clock, user=self.user, on_event=self._on_event)
         self.gate = self.gated.gate
         self.devices = self.gated.devices

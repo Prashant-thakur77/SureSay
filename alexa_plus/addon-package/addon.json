@@ -1,0 +1,80 @@
+{
+  "manifestVersion": "1.0",
+  "storeListing": {
+    "distributionCountries": [
+      "US",
+      "IN"
+    ],
+    "locales": {
+      "en-US": {
+        "default": "DEFAULT",
+        "name": {
+          "value": "SureSay"
+        },
+        "shortDescription": "Three big guesses for speech others mishear. Nothing happens until you confirm one with your own voice or tap.",
+        "fullDescription": "SureSay is for people whose speech voice assistants often mishear, such as people living with dysarthria after a stroke, or with Parkinson's, ALS or cerebral palsy. Say what you need in your own way. SureSay shows its three best guesses as big, numbered cards and reads them aloud. You choose by saying \"two\", \"the second one\" or \"haan\", or by tapping. Nothing changes until you confirm: the assistant can suggest, but only your own voice or tap on your paired screen can release an action, and every change leaves a consent receipt. Risky actions such as unlocking the door, ordering or calling someone ask a second yes. SureSay can also speak a confirmed sentence aloud for you, and it learns your way of saying things from your confirmations.",
+        "examplePhrases": [
+          "Ask SureSay to turn on the fan",
+          "Ask SureSay to call Mom",
+          "Ask SureSay to say I am thirsty"
+        ],
+        "privacyAndCompliance": {
+          "privacyPolicyUrl": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/privacy",
+          "termsOfUseUrl": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/terms"
+        },
+        "mediaAssets": {
+          "icons": {
+            "light": [
+              {
+                "size": "72x72",
+                "uri": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/brand/icon-72x72.png"
+              },
+              {
+                "size": "64x64",
+                "uri": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/brand/icon-64x64.png"
+              },
+              {
+                "size": "88x88",
+                "uri": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/brand/icon-88x88.png"
+              },
+              {
+                "size": "126x126",
+                "uri": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/brand/icon-126x126.png"
+              },
+              {
+                "size": "180x180",
+                "uri": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/brand/icon-180x180.png"
+              },
+              {
+                "size": "241x241",
+                "uri": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/brand/icon-241x241.png"
+              }
+            ],
+            "dark": []
+          },
+          "carouselImages": [
+            {
+              "uri": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/brand/carousel-1.png",
+              "size": "600x900",
+              "altText": "Three numbered SureSay cards after the words 'van on' were heard: turn on the bedroom fan, turn on the TV, turn off the fan."
+            }
+          ],
+          "bannerImages": []
+        }
+      }
+    }
+  },
+  "integrations": [
+    {
+      "type": "MCP",
+      "config": {
+        "endpoints": {
+          "default": {
+            "type": "HTTPS",
+            "uri": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/mcp"
+          }
+        }
+      }
+    }
+  ]
+}

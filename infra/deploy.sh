@@ -98,7 +98,9 @@ MODE="direct"; [ -n "$RUNTIME_ARN" ] && MODE="agent"
 VARS=(AWS_LAMBDA_EXEC_WRAPPER=/opt/bootstrap PORT=8080 AWS_LWA_READINESS_CHECK_PATH=/healthz
       SURESAY_BACKEND=aws SURESAY_GATE_TABLE="$TABLE" SURESAY_BUCKET="$BUCKET" SURESAY_DATA_DIR=/tmp/suresay
       AGENTCORE_MEMORY_ID="$MEMORY_ID" SURESAY_AGENT_TOKEN="$AGENT_TOKEN" SURESAY_ASR=auto SURESAY_RANKER=auto
-      SURESAY_AGENT_MODE="$MODE" AGENTCORE_RUNTIME_ARN="$RUNTIME_ARN")
+      SURESAY_AGENT_MODE="$MODE" AGENTCORE_RUNTIME_ARN="$RUNTIME_ARN" SURESAY_ALLOWED_ORIGINS="*"
+      SURESAY_EVIDENCE_LANGUAGE="${SURESAY_EVIDENCE_LANGUAGE:-en-US}" SURESAY_OAUTH_CLIENTS="${SURESAY_OAUTH_CLIENTS:-}"
+      SURESAY_PUBLIC_URL="$(aws lambda get-function-url-config --function-name "$FUNCTION" --query FunctionUrl --output text 2>/dev/null | sed 's:/*$::' || true)")
 
 say "Lambda $FUNCTION"
 if ! aws lambda get-function --function-name "$FUNCTION" >/dev/null 2>&1; then
