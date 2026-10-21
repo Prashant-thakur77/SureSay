@@ -44,6 +44,7 @@ logger = logging.getLogger("suresay.hub")
 # (eval/tune_confirm.py): biasing toward "yes/one/haan..." recovered every genuine answer but also pulled
 # ordinary words toward them, and the rule ranks false accepts first. See eval/REPORT.md.
 EVIDENCE_WORDS: list[str] = []
+GUEST_VOICE_PER_DAY = 60  # public demo homes: speech recognition is paid per request, typing is free
 
 
 class McpAuth:
@@ -246,6 +247,14 @@ def build_app(s: SureSay | None = None) -> Starlette:
         """One user turn from the device: typed text or recorded audio."""
         text = str(data.get("text") or "").strip()[:500] or None
         audio_ref = None
+        if data.get("audio_b64") and device.user_id.startswith("guest-"):
+            day = time.strftime("%Y-%m-%d")
+            key = f"{device.user_id}:{day}"
+            used = (s.store.get("guest_usage", key) or {}).get("voice", 0)
+            if used >= GUEST_VOICE_PER_DAY:
+                return JSONResponse({"error": "this demo home has used today's voice turns; please type instead"},
+                                    status_code=429)
+            s.store.put("guest_usage", key, {"voice": used + 1, "expires_at": time.time() + 86400})
         if data.get("audio_b64"):
             try:
                 audio = base64.b64decode(str(data["audio_b64"]), validate=True)

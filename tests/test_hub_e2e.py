@@ -361,3 +361,20 @@ def test_public_demo_gives_each_visitor_a_private_sandbox(hub: Hub) -> None:
 
 def test_public_demo_is_off_unless_enabled(hub: Hub) -> None:
     assert hub.http.post("/device/try").status_code == 404
+
+
+def test_guest_voice_turns_are_capped(hub: Hub, monkeypatch: pytest.MonkeyPatch) -> None:
+    import base64 as b64
+
+    import suresay.hub as hubmod
+
+    monkeypatch.setattr(hubmod, "GUEST_VOICE_PER_DAY", 2)
+    hub.s.cfg.__dict__["public_demo"] = True
+    g = hub.http.post("/device/try").json()
+    from confirm_gate.evidence import Device
+
+    d = Device(g["device_id"], g["user_id"], g["key"], g["name"])
+    audio = b64.b64encode(b"fan on").decode()
+    codes = [hub.signed(d, "POST", "/device/turn", {"audio_b64": audio}).status_code for _ in range(3)]
+    assert codes == [200, 200, 429]
+    assert hub.signed(d, "POST", "/device/turn", {"text": "fan on"}).status_code == 200
