@@ -35,3 +35,7 @@ Live: Transcribe, Polly, S3, DynamoDB, Lambda hub, AgentCore Runtime (`suresay_a
 - Two `tests` packages: run them separately (`make test` does).
 - moto's DynamoDB is not atomic under threads; never trust it for race tests.
 - Measure cloud latency on the deployed hub (`latency.py --hub-url`), not from here.
+- Behind the Lambda Web Adapter, uvicorn sees 127.0.0.1 and would trust `X-Forwarded-For`: always run it with proxy headers off and get the caller from `hub.client_ip()`.
+- Rate limits and quotas use `store.add` (atomic counter; DynamoDB `ADD`). Never get-then-put a counter.
+- A device that sends its own transcripts (the Alexa skill) must be paired with `suresay.cli pair --transcriber alexa` (or marked with `voice-device`); others get 409.
+- Re-scoring an eval after a parser change: run with dummy AWS credentials (`AWS_ACCESS_KEY_ID=x …`) so a cache miss fails instead of spending; `run_hinglish_check.py --rescore` re-decides recorded transcripts offline.
