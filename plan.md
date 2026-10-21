@@ -280,3 +280,15 @@ Priority if time remains before Fri 18:00 IST:
 2. Per-user adaptation demo on the worst speaker (it answers the negative result).
 3. Video recording (user).
 4. The 10-foot layout and the Speak-for-me board.
+
+---
+
+## 11. Iteration 2 (21 Oct): review, scale, observe
+
+| # | Item | Why | Done when |
+|---|---|---|---|
+| 1 | Independent adversarial security review of the gate, hub, OAuth, device signing and web signing | Fresh eyes on the code the whole argument rests on | Findings triaged; every confirmed issue fixed with a test |
+| 2 | Per-user DynamoDB index (`user-kind-index`) + TTL on events | The public demo makes `device_pending` and `/device/state` read every user's rows | Queries touch only the user's items; moto test; index added by `deploy.sh` |
+| 3 | CloudWatch metrics (Embedded Metric Format) + a "SureSay safety" dashboard | Operators and judges can see confirms, refusals and latency live | Metrics appear in CloudWatch; `deploy.sh` creates the dashboard |
+| 4 | Carer alerts via Amazon SNS (opt-in) | Caretaking: a carer hears about high-risk actions the user confirmed | Publish on high-risk receipts when `SURESAY_CARER_TOPIC_ARN` is set; test with a stub |
+| 5 | Nova quota → Nova arms | The remaining pending numbers | Run when the quota case closes |
