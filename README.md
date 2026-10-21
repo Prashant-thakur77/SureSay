@@ -87,6 +87,7 @@ The Nova 2 Lite ranker and the model-driven safety arms are built and tested aga
 | **Amazon Bedrock AgentCore Memory** | Each user's phrasebook as blob events; the agent's session, with a SEMANTIC strategy for facts the user tells it. |
 | **Strands Agents** | The agent loop, talking to the SureSay MCP server over Streamable HTTP. |
 | **Amazon Transcribe** | Streaming recognition of requests, primed with a per-user custom vocabulary built from the phrasebook; transcribes the user's own confirmation audio server-side; batch jobs with alternatives for eval. |
+| **Amazon Bedrock: Nova 2 Sonic** (`amazon.nova-2-sonic-v1:0`) | A second recogniser over a bidirectional stream (the user's own words; the stream closes before Sonic replies). As safe as Transcribe on the held-out speakers at a third of the cost per clip, but slower in Lambda, so it is an option for spoken answers (`SURESAY_EVIDENCE_ASR=nova-sonic`). |
 | **Amazon Polly** (neural, Kajal en-IN) | Reads the three cards aloud, and speaks confirmed sentences *for* the user. |
 | **Amazon DynamoDB** | The gate ledger (card sets, evidence, receipts, paired devices, signature replay cache) with conditional writes for one-time use, plus home state. One on-demand table with a kind index and TTL. |
 | **Amazon S3** | Utterance and confirmation audio, content-addressed, private, encrypted, expiring after 30 days. Receipts carry the audio's fingerprint. |

@@ -64,6 +64,7 @@ A prompt injection can make the agent *ask*. It can never make anything *happen*
 | AgentCore Memory | Per-user phrasebooks (blob events) and the agent's long-term facts |
 | Strands Agents | The agent loop over MCP Streamable HTTP |
 | Transcribe | Streaming recognition with per-user custom vocabularies; server-side transcription of confirmation audio |
+| Bedrock: Nova 2 Sonic | A second recogniser over a bidirectional stream: the user's own words come back and the stream closes before Sonic replies. On the held-out speakers it was as safe as Transcribe at a third of the cost per clip, and 650 ms slower in Lambda, so it is an option for spoken answers |
 | Polly | Reads the cards aloud; speaks confirmed sentences for the user |
 | DynamoDB | The gate ledger with conditional one-time writes; home state |
 | S3 | Private, expiring utterance and evidence audio |
@@ -99,7 +100,7 @@ SureSay column: SureSay (offline ranker); the Nova 2 Lite ranker is pending Bedr
 1. **The most severe speakers lose recall to the abstain rule, and maybe cards only partly win it back.** Worst test speaker: M04. SureSay's confident cards hold their phrase 40.0% of the time at top-1, against 90.0% for B1, because it asks again on 60.0% of them. Offering its best guesses as maybe cards while asking again brings that speaker to 85.0% in the cards (93.5% over all test speakers), but maybe cards also appear on 47.2% of out-of-book utterances, where the user has to decline them. B1 never asks and acted on a wrong phrase 53.7% of the time; SureSay acted wrongly 0% of the time. Per-user thresholds are the next step.
 2. **Strict confirmation costs retries.** On genuine yes/no/number answers from dysarthric speakers, SureSay recovered 80.6% (B0: 94.4%) and asked 10.0% of them to repeat. That is the price of the false-accept rate above; tap, keyboard and switch confirmation exist so a repeat is never a dead end.
 3. **Recogniser biasing did not help confirmations.** On dev speakers (none: 1 false accepts, 77.8% recovered, core: 1 false accepts, 77.8% recovered, full: 2 false accepts, 77.8% recovered), no setting beat leaving the recogniser unbiased, so SureSay transcribes confirmations without bias. Biasing that raises recall without false accepts is open.
-4. **The model arms are pending.** Nova 2 Lite is authorized on this account but every on-demand quota is 0 (increase requests filed; docs/FRICTION_LOG.md). The Strands agent is deployed on AgentCore Runtime and phrasebooks live in AgentCore Memory, but the agent cannot reason until Nova has quota, so turns fall back to direct answers. The Nova ranker and the Nova-agent safety arms are implemented and tested against stubs; no Nova number is reported until they run.
+4. **The model arms are pending.** Nova 2 Lite is authorized on this account but every on-demand quota is 0 (increase requests filed; docs/FRICTION_LOG.md). The Strands agent is deployed on AgentCore Runtime and phrasebooks live in AgentCore Memory, but the agent cannot reason until Nova has quota, so turns fall back to direct answers. The Nova ranker and the Nova-agent safety arms are implemented and tested against stubs; no Nova 2 Lite number is reported until they run. (Amazon Nova 2 Sonic, the speech model, does run on this account and is measured above as a recogniser.)
 5. **Corpus caveats.** TORGO sentences are well-known reading passages that a large recogniser may have seen in training, and the phrasebooks are sentences rather than short home commands. Confirmation words are sparse in TORGO (a few per speaker), so per-speaker confirmation numbers rest on small counts.
 6. **Unclear words heard as "yeah" or "OK".** 8 of SureSay's 10 false accepts on test speakers were the recogniser (transcribe-streaming) turning an unclear single word into a filler such as "Yeah" or "OK.", which the yes/no card accepts. That card guards the high-risk actions. A stricter yes vocabulary for that card is the candidate fix; it was found on test speakers, and dev has too few cases to tune it honestly, so it is reported here and not changed.
 <!-- negatives:end -->
@@ -121,7 +122,7 @@ Everything user-facing is new:
 - **The Strands agent** on AgentCore Runtime, with phrasebooks written through to AgentCore Memory.
 - **The Alexa skill**, deployed and flow-tested on AWS.
 - **The web client:** WCAG 2.2 AA, voice, tap, keys or one switch, three themes, TV mode.
-- **The evaluation:** TORGO on Amazon Transcribe with two runs, a 50-case safety suite with a linked-client arm, latency measured in region, per-user calibration and a Hinglish check.
+- **The evaluation:** TORGO on Amazon Transcribe with two runs, repeated with Amazon Nova 2 Sonic and a local recogniser, a 50-case safety suite with a linked-client arm, latency measured in region, per-user calibration and a Hinglish check.
 - **One-command deploy and teardown**, and more than 450 tests.
 
 ## Open source
