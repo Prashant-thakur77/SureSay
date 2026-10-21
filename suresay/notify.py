@@ -51,19 +51,21 @@ class CarerAlerts:
         hour = int(time.time() // 3600)
         return self.store.add("quota", f"carer:{user_id}:{hour}", 1, expires_at=float((hour + 1) * 3600)) <= self.per_hour
 
-    def on_receipt(self, user_id: str, receipt: dict[str, Any]) -> bool:
-        if not self.topic_arn or receipt.get("what", {}).get("risk") != "high":
+    def on_receipt(self, user_id: str, receipt: dict[str, Any], *, urgent: bool = False) -> bool:
+        """Alert on a confirmed high-risk action, or on any confirmed card from the Help button (*urgent*)."""
+        if not self.topic_arn or (receipt.get("what", {}).get("risk") != "high" and not urgent):
             return False
         if user_id.startswith("guest-") or not self._within_limit(user_id):
             return False  # a public demo home has no carer; a flood is not news
         how = {"voice": "their voice", "transcript": "their voice (Alexa)", "tap": "a tap"}.get(
             receipt.get("how", {}).get("channel", ""), "their device")
         heard = _flat(receipt.get("evidence", {}).get("transcript"), 40)
-        text = (f"SureSay: {_flat(user_id, 40)} confirmed “{_flat(receipt['what']['shown_as'], 120)}” with {how}"
+        lead = "asked for help and" if urgent else ""
+        text = (f"SureSay: {_flat(user_id, 40)} {lead} confirmed “{_flat(receipt['what']['shown_as'], 120)}” with {how}"
                 + (f" (heard “{heard}”)" if heard else "") + f" at {receipt['when']['confirmed_at'][11:16]} UTC. "
                 f"Receipt {_flat(receipt['receipt_id'], 40)}.")
         try:
-            self._sns().publish(TopicArn=self.topic_arn, Subject="SureSay: an action was confirmed", Message=text,
+            self._sns().publish(TopicArn=self.topic_arn, Subject="SureSay: help requested" if urgent else "SureSay: an action was confirmed", Message=text,
                                 MessageAttributes={"user_id": {"DataType": "String", "StringValue": user_id}})
         except Exception:
             logger.exception("carer alert failed")

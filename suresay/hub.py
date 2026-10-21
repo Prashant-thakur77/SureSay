@@ -532,10 +532,68 @@ def build_app(s: SureSay | None = None) -> Starlette:
         pending = await anyio.to_thread.run_sync(go)
         return JSONResponse({"pending": pending, "say": f"Someone's at the door. {visitor['note']}"})
 
+    async def help_me(request: Request, device: Any, data: dict[str, Any]) -> Response:
+        """The Help button: call or message his carer. Still his own yes; once he gives it, the carer is alerted."""
+        from .state import CONTACTS
+
+        carer = next((c for c in CONTACTS if "carer" in c["name"].lower()), CONTACTS[0])
+
+        def go() -> dict[str, Any] | None:
+            ps = s.gate.propose(device.user_id, [("call_contact", {"contact_id": carer["id"]}),
+                                                 ("message_contact", {"contact_id": carer["id"],
+                                                                      "text": "I need help. Please come now."})],
+                                origin="user_words", context={"heard": "", "source": "help button", "help": True})
+            return s.gate.device_view(device, ps.pending_id)
+
+        return JSONResponse({"pending": await anyio.to_thread.run_sync(go), "say": "Do you want me to get help?"})
+
     async def reset(request: Request, device: Any, data: dict[str, Any]) -> Response:
         await anyio.to_thread.run_sync(s.home.reset, device.user_id)
         closed = await anyio.to_thread.run_sync(lambda: s.gate.withdraw_open(device.user_id, reason="reset"))
         return JSONResponse({"ok": True, "withdrawn": closed})
+
+    async def practice(request: Request, device: Any, data: dict[str, Any]) -> Response:
+        """GET: today's sentences and progress. POST {target, audio_b64}: score one attempt (and learn from it)."""
+        from . import practice as pr
+
+        u = device.user_id
+        if request.method == "GET":
+            def summary() -> dict[str, Any]:
+                attempts = sorted(s.store.scan("practice", user_id=u), key=lambda a: a["at"])
+                return {"today": pr.today(s.phrasebook.list(u)), **pr.progress(attempts),
+                        "recent": [{k: a[k] for k in ("target", "score", "at")} for a in attempts[-5:]]}
+
+            return JSONResponse(await anyio.to_thread.run_sync(summary))
+        target = " ".join(str(data.get("target") or "").split())[:200]
+        raw = str(data.get("audio_b64") or "")
+        if not target or not raw:
+            return JSONResponse({"error": "say one of today's sentences"}, status_code=400)
+        if len(raw) > (MAX_AUDIO_BYTES * 4) // 3 + 4:
+            return JSONResponse({"error": "audio is too long"}, status_code=413)
+        try:
+            audio = base64.b64decode(raw, validate=True)
+        except ValueError:
+            return JSONResponse({"error": "audio_b64 is not base64"}, status_code=400)
+        why = await anyio.to_thread.run_sync(guest_take, u, "voice")
+        if why:
+            return JSONResponse({"error": why}, status_code=429)
+
+        def score() -> dict[str, Any]:
+            heard = s.asr.transcribe(audio, vocabulary=None, user_id=u)  # no priming: the score must be honest
+            out = pr.clarity(target, heard.text)
+            now = time.time()
+            s.store.put("practice", f"{u}:{now:.6f}", {"user_id": u, "target": target, "heard": heard.text,
+                                                       "score": out["score"], "at": now})
+            entry = next((e for e in s.phrasebook.list(u) if e["action"] == "say_for_me"
+                          and e["args"].get("text") == target), None)
+            learned = bool(entry and heard.engine != "typed" and out["score"] < 100
+                           and s.teach(u, heard.text, "say_for_me", entry["args"]))
+            from . import metrics
+
+            metrics.emit("PracticeClarity", out["score"], "Percent")
+            return {**out, "heard": heard.text, "target": target, "learned": learned}
+
+        return JSONResponse(await anyio.to_thread.run_sync(score))
 
     async def devices(request: Request, device: Any, data: dict[str, Any]) -> Response:
         """The user's own active devices and assistant links (never a key), so they can see and end any of them."""
@@ -562,6 +620,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
 
     routes += [
         Route("/device/devices", _signed(devices, s), methods=["GET"]),
+        Route("/device/practice", _signed(practice, s), methods=["GET", "POST"]),
         Route("/device/unpair", _signed(unpair, s), methods=["POST"]),
         Route("/device/turn", _signed(turn, s), methods=["POST"]),
         Route("/device/speak", _signed(speak, s), methods=["POST"]),
@@ -569,6 +628,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
         Route("/device/reset", _signed(reset, s), methods=["POST"]),
         Route("/device/propose", _signed(propose, s), methods=["POST"]),
         Route("/device/doorbell", _signed(doorbell, s), methods=["POST"]),
+        Route("/device/help", _signed(help_me, s), methods=["POST"]),
     ]
 
     async def try_demo(request: Request) -> Response:

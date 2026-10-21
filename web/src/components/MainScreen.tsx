@@ -21,6 +21,7 @@ import { SidePanel, type DoorInfo, type McpInfo } from "./SidePanel";
 import type { VisitorId } from "./Doorbell";
 import { readJson, writeJson } from "../lib/storage";
 import { SpeakBoard } from "./SpeakBoard";
+import { PracticePanel } from "./PracticePanel";
 import { TalkPanel } from "./TalkPanel";
 import { TabList, TabPanel, type TabDef } from "./Tabs";
 import { TeachPanel } from "./TeachPanel";
@@ -39,12 +40,13 @@ interface Props {
   pollMs?: number;
 }
 
-export type TabId = "talk" | "people" | "speak" | "timeline" | "teach";
+export type TabId = "talk" | "people" | "speak" | "practice" | "timeline" | "teach";
 
 const TABS: TabDef<TabId>[] = [
   { id: "talk", label: "Talk", icon: "mic" },
   { id: "people", label: "Talk to someone", icon: "message" },
   { id: "speak", label: "Speak for me", icon: "speech" },
+  { id: "practice", label: "Practice", icon: "spark" },
   { id: "timeline", label: "Timeline", icon: "clock" },
   { id: "teach", label: "Teach", icon: "book" },
 ];
@@ -271,6 +273,8 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
 
   // guests get a slim note about the demo home, which they can hide
   const guest = isGuest(hub.creds.user_id);
+  const practiceLoad = useCallback(() => hub.practiceState!(), [hub]);
+  const practiceSubmit = useCallback((t: string, a: string) => hub.practiceSubmit!(t, a), [hub]);
   const loadDevices = useMemo(() => (hub.devices ? () => hub.devices!() : undefined), [hub]);
   const unpairDevice = useMemo(() => (hub.unpairDevice ? (id: string) => hub.unpairDevice!(id) : undefined), [hub]);
   const [guestNote, setGuestNote] = useState(() => guest && readJson<boolean>("suresay.guestNoteHidden") !== true);
@@ -301,6 +305,10 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
             user={state?.user_id ?? hub.creds.user_id}
             mcp={mcp}
             onSettings={() => setSettingsOpen(true)}
+            onHelp={hub.help ? () => {
+              setTab("talk");
+              void conv.help();
+            } : undefined}
             sideToggle={bigScreen ? { open: sideOpen, onToggle: () => setSideOpen((o) => !o) } : undefined}
           />
           {guestNote && (
@@ -374,6 +382,20 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
               </TabPanel>
               <TabPanel id="speak" active={tab === "speak"}>
                 <SpeakBoard phrasebook={phrasebook} busy={phase.kind === "thinking"} onSay={(text) => proposeFromTab("say_for_me", { text })} />
+              </TabPanel>
+              <TabPanel id="practice" active={tab === "practice"}>
+                {hub.practiceState && hub.practiceSubmit ? (
+                  <PracticePanel
+                    load={practiceLoad}
+                    submit={practiceSubmit}
+                    record={recorder.record}
+                    stop={recorder.stop}
+                    recording={recorder.mic === "recording"}
+                    announce={(m) => announce(m, "polite")}
+                  />
+                ) : (
+                  <p>Practice needs a newer SureSay hub.</p>
+                )}
               </TabPanel>
               <TabPanel id="timeline" active={tab === "timeline"}>
                 <TimelinePanel state={state} />

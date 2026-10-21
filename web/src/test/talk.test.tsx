@@ -51,3 +51,15 @@ describe("Show it to them", () => {
     expect(screen.getByText("मुझे पानी चाहिए।").getAttribute("lang")).toBe("hi");
   });
 });
+
+describe("Help", () => {
+  it("is one press away and offers his carer, still as cards to confirm", async () => {
+    const hub = fakeHub([]);
+    render(<MainScreen hub={hub} gate={fakeGate()} speaker={new Speaker(hub)} settings={QUIET} bigScreen={false}
+                       onSettingsChange={() => undefined} onUnpair={() => undefined} pollMs={60000} />);
+    fireEvent.click(screen.getByRole("button", { name: "Help" }));
+    await waitFor(() => expect(hub.help).toHaveBeenCalled());
+    await screen.findByRole("button", { name: /Option 1 of 2: Call Ravi/ });
+    expect(screen.getByRole("button", { name: /Option 2 of 2: Message Ravi/ })).toBeTruthy();
+  });
+});

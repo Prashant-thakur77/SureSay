@@ -585,6 +585,24 @@ export function useConversation(deps: ConversationDeps) {
     [begin, networkProblem, setPhase, showSet],
   );
 
+  const help = useCallback(async () => {
+    const { hub, announce } = depsRef.current;
+    if (!hub.help) return;
+    const id = begin();
+    setPhase({ kind: "thinking" });
+    announce("Getting help ready. You choose who to contact.", "assertive");
+    let out;
+    try {
+      out = await hub.help();
+    } catch (err) {
+      networkProblem(id, err);
+      return;
+    }
+    if (!live(id)) return;
+    showSet(id, out.pending, { say: out.say });
+    void depsRef.current.refreshState();
+  }, [begin, networkProblem, setPhase, showSet]);
+
   /** Open card sets the hub knows about (for example, ones the assistant proposed) are shown when nothing else is. */
   const adoptPending = useCallback(
     (sets: PendingSet[] | undefined) => {
@@ -613,6 +631,7 @@ export function useConversation(deps: ConversationDeps) {
     debug,
     toggleMic,
     startRequest,
+    help,
     /** Ask again in the same mode as the last turn (Talk to someone stays Talk to someone). */
     again: () => startRequest(purposeRef.current),
     sendText,

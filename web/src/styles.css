@@ -3874,3 +3874,41 @@ code {
     transition: none;
   }
 }
+
+/* Practice */
+.practice { display: grid; gap: 1.1rem; }
+.practice__streak { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; color: var(--accent-ink); }
+.practice__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+.practice__item {
+  width: 100%; display: flex; align-items: center; gap: 0.9rem; text-align: left; min-height: 72px;
+  padding: 0.8rem 1.1rem; border-radius: 18px; border: var(--bw) solid var(--line-soft); background: var(--surface);
+  color: var(--ink); font: 700 1.3rem/1.3 var(--font); cursor: pointer; box-shadow: var(--shadow);
+}
+.practice__item span:nth-child(2) { flex: 1; }
+.practice__item--on { border-color: var(--accent); box-shadow: 0 0 0 4px var(--focus-halo); }
+.practice__item:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
+.practice__best { font-size: 0.95rem; font-weight: 700; color: var(--muted); }
+.practice__result { border-radius: 22px; padding: 1.2rem 1.4rem; background: var(--ticket-bg); border: var(--bw) solid var(--hair); }
+.practice__score { margin: 0; font-weight: 700; font-size: 1.4rem; }
+.practice__pct { font-size: 3.4rem; background: var(--dawn); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.practice__words { display: flex; flex-wrap: wrap; gap: 0.35rem 0.6rem; font-size: 1.6rem; font-weight: 700; margin: 0.6rem 0; }
+.pw--ok { color: var(--ink); }
+.pw--miss { color: var(--accent-ink); text-decoration: underline wavy var(--accent); text-underline-offset: 6px; }
+.practice__cheer { font-family: var(--serif); font-size: 1.6rem; margin: 0; }
+.practice__learned { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; color: var(--ok-ink); }
+.practice__error { color: var(--warn-ink); font-weight: 700; }
+.practice__chart { margin: 0; }
+.practice__chart figcaption { font-weight: 700; margin-bottom: 0.4rem; }
+.practice__bars { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding: 8px; border-radius: 14px; background: var(--surface2); }
+.practice__bar { flex: 1; max-width: 36px; border-radius: 8px 8px 3px 3px; background: var(--dawn); }
+.practice__note { font-size: 0.95rem; color: var(--muted); }
+
+/* The Help button: always one press away */
+.topbar__help {
+  background: #b3261e;
+  color: #ffffff;
+  border: 0;
+  font-weight: 700;
+}
+.topbar__help:hover { background: #8f1d17; }
+.topbar__help:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }

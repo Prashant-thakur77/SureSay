@@ -110,6 +110,13 @@ export function fakeHub(pending: PendingSet[]) {
         context: { heard: "", source: "doorbell (simulated)", visitor: { id: visitor, name: "Ravi", who: "your carer", note: "Ravi, your carer, is at the front door with your shopping." } },
       }),
     })),
+    help: vi.fn(async () => ({
+      pending: cardSet({ pending_id: "p_help", options: [
+        { n: 1, text: "Call Ravi", action: "call_contact", args: { contact_id: "ravi" }, risk: "low" },
+        { n: 2, text: "Message Ravi: “I need help. Please come now.”", action: "message_contact", args: { contact_id: "ravi", text: "I need help. Please come now." }, risk: "high" },
+      ], context: { heard: "", source: "help button" } }),
+      say: "Do you want me to get help?",
+    })),
     propose: vi.fn(async (action: string, args: Record<string, unknown>): Promise<PendingSet> => {
       const text = action === "say_for_me" ? `Say out loud: “${String(args.text)}”` : `Remember: “${String(args.phrase)}”`;
       return cardSet({ pending_id: "p_proposed", options: [{ n: 1, text, action, args, risk: "low" }], context: { heard: "", source: "tapped on device" } });

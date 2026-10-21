@@ -9,6 +9,8 @@ import type {
   HubState,
   PairedDevice,
   PendingSet,
+  PracticeResult,
+  PracticeState,
   SpeakResponse,
   TurnResponse,
 } from "./types";
@@ -40,6 +42,11 @@ export interface HubApi {
   propose(action: string, args: Record<string, unknown>): Promise<PendingSet>;
   /** Simulated doorbell press: opens the door's card set (the user still confirms). */
   doorbell(visitor: "ravi" | "delivery" | "unknown"): Promise<{ pending: PendingSet; say: string }>;
+  /** The Help button: a card set to call or message his carer. */
+  help?(): Promise<{ pending: PendingSet; say: string }>;
+  /** Practice: today's sentences and progress; and scoring one recording. */
+  practiceState?(): Promise<PracticeState>;
+  practiceSubmit?(target: string, audioB64: string): Promise<PracticeResult>;
   /** The user's own devices and assistant links. */
   devices?(): Promise<PairedDevice[]>;
   /** Unpair one of them (for an assistant link, that ends its access). */
@@ -131,6 +138,18 @@ export class HubClient implements HubApi {
     } finally {
       t.done();
     }
+  }
+
+  help(): Promise<{ pending: PendingSet; say: string }> {
+    return this.call<{ pending: PendingSet; say: string }>("POST", "/device/help", {});
+  }
+
+  practiceState(): Promise<PracticeState> {
+    return this.call<PracticeState>("GET", "/device/practice");
+  }
+
+  practiceSubmit(target: string, audioB64: string): Promise<PracticeResult> {
+    return this.call<PracticeResult>("POST", "/device/practice", { target, audio_b64: audioB64 }, 60000);
   }
 
   async devices(): Promise<PairedDevice[]> {

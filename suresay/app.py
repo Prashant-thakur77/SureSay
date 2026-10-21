@@ -28,6 +28,13 @@ __version__ = "1.0.0"
 
 from .catalog import NEGATIONS, has_negation  # noqa: E402,F401 (re-exported for eval/run_adapt_eval.py)
 
+
+def _same(a: str, b: str) -> bool:
+    from .rank import norm
+
+    return norm(a) == norm(b)
+
+
 LEARN_CONFLICT = 0.75  # a heard phrase this close to a phrase with another meaning is never learned
 
 current_user: contextvars.ContextVar[str] = contextvars.ContextVar("suresay_user", default="")
@@ -187,7 +194,9 @@ class SureSay:
         if event["type"] == "done" and self.carer.topic_arn and event.get("receipt_id"):
             rec = self.store.get("receipt", event["receipt_id"])
             if rec:
-                self.carer.on_receipt(rec.get("user_id", ""), rec)
+                doc = self.store.get("pending", event.get("pending_id") or "") or {}
+                urgent = bool((doc.get("context") or {}).get("help"))
+                self.carer.on_receipt(rec.get("user_id", ""), rec, urgent=urgent)
         try:
             self.store.put("event", f"{event['at']:.6f}-{event['type']}", event)
         except Exception:
@@ -212,27 +221,34 @@ class SureSay:
             option = doc["options"][int(doc.get("option") or 1) - 1]
             if not heard or option["action"] == "phrasebook_add" or option.get("risk") == "high":
                 return
-            from . import catalog
-            from .rank import norm, similarity
-
-            if option["action"] == "say_for_me" and norm(str((option.get("args") or {}).get("text") or "")) == norm(heard):
+            if option["action"] == "say_for_me" and str((option.get("args") or {}).get("text") or "") and \
+                    _same(str(option["args"]["text"]), heard):
                 return  # he chose his own words as heard: nothing to learn
-            if has_negation(heard):
-                return
-            book = self.phrasebook.list(doc["user_id"])
-            if any(norm(e["phrase"]) == norm(heard) for e in book):
-                return
-            # Never teach a phrase that already means something else: "unlock the door" heard, "lock" chosen,
-            # must not make "unlock the door" mean lock. Learning is for mishearings, not for standard phrasings.
-            meaning = (option["action"], option["args"])
-            for known in [*book, *catalog.templates()]:
-                if (known["action"], known["args"]) != meaning and similarity(heard, known["phrase"]) >= LEARN_CONFLICT:
-                    logger.info("not learning %r: it already sounds like %r", heard, known["phrase"])
-                    return
-            self.phrasebook.add(doc["user_id"], heard, option["action"], option["args"])
-            logger.info("learned %r -> %s", heard, option["action"])
+            self.teach(doc["user_id"], heard, option["action"], option["args"])
         except Exception:
             logger.exception("could not learn from a confirmation")
+
+    def teach(self, user_id: str, heard: str, action: str, args: dict[str, Any]) -> bool:
+        """Teach SureSay that *heard* (recognised by the server from his own speech) means this action.
+
+        Never a phrase with a negation, never one the book already has, and never one that already sounds like a
+        phrase with another meaning ("unlock the door" heard, "lock" chosen, must not make it mean lock)."""
+        from . import catalog
+        from .rank import norm, similarity
+
+        heard = " ".join(heard.split())
+        if not heard or has_negation(heard) or catalog.risk(action, args) == "high":
+            return False
+        book = self.phrasebook.list(user_id)
+        if any(norm(e["phrase"]) == norm(heard) for e in book):
+            return False
+        for known in [*book, *catalog.templates()]:
+            if (known["action"], known["args"]) != (action, args) and similarity(heard, known["phrase"]) >= LEARN_CONFLICT:
+                logger.info("not learning %r: it already sounds like %r", heard, known["phrase"])
+                return False
+        self.phrasebook.add(user_id, heard, action, args)
+        logger.info("learned %r -> %s", heard, action)
+        return True
 
     def recent_events(self, user_id: str, limit: int = 40) -> list[dict[str, Any]]:
         rows = self.store.scan("event", user_id=user_id)

@@ -19,6 +19,23 @@ export interface DeviceCreds {
   name: string;
 }
 
+export interface PracticeState {
+  today: string[];
+  attempts: number;
+  streak_days: number;
+  days: Array<{ day: string; average: number; attempts: number }>;
+  best: Record<string, number>;
+  recent: Array<{ target: string; score: number; at: number }>;
+}
+
+export interface PracticeResult {
+  score: number;
+  words: Array<{ word: string; heard: boolean }>;
+  heard: string;
+  target: string;
+  learned: boolean;
+}
+
 /** One of the user's paired devices or assistant links (never its key). */
 export interface PairedDevice {
   device_id: string;

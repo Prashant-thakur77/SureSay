@@ -45,11 +45,13 @@ interface Props {
   user: string;
   mcp: McpInfo;
   onSettings: () => void;
+  /** The Help button: offers to call or message his carer (still confirmed like everything else). */
+  onHelp?: () => void;
   /** Big-screen mode: the side panel hides behind a "Home" button. */
   sideToggle?: { open: boolean; onToggle: () => void };
 }
 
-export const TopBar = forwardRef<HTMLButtonElement, Props>(function TopBar({ user, mcp, onSettings, sideToggle }, ref) {
+export const TopBar = forwardRef<HTMLButtonElement, Props>(function TopBar({ user, mcp, onSettings, onHelp, sideToggle }, ref) {
   return (
     <header className="topbar" data-scan-exempt>
       <a href="#main" className="skip">
@@ -73,6 +75,12 @@ export const TopBar = forwardRef<HTMLButtonElement, Props>(function TopBar({ use
         <button type="button" className="btn btn--secondary" aria-expanded={sideToggle.open} aria-controls="side-panel" onClick={sideToggle.onToggle}>
           <Icon name="home" size={26} />
           {sideToggle.open ? "Hide home" : "Home"}
+        </button>
+      )}
+      {onHelp && (
+        <button type="button" className="btn topbar__help" onClick={onHelp}>
+          <Icon name="alert" size={24} />
+          Help
         </button>
       )}
       <button ref={ref} type="button" className="btn btn--secondary topbar__settings" onClick={onSettings} aria-haspopup="dialog">
