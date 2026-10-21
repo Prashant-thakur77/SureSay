@@ -145,6 +145,7 @@ def intent_section(i: dict[str, Any], i2: dict[str, Any] | None) -> tuple[list[s
            "ss_top3": test[ss]["top3_pct"], "ss_abstain": test[ss]["correct_abstain_pct"],
            "b1_abstain": test["b1"]["correct_abstain_pct"], "ss_false_abstain": test[ss]["false_abstain_pct"],
            "b1_wrong": test["b1"]["acted_without_asking_wrong_pct"], "b0_wrong": test["b0"]["acted_without_asking_wrong_pct"],
+           "ss_wrong": test[ss]["acted_without_asking_wrong_pct"],
            "ctrl_b0": (ctrl or {}).get("b0", {}).get("top1_pct"), "ctrl_ss": (ctrl or {}).get(ss, {}).get("top1_pct"),
            "worst": (worst[0], worst[1][ss]["top1_pct"], worst[1]["b1"]["top1_pct"], worst[1][ss]["false_abstain_pct"],
                      worst[1][ss].get("in_cards_with_maybe_pct")),
@@ -216,8 +217,9 @@ def safety_section(s: dict[str, Any], s2: dict[str, Any] | None) -> tuple[list[s
                 "scripted arms above."]
     if s2:
         out += ["", f"Run 2: {s2['arms']['suresay_adversary']['summary']['unconfirmed_changes']} / 50."]
+    sonic = {k: arms.get(k, {}).get("summary") for k in ("plain_sonic", "suresay_sonic")}
     return out, {"ss": adv["unconfirmed_changes"], "cases": adv["cases"], "plain": plain["unconfirmed_changes"],
-                 "plain_cases": plain["cases"], "near_intent": nm["intent_done"]}
+                 "plain_cases": plain["cases"], "near_intent": nm["intent_done"], "sonic": sonic}
 
 
 def latency_section(lat: dict[str, Any], atom: dict[str, Any] | None) -> tuple[list[str], dict[str, Any]]:
@@ -431,7 +433,7 @@ def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] |
             f"cards while asking again brings that speaker to {f(ss_maybe)} in the cards ({f(ik['ss_maybe'])} over all test "
             f"speakers), but maybe cards also appear on {f(ik['ss_maybe_oob'])} of out-of-book utterances, where the user has "
             "to decline them. B1 never asks and acted on a wrong phrase "
-            f"{f(ik['b1_wrong'])} of the time; SureSay acted wrongly 0% of the time. Per-user thresholds are the next step.",
+            f"{f(ik['b1_wrong'])} of the time; SureSay acted wrongly {f(ik['ss_wrong'])} of the time. Per-user thresholds are the next step.",
             f"2. **Strict confirmation costs retries.** On genuine yes/no/number answers from dysarthric speakers, SureSay "
             f"recovered {f(ck['ss_rec'])} (B0: {f(ck['b0_rec'])}) and asked {f(ck['ss_refused'])} of them to repeat. "
             "That is the price of the false-accept rate above; tap, keyboard and switch confirmation exist so a "
@@ -491,8 +493,12 @@ def main() -> None:
         f"| Meaning recovered | top-1 / top-3 | {f(ik['b0_top1'])} / — | {f(ik['b1_top1'])} / {f(ik['b1_top3'])} | {f(ik['ss_top1'])} / {f(ik['ss_top3'])} | 50-phrase books, 6 test speakers |",
         f"| In the cards when unsure too | counting maybe cards | — | {f(ik['b1_top3'])} (acts without asking) | **{f(ik['ss_maybe'])}** | same |",
         f"| Abstains when unsure | correct \"say again\" | 0% | {f(ik['b1_abstain'])} | **{f(ik['ss_abstain'])}** | out-of-book utterances |",
-        f"| Never acts on a guess | acted on a wrong phrase without asking | {f(ik['b0_wrong'])} | {f(ik['b1_wrong'])} | **0%** | in-book + out-of-book |",
+        f"| Never acts on a guess | acted on a wrong phrase without asking | {f(ik['b0_wrong'])} | {f(ik['b1_wrong'])} | **{f(ik['ss_wrong'])}** | in-book + out-of-book |",
         f"| Nothing without consent | unconfirmed changes | {sk['plain']} / {sk['plain_cases']} (no gate) | — | **{sk['ss']} / {sk['cases']}** | adversarial suite |",
+        *([f"| …with a real model as the agent | unconfirmed changes | {sk['sonic']['plain_sonic']['unconfirmed_changes']} / "
+           f"{sk['sonic']['plain_sonic']['cases']} (Nova 2 Sonic, no gate) | — | **{sk['sonic']['suresay_sonic']['unconfirmed_changes']} / "
+           f"{sk['sonic']['suresay_sonic']['cases']}** | Amazon Nova 2 Sonic, injections + near-misses |"]
+          if all(sk["sonic"].values()) else []),
         f"| Speed | understand p50 / p95 | — | — | {lk['u50']} / {lk['u95']} ms | 100 dev clips, {lk['u_where']} |",
         f"| Gate overhead | p50 / p95 | — | — | {lk.get('c50', lk['g50'])} / {lk.get('c95', lk['g95'])} ms | "
         f"{'Lambda + DynamoDB' if 'c50' in lk else 'SQLite'} |",

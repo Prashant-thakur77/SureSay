@@ -1,8 +1,20 @@
 # SureSay
 
+[![ci](https://github.com/Prashant-thakur77/SureSay/actions/workflows/ci.yml/badge.svg)](https://github.com/Prashant-thakur77/SureSay/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/Prashant-thakur77/SureSay?color=14213d)](https://github.com/Prashant-thakur77/SureSay/releases)
+[![license: MIT](https://img.shields.io/badge/license-MIT-14213d)](LICENSE)
+[![python](https://img.shields.io/badge/python-3.12%20%7C%203.13-14213d)](pyproject.toml)
+[![MCP](https://img.shields.io/badge/MCP-2025--11--25%20·%20Streamable%20HTTP-7b5cff)](mcp_server/server.py)
+[![WCAG 2.2 AA](https://img.shields.io/badge/WCAG-2.2%20AA-0a6159)](#accessibility)
+[![live demo](https://img.shields.io/badge/live%20demo-try%20it-ff6b5a)](https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws)
+
 **A voice assistant for people whose speech other assistants mishear. It shows its three best guesses, and nothing happens until you choose one.**
 
+[![Watch the 3-minute film](docs/img/video-poster.jpg)](https://github.com/Prashant-thakur77/SureSay/releases/download/v1.0.0/SureSay.mp4)
+
 People with dysarthria (after a stroke, or living with Parkinson's, ALS or cerebral palsy) are the people voice assistants fail most often. A misheard command that *acts* is worse than no command at all: the wrong light, the wrong person called, the door unlocked instead of locked. SureSay turns every request into three big, numbered, read-aloud cards. You say "two", "the second one", "haan" or "do number", or you tap, press a key or hit one switch. Only that confirmation, made on your own device, can release the action, and every change leaves a consent receipt.
+
+**Contents:** [One turn](#one-turn) · [Why the agent can't confirm](#why-the-agent-cant-confirm-for-you) · [Results](#results) · [AWS](#aws-services-used-and-how) · [Run it](#run-it) · [Security](#security) · [Accessibility](#accessibility) · [Open source](#the-open-source-part) · [Repository](#repository)
 
 **Judging? Start with [docs/JUDGES.md](docs/JUDGES.md)** (five minutes: what to try, where each criterion is evidenced, how to verify).
 
@@ -67,8 +79,9 @@ Held-out TORGO dysarthric speakers (dev F03 and M05 for tuning; test F01, F04, M
 | Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers |
 | In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **93.5%** | same |
 | Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances |
-| Never acts on a guess | acted on a wrong phrase without asking | 84.3% | 53.7% | **0%** | in-book + out-of-book |
+| Never acts on a guess | acted on a wrong phrase without asking | 84.3% | 53.7% | **0.0%** | in-book + out-of-book |
 | Nothing without consent | unconfirmed changes | 35 / 35 (no gate) | — | **0 / 50** | adversarial suite |
+| …with a real model as the agent | unconfirmed changes | 11 / 35 (Nova 2 Sonic, no gate) | — | **0 / 35** | Amazon Nova 2 Sonic, injections + near-misses |
 | Speed | understand p50 / p95 | — | — | 869.6 / 2434.6 ms | 100 dev clips, Lambda + Transcribe |
 | Gate overhead | p50 / p95 | — | — | 48.9 / 58.1 ms | Lambda + DynamoDB |
 | No regression | top-1, controls | 80.8% | — | 100.0% | control speakers |
@@ -116,6 +129,16 @@ make eval         # every claim on TORGO (needs data/torgo; see eval/README.md)
 make report       # regenerate eval/REPORT.md and the table above
 ```
 
+## Security
+
+The guarantee is structural: the one-time code that releases a card set goes only to the user's paired device, over an HMAC-signed channel, and never into any MCP result, log or receipt. The model holds the `confirm` tool and is refused every time.
+
+- Three independent adversarial reviews; every confirmed finding was fixed with a failing test first ([SECURITY.md](SECURITY.md) lists them).
+- 50-case safety suite in CI: prompt injections, near-miss commands, forged confirmations, replays, races, pairing brute force, a captured signed request. 0 unconfirmed changes, also through an OAuth-linked client and with a real Amazon Nova model as the agent.
+- Atomic one-time use on DynamoDB (conditional writes, never get-then-put); per-source pairing budgets; quotas on the public demo.
+
+Report a vulnerability: see [SECURITY.md](SECURITY.md).
+
 ## Accessibility
 
 WCAG 2.2 AA (most text meets AAA contrast):
@@ -146,6 +169,10 @@ Confirmations work in English, Hinglish and Devanagari ("doosra", "teen number",
 | `eval/` | TORGO preparation, the four claim scripts, tuning, cost, the report |
 | `infra/` | deploy, teardown, smoke test, IAM |
 | `docs/` | Friction log, product feedback, Devpost write-up, video script |
+
+## Contributing and changes
+
+Issues and pull requests are welcome; [CONTRIBUTING.md](CONTRIBUTING.md) has the setup, the rules every change keeps (the agent can never confirm; every number comes from `eval/`), and how to run the checks. Release notes: [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
