@@ -300,7 +300,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
     async def state(request: Request, device: Any, data: dict[str, Any]) -> Response:
         def collect() -> dict[str, Any]:
             u = device.user_id
-            events = [e for e in s.store.scan("event") if e.get("user_id") == u]
+            events = s.store.scan("event", user_id=u)
             stats = {"confirmed": sum(e["type"] == "done" for e in events),
                      "refused": sum(e["type"] == "refused" for e in events),
                      "refused_from_assistant": sum(e["type"] == "refused" and e.get("caller") == "agent" for e in events),

@@ -37,6 +37,11 @@ if ! aws dynamodb describe-table --table-name "$TABLE" --query 'Table.GlobalSeco
   aws dynamodb update-table --table-name "$TABLE" --attribute-definitions AttributeName=kind,AttributeType=S \
     --global-secondary-index-updates '[{"Create":{"IndexName":"kind-index","KeySchema":[{"AttributeName":"kind","KeyType":"HASH"}],"Projection":{"ProjectionType":"ALL"}}}]' >/dev/null
   echo "creating kind-index (backfills in the background; the hub scans until it is ready)"
+elif ! aws dynamodb describe-table --table-name "$TABLE" --query 'Table.GlobalSecondaryIndexes[].IndexName' --output text | grep -q user-kind-index; then
+  # One user's rows of one kind (open card sets, events) without reading anyone else's: matters with the public demo.
+  aws dynamodb update-table --table-name "$TABLE" --attribute-definitions AttributeName=f_user_id,AttributeType=S AttributeName=kind,AttributeType=S \
+    --global-secondary-index-updates '[{"Create":{"IndexName":"user-kind-index","KeySchema":[{"AttributeName":"f_user_id","KeyType":"HASH"},{"AttributeName":"kind","KeyType":"RANGE"}],"Projection":{"ProjectionType":"ALL"}}}]' >/dev/null
+  echo "creating user-kind-index (backfills in the background)"
 fi
 
 say "S3 bucket $BUCKET"

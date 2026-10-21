@@ -203,7 +203,7 @@ class SureSay:
             logger.exception("could not learn from a confirmation")
 
     def recent_events(self, user_id: str, limit: int = 40) -> list[dict[str, Any]]:
-        rows = [e for e in self.store.scan("event") if e.get("user_id") == user_id]
+        rows = self.store.scan("event", user_id=user_id)
         rows.sort(key=lambda e: e["at"])
         return rows[-limit:]
 
