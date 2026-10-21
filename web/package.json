@@ -1,7 +1,22 @@
 {
   "name": "suresay-web",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "SureSay web client: three big guesses, and nothing happens until you choose one. WCAG 2.2 AA; voice, tap, keys or one switch.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Prashant-thakur77/SureSay.git",
+    "directory": "web"
+  },
+  "keywords": [
+    "accessibility",
+    "dysarthria",
+    "voice-assistant",
+    "mcp",
+    "react",
+    "aac"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite --port 5173 --strictPort",

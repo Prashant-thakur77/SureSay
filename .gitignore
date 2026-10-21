@@ -35,3 +35,4 @@ notes/
 eval/results/scratch/
 infra/.state/
 video/node_modules
+eval/results/ci/

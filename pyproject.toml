@@ -1,11 +1,22 @@
 [project]
 name = "suresay"
-version = "0.1.0"
+version = "1.0.0"
 description = "A voice assistant for atypical speech: three big guesses, and nothing happens until you confirm one."
 readme = "README.md"
 license = "MIT"
 authors = [{ name = "Prashant Thakur" }]
 requires-python = ">=3.12"
+keywords = ["accessibility", "dysarthria", "speech-recognition", "voice-assistant", "alexa", "mcp",
+            "model-context-protocol", "amazon-nova", "aws", "confirm-before-act", "assistive-technology"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Healthcare Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Adaptive Technologies",
+]
 dependencies = [
     "confirm-gate-mcp",
     "mcp>=2.1,<2.2",              # strands-agents pins mcp<2.2
@@ -22,6 +33,12 @@ dependencies = [
     "numpy>=2.0",
     "soundfile>=0.12",
 ]
+
+[project.urls]
+Homepage = "https://github.com/Prashant-thakur77/SureSay"
+Demo = "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws"
+Evaluation = "https://github.com/Prashant-thakur77/SureSay/blob/main/eval/REPORT.md"
+"Confirm gate" = "https://github.com/Prashant-thakur77/confirm-gate-mcp"
 
 [project.optional-dependencies]
 whisper = ["faster-whisper>=1.1"]

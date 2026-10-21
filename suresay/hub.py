@@ -595,7 +595,9 @@ def build_app(s: SureSay | None = None) -> Starlette:
         return JSONResponse({"ok": True})
 
     async def info(request: Request) -> Response:
-        return JSONResponse({"name": "suresay", "mcp": "/mcp", "transport": "streamable-http", "public_demo": s.cfg.public_demo,
+        from .app import __version__
+
+        return JSONResponse({"name": "suresay", "version": __version__, "mcp": "/mcp", "transport": "streamable-http", "public_demo": s.cfg.public_demo,
                              "protocol_versions": ["2025-11-25", "2026-07-28"], "backend": s.cfg.backend,
                              "turn_mode": bridge._mode or "not yet decided"})
 

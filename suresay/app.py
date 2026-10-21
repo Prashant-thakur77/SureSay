@@ -24,6 +24,7 @@ from .speech import Speaker
 from .state import Home
 
 logger = logging.getLogger(__name__)
+__version__ = "1.0.0"
 
 from .catalog import NEGATIONS, has_negation  # noqa: E402,F401 (re-exported for eval/run_adapt_eval.py)
 
@@ -104,7 +105,7 @@ class SureSay:
         self.events: collections.deque[dict[str, Any]] = collections.deque(maxlen=300)
         self._usage = {"asr_seconds": 0.0, "input_tokens": 0, "output_tokens": 0, "turns": 0}
 
-        self.mcp = MCPServer("suresay", title="SureSay", instructions=INSTRUCTIONS, version="0.1.0",
+        self.mcp = MCPServer("suresay", title="SureSay", instructions=INSTRUCTIONS, version=__version__,
                              extensions=[build_apps(self.cfg)])
         self.gated = GatedServer(self.mcp, store=store, clock=clock, user=self.user, on_event=self._on_event)
         self.gate = self.gated.gate
