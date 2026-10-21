@@ -21,7 +21,7 @@
   <!-- device -->
   <rect x="48" y="110" width="300" height="430" rx="22" fill="#ffffff" stroke="#14213d" stroke-width="2.5"/>
   <text x="72" y="148" font-size="21" font-weight="700" fill="#14213d">The user's device</text>
-  <text x="72" y="174" font-size="15" fill="#3d4a63">web client playing the Alexa+ role</text>
+  <text x="72" y="174" font-size="13.5" fill="#3d4a63">web app · Echo Show (MCP Apps) · skill</text>
   <g font-size="16" fill="#14213d">
     <rect x="72" y="196" width="252" height="54" rx="12" fill="#f3ede3" stroke="#14213d"/>
     <circle cx="98" cy="223" r="15" fill="#14213d"/><text x="93" y="229" fill="#fbf8f3" font-weight="700">1</text>
@@ -57,7 +57,7 @@
   <text x="736" y="248" font-size="14" fill="#14213d">Streamable HTTP · 2025-11-25</text>
   <text x="736" y="270" font-size="14" fill="#14213d">understand · reads · confirm</text>
   <text x="736" y="292" font-size="14" fill="#14213d">writes only <tspan font-weight="700">propose</tspan></text>
-  <text x="736" y="312" font-size="14" fill="#14213d">never returns a nonce</text>
+  <text x="736" y="312" font-size="14" fill="#14213d">MCP Apps cards UI · no nonce</text>
 
   <rect x="456" y="350" width="510" height="168" rx="14" fill="#14213d"/>
   <text x="476" y="380" font-size="17" font-weight="700" fill="#fbf8f3">confirm-gate (open source, MIT)</text>
@@ -76,15 +76,15 @@
 
   <!-- agent -->
   <rect x="1072" y="110" width="280" height="430" rx="22" fill="#ffffff" stroke="#14213d" stroke-width="2.5"/>
-  <text x="1096" y="148" font-size="21" font-weight="700" fill="#14213d">Strands agent</text>
-  <text x="1096" y="174" font-size="15" fill="#3d4a63">AgentCore Runtime</text>
+  <text x="1096" y="148" font-size="20" font-weight="700" fill="#14213d">Strands agent · Alexa+</text>
+  <text x="1096" y="174" font-size="15" fill="#3d4a63">AgentCore Runtime · OAuth-linked</text>
   <text x="1096" y="214" font-size="16" fill="#14213d">Nova 2 Lite on Bedrock</text>
   <text x="1096" y="244" font-size="15" fill="#14213d">● calls understand</text>
   <text x="1096" y="268" font-size="15" fill="#14213d">● answers questions</text>
   <text x="1096" y="292" font-size="15" fill="#14213d">● may propose writes</text>
-  <text x="1096" y="316" font-size="15" fill="#14213d">● memory: AgentCore Memory</text>
+  <text x="1096" y="316" font-size="15" fill="#14213d">● Alexa+ links via OAuth + PKCE</text>
   <rect x="1096" y="346" width="232" height="108" rx="10" fill="#f3ede3" stroke="#14213d"/>
-  <text x="1110" y="372" font-size="15" font-weight="700" fill="#14213d">holds an agent token</text>
+  <text x="1110" y="372" font-size="15" font-weight="700" fill="#14213d">holds a token, never a key</text>
   <text x="1110" y="396" font-size="14" fill="#14213d">no device key, no nonce:</text>
   <text x="1110" y="418" font-size="14" fill="#14213d">it cannot confirm, even</text>
   <text x="1110" y="438" font-size="14" fill="#14213d">holding the confirm tool</text>
@@ -96,7 +96,7 @@
   <path d="M348 236 H456" stroke="#9a4a00" stroke-width="3" fill="none" marker-end="url(#ahA)" marker-start="url(#ahA)"/>
   <text x="366" y="222" font-size="13" font-weight="700" fill="#6b2a00">signed</text>
   <path d="M348 342 H 843 V 338" stroke="#14213d" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#ah)"/>
-  <text x="354" y="334" font-size="12" fill="#14213d">confirm (MCP)</text>
+  <text x="356" y="334" font-size="12" fill="#14213d">confirm</text>
   <!-- agent -> mcp -->
   <path d="M1072 262 H966" stroke="#14213d" stroke-width="3" fill="none" marker-end="url(#ah)" marker-start="url(#ah)"/>
   <text x="994" y="246" font-size="13" font-weight="700" fill="#14213d">token</text>
