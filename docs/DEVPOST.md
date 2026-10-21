@@ -23,6 +23,8 @@ When the phrase is something to say to people rather than to a device ("I am thi
 - **Teach:** add your own phrases. SureSay also learns from your confirmations, but never a phrase that already means something else.
 - **Timeline:** for carers, a record of every receipt, with "changes without you: 0".
 - **Maybe cards:** when it's unsure, it asks again and still offers its best guesses, confirm-only.
+- **"Don't" never becomes "do":** "don't unlock the door" sounds like "unlock the door", so a negated command offers no cards. SureSay says what it heard and that nothing will change.
+- **Your devices:** every screen, voice device and assistant link that can show your cards, each one a tap away from unpaired.
 - **Doorbell:** "Someone's at the door: Ravi, your carer" opens cards (let them in, which asks twice; reply at the door; or call). This one is simulated, since we have no doorbell account.
 - **Big-screen TV mode.**
 
@@ -33,7 +35,7 @@ SureSay is a self-hosted MCP server built to the Alexa+ add-on requirements, and
 | Alexa+ asks for | SureSay |
 |---|---|
 | MCP spec 2025-11-25, Streamable HTTP, a remote URL | `/mcp` on AWS Lambda; negotiates 2025-11-25 (and 2026-07-28) |
-| Account linking: OAuth 2.1 code flow + PKCE S256, Protected Resource Metadata (RFC 9728), auth-server metadata, Bearer in the header, 401 without `WWW-Authenticate` | All implemented and tested (`suresay/oauth.py`, `tests/test_oauth.py`). Linking means entering your SureSay pairing code |
+| Account linking: OAuth 2.1 code flow + PKCE S256, Protected Resource Metadata (RFC 9728), auth-server metadata, Bearer in the header, 401 without `WWW-Authenticate` | All implemented and tested (`suresay/oauth.py`, `tests/test_oauth.py`). Linking means entering your SureSay pairing code. The link is listed under Your devices: unpairing it ends every token at once, and a replayed refresh token ends the link too |
 | Visuals through MCP Apps | `understand` carries `_meta.ui.resourceUri = ui://suresay/cards.html`: the three cards render on an Echo Show or Fire TV, and that screen can pair as one of your devices, so a tap there is your own evidence |
 | An add-on package | `alexa_plus/addon-package/addon.json`, six icon sizes, a 600×900 carousel, `/privacy`, `/terms` |
 | Fast query responses (under 500 ms) | `home_status` and typed `understand` run in milliseconds; spoken `understand` is 870 ms p50 because it includes speech recognition |
@@ -106,7 +108,7 @@ SureSay column: SureSay (offline ranker); the Nova 2 Lite ranker is pending Bedr
 
 Everything user-facing is new:
 
-- **The confirm gate:** the consent parser, stores, device pairing and signing, evidence, receipts and an MCP proxy. Two independent security reviews were run, and every finding was fixed with a test.
+- **The confirm gate:** the consent parser, stores, device pairing and signing, evidence, receipts and an MCP proxy. Two independent adversarial reviews were run; every confirmed finding was fixed with a failing test first, including a pairing brute force through the public demo, an Alexa answer landing on a card set the user never heard, and "ek second" (one moment) read as "option 2".
 - **The hub:**
   - an MCP server with MCP Apps;
   - a signed device channel;
@@ -124,7 +126,7 @@ Everything user-facing is new:
 
 ## Open source
 
-[confirm-gate-mcp](https://github.com/Prashant-thakur77/confirm-gate-mcp) (MIT, its own repository with CI on Python 3.12 and 3.13; release v0.2.0 includes the security hardening) is the gate on its own. `confirm-gate serve --upstream <any MCP server>` puts confirm-before-act, with an approval page, in front of any MCP server. Install: `pip install "git+https://github.com/Prashant-thakur77/confirm-gate-mcp"`. Why it matters: as assistants gain the power to act, prompt injection becomes a way to act. A gate that keeps the confirmation secret away from the model turns "never act without the user" from a prompt into a property of the code, for any MCP server.
+[confirm-gate-mcp](https://github.com/Prashant-thakur77/confirm-gate-mcp) (MIT, its own repository with CI on Python 3.12 and 3.13; release v0.3.0 includes two rounds of security hardening) is the gate on its own. `confirm-gate serve --upstream <any MCP server>` puts confirm-before-act, with an approval page, in front of any MCP server. Install: `pip install "git+https://github.com/Prashant-thakur77/confirm-gate-mcp"`. Why it matters: as assistants gain the power to act, prompt injection becomes a way to act. A gate that keeps the confirmation secret away from the model turns "never act without the user" from a prompt into a property of the code, for any MCP server.
 
 ## What's next
 
