@@ -177,7 +177,6 @@ class AgentBridge:
 
     def _invoke_runtime(self, payload: dict[str, Any], session_id: str) -> str:
         import boto3
-
         from botocore.config import Config
 
         client = boto3.client("bedrock-agentcore", region_name=self.s.cfg.region,
