@@ -3,6 +3,8 @@
 ``python -m suresay.cli pair [--user demo] [--transcriber alexa]`` prints a fresh pairing code; with
 ``--transcriber`` the device it pairs may send its own speech transcripts (a smart-speaker skill).
 ``python -m suresay.cli voice-device <device_id> alexa`` marks an already paired device that way.
+``python -m suresay.cli devices [--user demo]`` lists a user's devices and links; ``revoke <device_id>`` unpairs one
+(for a "Linked: <client>" device, that ends the account link and every token issued under it).
 
 With ``SURESAY_BACKEND=aws`` the code is written to the DynamoDB table the deployed hub reads,
 so a browser can pair with the cloud hub. The code is shown here, never to the agent.
@@ -26,6 +28,10 @@ def main() -> None:
     v = sub.add_parser("voice-device", help="mark a paired device as one that sends its own transcripts")
     v.add_argument("device_id")
     v.add_argument("transcriber")
+    d = sub.add_parser("devices", help="list a user's paired devices and account links")
+    d.add_argument("--user", default=None)
+    r = sub.add_parser("revoke", help="unpair a device (or end an account link)")
+    r.add_argument("device_id")
     args = ap.parse_args()
     cfg = settings()
     store = DynamoStore(cfg.gate_table, region=cfg.region) if cfg.is_aws else SqliteStore(cfg.data_dir / "suresay.db")
@@ -33,6 +39,13 @@ def main() -> None:
         user = args.user or cfg.default_user
         code = DeviceRegistry(store).start_pairing(user, transcriber=args.transcriber)
         print(code)
+    elif args.cmd == "devices":
+        for doc in store.scan("device", user_id=args.user or cfg.default_user):
+            state = "revoked" if doc.get("revoked_at") else "active"
+            extra = f"  transcriber={doc['transcriber']}" if doc.get("transcriber") else ""
+            print(f"{doc['device_id']}  {state:8}  {doc.get('name', '')}{extra}")
+    elif args.cmd == "revoke":
+        print("revoked" if DeviceRegistry(store).revoke(args.device_id) else "already revoked or unknown")
     elif args.cmd == "voice-device":
         if not DeviceRegistry(store).set_transcriber(args.device_id, args.transcriber):
             raise SystemExit(f"no active device {args.device_id}")

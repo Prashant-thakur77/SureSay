@@ -145,3 +145,37 @@ def test_tokens_in_the_query_string_are_ignored(linked: Hub) -> None:
     r = linked.http.post(f"/mcp?access_token={tok['access_token']}", json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"},
                          headers={"accept": "application/json, text/event-stream", "content-type": "application/json"})
     assert r.status_code == 401
+
+
+def _refresh(hub: Hub, token: str) -> httpx.Response:
+    return hub.http.post("/oauth/token", data={"grant_type": "refresh_token", "refresh_token": token,
+                                                "client_id": CLIENT["client_id"], "client_secret": CLIENT["client_secret"]})
+
+
+def test_unlinking_the_device_revokes_every_token_from_that_link(linked: Hub) -> None:
+    """Second review, finding 10: there was no way to revoke a link; refresh tokens rotated for 60 days."""
+    tok = link(linked)
+    links = [d for d in linked.s.store.scan("device", user_id="demo") if d["name"].startswith("Linked:")]
+    assert len(links) == 1 and links[0]["revoked_at"] is None
+    assert linked.s.devices.revoke(links[0]["device_id"])
+    assert mcp(linked, tok["access_token"], "tools/list", {}).status_code == 401
+    assert _refresh(linked, tok["refresh_token"]).status_code == 400
+
+
+def test_a_reused_refresh_token_revokes_the_whole_link(linked: Hub) -> None:
+    """A refresh token used twice was stolen or replayed: end the link, so the thief's new token dies too."""
+    tok = link(linked)
+    new = _refresh(linked, tok["refresh_token"]).json()
+    assert mcp(linked, new["access_token"], "tools/list", {}).status_code == 200
+    assert _refresh(linked, tok["refresh_token"]).status_code == 400
+    assert mcp(linked, new["access_token"], "tools/list", {}).status_code == 401
+    assert _refresh(linked, new["refresh_token"]).status_code == 400
+
+
+def test_the_link_page_names_the_client_and_cannot_be_framed(linked: Hub) -> None:
+    linked.s.oauth.register_client("alexa-plus-named", None, [CLIENT["redirect_uri"]], name="Alexa+")
+    _, challenge = pkce()
+    page = authorize(linked, challenge, client_id="alexa-plus-named")
+    assert page.status_code == 200 and "Alexa+" in page.text
+    assert "frame-ancestors 'none'" in page.headers.get("content-security-policy", "")
+    assert page.headers.get("x-frame-options") == "DENY"
