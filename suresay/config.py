@@ -39,6 +39,8 @@ class Settings:
         default_factory=lambda: tuple(o for o in _env("SURESAY_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",") if o)
     )
     evidence_language: str = field(default_factory=lambda: _env("SURESAY_EVIDENCE_LANGUAGE", "en-US"))  # hi-IN for Hindi
+    # Who hears spoken answers on the cards: "" = the same recogniser as requests; "nova-sonic" = Amazon Nova 2 Sonic
+    evidence_asr: str = field(default_factory=lambda: _env("SURESAY_EVIDENCE_ASR", ""))
     public_demo: bool = field(default_factory=lambda: _env("SURESAY_PUBLIC_DEMO") in ("1", "true", "yes"))
     carer_topic_arn: str = field(default_factory=lambda: _env("SURESAY_CARER_TOPIC_ARN"))
     learn: bool = field(default_factory=lambda: _env("SURESAY_LEARN", "1") not in ("0", "false", "no"))

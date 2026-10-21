@@ -361,11 +361,15 @@ def build_app(s: SureSay | None = None) -> Starlette:
         """The user's confirmation audio, transcribed by the server. Hindi speakers: SURESAY_EVIDENCE_LANGUAGE=hi-IN,
         which writes Hindi in Devanagari and English words transliterated; both are mapped by the consent parser."""
         if not evidence_asr:
-            from .asr import TranscribeStreamingAsr
+            from . import asr as asrmod
 
             lang = s.cfg.evidence_language
-            evidence_asr.append(TranscribeStreamingAsr(region=s.cfg.region, language=lang)
-                                if lang != "en-US" and s.asr.name.startswith("transcribe") else s.asr)
+            if lang != "en-US" and s.asr.name.startswith("transcribe"):
+                evidence_asr.append(asrmod.TranscribeStreamingAsr(region=s.cfg.region, language=lang))
+            elif s.cfg.evidence_asr == "nova-sonic":  # as safe as Transcribe on answers (REPORT.md), a third the cost
+                evidence_asr.append(asrmod.NovaSonicAsr(region=s.cfg.region))
+            else:
+                evidence_asr.append(s.asr)
         return evidence_asr[0].transcribe(audio, vocabulary=EVIDENCE_WORDS or None).text
 
     quota = Quota(s.store)

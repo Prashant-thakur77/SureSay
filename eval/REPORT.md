@@ -170,7 +170,7 @@ Everything above uses Amazon Transcribe. The same pipeline was also run with a l
 | `whisper-small.en` | 62.3% | 1.4% | 66.7% | 33.3% | 98.1% | 89.8% | — | 100.0% |
 | `nova-2-sonic` | 63.5% | 1.9% | 80.6% | 37.0% | 94.4% | 65.7% | 93.5% | 100.0% |
 
-Nova 2 Sonic ran on 852 clips for $0.76 at list price ($0.89 per 1,000 clips, input tokens only: the stream is closed before Sonic replies), against $2.50 per 1,000 short clips for Amazon Transcribe streaming (its 15-second minimum per request). Sonic has no custom vocabulary, so it is compared with no phrasebook priming; the "maybe" column is blank where that run predates maybe cards.
+Nova 2 Sonic ran on 852 clips for $0.76 at list price ($0.89 per 1,000 clips, input tokens only: the stream is closed before Sonic replies), against $2.50 per 1,000 short clips for Amazon Transcribe streaming (its 15-second minimum per request). Inside the Lambda function, recognition took 1469.5 ms at p50 with Nova 2 Sonic (20 dev clips, 0 failed) against 825.2 ms with Transcribe (100 clips). Same safety, a third of the cost, a longer wait: SureSay keeps Transcribe as the default and offers Sonic for spoken answers with `SURESAY_EVIDENCE_ASR=nova-sonic`. Sonic has no custom vocabulary, so it is compared with no phrasebook priming; the "maybe" column is blank where that run predates maybe cards.
 
 ## Per-user calibration
 

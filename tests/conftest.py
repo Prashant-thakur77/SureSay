@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import contextlib
 import json
 import socket
 import threading
@@ -85,9 +86,9 @@ def _free_port() -> int:
         return sock.getsockname()[1]
 
 
-@pytest.fixture()
-def hub(tmp_path: Path) -> Iterator[Hub]:
-    s = make_suresay(tmp_path)
+@contextlib.contextmanager
+def serve(s: SureSay) -> Iterator[Hub]:
+    """A real hub for *s* on a free local port, for the length of the block."""
     app = build_app(s)
     port = _free_port()
     server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=port, log_level="warning", proxy_headers=False))
@@ -97,6 +98,14 @@ def hub(tmp_path: Path) -> Iterator[Hub]:
         if server.started:
             break
         time.sleep(0.05)
-    yield Hub(s, f"http://127.0.0.1:{port}")
-    server.should_exit = True
-    thread.join(timeout=5)
+    try:
+        yield Hub(s, f"http://127.0.0.1:{port}")
+    finally:
+        server.should_exit = True
+        thread.join(timeout=5)
+
+
+@pytest.fixture()
+def hub(tmp_path: Path) -> Iterator[Hub]:
+    with serve(make_suresay(tmp_path)) as h:
+        yield h

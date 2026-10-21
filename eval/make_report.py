@@ -305,6 +305,17 @@ def asr_section(c: dict[str, Any], i: dict[str, Any]) -> list[str]:
             "|---|---|---|---|---|---|---|---|---|", *rows, "", *sonic_note()]
 
 
+def _sonic_latency() -> str:
+    sl = read_result("latency_nova_sonic", "novasonic/run1")
+    tl = (read_result("latency", "run1") or {}).get("understand_cloud")
+    if not (sl and tl):
+        return ""
+    return (f"Inside the Lambda function, recognition took {f(sl['asr']['p50_ms'], ' ms')} at p50 with Nova 2 Sonic "
+            f"({sl['clips']} dev clips, {sl['failed']} failed) against {f(tl['asr']['p50_ms'], ' ms')} with Transcribe "
+            f"({tl['clips']} clips). Same safety, a third of the cost, a longer wait: SureSay keeps Transcribe as the "
+            "default and offers Sonic for spoken answers with `SURESAY_EVIDENCE_ASR=nova-sonic`. ")
+
+
 def sonic_note() -> list[str]:
     spend = read_result("spend") or {}
     if not spend.get("nova_sonic_clips"):
@@ -315,7 +326,7 @@ def sonic_note() -> list[str]:
     return [f"Nova 2 Sonic ran on {spend['nova_sonic_clips']} clips for ${spend['nova_sonic_usd']:.2f} at list price "
             f"(${per * 1000:.2f} per 1,000 clips, input tokens only: the stream is closed before Sonic replies), against "
             f"${tr * 1000:.2f} per 1,000 short clips for Amazon Transcribe streaming (its 15-second minimum per request). "
-            "Sonic has no custom vocabulary, so it is "
+            + _sonic_latency() + "Sonic has no custom vocabulary, so it is "
             "compared with no phrasebook priming; the \"maybe\" column is blank where that run predates maybe cards."]
 
 

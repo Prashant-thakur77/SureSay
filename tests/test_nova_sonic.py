@@ -74,3 +74,34 @@ def test_silence_gives_an_empty_transcript() -> None:
         return FakeStream([])
 
     assert NovaSonicAsr(connect=connect, pace=0).transcribe(wav()).text == ""
+
+
+def test_confirmations_can_be_heard_by_nova_sonic(tmp_path: Any, monkeypatch: Any) -> None:
+    """SURESAY_EVIDENCE_ASR=nova-sonic: requests keep the primed recogniser, spoken answers go to Nova 2 Sonic."""
+    from dataclasses import replace
+
+    import suresay.asr as asrmod
+    from suresay.asr import Heard
+    from tests.conftest import Hub, make_suresay, serve
+
+    heard: list[bytes] = []
+
+    class FakeSonic:
+        name = "nova-2-sonic"
+
+        def __init__(self, **kw: Any) -> None:
+            pass
+
+        def transcribe(self, audio: bytes, **kw: Any) -> Heard:
+            heard.append(audio)
+            return Heard(text="number one", engine=self.name)
+
+    monkeypatch.setattr(asrmod, "NovaSonicAsr", FakeSonic)
+    s = make_suresay(tmp_path)
+    s.cfg = replace(s.cfg, evidence_asr="nova-sonic")
+    with serve(s) as hub:
+        assert isinstance(hub, Hub)
+        device = hub.pair()
+        p = hub.say(device, "fan on")["pending"][0]
+        ev = hub.voice(device, p, "anything").json()
+    assert heard == [b"anything"] and ev["decision"]["kind"] == "choose" and ev["decision"]["option"] == 1

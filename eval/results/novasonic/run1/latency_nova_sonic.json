@@ -1,0 +1,32 @@
+{
+  "name": "latency_nova_sonic",
+  "generated_at": "2026-10-21T14:44:46+0530",
+  "git_sha": "085a5fc",
+  "python": "3.13.12",
+  "hub": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws",
+  "where": "measured inside the Lambda function (us-east-1)",
+  "asr_engines": [
+    "nova-2-sonic"
+  ],
+  "clips": 20,
+  "failed": 0,
+  "failures": [],
+  "total": {
+    "n": 20,
+    "p50_ms": 1512.6,
+    "p95_ms": 3879.4,
+    "mean_ms": 1902.45
+  },
+  "asr": {
+    "n": 20,
+    "p50_ms": 1469.5,
+    "p95_ms": 3826.4,
+    "mean_ms": 1857.89
+  },
+  "rank": {
+    "n": 20,
+    "p50_ms": 1.2,
+    "p95_ms": 1.8,
+    "mean_ms": 1.33
+  }
+}

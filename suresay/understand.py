@@ -7,6 +7,7 @@ card set in the gate, and only the user's own evidence can release one of them.
 from __future__ import annotations
 
 import json
+import logging
 import time
 from collections import Counter
 from typing import TYPE_CHECKING, Any
@@ -18,6 +19,8 @@ from .rank import Ranked
 
 if TYPE_CHECKING:
     from .app import SureSay
+
+logger = logging.getLogger(__name__)
 
 CONFIRM_WORDS = ["yes", "no", "one", "two", "three", "cancel", "haan", "nahin"]
 
@@ -45,6 +48,7 @@ def understand(app: SureSay, user_id: str, *, transcript: str | None = None, aud
         try:
             heard = app.asr.transcribe(audio, vocabulary=vocabulary(book, extra=CONFIRM_WORDS), user_id=user_id)
         except Exception as exc:  # no recogniser reachable: never a dead end, offer typing
+            logger.warning("speech recognition failed (%s): %s", app.asr.name, exc)
             return {"status": "ask_again", "heard": "", "asr": "unavailable", "ranker": "", "maybe": [],
                     "reason": f"speech recognition is unavailable ({type(exc).__name__})",
                     "timing": {"total_ms": round((time.perf_counter() - t0) * 1000, 1)},

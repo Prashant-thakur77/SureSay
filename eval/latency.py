@@ -157,19 +157,30 @@ def cloud_understand(hub_url: str, runs: int) -> dict[str, Any]:
         return http.request(method, path, content=body or None, headers=h).json()
 
     total, asr_ms, rank_ms, engines = [], [], [], set()
-    _count_spend(len(clips))
+    failures: list[str] = []
     for c in clips:
         out = signed("POST", "/device/turn", {"audio_b64": base64.b64encode((DATA / c["wav"]).read_bytes()).decode()})
         res = out.get("result") or {}
         t = res.get("timing") or {}
+        if res.get("asr") == "unavailable":  # recognition failed: report it, never time it as 0 ms
+            failures.append(str(res.get("reason")))
+            continue
         if "total_ms" in t:
             total.append(t["total_ms"])
             asr_ms.append(t.get("asr_ms", 0.0))
             rank_ms.append(t.get("rank_ms", 0.0))
             engines.add(res.get("asr"))
     signed("POST", "/device/reset", {})
+    if any(str(e).startswith("transcribe") for e in engines):
+        _count_spend(len(total))
+    elif total:  # Nova 2 Sonic in Lambda: its tokens are not reported back here, so count the clips
+        spend = EVAL / "results" / "spend.json"
+        doc = json.loads(spend.read_text())
+        doc["nova_sonic_cloud_clips"] = doc.get("nova_sonic_cloud_clips", 0) + len(total)
+        spend.write_text(json.dumps(doc, indent=1))
     return {"hub": base, "where": "measured inside the Lambda function (us-east-1)", "asr_engines": sorted(engines),
-            "clips": len(total), "total": stats(total), "asr": stats(asr_ms), "rank": stats(rank_ms)}
+            "clips": len(total), "failed": len(failures), "failures": sorted(set(failures)),
+            "total": stats(total), "asr": stats(asr_ms), "rank": stats(rank_ms)}
 
 
 def cloud_mcp_typed(hub_url: str, runs: int) -> dict[str, Any]:
@@ -228,7 +239,18 @@ def main() -> None:
     ap.add_argument("--hub-url", default="", help="deployed hub: time the gate inside AWS")
     ap.add_argument("--runs", type=int, default=RUNS)
     ap.add_argument("--run", default=None)
+    ap.add_argument("--recogniser-only", default="",
+                    help="time only the deployed hub's recogniser (voice turns, measured in Lambda) into "
+                         "results/<run>/latency_<this name>.json; deploy with SURESAY_ASR set to it first")
     args = ap.parse_args()
+    if args.recogniser_only:
+        if not args.hub_url:
+            raise SystemExit("--recogniser-only needs --hub-url")
+        res = cloud_understand(args.hub_url, args.runs)
+        path = write_result(f"latency_{args.recogniser_only.replace('-', '_')}", res, run=args.run)
+        print(f"{res['asr_engines']}: recognition p50 {res['asr']['p50_ms']} ms, p95 {res['asr']['p95_ms']} ms "
+              f"(turn p50 {res['total']['p50_ms']} ms) in Lambda; wrote {path}")
+        return
     out: dict[str, Any] = {"claim": 4, "runs": args.runs}
     with tempfile.TemporaryDirectory() as tmp:
         out["gate_sqlite"] = gate_overhead(SqliteStore(Path(tmp) / "g.db"), args.runs)
