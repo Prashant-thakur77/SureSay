@@ -225,7 +225,7 @@ Cut order if behind: Alexa skill bridge → Polly read-back (browser TTS stays) 
 - [x] P1 confirm-gate-mcp — 217 tests (memory, SQLite, moto); real-DynamoDB race test; standalone `confirm-gate serve` + approval page
 - [x] P2 hub — MCP at /mcp (2025-11-25), signed device channel, actions, state, Polly read-back; 29 end-to-end tests
 - [x] P3 understand — Transcribe streaming/batch + faster-whisper + text; Nova + fuzzy rankers; abstain rule tuned on dev
-- [~] P4 agent — Strands agent + AgentCore app + Memory session written; **blocked**: Bedrock (no model access) and AgentCore quotas = 0. Fallback in use: hub answers turns directly (plan §9)
+- [~] P4 agent — deployed on AgentCore Runtime; phrasebooks in AgentCore Memory (live). Waiting on Nova quota (0 on this account, increases filed); a circuit breaker answers turns directly meanwhile
 - [x] P5 web client — WCAG 2.2 AA, voice/tap/keys/switch, three themes, MCP TS SDK confirm; design pass with consent trail in progress
 - [x] P6 eval — on Amazon Transcribe (dev-tuned) with faster-whisper as a second recogniser; Claims 1–5, learning, cost, store atomicity; Nova arms pending Bedrock
 - [x] P7 infra — deploy.sh/teardown.sh; hub live on Lambda + DynamoDB + S3; AgentCore steps degrade gracefully

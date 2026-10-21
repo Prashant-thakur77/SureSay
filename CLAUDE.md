@@ -28,8 +28,8 @@ SureSay is a voice assistant for people with atypical speech (dysarthria): it sh
 ## Backends
 `SURESAY_BACKEND=local` (SQLite + disk + Whisper/fuzzy) or `aws` (DynamoDB + S3 + Transcribe + Nova + AgentCore Memory). Each service sits behind a small interface, so tests run offline.
 
-## Account status (as of 2026-10-20)
-Bedrock (`NOT_AUTHORIZED`, "Operation not allowed"), Transcribe (`SubscriptionRequiredException`) and AgentCore (quotas "Total Agents per Account" = 0, "Memories" = 0) are blocked pending an AWS Support case. Polly, S3, DynamoDB, Lambda work; the hub is deployed (infra/.state/outputs.env). Re-check with the commands in `docs/FRICTION_LOG.md`. When access opens: `make deploy` (agent + memory), `make eval` (Nova arms fill in), `make report`.
+## Account status (as of 2026-10-21 09:40 IST)
+Live: Transcribe, Polly, S3, DynamoDB, Lambda hub, AgentCore Runtime (`suresay_agent`) and Memory (`suresay_memory`). Bedrock Nova 2 Lite is AUTHORIZED but every on-demand quota is 0; increases requested for the global profile (L-D5F39C2F, L-71C69B70). When approved: set `NOVA_MODEL_ID=global.amazon.nova-2-lite-v1:0`, run `make deploy`, then the Nova eval arms (`run_intent_eval.py --nova on`, `run_safety_suite.py`), then `make report`.
 
 ## Gotchas
 - Two `tests` packages: run them separately (`make test` does).

@@ -368,9 +368,11 @@ def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] |
             "That is the price of the false-accept rate above; tap, keyboard and switch confirmation exist so a "
             "repeat is never a dead end.",
             f"3. **Recogniser biasing did not help confirmations.** {bias_text}",
-            "4. **The model arms are pending.** Bedrock (Nova 2 Lite) and AgentCore Memory/Runtime are blocked on this "
-            "AWS account pending a support case (docs/FRICTION_LOG.md). The Nova ranker and the Nova-agent safety "
-            "arms are implemented and tested against stubs, but no Nova number is reported until they run.",
+            "4. **The model arms are pending.** Nova 2 Lite is authorized on this account but every on-demand quota is "
+            "0 (increase requests filed; docs/FRICTION_LOG.md). The Strands agent is deployed on AgentCore Runtime and "
+            "phrasebooks live in AgentCore Memory, but the agent cannot reason until Nova has quota, so turns fall back "
+            "to direct answers. The Nova ranker and the Nova-agent safety arms are implemented and tested against "
+            "stubs; no Nova number is reported until they run.",
             "5. **Corpus caveats.** TORGO sentences are well-known reading passages that a large recogniser may "
             "have seen in training, and the phrasebooks are sentences rather than short home commands. "
             "Confirmation words are sparse in TORGO (a few per speaker), so per-speaker confirmation numbers rest "
