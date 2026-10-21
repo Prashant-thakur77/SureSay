@@ -73,3 +73,25 @@ def test_device_events_are_tagged_as_device(hub: Hub) -> None:
     hub.signed(device, "POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]})
     kinds = {e["type"]: e["caller"] for e in hub.s.events if e.get("pending_id") == p["pending_id"]}
     assert kinds["evidence"].startswith("device") and kinds["done"].startswith("device")
+
+
+class StubPolly:
+    def __init__(self) -> None:
+        self.calls: list[dict[str, Any]] = []
+
+    def synthesize_speech(self, **kw: Any) -> dict[str, Any]:
+        import io
+
+        self.calls.append(kw)
+        return {"AudioStream": io.BytesIO(b"ID3")}
+
+
+def test_hindi_text_is_read_in_hindi(tmp_path: Any) -> None:
+    from suresay.speech import Speaker
+
+    polly = StubPolly()
+    sp = Speaker(tmp_path, client=polly)
+    sp.synth("मुझे पानी चाहिए")
+    sp.synth("I am thirsty.")
+    assert polly.calls[0]["LanguageCode"] == "hi-IN" and polly.calls[1]["LanguageCode"] == "en-IN"
+    assert all(c["VoiceId"] == "Kajal" for c in polly.calls)

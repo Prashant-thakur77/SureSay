@@ -32,12 +32,14 @@ class Speaker:
         text = " ".join((text or "").split())[:1500]
         if not text:
             raise ValueError("nothing to say")
-        key = hashlib.sha256(f"{self.voice}|{self.language}|{text}".encode()).hexdigest()[:32]
+        # Kajal is bilingual: Devanagari text is read as Hindi, everything else in the configured language.
+        lang = "hi-IN" if any("\u0900" <= ch <= "\u097f" for ch in text) and self.voice == "Kajal" else self.language
+        key = hashlib.sha256(f"{self.voice}|{lang}|{text}".encode()).hexdigest()[:32]
         path = self.cache / f"{key}.mp3"
         if path.exists():
             return path.read_bytes()
         resp = self._polly().synthesize_speech(Text=text, VoiceId=self.voice, Engine="neural",
-                                               LanguageCode=self.language, OutputFormat="mp3", SampleRate="24000")
+                                               LanguageCode=lang, OutputFormat="mp3", SampleRate="24000")
         audio = resp["AudioStream"].read()
         self.chars += len(text)
         path.write_bytes(audio)
