@@ -7,7 +7,8 @@ signed with this skill's device key, as transcript evidence -> the gate decides 
 The skill holds a device key (it is a paired device, like the browser), so it can see a card set's nonce;
 the assistant on the hub never can. Standard library only, so it deploys as this one file.
 
-Environment: SURESAY_HUB_URL, SURESAY_DEVICE_ID, SURESAY_DEVICE_KEY (from ``python alexa_skill/pair.py``).
+Environment: SURESAY_HUB_URL, SURESAY_DEVICE_ID, SURESAY_DEVICE_KEY (from ``python alexa_skill/pair.py``), and
+SURESAY_ALEXA_SKILL_ID (the skill's application id; when set, requests from any other skill are refused).
 """
 
 from __future__ import annotations
@@ -76,16 +77,28 @@ def read_cards(p: dict[str, Any]) -> str:
     return f"{lead}Did you mean... {parts} Say a number, or no."
 
 
-def _open(hub: Hub, attrs: dict[str, Any]) -> dict[str, Any] | None:
+def _open(hub: Hub, attrs: dict[str, Any]) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
+    """The set Alexa read out in this session, if it is still open (never any other), and all open sets."""
     pid = attrs.get("pending_id")
     sets = hub.call("GET", "/device/pending").get("pending", [])
-    return next((p for p in sets if p["pending_id"] == pid), None) or (sets[0] if sets else None)
+    return next((p for p in sets if pid and p["pending_id"] == pid), None), sets
+
+
+def _read_waiting(sets: list[dict[str, Any]], lead: str) -> dict[str, Any]:
+    """Nothing the user heard is open. Read the newest waiting set (so a later answer is to words they heard)."""
+    if not sets:
+        return say(f"{lead}What would you like?", reprompt="What would you like?")
+    p = sets[-1]
+    return say(f"{lead}Here's what's waiting. {read_cards(p)}", reprompt="Say a number, or no.",
+               attrs={"pending_id": p["pending_id"]})
 
 
 def answer(hub: Hub, attrs: dict[str, Any], words: str) -> dict[str, Any]:
-    p = _open(hub, attrs)
+    p, sets = _open(hub, attrs)
     if p is None:
-        return say("There's nothing waiting for an answer. What would you like?", reprompt="What would you like?")
+        if attrs.get("pending_id"):
+            return _read_waiting(sets, "That question has closed, so nothing was changed. ")
+        return _read_waiting(sets, "There's nothing waiting for an answer. " if not sets else "")
     ev = hub.call("POST", "/device/evidence", {"pending_id": p["pending_id"], "nonce": p["nonce"], "kind": "transcript",
                                                 "transcript": words, "source": "alexa"})
     if "error" in ev:
@@ -124,8 +137,8 @@ def handle(event: dict[str, Any], hub: Hub | None = None) -> dict[str, Any]:
         if "error" in turn:
             return say(f"Sorry, {turn['error']}.", end=True)
         result = turn.get("result") or {}
-        if turn.get("pending"):
-            p = next((x for x in turn["pending"] if x["pending_id"] == result.get("pending_id")), turn["pending"][-1])
+        p = next((x for x in turn.get("pending") or [] if x["pending_id"] == result.get("pending_id")), None)
+        if p:  # only the set this turn opened: an older one was never read out here
             return say(read_cards(p), reprompt="Say a number, or no.", attrs={"pending_id": p["pending_id"]})
         return say(turn.get("reply") or "Sorry, please say it again.", reprompt="What would you like?")
     if name == "ChooseIntent":
@@ -143,12 +156,21 @@ def handle(event: dict[str, Any], hub: Hub | None = None) -> dict[str, Any]:
         return say("Say what you'd like, for example: turn on the fan. I'll offer my best guesses, and nothing "
                    "happens until you choose one by number.", reprompt="What would you like?")
     if attrs.get("pending_id"):  # Fallback while cards are open: never guess
-        p = _open(hub, attrs)
+        p, _ = _open(hub, attrs)
         if p:
             return say(f"Sorry, I didn't catch that. {read_cards(p)}", reprompt="Say a number, or no.", attrs=attrs)
     return say("Sorry, I didn't catch that. Please say it again.", reprompt="What would you like?")
 
 
+def _application_id(event: dict[str, Any]) -> str:
+    app = ((event.get("context") or {}).get("System") or {}).get("application") \
+        or (event.get("session") or {}).get("application") or {}
+    return str(app.get("applicationId") or "")
+
+
 def lambda_handler(event: dict[str, Any], context: Any = None) -> dict[str, Any]:
     logger.info("request %s", event.get("request", {}).get("type"))
+    expected = os.environ.get("SURESAY_ALEXA_SKILL_ID")
+    if expected and _application_id(event) != expected:  # only our skill may drive this device
+        raise PermissionError("request is not from the SureSay skill")
     return handle(event)

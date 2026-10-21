@@ -190,8 +190,10 @@ if [ -z "${SKIP_ALEXA:-}" ]; then
     chmod 600 "$STATE/alexa_device.env"
   fi
   AENV="$("$PY" - "$STATE/alexa_device.env" <<'PYEOF'
-import json, sys
+import json, os, sys
 pairs = dict(l.strip().split("=", 1) for l in open(sys.argv[1]) if "=" in l)
+if os.environ.get("ALEXA_SKILL_ID"):
+    pairs["SURESAY_ALEXA_SKILL_ID"] = os.environ["ALEXA_SKILL_ID"]
 print(json.dumps({"Variables": pairs}))
 PYEOF
 )"
@@ -207,8 +209,19 @@ PYEOF
     aws lambda update-function-configuration --function-name suresay-alexa-skill --environment "$AENV" >/dev/null
     aws lambda wait function-updated-v2 --function-name suresay-alexa-skill
   fi
+  if [ -n "${ALEXA_SKILL_ID:-}" ]; then  # the Alexa Skills Kit trigger, for our skill only
+    aws lambda add-permission --function-name suresay-alexa-skill --statement-id alexa-skill \
+      --action lambda:InvokeFunction --principal alexa-appkit.amazon.com --event-source-token "$ALEXA_SKILL_ID" \
+      >/dev/null 2>&1 || true
+  fi
+  "$PY" - infra/alexa_events/command.json "$STATE/alexa_event.json" <<'PYEOF'
+import json, os, sys
+ev = json.load(open(sys.argv[1]))
+ev.setdefault("context", {}).setdefault("System", {})["application"] = {"applicationId": os.environ.get("ALEXA_SKILL_ID", "")}
+json.dump(ev, open(sys.argv[2], "w"))
+PYEOF
   aws lambda invoke --function-name suresay-alexa-skill --cli-binary-format raw-in-base64-out \
-    --payload file://infra/alexa_events/command.json "$STATE/alexa_test.json" >/dev/null
+    --payload "file://$STATE/alexa_event.json" "$STATE/alexa_test.json" >/dev/null
   echo "skill test: $("$PY" -c "import json,sys; print(json.load(open(sys.argv[1]))['response']['outputSpeech']['ssml'][:140])" "$STATE/alexa_test.json")"
   echo "Alexa skill endpoint ARN: $(aws lambda get-function --function-name suresay-alexa-skill --query Configuration.FunctionArn --output text)"
 fi

@@ -66,3 +66,43 @@ def test_a_number_that_is_not_a_card_is_refused(alexa: Any, hub: Hub) -> None:
     out = alexa.handle(intent("ChooseIntent", r["sessionAttributes"], number="7"))
     assert "Say a number" in speech(out)
     assert hub.s.home.get("demo")["version"] == 0
+
+
+def test_an_answer_never_lands_on_a_set_the_user_did_not_hear(alexa: Any, hub: Hub) -> None:
+    """Second review, finding 2: when the set Alexa read had closed, the answer went to whatever set was open."""
+    heard = alexa.handle(intent("CommandIntent", utterance="fan on"))
+    web = hub.pair()
+    first = hub.s.gate.device_pending(web)[0]
+    hub.tap(web, first, 0)  # answered "no" on the screen meanwhile  # noqa: ERA001
+    hub.signed(web, "POST", "/device/reset", {})
+    other = hub.say(web, "lights on")["pending"][0]
+    out = alexa.handle(intent("ChooseIntent", heard["sessionAttributes"], ordinal="first"))
+    assert "closed" in speech(out) and "Done" not in speech(out)
+    assert hub.s.home.get("demo")["version"] == 0
+    assert any(p["pending_id"] == other["pending_id"] for p in hub.s.gate.device_pending(web))
+    assert out["sessionAttributes"].get("pending_id") == other["pending_id"]  # it was read out, so now it may be answered
+
+
+def test_a_one_shot_yes_reads_the_question_instead_of_answering_it(alexa: Any, hub: Hub) -> None:
+    hub.s.gate.propose("demo", [("home_set", {"device": "fan", "on": True})], origin="assistant")
+    out = alexa.handle(intent("AMAZON.YesIntent"))
+    assert "Turn on the bedroom fan" in speech(out) and "Done" not in speech(out)
+    assert hub.s.home.status("demo")["devices"]["fan"]["on"] is False
+    done = alexa.handle(intent("AMAZON.YesIntent", out["sessionAttributes"]))
+    assert "Done" in speech(done) and hub.s.home.status("demo")["devices"]["fan"]["on"] is True
+
+
+def test_command_reads_only_the_set_its_own_turn_opened(alexa: Any, hub: Hub, monkeypatch: pytest.MonkeyPatch) -> None:
+    hub.s.gate.propose("demo", [("message_contact", {"contact_id": "ravi", "text": "buy milk"})], origin="assistant")
+    r = alexa.handle(intent("CommandIntent", utterance="what time is it"))  # no new set from this turn
+    assert "milk" not in speech(r).lower() and "pending_id" not in r["sessionAttributes"]
+
+
+def test_requests_from_another_skill_are_refused(alexa: Any, hub: Hub, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("SURESAY_ALEXA_SKILL_ID", "amzn1.ask.skill.ours")
+    ev = intent("CommandIntent", utterance="fan on")
+    ev["context"] = {"System": {"application": {"applicationId": "amzn1.ask.skill.someone-else"}}}
+    with pytest.raises(PermissionError):
+        alexa.lambda_handler(ev)
+    ev["context"]["System"]["application"]["applicationId"] = "amzn1.ask.skill.ours"
+    assert "Turn on the bedroom fan" in speech(alexa.lambda_handler(ev))

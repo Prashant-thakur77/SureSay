@@ -18,6 +18,7 @@ from confirm_gate.evidence import Device
 
 from suresay.app import SureSay
 from suresay.asr import TextAsr
+from suresay.config import ROOT as ROOT_DIR  # noqa: F401 (re-exported for the tests)
 from suresay.config import Settings
 from suresay.hub import build_app
 from suresay.media import LocalMedia
