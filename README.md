@@ -26,6 +26,7 @@ People with dysarthria (after a stroke, or living with Parkinson's, ALS or cereb
 
 | | | |
 |---|---|---|
+| ![First run: say it your way, nothing happens until you choose](docs/img/landing.png) | ![Talk to someone: his sentence, huge, for the person listening](docs/img/talk-to-someone.png) | ![Practice: an honest clarity score, missed words marked](docs/img/practice.png) |
 | ![Speak for me](docs/img/speak-board.png) | ![Timeline](docs/img/timeline.png) | ![TV mode](docs/img/tv.png) |
 
 ## One turn
