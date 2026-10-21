@@ -51,3 +51,8 @@ smoke:            ## End-to-end check of the deployed hub
 
 lint:
 	.venv/bin/ruff check suresay mcp_server strands_agent eval infra packages/confirm-gate-mcp/src
+
+oss-sync:         ## Publish packages/confirm-gate-mcp to its own repository (history preserved)
+	git branch -D oss-split 2>/dev/null || true
+	git subtree split --prefix=packages/confirm-gate-mcp -b oss-split
+	git push https://github.com/Prashant-thakur77/confirm-gate-mcp.git oss-split:main
