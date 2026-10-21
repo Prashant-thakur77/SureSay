@@ -62,9 +62,13 @@ class McpAuth:
         caller = ""
         body = b""
         replay = False
-        if auth.startswith("Bearer ") and hmac.compare_digest(auth[7:].strip(), self.s.cfg.agent_token):
+        bearer = auth[7:].strip() if auth.startswith("Bearer ") else ""
+        linked = self.s.oauth.user_for(bearer) if bearer else None
+        if bearer and hmac.compare_digest(bearer, self.s.cfg.agent_token):
             user = headers.get("x-suresay-user") or self.s.cfg.default_user
             caller = "agent"
+        elif linked is not None:
+            user, caller = linked[0], f"linked:{linked[1]}"  # e.g. Alexa+ after account linking: agent powers only
         elif "x-signature" in headers:
             chunks = []
             more = True
@@ -304,6 +308,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
                              "turn_mode": bridge._mode or "not yet decided"})
 
     routes += [Route("/healthz", healthz), Route("/api/info", info)]
+    routes += s.oauth.routes()
     dist = ROOT / "web" / "dist"
     if dist.exists():
         routes.append(Mount("/", app=StaticFiles(directory=dist, html=True), name="web"))

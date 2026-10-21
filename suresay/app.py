@@ -84,6 +84,10 @@ class SureSay:
         self.gated = GatedServer(self.mcp, store=store, clock=clock, user=self.user, on_event=self._on_event)
         self.gate = self.gated.gate
         self.devices = self.gated.devices
+        from .oauth import OAuth
+
+        self.oauth = OAuth(store, self.devices, public_url=self.cfg.public_url, clock=clock)
+        self.oauth.register_from_env(self.cfg.oauth_clients)
         from mcp_server.server import register_tools
 
         register_tools(self)

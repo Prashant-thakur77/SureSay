@@ -40,7 +40,8 @@ class Settings:
     )
     evidence_language: str = field(default_factory=lambda: _env("SURESAY_EVIDENCE_LANGUAGE", "en-US"))  # hi-IN for Hindi
     learn: bool = field(default_factory=lambda: _env("SURESAY_LEARN", "1") not in ("0", "false", "no"))
-    public_url: str = field(default_factory=lambda: _env("SURESAY_PUBLIC_URL", "http://127.0.0.1:9000"))
+    public_url: str = field(default_factory=lambda: _env("SURESAY_PUBLIC_URL"))  # "" = derive from the request
+    oauth_clients: str = field(default_factory=lambda: _env("SURESAY_OAUTH_CLIENTS"))  # JSON, see suresay/oauth.py
 
     @property
     def is_aws(self) -> bool:
