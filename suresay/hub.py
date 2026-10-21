@@ -110,6 +110,23 @@ class McpAuth:
             current_caller.reset(tc)
 
 
+class DeviceCallerTag:
+    """Requests on /device/* come from a user's device: tag the caller kind for events and metrics."""
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] == "http" and scope["path"].startswith("/device/"):
+            token = current_caller.set("device")
+            try:
+                await self.app(scope, receive, send)
+            finally:
+                current_caller.reset(token)
+            return
+        await self.app(scope, receive, send)
+
+
 def _signed(handler: Any, s: SureSay) -> Any:
     async def wrapped(request: Request) -> Response:
         try:
@@ -415,6 +432,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
         routes.append(Mount("/", app=StaticFiles(directory=dist, html=True), name="web"))
     app.router.routes.extend(routes)
     app.add_middleware(McpAuth, suresay=s)
+    app.add_middleware(DeviceCallerTag)
     # Device and MCP auth are header signatures/tokens, never cookies, so "*" is safe when a screen app needs it.
     app.add_middleware(
         CORSMiddleware, allow_origins=["*"] if "*" in s.cfg.allowed_origins else list(s.cfg.allowed_origins), allow_methods=["GET", "POST", "DELETE", "OPTIONS"],

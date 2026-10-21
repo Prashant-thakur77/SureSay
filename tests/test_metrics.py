@@ -64,3 +64,12 @@ def test_carer_is_alerted_for_high_risk_confirmations_only(hub: Hub) -> None:
     assert len(sns.published) == 1
     msg = sns.published[0]["Message"]
     assert "Unlock the front door" in msg and "their voice" in msg and final["nonce"] not in msg
+
+
+def test_device_events_are_tagged_as_device(hub: Hub) -> None:
+    device = hub.pair()
+    p = hub.say(device, "fan on")["pending"][0]
+    ev = hub.tap(device, p, 1).json()
+    hub.signed(device, "POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]})
+    kinds = {e["type"]: e["caller"] for e in hub.s.events if e.get("pending_id") == p["pending_id"]}
+    assert kinds["evidence"].startswith("device") and kinds["done"].startswith("device")
