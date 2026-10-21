@@ -44,6 +44,7 @@ export function receipt(): Receipt {
 export function hubState(pending: PendingSet[]): HubState {
   return {
     user_id: "demo",
+    stats: { confirmed: 4, refused: 2, refused_from_assistant: 1, cancelled: 1, without_you: 0 },
     home: {
       devices: {
         living_lights: { name: "living room lights", room: "living room", kind: "light", on: false },
@@ -69,7 +70,11 @@ export function hubState(pending: PendingSet[]): HubState {
       { type: "evidence", at: 1800000002, pending_id: "p_y", channel: "tap", decision: { kind: "choose", option: 1, heard: "tap: 1" } },
       { type: "done", at: 1800000003, pending_id: "p_y", text: "Turn on the bedroom fan" },
     ],
-    phrasebook: [{ id: "ph1", phrase: "van on", action: "home_set", args: { device: "fan", on: true } }],
+    phrasebook: [
+      { id: "ph_start00", phrase: "fan on", action: "home_set", args: { device: "fan", on: true } },
+      { id: "ph_start18", phrase: "thank you", action: "say_for_me", args: { text: "Thank you so much." } },
+      { id: "ph_9f1c2a7b3d", phrase: "my fan", action: "home_set", args: { device: "fan", on: true } },
+    ],
     pending,
     spoken: [],
   };
@@ -92,6 +97,23 @@ export function fakeHub(pending: PendingSet[]) {
     }),
     state: vi.fn(async () => hubState(pending)),
     reset: vi.fn(async () => undefined),
+    doorbell: vi.fn(async (visitor: string) => ({
+      say: "Someone's at the door. Ravi, your carer, is at the front door with your shopping.",
+      pending: cardSet({
+        pending_id: "p_door",
+        origin: "doorbell",
+        options: [
+          { n: 1, text: "Unlock the front door", action: "door_lock", args: { locked: false }, risk: "high" },
+          { n: 2, text: "Tell them at the door: “I'm coming, please wait.”", action: "doorbell_reply", args: { text: "I'm coming, please wait." }, risk: "low" },
+          { n: 3, text: "Call Ravi", action: "call_contact", args: { contact_id: "ravi" }, risk: "high" },
+        ],
+        context: { heard: "", source: "doorbell (simulated)", visitor: { id: visitor, name: "Ravi", who: "your carer", note: "Ravi, your carer, is at the front door with your shopping." } },
+      }),
+    })),
+    propose: vi.fn(async (action: string, args: Record<string, unknown>): Promise<PendingSet> => {
+      const text = action === "say_for_me" ? `Say out loud: “${String(args.text)}”` : `Remember: “${String(args.phrase)}”`;
+      return cardSet({ pending_id: "p_proposed", options: [{ n: 1, text, action, args, risk: "low" }], context: { heard: "", source: "tapped on device" } });
+    }),
     signingFetch: vi.fn(),
   };
   return hub as typeof hub & HubApi;

@@ -1,7 +1,15 @@
 /** Wire types for the SureSay hub. They mirror the Python server's JSON exactly. */
 
 export type Risk = "low" | "high";
-export type Origin = "user_words" | "assistant";
+export type Origin = "user_words" | "assistant" | "doorbell";
+
+/** Who rang the (simulated) doorbell. */
+export interface Visitor {
+  id: string;
+  name: string;
+  who: string;
+  note: string;
+}
 export type Stage = "choose" | "final";
 
 export interface DeviceCreds {
@@ -36,6 +44,10 @@ export interface PendingSet {
     asr?: string;
     ranker?: string;
     confidence?: Array<number | null>;
+    /** The hub is not sure: these are "maybe" cards, offered after "please say it again". */
+    unsure?: boolean;
+    source?: string;
+    visitor?: Visitor;
   };
 }
 
@@ -98,12 +110,14 @@ export interface Receipt {
   };
   who: { user_id: string; device_id: string };
   when: { proposed_at: string | null; evidence_at: string | null; confirmed_at: string | null; executed_at: string | null };
-  how: { channel: "voice" | "tap"; pending_id: string; nonce_sha256?: string };
+  how: { channel: "voice" | "tap" | "transcript"; pending_id: string; nonce_sha256?: string };
   evidence: {
     transcript?: string | null;
     decision: { kind: DecisionKind; option: number | null; heard: string };
     fingerprint: string;
     media_ref?: string | null;
+    /** Who recognised the words for transcript evidence, e.g. "alexa". */
+    transcriber?: string | null;
   };
   checks: Check[];
   result: unknown;
@@ -151,7 +165,7 @@ export interface GateEvent {
   options?: Array<{ n: number; text: string; action: string; risk: Risk }>;
   decision?: { kind: DecisionKind; option: number | null; heard: string };
   transcript?: string | null;
-  channel?: "voice" | "tap";
+  channel?: "voice" | "tap" | "transcript";
   caller?: string;
   text?: string;
   receipt_id?: string;
@@ -165,8 +179,18 @@ export interface Phrase {
   args: Record<string, unknown>;
 }
 
+export interface HubStats {
+  confirmed: number;
+  refused: number;
+  refused_from_assistant: number;
+  cancelled: number;
+  /** Always 0: every change has a receipt from the user's own device. */
+  without_you: number;
+}
+
 export interface HubState {
   user_id: string;
+  stats?: HubStats;
   home: {
     devices: Record<string, HomeDevice>;
     front_door: "locked" | "unlocked";

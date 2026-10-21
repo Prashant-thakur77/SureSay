@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAnnouncer } from "../hooks/useAnnouncer";
 import { useConversation, type Phase } from "../hooks/useConversation";
 import { useHubState } from "../hooks/useHubState";
+import { useMotionOK } from "../hooks/useMotion";
 import { useRecorder } from "../hooks/useRecorder";
 import { useScan, type ScanItem } from "../hooks/useScan";
 import { tvFromUrl, type Settings } from "../hooks/useSettings";
@@ -9,13 +10,21 @@ import type { HubApi } from "../lib/api";
 import type { ConfirmChannel } from "../lib/mcp";
 import { randomHex } from "../lib/sign.js";
 import type { Speaker } from "../lib/speech";
+import { boardTiles } from "../lib/phrases";
 import type { Phrase } from "../lib/types";
 import { Conversation, type ConversationActions } from "./Conversation";
 import { Icon } from "./Icon";
 import { LiveRegions } from "./LiveRegions";
 import { ScanContext } from "./scan";
 import { SettingsDialog } from "./SettingsDialog";
-import { SidePanel, type McpInfo } from "./SidePanel";
+import { SidePanel, type DoorInfo, type McpInfo } from "./SidePanel";
+import type { VisitorId } from "./Doorbell";
+import { readJson, writeJson } from "../lib/storage";
+import { SpeakBoard } from "./SpeakBoard";
+import { TabList, TabPanel, type TabDef } from "./Tabs";
+import { TeachPanel } from "./TeachPanel";
+import { TimelinePanel } from "./TimelinePanel";
+import { TRY_EXAMPLES } from "./TryChips";
 import { TopBar } from "./TopBar";
 
 interface Props {
@@ -29,12 +38,28 @@ interface Props {
   pollMs?: number;
 }
 
+export type TabId = "talk" | "speak" | "timeline" | "teach";
+
+const TABS: TabDef<TabId>[] = [
+  { id: "talk", label: "Talk", icon: "mic" },
+  { id: "speak", label: "Speak for me", icon: "speech" },
+  { id: "timeline", label: "Timeline", icon: "clock" },
+  { id: "teach", label: "Teach", icon: "book" },
+];
+
 function scanItems(phase: Phase, a: ConversationActions, phrasebook: Phrase[]): ScanItem[] {
   const mic: ScanItem = { id: "mic", label: "Microphone", activate: a.toggleMic };
   switch (phase.kind) {
     case "cards":
       if (phase.answer === "listening") return [{ id: "mic", label: "Stop listening", activate: a.toggleMic }];
-      if (phase.set.stage === "final") {
+      if (phase.set.context?.unsure) {
+        return [
+          { id: "again", label: "Say it again", activate: a.startRequest },
+          ...phase.set.options.map((o) => ({ id: `card-${o.n}`, label: `Maybe ${o.n}: ${o.text}`, activate: () => a.choose(o.n) })),
+          { id: "none", label: "None of these", activate: a.none },
+        ];
+      }
+      if (phase.set.stage === "final" || phase.set.options.length === 1) {
         return [
           { id: "yes", label: `Yes: ${phase.set.options[0]?.text ?? ""}`, activate: a.yes },
           { id: "no", label: "No", activate: a.none },
@@ -66,6 +91,8 @@ function scanItems(phase: Phase, a: ConversationActions, phrasebook: Phrase[]): 
       return [];
     case "listening":
       return [{ id: "mic", label: "Stop listening", activate: a.toggleMic }];
+    case "idle":
+      return [mic, ...TRY_EXAMPLES.map((t, i) => ({ id: `try-${i}`, label: `Try: ${t.text}`, activate: () => a.sendText(t.text) }))];
     default:
       return [mic];
   }
@@ -77,6 +104,11 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
   const recorder = useRecorder();
   const sessionId = useMemo(() => `s_${randomHex(8)}`, []);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [tab, setTab] = useState<TabId>("talk");
+  const tabRef = useRef<TabId>("talk");
+  tabRef.current = tab;
+  const [sideOpen, setSideOpen] = useState(false);
+  const motion = useMotionOK(settings.calm);
   const [speaking, setSpeaking] = useState(false);
   useEffect(() => {
     speaker.onSpeaking = setSpeaking;
@@ -121,6 +153,44 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
     adoptPending(state?.pending);
   }, [state?.pending, adoptPending]);
 
+  // any new card set is answered on the Talk tab
+  const openSetId = phase.kind === "cards" ? phase.set.pending_id : "";
+  useEffect(() => {
+    if (openSetId) setTab("talk");
+  }, [openSetId]);
+
+  // the last visitor is remembered on this device (the hub's state has no doorbell history)
+  const [lastVisitor, setLastVisitor] = useState<DoorInfo["visitor"]>(() => readJson<DoorInfo["visitor"]>("suresay.doorbell") ?? undefined);
+  const visitorName = phase.kind === "cards" ? phase.set.context?.visitor?.name : undefined;
+  useEffect(() => {
+    if (!openSetId || !visitorName) return;
+    const v = { name: visitorName, at: Date.now() / 1000 };
+    setLastVisitor(v);
+    writeJson("suresay.doorbell", v);
+  }, [openSetId, visitorName]);
+  const lastReply = state?.receipts.find((r) => r.what.action === "doorbell_reply");
+  const door: DoorInfo = {
+    visitor: lastVisitor,
+    reply: lastReply
+      ? { text: String((lastReply.result as { said_at_door?: unknown } | null)?.said_at_door ?? lastReply.what.args.text ?? ""), at: lastReply.when.executed_at }
+      : undefined,
+  };
+  const ring = useCallback(
+    (id: VisitorId) => {
+      setTab("talk");
+      void conv.ring(id);
+    },
+    [conv],
+  );
+
+  const proposeFromTab = useCallback(
+    (action: string, args: Record<string, unknown>) => {
+      setTab("talk");
+      void conv.propose(action, args);
+    },
+    [conv],
+  );
+
   const actions: ConversationActions = {
     toggleMic: conv.toggleMic,
     startRequest: () => void conv.startRequest(),
@@ -138,7 +208,14 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
   actionsRef.current = actions;
 
   const phrasebook = state?.phrasebook ?? [];
-  const items = settingsOpen ? [] : scanItems(phase, actions, phrasebook);
+  const tabItems: ScanItem[] = TABS.filter((t) => t.id !== tab).map((t) => ({ id: `tab-${t.id}`, label: `${t.label} tab`, activate: () => setTab(t.id) }));
+  const items: ScanItem[] = settingsOpen
+    ? []
+    : tab === "talk"
+      ? scanItems(phase, actions, phrasebook)
+      : tab === "speak"
+        ? [...boardTiles(phrasebook).map((t) => ({ id: `tile-${t.key}`, label: `Say: ${t.title}`, activate: () => proposeFromTab("say_for_me", { text: t.text }) })), ...tabItems]
+        : tabItems;
   const onHighlight = useCallback((label: string) => label && announce(label, "polite"), [announce]);
   const highlighted = useScan(items, settings.scan, settings.scanSpeed, onHighlight);
 
@@ -150,6 +227,7 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
       if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
       const a = actionsRef.current;
       const p = phaseRef.current;
+      if (tabRef.current !== "talk" || target?.closest("[role='tab']")) return;
       if (e.key === " ") {
         if (target?.closest("button, a, summary, [role='button']")) return;
         e.preventDefault();
@@ -171,7 +249,7 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
         a.none();
         return;
       }
-      if (p.set.stage === "final" && key === "y") {
+      if ((p.set.stage === "final" || p.set.options.length === 1) && key === "y") {
         e.preventDefault();
         a.yes();
       }
@@ -199,7 +277,14 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
     <ScanContext.Provider value={highlighted}>
       <div className={`app${settings.scan ? " app--scan" : ""}`}>
         <div className="app__shell" ref={shellRef}>
-          <TopBar ref={settingsBtn} user={state?.user_id ?? hub.creds.user_id} mcp={mcp} onSettings={() => setSettingsOpen(true)} />
+          {recorder.mic === "recording" && <div className="listen-bar" aria-hidden="true" />}
+          <TopBar
+            ref={settingsBtn}
+            user={state?.user_id ?? hub.creds.user_id}
+            mcp={mcp}
+            onSettings={() => setSettingsOpen(true)}
+            sideToggle={bigScreen ? { open: sideOpen, onToggle: () => setSideOpen((o) => !o) } : undefined}
+          />
           {connection !== "ok" && (
             <div className={`banner ${connection === "unpaired" ? "banner--warn" : ""}`} role="status" data-scan-exempt>
               <Icon name="alert" size={24} />
@@ -215,8 +300,10 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
               )}
             </div>
           )}
-          <div className="layout">
-            <main id="main" className="stage" tabIndex={-1} aria-label="Conversation">
+          <div className={`layout${bigScreen && !sideOpen ? " layout--solo" : ""}`}>
+            <main id="main" className="stage" tabIndex={-1} aria-label="SureSay">
+              <TabList tabs={TABS} active={tab} onChange={setTab} label="SureSay" />
+              <TabPanel id="talk" active={tab === "talk"}>
               <Conversation
                 phase={phase}
                 actions={actions}
@@ -228,14 +315,26 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
                 announce={(m) => announce(m, "polite")}
                 speaking={speaking}
                 history={!state || state.receipts.length > 0 || state.events.length > 0}
+                motion={motion}
+                onBackToBoard={() => setTab("speak")}
               />
+              </TabPanel>
+              <TabPanel id="speak" active={tab === "speak"}>
+                <SpeakBoard phrasebook={phrasebook} busy={phase.kind === "thinking"} onSay={(text) => proposeFromTab("say_for_me", { text })} />
+              </TabPanel>
+              <TabPanel id="timeline" active={tab === "timeline"}>
+                <TimelinePanel state={state} />
+              </TabPanel>
+              <TabPanel id="teach" active={tab === "teach"}>
+                <TeachPanel phrasebook={phrasebook} busy={phase.kind === "thinking"} onTeach={(phrase, action, args) => proposeFromTab("phrasebook_add", { phrase, action, args })} />
+              </TabPanel>
               {settings.scan && (
                 <p className="scan-note">
                   <Icon name="list" size={22} /> Scanning is on. Press any key or click to pick the highlighted item.
                 </p>
               )}
             </main>
-            <SidePanel state={state} debug={conv.debug} mcp={mcp} />
+            <SidePanel state={state} debug={conv.debug} mcp={mcp} hidden={bigScreen && !sideOpen} door={door} onRing={ring} />
           </div>
         </div>
         <SettingsDialog
@@ -246,6 +345,7 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
           onClose={closeSettings}
           onResetHome={resetHome}
           onUnpair={onUnpair}
+          onRing={ring}
         />
         <LiveRegions assertive={assertive} polite={polite} />
       </div>

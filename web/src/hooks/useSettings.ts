@@ -15,6 +15,8 @@ export interface Settings {
   bigScreen: boolean;
   /** No animation at all, whatever the device says. */
   calm: boolean;
+  /** Small sounds, like the chime when something is done. */
+  sounds: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -26,6 +28,7 @@ export const DEFAULT_SETTINGS: Settings = {
   scanSpeed: 2,
   bigScreen: false,
   calm: false,
+  sounds: true,
 };
 
 const SCALES: TextScale[] = [1, 1.25, 1.5, 2];
@@ -44,6 +47,7 @@ function load(): Settings {
     scanSpeed: SPEEDS.includes(s.scanSpeed) ? s.scanSpeed : 2,
     bigScreen: s.bigScreen === true,
     calm: s.calm === true,
+    sounds: s.sounds !== false,
   };
 }
 

@@ -1,6 +1,7 @@
 import { forwardRef, type CSSProperties } from "react";
 import { Icon } from "./Icon";
 import { useScanMark } from "./scan";
+import { VoiceRibbon } from "./VoiceRibbon";
 
 export type MicMode = "request" | "answer" | "listening" | "busy";
 
@@ -11,6 +12,8 @@ interface Props {
   answerKind?: "number" | "yesno";
   speaking?: boolean;
   disabled?: boolean;
+  /** Animation allowed: draws the live voice ribbon while listening. */
+  motion?: boolean;
 }
 
 const LABELS: Record<MicMode, { title: string; hint: string }> = {
@@ -29,7 +32,7 @@ const RINGS = [1, 2, 3, 4];
  * speaks. The rings are decoration; the level is also a labelled meter.
  */
 export const MicButton = forwardRef<HTMLButtonElement, Props>(function MicButton(
-  { mode, level, onToggle, answerKind = "number", speaking = false, disabled },
+  { mode, level, onToggle, answerKind = "number", speaking = false, disabled, motion = true },
   ref,
 ) {
   const scan = useScanMark("mic");
@@ -43,6 +46,7 @@ export const MicButton = forwardRef<HTMLButtonElement, Props>(function MicButton
   return (
     <div className="mic-wrap">
       <div className={`orb orb--${orbState}`} style={{ "--level": listening ? meter.toFixed(3) : 0 } as CSSProperties}>
+        <span className="orb__glow" aria-hidden="true" />
         {RINGS.map((r) => (
           <span key={r} className="orb__ring" style={{ "--r": r } as CSSProperties} aria-hidden="true" />
         ))}
@@ -66,6 +70,7 @@ export const MicButton = forwardRef<HTMLButtonElement, Props>(function MicButton
       <p id="mic-hint" className="mic__hint">
         {hint} <span className="kbd-hint">Or press Space.</span>
       </p>
+      <VoiceRibbon level={level} active={listening && motion} />
       {listening && (
         <div className="meter" role="meter" aria-label="Voice level" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(meter * 100)}>
           <span className="meter__fill" style={{ width: `${Math.round(meter * 100)}%` }} />

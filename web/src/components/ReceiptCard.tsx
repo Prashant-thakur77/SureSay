@@ -38,6 +38,28 @@ export function Checks({ receipt }: { receipt: Receipt }) {
   );
 }
 
+const BURST = Array.from({ length: 14 }, (_, i) => ({
+  angle: (360 / 14) * i + (i % 2 ? 9 : -4),
+  dist: 54 + ((i * 37) % 26),
+  hue: i % 4,
+  size: 6 + ((i * 5) % 5),
+}));
+
+/** A burst of dots out of the stamp (decorative; none at all without motion). */
+function Burst() {
+  return (
+    <span className="burst" aria-hidden="true">
+      {BURST.map((b, i) => (
+        <span
+          key={i}
+          className={`burst__dot burst__dot--${b.hue}`}
+          style={{ "--a": `${b.angle}deg`, "--d": `${b.dist}px`, "--s": `${b.size}px`, "--k": i } as CSSProperties}
+        />
+      ))}
+    </span>
+  );
+}
+
 /** A small round "CONFIRMED BY YOU" stamp. Decorative: the same words are in the text. */
 function Stamp() {
   const id = useId().replace(/:/g, "");
@@ -141,7 +163,10 @@ export const ReceiptCard = forwardRef<HTMLHeadingElement, Props>(function Receip
               </dd>
             </div>
           </dl>
-          <Stamp />
+          <span className="stamp-wrap">
+            <Burst />
+            <Stamp />
+          </span>
         </div>
       </article>
       </div>

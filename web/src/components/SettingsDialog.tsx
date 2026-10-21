@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 import type { ScanSpeed, Settings, TextScale, ThemeChoice } from "../hooks/useSettings";
+import { DoorbellMenu, type VisitorId } from "./Doorbell";
 import { Icon } from "./Icon";
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
   onClose: () => void;
   onResetHome: () => Promise<void>;
   onUnpair: () => void;
+  onRing?: (id: VisitorId) => void;
 }
 
 function Choice<T extends string | number>({ legend, name, value, options, onChange }: { legend: string; name: string; value: T; options: Array<{ value: T; label: string }>; onChange: (v: T) => void }) {
@@ -48,7 +50,7 @@ function Toggle({ label, hint, checked, onChange, disabled }: { label: string; h
 }
 
 /** Settings: an accessible modal. Tab stays inside, Escape closes, focus returns to the Settings button. */
-export function SettingsDialog({ open, settings, tvFromUrl, onChange, onClose, onResetHome, onUnpair }: Props) {
+export function SettingsDialog({ open, settings, tvFromUrl, onChange, onClose, onResetHome, onUnpair, onRing }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState("");
   const [confirmUnpair, setConfirmUnpair] = useState(false);
@@ -104,6 +106,12 @@ export function SettingsDialog({ open, settings, tvFromUrl, onChange, onClose, o
             <legend>Speech</legend>
             <Toggle label="Read aloud" hint="Read the cards and results out loud." checked={settings.readAloud} onChange={(v) => onChange({ readAloud: v })} />
             <Toggle label="Answer by voice automatically" hint="After the cards are read, listen for your answer." checked={settings.autoVoice} onChange={(v) => onChange({ autoVoice: v })} />
+            <Toggle
+              label="Sound effects"
+              hint="A soft chime when something is done. It stays quiet when read-aloud is off or Calm mode is on."
+              checked={settings.sounds}
+              onChange={(v) => onChange({ sounds: v })}
+            />
           </fieldset>
           <fieldset className="choice">
             <legend>Motion</legend>
@@ -132,8 +140,8 @@ export function SettingsDialog({ open, settings, tvFromUrl, onChange, onClose, o
               />
             )}
             <Toggle
-              label="Big screen (10-foot) layout"
-              hint={tvFromUrl ? "On because the address has ?tv=1." : "Three cards side by side, for a TV."}
+              label="Big screen (TV)"
+              hint={tvFromUrl ? "On because the address has ?tv=1." : "A 10-foot layout: three big cards side by side, arrow keys and Enter."}
               checked={settings.bigScreen || tvFromUrl}
               disabled={tvFromUrl}
               onChange={(v) => onChange({ bigScreen: v })}
@@ -145,6 +153,15 @@ export function SettingsDialog({ open, settings, tvFromUrl, onChange, onClose, o
               <button type="button" className="btn btn--secondary" onClick={() => void reset()}>
                 <Icon name="refresh" size={24} /> Reset demo home
               </button>
+              {onRing && (
+                <DoorbellMenu
+                  label="Doorbell (demo)"
+                  onRing={(id) => {
+                    onClose();
+                    onRing(id);
+                  }}
+                />
+              )}
               {!confirmUnpair ? (
                 <button type="button" className="btn btn--danger" onClick={() => setConfirmUnpair(true)}>
                   <Icon name="unlock" size={24} /> Unpair this device

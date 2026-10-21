@@ -133,6 +133,12 @@ const PATHS: Record<Name, ReactElement> = {
   ),
   chevron: <path d="M8 10l4 4 4-4" />,
   send: <path d="M3.5 11.5L20.5 4l-6.8 16.5-2.6-6.9z" />,
+  bell: (
+    <>
+      <path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z" />
+      <path d="M10 21a2 2 0 0 0 4 0M12 3v2" />
+    </>
+  ),
   hand: (
     <>
       <path d="M8.5 12.5V5.8a1.5 1.5 0 0 1 3 0v5.7" />

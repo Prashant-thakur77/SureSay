@@ -1,14 +1,22 @@
-import { forwardRef } from "react";
+import { forwardRef, useId } from "react";
 import { Icon } from "./Icon";
 import type { McpInfo } from "./SidePanel";
 
 export function Wordmark({ as: Tag = "h1" }: { as?: "h1" | "p" }) {
+  const gid = `dawn-${useId().replace(/:/g, "")}`;
   return (
     <Tag className="wordmark">
       <span className="wordmark__mark" aria-hidden="true">
         <svg viewBox="0 0 32 32" width="100%" height="100%">
-          <rect x="1" y="1" width="30" height="30" rx="9" fill="currentColor" />
-          <path d="M9 16.5l4.5 4.5L23 11" fill="none" stroke="var(--on-ink)" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+          <defs>
+            <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#FFB547" />
+              <stop offset="0.5" stopColor="#FF6B5A" />
+              <stop offset="1" stopColor="#7B5CFF" />
+            </linearGradient>
+          </defs>
+          <rect className="wordmark__tile" x="1" y="1" width="30" height="30" rx="9" fill={`url(#${gid})`} />
+          <path className="wordmark__tick" d="M9 16.5l4.5 4.5L23 11" fill="none" stroke="#ffffff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
       <span>
@@ -37,9 +45,11 @@ interface Props {
   user: string;
   mcp: McpInfo;
   onSettings: () => void;
+  /** Big-screen mode: the side panel hides behind a "Home" button. */
+  sideToggle?: { open: boolean; onToggle: () => void };
 }
 
-export const TopBar = forwardRef<HTMLButtonElement, Props>(function TopBar({ user, mcp, onSettings }, ref) {
+export const TopBar = forwardRef<HTMLButtonElement, Props>(function TopBar({ user, mcp, onSettings, sideToggle }, ref) {
   return (
     <header className="topbar" data-scan-exempt>
       <a href="#main" className="skip">
@@ -53,6 +63,12 @@ export const TopBar = forwardRef<HTMLButtonElement, Props>(function TopBar({ use
         </span>
         <McpChip mcp={mcp} />
       </div>
+      {sideToggle && (
+        <button type="button" className="btn btn--secondary" aria-expanded={sideToggle.open} aria-controls="side-panel" onClick={sideToggle.onToggle}>
+          <Icon name="home" size={26} />
+          {sideToggle.open ? "Hide home" : "Home"}
+        </button>
+      )}
       <button ref={ref} type="button" className="btn btn--secondary topbar__settings" onClick={onSettings} aria-haspopup="dialog">
         <Icon name="gear" size={26} />
         Settings

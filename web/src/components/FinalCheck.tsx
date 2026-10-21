@@ -14,10 +14,12 @@ interface Props {
   onNo: () => void;
   onExpire: (pendingId: string) => void;
   announce: (msg: string) => void;
+  /** A one-card set (a tapped tile, a phrase to learn): "Is this right?" rather than a second check. */
+  single?: boolean;
 }
 
 /** The second yes for risky actions: one big card and two huge buttons. */
-export function FinalCheck({ set, deadline, busy, devices, onYes, onNo, onExpire, announce }: Props) {
+export function FinalCheck({ set, deadline, busy, devices, onYes, onNo, onExpire, announce, single = false }: Props) {
   const option = set.options[0];
   // focus the question, not YES: a reflex Enter must never confirm a risky action
   const cardRef = useRef<HTMLDivElement>(null);
@@ -33,7 +35,15 @@ export function FinalCheck({ set, deadline, busy, devices, onYes, onNo, onExpire
     <section className="final" aria-labelledby="final-title">
       <div className="cardset__head">
         <h2 id="final-title" className="stage__title display">
-          Please <em>check</em>: this one asks twice
+          {single ? (
+            <>
+              Is this <em>right?</em>
+            </>
+          ) : (
+            <>
+              Please <em>check</em>: this one asks twice
+            </>
+          )}
         </h2>
         <Countdown deadline={deadline} pendingId={set.pending_id} onExpire={onExpire} announce={announce} />
       </div>

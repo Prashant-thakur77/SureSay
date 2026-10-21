@@ -113,12 +113,39 @@ async function main() {
   // 8. the same evidence cannot be used twice
   const again = await client.callTool({ name: "confirm", arguments: { pending_id: set.pending_id, evidence_ref: ev.data.evidence_ref } });
   check(JSON.parse(again.content[0].text).status === "refused", "re-using the evidence is refused");
+
+  // 8b. speak for me: a tapped tile proposes say_for_me; the user still confirms it
+  const proposed = await call("POST", "/device/propose", { action: "say_for_me", args: { text: "Thank you." } });
+  const sayset = proposed.data.pending;
+  check(proposed.status === 200 && sayset?.options?.length === 1 && sayset.origin === "user_words", "POST /device/propose opened a one-card set", sayset?.options?.[0]?.text);
+  const sayEv = await call("POST", "/device/evidence", { pending_id: sayset.pending_id, nonce: sayset.nonce, kind: "tap", option: 1 });
+  check(sayEv.status === 200 && sayEv.data.decision?.kind === "choose", "tap evidence recorded for the spoken sentence");
+  const sayDone = JSON.parse((await client.callTool({ name: "confirm", arguments: { pending_id: sayset.pending_id, evidence_ref: sayEv.data.evidence_ref } })).content[0].text);
+  check(sayDone.status === "done" && sayDone.result?.say === "Thank you.", "MCP confirm returned result.say", JSON.stringify(sayDone.result));
+  check(!JSON.stringify(sayDone).includes(sayset.nonce), "the nonce is not in the say_for_me result");
+  // 8c. the doorbell (simulated): Ravi rings, the user taps the reply card, it is said at the door
+  const bell = await call("POST", "/device/doorbell", { visitor: "ravi" });
+  const door = bell.data.pending;
+  check(bell.status === 200 && door?.origin === "doorbell" && door?.context?.visitor?.id === "ravi", "POST /device/doorbell opened the door's cards", `${door?.options?.length} options · ${bell.data.say}`);
+  const replyCard = door?.options?.find((o) => o.action === "doorbell_reply");
+  const unlockCard = door?.options?.find((o) => o.action === "door_lock" && o.args?.locked === false);
+  check(!!replyCard && unlockCard?.risk === "high", "the door's cards: a reply, and unlock asks twice", replyCard?.text);
+  const doorEv = await call("POST", "/device/evidence", { pending_id: door.pending_id, nonce: door.nonce, kind: "tap", option: replyCard.n });
+  const doorDone = JSON.parse((await client.callTool({ name: "confirm", arguments: { pending_id: door.pending_id, evidence_ref: doorEv.data.evidence_ref } })).content[0].text);
+  check(doorDone.status === "done" && typeof doorDone.result?.said_at_door === "string", "MCP confirm said the reply at the door", doorDone.result?.said_at_door);
+  const badBell = await call("POST", "/device/doorbell", { visitor: "burglar" });
+  check(badBell.status === 400, "doorbell refuses an unknown visitor");
+
+  const bad = await call("POST", "/device/propose", { action: "rm_rf", args: {} });
+  check(bad.status === 400, "propose refuses an action outside the catalog", bad.data.error);
   await client.close();
 
   // 9. the home really changed
   const after = await call("GET", "/device/state");
   check(after.status === 200 && after.data.home.devices.fan.on === true, "GET /device/state shows the fan on");
-  check(after.data.receipts?.[0]?.receipt_id === done.receipt?.receipt_id, "the receipt is in /device/state");
+  check(after.data.receipts?.some((x) => x.receipt_id === done.receipt?.receipt_id), "the receipt is in /device/state");
+  const st = after.data.stats;
+  check(!!st && st.confirmed >= 2 && st.without_you === 0, "stats: confirmed by you, never without you", JSON.stringify(st));
 
   console.log(failures === 0 ? "\nSMOKE OK" : `\nSMOKE FAILED (${failures})`);
   process.exit(failures === 0 ? 0 : 1);

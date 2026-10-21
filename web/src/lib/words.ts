@@ -16,8 +16,41 @@ export function spokenChoices(set: Pick<PendingSet, "options" | "stage">): strin
   return `${parts.join(" ")} Say a number, or no.`;
 }
 
+export function isDoorbell(set: Pick<PendingSet, "origin" | "context">): boolean {
+  return set.origin === "doorbell" || !!set.context?.visitor;
+}
+
+/** "Someone's at the door. Ravi, your carer, is at the front door with your shopping. One: … Say a number." */
+export function spokenDoorbell(set: Pick<PendingSet, "options" | "stage" | "context">): string {
+  const note = (set.context?.visitor?.note ?? "").trim().replace(/[.!?]+$/, "");
+  const lead = note ? `Someone's at the door. ${note}.` : "Someone's at the door.";
+  if (set.stage === "final") return `${lead} ${set.options[0]?.text ?? ""}? Say yes or no.`;
+  const parts = set.options.map((o) => `${numberWord(o.n)}: ${o.text}.`);
+  return `${lead} ${parts.join(" ")} Say a number.`;
+}
+
+export function isUnsure(set: Pick<PendingSet, "context">): boolean {
+  return set.context?.unsure === true;
+}
+
+/** Read-back for "maybe" cards. */
+export function spokenUnsure(set: Pick<PendingSet, "options" | "stage">): string {
+  if (set.stage === "final") return `I'm not sure. Please say it again, or say yes if this is right: ${set.options[0]?.text ?? ""}?`;
+  const parts = set.options.map((o) => `${numberWord(o.n)}: ${o.text}.`);
+  return `I'm not sure. Please say it again, or say a number if one of these is right: ${parts.join(" ")}`;
+}
+
 /** What a screen reader hears when a new card set appears. */
 export function announceChoices(set: PendingSet): string {
+  if (isDoorbell(set) && set.stage !== "final") {
+    const n = set.options.length;
+    const note = set.context?.visitor?.note ?? "";
+    return `Someone's at the door. ${note} ${n} ${n === 1 ? "choice" : "choices"}.`.replace(/\s+/g, " ").trim();
+  }
+  if (isUnsure(set)) {
+    const n = set.options.length;
+    return `Not sure. ${n} possible ${n === 1 ? "match" : "matches"}.`;
+  }
   const who = set.origin === "assistant" ? "The assistant suggested this. You did not ask for it. " : "";
   if (set.stage === "final") return `${who}Second check. ${set.options[0]?.text}? Choose yes or no.`;
   const n = set.options.length;
@@ -83,6 +116,10 @@ function clock(at: number | string | null | undefined): string {
 export { clock as timeOf };
 
 export function channelWords(r: Receipt): string {
+  if (r.how.channel === "transcript") {
+    const who = /alexa/i.test(r.evidence.transcriber ?? "") ? "your voice on Alexa" : "your voice assistant";
+    return r.evidence.transcript ? `${who} (heard “${r.evidence.transcript}”)` : who;
+  }
   if (r.how.channel === "voice") {
     const heard = r.evidence.transcript || r.evidence.decision?.heard;
     return heard ? `your voice (heard “${heard}”)` : "your voice";
@@ -158,7 +195,7 @@ export function describeEvents(events: GateEvent[]): ActivityLine[] {
 
 /** The icon for an option, from its action and arguments. */
 export type IconName =
-  | "bulb" | "fan" | "snow" | "tv" | "lock" | "unlock" | "phone" | "message" | "cart" | "speech" | "book" | "home" | "spark";
+  | "bulb" | "fan" | "snow" | "tv" | "lock" | "unlock" | "phone" | "message" | "cart" | "speech" | "book" | "home" | "spark" | "bell";
 
 export function iconFor(option: Pick<CardOption, "action" | "args">, devices?: Record<string, { kind: string }>): IconName {
   const a = option.args ?? {};
@@ -182,6 +219,8 @@ export function iconFor(option: Pick<CardOption, "action" | "args">, devices?: R
       return "cart";
     case "say_for_me":
       return "speech";
+    case "doorbell_reply":
+      return "bell";
     case "phrasebook_add":
       return "book";
     case "home_status":

@@ -18,6 +18,8 @@ export function useFocusTrap(ref: RefObject<HTMLElement>, active: boolean, onClo
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        // an open menu inside the dialog closes first
+        if (e.target instanceof Element && e.target.closest("[data-esc-local='open']")) return;
         e.preventDefault();
         e.stopPropagation();
         onClose();

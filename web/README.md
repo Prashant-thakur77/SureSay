@@ -32,6 +32,18 @@ node scripts/smoke.mjs
 
 It pairs, sends the typed turn "van on" and expects "Turn on the bedroom fan" first. It shows that confirming without the user's evidence is refused, sends tap evidence and confirms it through MCP, then reads `/device/state` to check that the fan is on.
 
+## What's on screen
+
+- **Talk**: speak or type. Three guesses arrive as numbered cards (1 coral, 2 teal, 3 violet; the number is always shown). When SureSay is not sure, "Say it again" comes first and the guesses below are marked "maybe", still confirmable. "Try one" chips give first-time users an example to tap.
+- **Speak for me**: big tiles of things to say out loud. A tap opens a "Say out loud: …?" card. Once you confirm it, SureSay says the sentence and shows it in huge type for the people nearby. "Say again" replays it on this device; it is not a new action.
+- **Timeline**: what was done, when and how (voice, tap or Alexa), with "why allowed". At the top: confirmed by you, blocked attempts, and changes without you (always 0). "Copy summary" puts a plain-text summary on the clipboard for a carer.
+- **Teach**: "When I say…" plus "I mean…". You confirm it on a card before SureSay learns it. Phrases you taught are marked "Learned from you".
+- **Home panel**: the fan spins, lights glow, the TV flickers and the AC drifts snow while on. A device that just changed pulses once.
+- **Doorbell (simulated)**: "Doorbell" in "Under the hood" or Settings → Demo rings for Ravi, a delivery driver or someone unknown. The door's cards get their own header (a silhouette tile, no photos) but work like every other card: voice, tap, keys, scanning, "None of these". Unlocking still asks twice. A reply is said through the device speaker and shown big. The Front door tile shows the last visitor and the last reply.
+- **Big screen (TV)**: `?tv=1` or Settings. Three big cards side by side, arrow keys and Enter, a big mic tile, and the side panel behind a "Home" button.
+
+Every animation has a static equivalent. All of it stops under `prefers-reduced-motion` or Calm mode. The done chime plays only when Sound effects and read-aloud are on and Calm mode is off.
+
 ## How the device is trusted
 
 Pairing gives this browser a secret device key. Every later request (`/device/*` and `/mcp` alike) is signed as `HMAC-SHA256(key, METHOD \n PATH?QUERY \n UNIX_SECONDS \n sha256(BODY))`, and each URL carries a random `r=` value, so no two signatures repeat and a replayed request is refused. The signing code is `src/lib/sign.js`. The app and the smoke script share it, and it falls back to a small pure-JS SHA-256 where WebCrypto is not available.
@@ -66,7 +78,8 @@ Confirmation goes through the hub's MCP server: the official MCP SDK client call
 | Enter | Choose the focused card |
 | Arrow keys, Home, End | Move between cards |
 | Escape or N | None of these (or No on the "asks twice" check) |
-| Y | Yes on the "asks twice" check |
+| Y | Yes on a single card or the "asks twice" check |
+| Left / Right on the tabs | Move between Talk, Speak for me, Timeline and Teach (Home and End too) |
 | Any key or click | In scanning mode: pick the highlighted item. Tab still moves focus. |
 
 Add `?tv=1` to the address for the big-screen layout.

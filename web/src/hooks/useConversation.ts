@@ -13,7 +13,9 @@ import { MicError, micSupported } from "../lib/audio";
 import type { ConfirmChannel } from "../lib/mcp";
 import type { Speaker } from "../lib/speech";
 import type { ConfirmResult, HubState, PendingSet, Receipt, Timing } from "../lib/types";
-import { announceChoices, plainEvidenceError, plainReason, spokenChoices } from "../lib/words";
+import { playChime } from "../lib/sfx";
+import { TICK_MS } from "../lib/checks";
+import { announceChoices, isDoorbell, isUnsure, plainEvidenceError, plainReason, spokenChoices, spokenDoorbell, spokenUnsure } from "../lib/words";
 import type { Politeness } from "./useAnnouncer";
 import type { Settings } from "./useSettings";
 
@@ -33,7 +35,7 @@ export type Phase =
       note?: string;
       heardAnswer?: string;
     }
-  | { kind: "done"; receipt: Receipt; said?: string; heardAnswer?: string }
+  | { kind: "done"; receipt: Receipt; said?: string; atDoor?: string; heardAnswer?: string }
   | { kind: "cancelled" }
   | { kind: "ask_again"; heard?: string; maybe: Array<{ text: string; phrase: string }>; phrases: boolean }
   | { kind: "answer"; text: string; heard?: string }
@@ -80,6 +82,14 @@ function sayOf(result: unknown, receipt: Receipt): string | undefined {
   if (r && typeof r.say === "string") return r.say;
   const fromReceipt = receipt.result as { say?: unknown } | null | undefined;
   if (fromReceipt && typeof fromReceipt.say === "string") return fromReceipt.say;
+  const t = receipt.what.args?.text;
+  return typeof t === "string" ? t : undefined;
+}
+
+function atDoorOf(result: unknown, receipt: Receipt): string | undefined {
+  for (const r of [result, receipt.result] as Array<{ said_at_door?: unknown } | null | undefined>) {
+    if (r && typeof r.said_at_door === "string") return r.said_at_door;
+  }
   const t = receipt.what.args?.text;
   return typeof t === "string" ? t : undefined;
 }
@@ -201,7 +211,7 @@ export function useConversation(deps: ConversationDeps) {
       });
       setDebug((d) => ({ ...d, pendingId: set.pending_id }));
       depsRef.current.announce(announceChoices(set), "assertive");
-      const say = opts.say ?? spokenChoices(set);
+      const say = isDoorbell(set) ? spokenDoorbell(set) : isUnsure(set) ? spokenUnsure(set) : (opts.say ?? spokenChoices(set));
       void (async () => {
         await speak(say);
         if (!live(id)) return;
@@ -218,9 +228,17 @@ export function useConversation(deps: ConversationDeps) {
       if (!live(id) || !r.receipt) return;
       const receipt = r.receipt;
       const said = receipt.what.action === "say_for_me" ? sayOf(r.result, receipt) : undefined;
-      setPhase({ kind: "done", receipt, said, heardAnswer });
+      const atDoor = receipt.what.action === "doorbell_reply" ? atDoorOf(r.result, receipt) : undefined;
+      setPhase({ kind: "done", receipt, said, atDoor, heardAnswer });
       depsRef.current.announce(`Done: ${receipt.what.shown_as}.`, "assertive");
-      if (said) void speak(said, true);
+      const { settings } = depsRef.current;
+      // the chime lands with the stamp; never in Calm mode, never when read-aloud is off, not over speech
+      if (!said && !atDoor && settings.sounds && settings.readAloud && !settings.calm) {
+        playChime(receipt.checks.length * TICK_MS + 180 + 280);
+      }
+      // the doorbell's speaker is simulated by this device's speaker
+      if (atDoor) void speak(atDoor, true);
+      else if (said) void speak(said, true);
       else void speak(`Done. ${receipt.what.shown_as}.`);
     },
     [setPhase, speak],
@@ -364,6 +382,23 @@ export function useConversation(deps: ConversationDeps) {
         if (!live(id)) return;
         if (set) showSet(id, set, { say: r.say, heard: r.heard });
         else problem(id, "The cards could not be shown.", "Please say it again.");
+      } else if (r.status === "ask_again" && r.pending_id) {
+        // not sure, but with "maybe" cards the user can still confirm
+        let set = resp.pending.find((p) => p.pending_id === r.pending_id);
+        if (!set) {
+          try {
+            set = (await hub.pending()).find((p) => p.pending_id === r.pending_id);
+          } catch {
+            set = undefined;
+          }
+        }
+        if (!live(id)) return;
+        if (set) showSet(id, { ...set, context: { ...set.context, unsure: true } }, { heard: r.heard });
+        else {
+          setPhase({ kind: "ask_again", heard: r.heard, maybe: r.maybe ?? [], phrases: false });
+          announce(ASK_AGAIN_TEXT, "assertive");
+          void speak(r.say || ASK_AGAIN_TEXT);
+        }
       } else if (r.status === "ask_again") {
         setPhase({ kind: "ask_again", heard: r.heard, maybe: r.maybe ?? [], phrases: false });
         announce(ASK_AGAIN_TEXT, "assertive");
@@ -446,7 +481,11 @@ export function useConversation(deps: ConversationDeps) {
   );
 
   const choose = useCallback((n: number) => void tap({ option: n }), [tap]);
-  const yes = useCallback(() => void tap({ answer: "yes" }), [tap]);
+  // a one-card "choose" set (a tapped tile) takes option 1 as its yes
+  const yes = useCallback(() => {
+    const p = phaseRef.current;
+    void tap(p.kind === "cards" && p.set.stage === "choose" ? { option: 1 } : { answer: "yes" });
+  }, [tap]);
   const none = useCallback(() => void tap({ answer: "no" }), [tap]);
 
   const answerByVoice = useCallback(() => {
@@ -494,8 +533,49 @@ export function useConversation(deps: ConversationDeps) {
     const p = phaseRef.current;
     if (p.kind === "done" && p.said) void speak(p.said, true);
     else if (p.kind === "answer" || p.kind === "reply") void speak(p.text, true);
-    else if (p.kind === "cards") void speak(spokenChoices(p.set), true);
+    else if (p.kind === "done" && p.atDoor) void speak(p.atDoor, true);
+    else if (p.kind === "cards") void speak(isDoorbell(p.set) ? spokenDoorbell(p.set) : isUnsure(p.set) ? spokenUnsure(p.set) : spokenChoices(p.set), true);
   }, [speak]);
+
+  /** A tap on a speak-for-me tile or the Teach form: the hub opens a card set, confirmed like any other. */
+  const propose = useCallback(
+    async (action: string, args: Record<string, unknown>) => {
+      const id = begin();
+      setPhase({ kind: "thinking" });
+      depsRef.current.announce("Getting it ready.", "polite");
+      let set: PendingSet;
+      try {
+        set = await depsRef.current.hub.propose(action, args);
+      } catch (err) {
+        if (err instanceof HubError && err.status === 400) problem(id, "SureSay can't do that one.", "Please try a different choice.");
+        else networkProblem(id, err);
+        return;
+      }
+      if (!live(id)) return;
+      showSet(id, set);
+      void depsRef.current.refreshState();
+    },
+    [begin, networkProblem, problem, setPhase, showSet],
+  );
+
+  /** Someone rings the (simulated) doorbell: the door's cards appear, confirmed like any other. */
+  const ring = useCallback(
+    async (visitor: "ravi" | "delivery" | "unknown") => {
+      const id = begin();
+      setPhase({ kind: "thinking" });
+      let out;
+      try {
+        out = await depsRef.current.hub.doorbell(visitor);
+      } catch (err) {
+        networkProblem(id, err);
+        return;
+      }
+      if (!live(id)) return;
+      showSet(id, out.pending);
+      void depsRef.current.refreshState();
+    },
+    [begin, networkProblem, setPhase, showSet],
+  );
 
   /** Open card sets the hub knows about (for example, ones the assistant proposed) are shown when nothing else is. */
   const adoptPending = useCallback(
@@ -536,5 +616,7 @@ export function useConversation(deps: ConversationDeps) {
     reset,
     replay,
     adoptPending,
+    propose,
+    ring,
   };
 }

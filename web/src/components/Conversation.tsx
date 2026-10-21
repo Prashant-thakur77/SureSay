@@ -3,6 +3,8 @@ import type { Phase } from "../hooks/useConversation";
 import { ASK_AGAIN_TEXT } from "../hooks/useConversation";
 import type { MicState } from "../hooks/useRecorder";
 import type { HomeDevice, Phrase } from "../lib/types";
+import { isDoorbell, isUnsure } from "../lib/words";
+import { DoorbellHeader } from "./Doorbell";
 import { CardSet } from "./CardSet";
 import { Connector } from "./Connector";
 import { FinalCheck } from "./FinalCheck";
@@ -11,6 +13,7 @@ import { MicButton, type MicMode } from "./MicButton";
 import { ReceiptCard } from "./ReceiptCard";
 import { useScanMark } from "./scan";
 import { Steps } from "./Steps";
+import { TryChips } from "./TryChips";
 import { TypeBox } from "./TypeBox";
 
 export interface ConversationActions {
@@ -40,6 +43,10 @@ interface Props {
   speaking?: boolean;
   /** Anything has happened before (receipts or gate events). */
   history?: boolean;
+  /** Animation allowed (no reduced motion, Calm mode off). */
+  motion?: boolean;
+  /** Go to the Speak-for-me board. */
+  onBackToBoard?: () => void;
 }
 
 function ScanButton({ id, className = "btn btn--secondary", onClick, children, ...rest }: { id: string; className?: string; onClick: () => void; children: ReactNode; "aria-keyshortcuts"?: string }) {
@@ -62,7 +69,14 @@ export function micMode(phase: Phase): MicMode {
   return "request";
 }
 
-export function Conversation({ phase, actions, mic, level, tv, devices, phrasebook, announce, speaking = false, history = true }: Props) {
+export function Conversation({ phase, actions, mic, level, tv, devices, phrasebook, announce, speaking = false, history = true, motion = true, onBackToBoard }: Props) {
+  const againRef = useRef<HTMLButtonElement>(null);
+  const againMark = useScanMark("again");
+  const unsureId = phase.kind === "cards" && isUnsure(phase.set) ? phase.set.pending_id : "";
+  // "maybe" cards: focus "Say it again" first, so a reflex Enter never picks an unsure guess
+  useEffect(() => {
+    if (unsureId) againRef.current?.focus();
+  }, [unsureId]);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const heardRef = useRef<HTMLParagraphElement>(null);
   const typeRef = useRef<HTMLInputElement>(null);
@@ -105,6 +119,7 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
             Say it your way. <em>Nothing happens until you choose.</em>
           </h2>
           <p className="stage__lead">Tap the microphone and speak, or type below.</p>
+          <TryChips onTry={actions.sendText} />
           {!history && <Steps />}
         </div>
       );
@@ -131,17 +146,32 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
       break;
     case "cards": {
       const busy = phase.answer === "sending";
+      const unsure = isUnsure(phase.set);
+      const door = isDoorbell(phase.set);
+      const single = phase.set.stage === "final" || phase.set.options.length === 1;
       view = (
         <>
+          {door && <DoorbellHeader visitor={phase.set.context?.visitor} />}
+          {unsure && (
+            <div className="unsure">
+              <h2 className="stage__title display">
+                I'm not sure <em>I got that.</em>
+              </h2>
+              <p className="stage__lead">Please say it again. Or pick one below if it's right.</p>
+              <button ref={againRef} type="button" className="btn btn--primary btn--xl unsure__again" onClick={actions.startRequest} {...againMark}>
+                <Icon name="mic" size={28} /> Say it again
+              </button>
+            </div>
+          )}
           {phase.assistantLine && (
             <p className="assistant-line">
               <span className="assistant-line__who">Assistant:</span> {phase.assistantLine}
             </p>
           )}
-          {phase.set.stage === "final" ? (
-            <FinalCheck set={phase.set} deadline={phase.deadline} busy={busy} devices={devices} onYes={actions.yes} onNo={actions.none} onExpire={actions.expire} announce={announce} />
+          {single && !unsure ? (
+            <FinalCheck set={phase.set} deadline={phase.deadline} busy={busy} devices={devices} onYes={actions.yes} onNo={actions.none} onExpire={actions.expire} announce={announce} single={phase.set.stage === "choose"} />
           ) : (
-            <CardSet set={phase.set} deadline={phase.deadline} busy={busy} tv={tv} devices={devices} onChoose={actions.choose} onSpace={actions.toggleMic} onExpire={actions.expire} announce={announce} />
+            <CardSet set={phase.set} deadline={phase.deadline} busy={busy} tv={tv} devices={devices} onChoose={actions.choose} onSpace={actions.toggleMic} onExpire={actions.expire} announce={announce} unsure={unsure} doorbell={door} />
           )}
           {phase.heardAnswer && <p className="heard heard--answer">Heard: “{phase.heardAnswer}”</p>}
           {busy && (
@@ -155,14 +185,16 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
             </p>
           )}
           <div className="actions">
-            {phase.set.stage === "choose" && (
+            {(!single || unsure) && (
               <ScanButton id="none" onClick={actions.none} aria-keyshortcuts="Escape N">
                 <Icon name="close" size={24} /> None of these <span className="kbd" aria-hidden="true">Esc</span>
               </ScanButton>
             )}
-            <ScanButton id="again" onClick={actions.startRequest}>
-              <Icon name="refresh" size={24} /> Say it again
-            </ScanButton>
+            {!unsure && (
+              <ScanButton id="again" onClick={actions.startRequest}>
+                <Icon name="refresh" size={24} /> Say it again
+              </ScanButton>
+            )}
             <ScanButton id="type" onClick={typeIt}>
               <Icon name="keyboard" size={24} /> Type it
             </ScanButton>
@@ -175,7 +207,46 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
       break;
     }
     case "done":
-      view = <ReceiptCard ref={headingRef} receipt={phase.receipt} said={phase.said} onReplay={phase.said ? actions.replay : undefined} />;
+      view = (
+        <>
+          {phase.atDoor && (
+            <section className="spoken spoken--door" aria-labelledby="door-said-title">
+              <h2 id="door-said-title" className="spoken__label">
+                <Icon name="bell" size={20} /> Said at the door
+              </h2>
+              <p className="spoken__text" lang="en">
+                “{phase.atDoor}”
+              </p>
+              <div className="actions">
+                <ScanButton id="replay" className="btn btn--primary btn--xl spoken__again" onClick={actions.replay}>
+                  <Icon name="volume" size={28} /> Say it at the door again
+                </ScanButton>
+              </div>
+            </section>
+          )}
+          {phase.said && (
+            <section className="spoken" aria-labelledby="spoken-title">
+              <h2 id="spoken-title" className="spoken__label">
+                Said out loud for you
+              </h2>
+              <p className="spoken__text" lang="en">
+                {phase.said}
+              </p>
+              <div className="actions">
+                <ScanButton id="replay" className="btn btn--primary btn--xl spoken__again" onClick={actions.replay}>
+                  <Icon name="volume" size={28} /> Say again
+                </ScanButton>
+                {onBackToBoard && (
+                  <ScanButton id="board" onClick={onBackToBoard}>
+                    <Icon name="speech" size={24} /> Back to Speak for me
+                  </ScanButton>
+                )}
+              </div>
+            </section>
+          )}
+          <ReceiptCard ref={headingRef} receipt={phase.receipt} />
+        </>
+      );
       break;
     case "cancelled":
       view = (
@@ -280,8 +351,9 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
           mode={mode}
           level={mic === "recording" ? level : 0}
           onToggle={actions.toggleMic}
-          answerKind={phase.kind === "cards" && phase.set.stage === "final" ? "yesno" : "number"}
+          answerKind={phase.kind === "cards" && (phase.set.stage === "final" || phase.set.options.length === 1) ? "yesno" : "number"}
           speaking={speaking}
+          motion={motion}
         />
         <TypeBox ref={typeRef} onSend={actions.sendText} onFocus={actions.stopListening} />
       </div>

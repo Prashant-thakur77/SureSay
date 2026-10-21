@@ -11,7 +11,7 @@
  * choosing, so a reflex press of the talk key never picks a card by accident.
  */
 
-import { useEffect, useRef, type KeyboardEvent } from "react";
+import { useEffect, useRef, type CSSProperties, type KeyboardEvent } from "react";
 import { formatSeconds, useCountdown } from "../hooks/useCountdown";
 import type { CardOption, HomeDevice, PendingSet } from "../lib/types";
 import { barValue, iconFor, likelihood } from "../lib/words";
@@ -28,6 +28,10 @@ interface Props {
   onSpace: () => void;
   onExpire: (pendingId: string) => void;
   announce: (msg: string) => void;
+  /** "Maybe" cards offered after "please say it again". */
+  unsure?: boolean;
+  /** The doorbell's cards: a heading under the doorbell header. */
+  doorbell?: boolean;
 }
 
 export function AssistantBanner() {
@@ -72,6 +76,8 @@ function ChoiceCard({
   devices,
   onChoose,
   onKeyDown,
+  unsure,
+  plain,
 }: {
   option: CardOption;
   total: number;
@@ -81,20 +87,27 @@ function ChoiceCard({
   devices?: Record<string, HomeDevice>;
   onChoose: (n: number) => void;
   onKeyDown: (e: KeyboardEvent<HTMLButtonElement>) => void;
+  unsure?: boolean;
+  /** Options, not guesses (the doorbell's choices): no likelihood. */
+  plain?: boolean;
 }) {
   const scan = useScanMark(`card-${option.n}`);
   const words = likelihood(confidence, option.n);
   const bar = barValue(confidence, option.n);
   const high = option.risk === "high";
   const name =
-    `Option ${option.n} of ${total}: ${option.text}. ${words}.` +
+    (unsure
+      ? `Maybe, option ${option.n} of ${total}: ${option.text}.`
+      : plain
+        ? `Option ${option.n} of ${total}: ${option.text}.`
+        : `Option ${option.n} of ${total}: ${option.text}. ${words}.`) +
     (high ? " Asks twice." : "") +
     (assistant ? " Suggested by the assistant." : "");
   return (
-    <li className="cards__item">
+    <li className="cards__item" style={{ "--i": option.n - 1 } as CSSProperties}>
       <button
         type="button"
-        className="card"
+        className={`card card--h${((option.n - 1) % 3) + 1}${unsure ? " card--maybe" : ""}`}
         data-card={option.n}
         aria-label={name}
         aria-disabled={busy || undefined}
@@ -112,12 +125,16 @@ function ChoiceCard({
         <span className="card__body">
           <span className="card__text">{option.text}</span>
           <span className="card__meta">
-            <span className="likely">
-              <span className="likely__words">{words}</span>
-              <span className="likely__bar" aria-hidden="true">
-                <span style={{ width: `${Math.round(bar * 100)}%` }} />
+            {unsure ? (
+              <span className="chip-maybe">Maybe</span>
+            ) : plain ? null : (
+              <span className="likely">
+                <span className="likely__words">{words}</span>
+                <span className="likely__bar" aria-hidden="true">
+                  <span style={{ width: `${Math.round(bar * 100)}%` }} />
+                </span>
               </span>
-            </span>
+            )}
             {high && (
               <span className="badge badge--twice">
                 <Icon name="shield" size={20} /> Asks twice
@@ -130,15 +147,16 @@ function ChoiceCard({
   );
 }
 
-export function CardSet({ set, deadline, busy, tv, devices, onChoose, onSpace, onExpire, announce }: Props) {
+export function CardSet({ set, deadline, busy, tv, devices, onChoose, onSpace, onExpire, announce, unsure = false, doorbell = false }: Props) {
   const listRef = useRef<HTMLOListElement>(null);
   const assistant = set.origin === "assistant";
 
-  // a new card set: focus its first card
+  // a new card set: focus its first card (not for "maybe" cards: there "Say it again" comes first)
   useEffect(() => {
+    if (unsure) return;
     const first = listRef.current?.querySelector<HTMLButtonElement>("button.card");
     first?.focus({ preventScroll: false });
-  }, [set.pending_id]);
+  }, [set.pending_id, unsure]);
 
   const onKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
     const cards = Array.from(listRef.current?.querySelectorAll<HTMLButtonElement>("button.card") ?? []);
@@ -161,11 +179,21 @@ export function CardSet({ set, deadline, busy, tv, devices, onChoose, onSpace, o
   };
 
   return (
-    <section className={`cardset${tv ? " cardset--tv" : ""}`} aria-labelledby="cards-title">
+    <section className={`cardset${tv ? " cardset--tv" : ""}${unsure ? " cardset--maybe" : ""}${doorbell ? " cardset--door" : ""}`} aria-labelledby="cards-title">
       <div className="cardset__head">
-        <h2 id="cards-title" className="stage__title display">
-          Did you <em>mean</em>…
-        </h2>
+        {doorbell ? (
+          <h3 id="cards-title" className="cardset__maybe-title display">
+            What would you <em>like to do?</em>
+          </h3>
+        ) : unsure ? (
+          <h3 id="cards-title" className="cardset__maybe-title display">
+            Or is it <em>one of these?</em>
+          </h3>
+        ) : (
+          <h2 id="cards-title" className="stage__title display">
+            Did you <em>mean</em>…
+          </h2>
+        )}
         <Countdown deadline={deadline} pendingId={set.pending_id} onExpire={onExpire} announce={announce} />
       </div>
       {assistant && <AssistantBanner />}
@@ -181,6 +209,8 @@ export function CardSet({ set, deadline, busy, tv, devices, onChoose, onSpace, o
             devices={devices}
             onChoose={onChoose}
             onKeyDown={onKeyDown}
+            unsure={unsure}
+            plain={doorbell}
           />
         ))}
       </ol>

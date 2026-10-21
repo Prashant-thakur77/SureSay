@@ -1,10 +1,11 @@
-import { useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { Debug } from "../hooks/useConversation";
 import type { McpStatus } from "../lib/mcp";
 import type { HubState } from "../lib/types";
 import { capitalise, channelWords, describeEvents, deviceIcon, timeOf } from "../lib/words";
 import { Icon } from "./Icon";
 import { TrailLines } from "./ConsentTrail";
+import { DoorbellMenu, type VisitorId } from "./Doorbell";
 import { Checks, shortId } from "./ReceiptCard";
 
 function wide(): boolean {
@@ -34,14 +35,56 @@ function Panel({ id, title, icon, children, defaultOpen }: { id: string; title: 
   );
 }
 
-function HomePanel({ state }: { state: HubState | null }) {
-  if (!state) return <p className="muted">Loading your home…</p>;
-  const devices = Object.entries(state.home.devices);
-  const unlocked = state.home.front_door === "unlocked";
+/** A lock whose shackle lifts when unlocked (moves only when motion is allowed). */
+function LockIcon({ locked }: { locked: boolean }) {
   return (
-    <ul className="tiles">
+    <svg className={`lock-icon${locked ? "" : " lock-icon--open"}`} width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      <rect x="4.5" y="10.5" width="15" height="10.5" rx="2" />
+      <path className="lock-icon__shackle" d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
+      <path d="M12 14.5v3" />
+    </svg>
+  );
+}
+
+export interface DoorInfo {
+  visitor?: { name: string; at: number };
+  reply?: { text: string; at: string | null };
+}
+
+function HomePanel({ state, door }: { state: HubState | null; door?: DoorInfo }) {
+  const listRef = useRef<HTMLUListElement>(null);
+  const before = useRef<Record<string, boolean> | null>(null);
+  const [changed, setChanged] = useState<string[]>([]);
+  const devices = state ? Object.entries(state.home.devices) : [];
+  const unlocked = state?.home.front_door === "unlocked";
+  const snapshot = state ? JSON.stringify([devices.map(([id, d]) => [id, d.on]), unlocked]) : "";
+
+  // a device that changed state pulses once and scrolls into view (if this panel is open)
+  useEffect(() => {
+    if (!state) return;
+    const now: Record<string, boolean> = Object.fromEntries(devices.map(([id, d]) => [id, d.on]));
+    now.front_door = !unlocked;
+    const prev = before.current;
+    before.current = now;
+    if (!prev) return;
+    const flipped = Object.keys(now).filter((k) => k in prev && prev[k] !== now[k]);
+    if (flipped.length === 0) return;
+    setChanged(flipped);
+    const list = listRef.current;
+    const tile = list?.querySelector<HTMLElement>(`[data-device="${flipped[0]}"]`);
+    if (tile && list && list.offsetParent !== null) {
+      const smooth = document.documentElement.dataset.calm !== "1" && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      tile.scrollIntoView?.({ block: "nearest", behavior: smooth ? "smooth" : "auto" });
+    }
+    const t = setTimeout(() => setChanged([]), 1600);
+    return () => clearTimeout(t);
+  }, [snapshot]);
+
+  if (!state) return <p className="muted">Loading your home…</p>;
+  return (
+    <ul className="tiles" ref={listRef}>
       {devices.map(([id, d]) => (
-        <li key={id} className={`tile${d.on ? " tile--on" : ""}`}>
+        <li key={id} data-device={id} data-kind={d.kind} className={`tile${d.on ? " tile--on" : ""}${changed.includes(id) ? " tile--changed" : ""}`}>
           <span className="tile__icon" aria-hidden="true">
             <Icon name={deviceIcon(d.kind)} size="100%" />
           </span>
@@ -53,13 +96,23 @@ function HomePanel({ state }: { state: HubState | null }) {
           </span>
         </li>
       ))}
-      <li className={`tile${unlocked ? " tile--warn" : ""}`}>
+      <li data-device="front_door" data-kind="lock" className={`tile${unlocked ? " tile--warn" : ""}${changed.includes("front_door") ? " tile--changed" : ""}`}>
         <span className="tile__icon" aria-hidden="true">
-          <Icon name={unlocked ? "unlock" : "lock"} size="100%" />
+          <LockIcon locked={!unlocked} />
         </span>
         <span className="tile__name">Front door</span>
         <span className="tile__room">Entrance</span>
         <span className={`pill ${unlocked ? "pill--warn" : "pill--on"}`}>{unlocked ? "Unlocked" : "Locked"}</span>
+        {(door?.visitor || door?.reply) && (
+          <span className="tile__door">
+            {door.visitor && (
+              <span>
+                Last visitor: <strong>{door.visitor.name}</strong> · {timeOf(door.visitor.at)}
+              </span>
+            )}
+            {door.reply && <span>Last reply: “{door.reply.text}”</span>}
+          </span>
+        )}
       </li>
     </ul>
   );
@@ -154,7 +207,7 @@ function lastRefusal(debug: Debug, events: HubState["events"] | undefined): { re
   return null;
 }
 
-export function UnderTheHood({ debug, mcp, events }: { debug: Debug; mcp: McpInfo; events?: HubState["events"] }) {
+export function UnderTheHood({ debug, mcp, events, onRing }: { debug: Debug; mcp: McpInfo; events?: HubState["events"]; onRing?: (id: VisitorId) => void }) {
   const refusal = lastRefusal(debug, events);
   const t = debug.timing;
   const timing = t ? [t.asr_ms != null && `ASR ${t.asr_ms} ms`, t.rank_ms != null && `rank ${t.rank_ms} ms`, t.total_ms != null && `total ${t.total_ms} ms`].filter(Boolean).join(" · ") : "";
@@ -188,6 +241,11 @@ export function UnderTheHood({ debug, mcp, events }: { debug: Debug; mcp: McpInf
           </div>
         ))}
       </dl>
+      {onRing && (
+        <div className="hood__demo">
+          <DoorbellMenu onRing={onRing} label="Doorbell" />
+        </div>
+      )}
       {refusal && (
         <div className="trail trail--refusal" data-testid="refusal-trail">
           <p className="trail__head">
@@ -202,9 +260,9 @@ export function UnderTheHood({ debug, mcp, events }: { debug: Debug; mcp: McpInf
   );
 }
 
-export function SidePanel({ state, debug, mcp }: { state: HubState | null; debug: Debug; mcp: McpInfo }) {
+export function SidePanel({ state, debug, mcp, hidden = false, door, onRing }: { state: HubState | null; debug: Debug; mcp: McpInfo; hidden?: boolean; door?: DoorInfo; onRing?: (id: VisitorId) => void }) {
   return (
-    <aside className="side" aria-label="Your home and history">
+    <aside className="side" id="side-panel" aria-label="Your home and history" hidden={hidden}>
       <nav aria-label="Side panels" className="side__nav">
         <ul>
           <li>
@@ -222,7 +280,7 @@ export function SidePanel({ state, debug, mcp }: { state: HubState | null; debug
         </ul>
       </nav>
       <Panel id="home" title="Home" icon="home">
-        <HomePanel state={state} />
+        <HomePanel state={state} door={door} />
       </Panel>
       <Panel id="cart" title="Cart" icon="cart">
         <CartPanel state={state} />
@@ -234,7 +292,7 @@ export function SidePanel({ state, debug, mcp }: { state: HubState | null; debug
         <ActivityPanel state={state} />
       </Panel>
       <Panel id="hood" title="Under the hood" icon="gear" defaultOpen={false}>
-        <UnderTheHood debug={debug} mcp={mcp} events={state?.events} />
+        <UnderTheHood debug={debug} mcp={mcp} events={state?.events} onRing={onRing} />
       </Panel>
     </aside>
   );

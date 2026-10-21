@@ -46,6 +46,13 @@ const TEXT_PAIRS: Array<[string, string]> = [
   ["ok-ink", "surface2"],
   ["warn-ink", "surface2"],
   ["accent-ink", "surface2"],
+  // card position hues: the number badge (numerals on the hue)
+  ["on-hue", "hue-1"],
+  ["on-hue", "hue-2"],
+  ["on-hue", "hue-3"],
+  // "maybe" cards
+  ["ink", "maybe-fill"],
+  ["muted", "maybe-fill"],
 ];
 
 const UI_PAIRS: Array<[string, string]> = [
@@ -54,6 +61,11 @@ const UI_PAIRS: Array<[string, string]> = [
   ["line", "bg"],
   ["line", "surface"],
   ["mic-border", "bg"],
+  // the hue edge on each card, and the hue tile accents
+  ["hue-1", "surface"],
+  ["hue-2", "surface"],
+  ["hue-3", "surface"],
+  ["hue-2", "surface2"],
 ];
 
 describe.each(["light", "dark", "contrast"])("%s theme contrast", (theme) => {

@@ -34,6 +34,10 @@ export interface HubApi {
   speak(text: string): Promise<SpeakResponse>;
   state(): Promise<HubState>;
   reset(): Promise<void>;
+  /** Open a card set from a tap (a speak-for-me tile, a taught phrase). The user still confirms it. */
+  propose(action: string, args: Record<string, unknown>): Promise<PendingSet>;
+  /** Simulated doorbell press: opens the door's card set (the user still confirms). */
+  doorbell(visitor: "ravi" | "delivery" | "unknown"): Promise<{ pending: PendingSet; say: string }>;
   /** The signing fetch, for the MCP transport. */
   signingFetch: (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 }
@@ -135,5 +139,17 @@ export class HubClient implements HubApi {
 
   async reset(): Promise<void> {
     await this.call<{ ok: boolean }>("POST", "/device/reset", {});
+  }
+
+  async doorbell(visitor: "ravi" | "delivery" | "unknown"): Promise<{ pending: PendingSet; say: string }> {
+    const out = await this.call<{ pending: PendingSet | null; say: string }>("POST", "/device/doorbell", { visitor });
+    if (!out.pending) throw new HubError(409, "the card set is no longer open");
+    return { pending: out.pending, say: out.say };
+  }
+
+  async propose(action: string, args: Record<string, unknown>): Promise<PendingSet> {
+    const out = await this.call<{ pending: PendingSet | null }>("POST", "/device/propose", { action, args });
+    if (!out.pending) throw new HubError(409, "the card set is no longer open");
+    return out.pending;
   }
 }
