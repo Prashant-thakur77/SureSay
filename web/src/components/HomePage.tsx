@@ -126,7 +126,7 @@ function Problem() {
         </p>
         <p className="chapter__aside">
           <strong className="chapter__big">62.8%</strong>
-          of single words a plain assistant wrongly took as a “yes” or a choice (430 decisions), on real dysarthric speech from six people held out from tuning.
+          of single words a forced-choice baseline wrongly took as a “yes” or a choice (430 decisions), on real dysarthric speech from six people held out from tuning.
           <span className="source">SureSay evaluation, TORGO corpus</span>
         </p>
       </div>

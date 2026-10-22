@@ -75,7 +75,8 @@ def attempt(ranker: FuzzyRanker, heard: dict[str, Any], book: list[dict[str, Any
     top = [c.phrase_id for c in rk.candidates]
     conf = [c.confidence for c in rk.candidates]
     if not rk.abstain:
-        outcome = "shown" if truth in top[:3] else "declined"
+        shown = [t for i, (t, c) in enumerate(zip(top[:3], conf, strict=False)) if i == 0 or c >= MAYBE_FLOOR]
+        outcome = "shown" if truth in shown else "declined"  # the same noise floor as suresay.understand
         maybes: list[str] = []
     else:
         maybes = [c.phrase_id for c in rk.candidates[:3]

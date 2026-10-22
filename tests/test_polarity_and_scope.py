@@ -43,3 +43,18 @@ def test_ideas_offered_while_asking_again_are_about_what_was_said(hub: Hub) -> N
     out = _say(hub, "please turn the bedroom fn")
     for m in out["result"].get("maybe", []):
         assert "fan" in m["text"].lower() or "bedroom" in m["text"].lower(), m
+
+
+@pytest.mark.parametrize("text", ["unlock the front door, my carer is here", "van on"])
+def test_a_card_below_the_noise_floor_is_not_shown_beside_a_real_guess(hub: Hub, text: str) -> None:
+    out = _say(hub, text)["result"]
+    assert out["status"] == "choose", out
+    shown = [c["text"] for c in out["candidates"]]
+    assert all(c["confidence"] >= 0.5 for c in out["candidates"][1:]), shown
+    assert not any("bread" in t.lower() or "what's on" in t.lower() for t in shown), shown
+
+
+@pytest.mark.parametrize("text", ["what's on in the house", "what is on at home", "is anything on"])
+def test_asking_what_is_on_is_answered_not_refused(hub: Hub, text: str) -> None:
+    out = _say(hub, text)["result"]
+    assert out["status"] == "answer" and out["action"] == "home_status", out

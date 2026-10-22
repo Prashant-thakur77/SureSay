@@ -1,8 +1,8 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { HomePage } from "./components/HomePage";
 import type { StartChoice } from "./components/StartGate";
 import { useSettings } from "./hooks/useSettings";
-import { HubClient } from "./lib/api";
+import { HubClient, tryDemo } from "./lib/api";
 import { hubBaseUrl } from "./lib/config";
 import { McpGate } from "./lib/mcp";
 
@@ -31,6 +31,15 @@ function wantsHome(): boolean {
   }
 }
 
+/** `?alexa=1`: a link straight to the simulated Alexa+ screen. */
+function wantsAlexa(): boolean {
+  try {
+    return new URLSearchParams(window.location.search).get("alexa") === "1";
+  } catch {
+    return false;
+  }
+}
+
 function setQuery(change: (q: URLSearchParams) => void): void {
   try {
     const url = new URL(window.location.href);
@@ -52,6 +61,9 @@ export function App() {
   const [start, setStart] = useState<StartChoice | null>(savedStart);
   const [home, setHome] = useState(wantsHome);
   const base = hubBaseUrl();
+  // a first visit by an ?alexa=1 link: make a demo home (as "Try it now" does) and open the Alexa+ view on it
+  const [demoing, setDemoing] = useState(() => !creds && !home && wantsAlexa());
+  const demo = useRef<Promise<DeviceCreds> | null>(null);
 
   const services = useMemo(() => {
     if (!creds) return null;
@@ -67,6 +79,30 @@ export function App() {
     setHome(false);
     setStart(choice);
   };
+
+  useEffect(() => {
+    if (!demoing) return;
+    let alive = true;
+    // one demo home per page load, even when the effect runs twice
+    demo.current ??= tryDemo(base);
+    demo.current.then(
+      (c) => {
+        if (!alive) return;
+        writeJson(KEYS.device, c);
+        setCreds(c);
+        // a quiet start: no read-aloud and no mic prompt
+        if (!savedStart()) choose("quiet");
+        setDemoing(false);
+      },
+      // demo off, too many from here, or no hub: the page it would have shown anyway
+      () => alive && setDemoing(false),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [demoing, base]);
+
+  if (demoing) return <p className="visually-hidden" role="status">Making your demo home…</p>;
 
   if (!start || home) {
     return (

@@ -668,9 +668,10 @@ def build_app(s: SureSay | None = None) -> Starlette:
                          for t in rpc("tools/list", {})["tools"]]
                 calls: list[dict[str, Any]] = []
                 last_understand: dict[str, Any] | None = None
+                latest: dict[str, Any] | None = None  # the newest card set, whichever tool proposed it
 
                 def call(name: str, args: dict[str, Any]) -> str:
-                    nonlocal last_understand
+                    nonlocal last_understand, latest
                     res = rpc("tools/call", {"name": name, "arguments": args})
                     body = res.get("structuredContent")
                     if not isinstance(body, dict):
@@ -681,6 +682,8 @@ def build_app(s: SureSay | None = None) -> Starlette:
                     calls.append({"name": name, "args": args, "result": body})
                     if name == "understand":
                         last_understand = body
+                    if body.get("pending_id"):
+                        latest = body
                     return json.dumps(body, default=str)
 
                 from strands_agent.prompts import SYSTEM_PROMPT
@@ -689,7 +692,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
                 t0 = time.perf_counter()
                 reply = agent(f"The user typed: {text}")
                 return {"reply": reply, "model": LIVE_AGENT_MODEL, "tool_calls": calls, "understand": last_understand,
-                        "ms": round((time.perf_counter() - t0) * 1000)}
+                        "latest": latest or last_understand, "ms": round((time.perf_counter() - t0) * 1000)}
 
         try:
             out = await anyio.to_thread.run_sync(turn)
@@ -756,8 +759,8 @@ def build_app(s: SureSay | None = None) -> Starlette:
         from .app import __version__
 
         return JSONResponse({"name": "suresay", "version": __version__, "mcp": "/mcp", "transport": "streamable-http", "public_demo": s.cfg.public_demo,
-                             "protocol_versions": ["2025-11-25", "2026-07-28"], "backend": s.cfg.backend,
-                             "turn_mode": bridge._mode or "not yet decided"})
+                             "protocol_versions": ["2025-03-26", "2025-06-18", "2025-11-25"], "backend": s.cfg.backend,
+                             "turn_mode": bridge._mode or s.cfg.agent_mode})
 
     async def privacy(request: Request) -> Response:
         return HTMLResponse(_doc_page("Privacy", PRIVACY))

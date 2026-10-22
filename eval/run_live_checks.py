@@ -122,7 +122,7 @@ def conformance(lv: Live) -> None:
              f"front door {after.get('front_door')}")
     st = tool_json(lv.result("tools/call", {"name": "pending_status", "arguments": {"pending_id": w.get("pending_id", "")}}))
     lv.check("pending_status tells the agent it is still waiting", st.get("state") == "waiting_for_user", st.get("state", ""))
-    lv.check("names", {"understand", "confirm", "pending_status", "home_status", "door_lock", "cart_order"} <= names)
+    lv.check("the core tools are listed (understand, confirm, pending_status, home_status, door_lock, cart_order)", {"understand", "confirm", "pending_status", "home_status", "door_lock", "cart_order"} <= names)
 
 
 def latency(lv: Live) -> dict[str, Any]:

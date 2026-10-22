@@ -80,3 +80,14 @@ def test_the_status_line_says_cards_are_waiting_when_maybe_cards_are_shown(hub: 
     assert _invoked({"status": "ask_again", "pending_id": "p_1"}) != "Done"
     assert _invoked({"status": "choose", "pending_id": "p_1"}) != "Done"
     assert _invoked({"status": "answer"}) == "Done"
+
+
+def test_a_maybe_set_carries_its_numbered_cards_like_any_other_set(hub: Any) -> None:
+    from suresay.rank import AbstainRule
+
+    out = hub.say(hub.pair(), "lights")["result"]
+    if out["status"] != "ask_again" or not out.get("pending_id"):
+        pytest.fail(f"'lights' is not unsure with this phrasebook: {out['status']}")
+    assert [c["n"] for c in out["candidates"]] == list(range(1, len(out["candidates"]) + 1))
+    assert all(c["confidence"] >= AbstainRule.maybe_floor for c in out["candidates"])
+

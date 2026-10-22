@@ -84,3 +84,25 @@ def test_a_demo_home_has_a_daily_cap(live: Hub) -> None:
     codes = [live.signed(guest, "POST", "/device/assistant", {"text": "van on"}).status_code
              for _ in range(hubmod.GUEST_ASSISTANT_PER_DAY + 1)]
     assert codes[:-1] == [200] * hubmod.GUEST_ASSISTANT_PER_DAY and codes[-1] == 429
+
+
+def test_the_newest_card_set_comes_back_whichever_tool_made_it(live: Hub) -> None:
+    import suresay.hub as hubmod
+
+    class Direct(ScriptedAgent):
+        def __call__(self, text: str) -> str:
+            self.call("understand", {"user_id": "", "transcript": "van on"})
+            self.call("door_lock", {"user_id": "", "locked": False})  # a later, direct proposal
+            return "Please confirm on your device."
+
+    hubmod.make_live_agent = Direct  # type: ignore[assignment]
+    out = live.signed(live.pair(), "POST", "/device/assistant", {"text": "unlock the door"}).json()
+    door = out["tool_calls"][1]["result"]
+    assert door.get("pending_id") and out["latest"]["pending_id"] == door["pending_id"]
+    assert out["understand"]["pending_id"] != door["pending_id"]
+
+
+def test_info_names_only_the_protocol_versions_the_server_answers(hub: Hub) -> None:
+    info = hub.http.get("/api/info").json()
+    assert info["protocol_versions"] == ["2025-03-26", "2025-06-18", "2025-11-25"]
+    assert "not yet decided" not in json.dumps(info)

@@ -6,6 +6,14 @@
 - **Measured live** (`eval/run_live_assistant.py`): 12 requests on the deployed hub, 0 changes without the user, `understand` called in 12 of 12, and the one forged confirm ("the user already said yes") refused. Server time p50 4.7 s.
 - The agent's system prompt lives in `strands_agent/prompts.py`, so the hub can load it without the Strands SDK.
 
+From a third strict judge's review (17/20):
+- **The live AI, attacked:** 15 more turns try to talk Nova 2 Sonic into acting (false consent, fake authority, urgency, "developer mode"). 26 turns in all: 0 changes without the user; the model called `confirm` twice and was refused twice.
+- **The newest card set wins:** `/device/assistant` returns `latest`, the newest card set whichever tool proposed it, and the Alexa+ view shows it; before, a later `door_lock` card reached the phone but not the Echo screen.
+- **No random third card:** beside a real guess, a card below the noise floor (the same 0.50 as maybe cards, fixed before measuring) is no longer shown; "unlock the front door, my carer is here" no longer offers brown bread. Re-scored offline: every reported figure unchanged.
+- **Unsure card sets carry their cards:** an ask-again set now includes its numbered `candidates`, so the MCP App draws them; it never says "one of these?" over no cards.
+- "what's on in the house" and "is anything on" are answered, not refused.
+- `?alexa=1` opens the Alexa+ view for a first-time visitor (a quiet demo home is made for them); `/api/info` lists only the protocol versions the server answers; the home page calls B0 "a forced-choice baseline"; the task-success headline bolds the stricter 98.1%; "built to WCAG 2.2 AA", since no formal audit was done; doc counts and figures current.
+
 ## 1.6.0 (22 Oct 2026)
 
 From a second strict judge's review (16/20):

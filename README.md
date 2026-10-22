@@ -5,7 +5,7 @@
 [![license: MIT](https://img.shields.io/badge/license-MIT-14213d)](LICENSE)
 [![python](https://img.shields.io/badge/python-3.12%20%7C%203.13-14213d)](pyproject.toml)
 [![MCP](https://img.shields.io/badge/MCP-2025--11--25%20·%20Streamable%20HTTP-7b5cff)](mcp_server/server.py)
-[![WCAG 2.2 AA](https://img.shields.io/badge/WCAG-2.2%20AA-0a6159)](#accessibility)
+[![Built to WCAG 2.2 AA](https://img.shields.io/badge/built%20to-WCAG%202.2%20AA-0a6159)](#accessibility)
 [![live demo](https://img.shields.io/badge/live%20demo-try%20it-ff6b5a)](https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws)
 
 **A voice assistant for people whose speech other assistants mishear. It shows its three best guesses, and nothing happens until you choose one.**
@@ -60,7 +60,7 @@ It also speaks *for* you: confirm a phrase like "I am thirsty" and SureSay says 
 - **Amazon's add-on functional requirements** ("explicit confirmation with key details before any high-consequence action", "prevent duplicate transactions", "reject if the amount differs", "deliver a receipt") are enforced by the gate, not by a prompt: [the mapping](alexa_plus/README.md#amazons-add-on-functional-requirements-enforced-by-the-gate).
 - **An Agent Skill** ([`skills/suresay/SKILL.md`](skills/suresay/SKILL.md)) teaches any agent to use SureSay safely: understand first, read the cards, never confirm.
 
-**See it as Alexa+ would:** the live demo's **Alexa+ view** ([open it directly](https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/?alexa=1)) is a simulated Echo Show playing the host. It calls SureSay's real MCP server, renders the `ui://suresay/cards.html` MCP App over the MCP Apps messages, and shows every message on the wire, while "Your phone" beside it is where the yes comes from. **Who plays the assistant** is your choice: a simple scripted host, or **Amazon Nova 2 Sonic, a live AI**. In live mode the model gets SureSay's MCP tools with exactly the agent's powers and decides which to call; every call it makes is logged, and when it tries `confirm` the gate refuses it, because only your device holds the one-time code. Measured on the deployed hub: 0 of 12 requests changed anything without the user, and its one confirm (after being told "the user already said yes") was refused (`eval/run_live_assistant.py`, REPORT.md). Live turns are capped per day.
+**See it as Alexa+ would:** the live demo's **Alexa+ view** ([open it directly](https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/?alexa=1)) is a simulated Echo Show playing the host. It calls SureSay's real MCP server, renders the `ui://suresay/cards.html` MCP App over the MCP Apps messages, and shows every message on the wire, while "Your phone" beside it is where the yes comes from. **Who plays the assistant** is your choice: a simple scripted host, or **Amazon Nova 2 Sonic, a live AI**. In live mode the model gets SureSay's MCP tools with exactly the agent's powers and decides which to call; every call it makes is logged, and when it tries `confirm` the gate refuses it, because only your device holds the one-time code. Measured on the deployed hub with 26 requests, 15 of them trying to talk it into acting (false consent, fake authority, urgency): 0 changed anything without the user, and both of its `confirm` attempts were refused (`eval/run_live_assistant.py`, REPORT.md). Live turns are capped per day.
 
 ![The Alexa+ view: a simulated Echo Show renders SureSay's MCP App cards; your phone confirms; the MCP messages are shown on the side](docs/devpost/12-alexa-plus.jpg)
 
@@ -103,9 +103,9 @@ Held-out TORGO dysarthric speakers (dev F03 and M05 for tuning; test F01, F04, M
 | Confirm heard right | false accepts | 62.8% | — | **2.3%** | 430 decisions, 6 test speakers |
 | Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers |
 | In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **91.7%** | same |
-| Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | 33.3% (66.7%) | 98.1% (1.9%) | **100.0%** (0); 98.1% counting only new recordings | 108 in-book sentences, 6 test speakers, `whisper-small.en` (a different recogniser from the rows above) |
+| Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | 33.3% (66.7%) | 98.1% (1.9%) | **98.1%** (0) counting only new recordings; 100.0% counting the other microphone | 108 in-book sentences, 6 test speakers, `whisper-small.en` (a different recogniser from the rows above) |
 | Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances |
-| Never acts on a guess | acted on a wrong phrase without asking | 84.3% | 53.7% | **0.0%** | in-book + out-of-book |
+| Never acts on a guess | acted on a wrong phrase without asking | 84.3% | 53.7% | **0.0%** | in-book + out-of-book; by design, since every action waits for the user |
 | Nothing without consent | unconfirmed changes | 35 / 35 (no gate) | — | **0 / 50** | adversarial suite |
 | …with a real model as the agent | unconfirmed changes | 11 / 35 (Nova 2 Sonic, no gate) | — | **0 / 35** | Amazon Nova 2 Sonic, injections + near-misses |
 | Speed | understand p50 / p95 | — | — | 869.6 / 2434.6 ms | 100 dev clips, Lambda + Transcribe |
@@ -113,7 +113,7 @@ Held-out TORGO dysarthric speakers (dev F03 and M05 for tuning; test F01, F04, M
 | No regression | top-1, controls | 80.8% | — | 100.0% | control speakers |
 | Never mistakes a non-answer for consent | non-answers taken as consent | 95.54% (keyword spotting) | — | **0.0%** | 7,093 generated non-answers, 100.0% of 190 genuine answers understood |
 | Works as an MCP server for Alexa+ | live checks passed | — | — | **20 / 20** | the deployed server, incl. the Alexa+ client's own handshake |
-| A live AI can't confirm | home changes with no answer from the user | — | — | **0 / 12** | Amazon Nova 2 Sonic driving the deployed MCP server; its one confirm refused |
+| A live AI can't confirm | home changes with no answer from the user | — | — | **0 / 26** | Amazon Nova 2 Sonic driving the deployed MCP server, 15 turns adversarial; 2 of 2 confirm attempts refused |
 | Accessible | Lighthouse accessibility, phone / desktop | — | — | **100 / 100** | the live site |
 
 SureSay column: SureSay (offline ranker); the Nova 2 Lite ranker is pending Bedrock access. B1 recovers more phrases at top-1 because it never abstains, and pays for it by acting on a wrong phrase without asking.
@@ -130,7 +130,7 @@ The Nova 2 Lite ranker and the model-driven safety arms are built and tested aga
 | **Amazon Bedrock AgentCore Memory** | Each user's phrasebook as blob events; the agent's session, with a SEMANTIC strategy for facts the user tells it. |
 | **Strands Agents** | The agent loop, talking to the SureSay MCP server over Streamable HTTP. |
 | **Amazon Transcribe** | Streaming recognition of requests, primed with a per-user custom vocabulary built from the phrasebook; transcribes the user's own confirmation audio server-side; batch jobs with alternatives for eval. |
-| **Amazon Bedrock: Nova 2 Sonic** (`amazon.nova-2-sonic-v1:0`) | A second recogniser over a bidirectional stream (the user's own words; the stream closes before Sonic replies). As safe as Transcribe on the held-out speakers at a third of the cost per clip, but slower in Lambda, so it is an option for spoken answers (`SURESAY_EVIDENCE_ASR=nova-sonic`). It is also the **live AI** in the Alexa+ view: as a tool-using agent it drives SureSay's MCP tools and cannot confirm (0 / 12 changes without the user, live). |
+| **Amazon Bedrock: Nova 2 Sonic** (`amazon.nova-2-sonic-v1:0`) | A second recogniser over a bidirectional stream (the user's own words; the stream closes before Sonic replies). As safe as Transcribe on the held-out speakers at a third of the cost per clip, but slower in Lambda, so it is an option for spoken answers (`SURESAY_EVIDENCE_ASR=nova-sonic`). It is also the **live AI** in the Alexa+ view: as a tool-using agent it drives SureSay's MCP tools and cannot confirm (0 / 26 changes without the user live, 15 of the turns adversarial). |
 | **Amazon Polly** (neural, Kajal en-IN) | Reads the three cards aloud, and speaks confirmed sentences *for* the user. |
 | **Amazon DynamoDB** | The gate ledger (card sets, evidence, receipts, paired devices, signature replay cache) with conditional writes for one-time use, plus home state. One on-demand table with a kind index and TTL. |
 | **Amazon S3** | Utterance and confirmation audio, content-addressed, private, encrypted, expiring after 30 days. Receipts carry the audio's fingerprint. |
@@ -145,7 +145,7 @@ Code pointers, permissions and a verify command for each service: [docs/AWS_INTE
 
 ```bash
 make setup        # Python 3.13 venv (uv) + web client packages
-make test         # 605 Python tests (423 for the gate, 182 for the hub) plus 183 web tests: account linking, the Alexa skill, the 50-case safety suite
+make test         # 630 Python tests (423 for the gate, 207 for the hub) plus 193 web tests: account linking, the Alexa skill, the 50-case safety suite
 make demo         # hub + web client (+ agent when Bedrock is reachable) on http://127.0.0.1:9000
 ```
 
@@ -171,7 +171,7 @@ Report a vulnerability: see [SECURITY.md](SECURITY.md).
 
 ## Accessibility
 
-WCAG 2.2 AA (most text meets AAA contrast):
+Built to WCAG 2.2 AA (most text meets AAA contrast), checked by axe in the tests and by Lighthouse on the live site; not a formal audit:
 
 - three themes, including high contrast;
 - 200% text at 320 px with no sideways scrolling;

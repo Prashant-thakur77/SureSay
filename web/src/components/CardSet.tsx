@@ -186,8 +186,9 @@ export function CardSet({ set, deadline, busy, tv, devices, onChoose, onSpace, o
             What would you <em>like to do?</em>
           </h3>
         ) : unsure ? (
-          <h3 id="cards-title" className="cardset__maybe-title display">
-            Or is it <em>one of these?</em>
+          // with no maybe cards there is nothing to point at: the ask-again line above says it all
+          <h3 id="cards-title" className={`cardset__maybe-title display${set.options.length === 0 ? " visually-hidden" : ""}`}>
+            {set.options.length > 0 ? <>Or is it <em>one of these?</em></> : "No guesses to show"}
           </h3>
         ) : (
           <h2 id="cards-title" className="stage__title display">

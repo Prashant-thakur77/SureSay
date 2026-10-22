@@ -1,11 +1,31 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import axe from "axe-core";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "../App";
+import { hubState } from "./fixtures";
 
 const PAIR_LABEL = "Enter the 6-digit code shown where SureSay is running";
+const GUEST = { device_id: "d_guest", user_id: "guest-1a2b3c4d5e", key: "LF5iGtLB8VTa1zGePWNsBO3mm3sLmHsTkEATr-QOkPo", name: "Demo visitor", demo: true };
 
-afterEach(() => window.history.replaceState(null, "", "/"));
+/** A hub with the public demo: /device/try answers with a guest device, or with `tryStatus` when it refuses. */
+function stubHub(tryStatus = 200) {
+  const calls: string[] = [];
+  vi.stubGlobal("fetch", vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+    const url = new URL(typeof input === "string" ? input : input instanceof URL ? input.href : input.url, "http://hub/");
+    calls.push(`${init?.method ?? "GET"} ${url.pathname}`);
+    const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+    if (url.pathname === "/api/info") return json({ name: "suresay", public_demo: true });
+    if (url.pathname === "/device/try") return tryStatus === 200 ? json(GUEST) : json({ error: "nope" }, tryStatus);
+    if (url.pathname === "/device/state") return json(hubState([]));
+    return json({ error: "not in this test" }, 404);
+  }));
+  return calls;
+}
+
+afterEach(() => {
+  window.history.replaceState(null, "", "/");
+  vi.unstubAllGlobals();
+});
 
 describe("the home page", () => {
   it("tells the story in chapters, with a site navigation and no axe violations", async () => {
@@ -45,4 +65,40 @@ describe("the home page", () => {
     expect(window.location.search).toBe("");
     expect(await screen.findByLabelText(PAIR_LABEL)).toBeTruthy();
   });
+
+  it("?alexa=1 with no device makes a demo home, starts quietly and opens straight into the Alexa+ view", async () => {
+    const calls = stubHub();
+    window.history.replaceState(null, "", "/?alexa=1");
+    render(<App />);
+    expect(await screen.findByRole("dialog", { name: /SureSay on a simulated Alexa\+ screen/ })).toBeTruthy();
+    expect(calls.filter((c) => c === "POST /device/try")).toHaveLength(1);
+    expect(JSON.parse(window.localStorage.getItem("suresay.start") ?? "null")).toBe("quiet");
+    expect(JSON.parse(window.localStorage.getItem("suresay.device") ?? "{}").device_id).toBe("d_guest");
+    expect(screen.queryByRole("heading", { level: 1, name: "Say it your way. Nothing happens until you choose." })).toBeNull();
+  });
+
+  it("?alexa=1 falls back to the home page when the hub won't make a demo home", async () => {
+    const calls = stubHub(429);
+    window.history.replaceState(null, "", "/?alexa=1");
+    render(<App />);
+    expect(await screen.findByRole("heading", { level: 1, name: "Say it your way. Nothing happens until you choose." })).toBeTruthy();
+    await waitFor(() => expect(calls).toContain("POST /device/try"));
+    expect(window.localStorage.getItem("suresay.device")).toBeNull();
+  });
+
+  it("?home with ?alexa=1 still shows the home page and makes no demo home", async () => {
+    const calls = stubHub();
+    window.history.replaceState(null, "", "/?home&alexa=1");
+    render(<App />);
+    expect(screen.getByRole("heading", { level: 1, name: "Say it your way. Nothing happens until you choose." })).toBeTruthy();
+    await new Promise((r) => setTimeout(r, 20));
+    expect(calls).not.toContain("POST /device/try");
+  });
+
+  it("calls the forced-choice baseline what it is", () => {
+    render(<App />);
+    expect(document.body.textContent).not.toMatch(/plain assistant wrongly took/);
+    expect(document.body.textContent).toMatch(/a forced-choice baseline wrongly took as a “yes” or a choice/);
+  });
 });
+

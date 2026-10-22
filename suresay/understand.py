@@ -107,7 +107,10 @@ def understand(app: SureSay, user_id: str, *, transcript: str | None = None, aud
                                   context={"heard": heard.text, "asr": heard.engine, "ranker": ranked.engine,
                                            "utterance_ref": audio_ref, "unsure": True,
                                            "confidence": [c.confidence for c in weak]})
-            out.update(pending_id=ps.pending_id, stage=app.gate.public_view(ps)["stage"],
+            view = app.gate.public_view(ps)
+            conf = {i + 1: c.confidence for i, c in enumerate(weak)}
+            out.update(pending_id=ps.pending_id, stage=view["stage"],
+                       candidates=[{**o, "confidence": conf.get(o["n"])} for o in view["options"]],
                        say="I'm not sure I got that. Please say it again, or pick one if it's right.")
         return out
 
@@ -118,6 +121,9 @@ def understand(app: SureSay, user_id: str, *, transcript: str | None = None, aud
                 "say": app.describe_read(top.action, result)}
 
     writes = [c for c in ranked.candidates if c.action in catalog.WRITE_ACTIONS][:3]
+    # beside a real guess, a card below the noise floor (the same 0.50 as "maybe" cards) is a random idea: drop it
+    floor = getattr(getattr(app.ranker, "rule", None), "maybe_floor", 0.5)
+    writes = writes[:1] + [c for c in writes[1:] if c.confidence >= floor]
     ps = app.gate.propose(user_id, [(c.action, c.args, c.text) for c in writes], origin="user_words",
                           context={"heard": heard.text, "asr": heard.engine, "ranker": ranked.engine,
                                    "utterance_ref": audio_ref,

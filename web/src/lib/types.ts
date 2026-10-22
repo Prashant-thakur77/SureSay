@@ -245,5 +245,7 @@ export interface AssistantTurn {
   model: string;
   tool_calls: Array<{ name: string; args: Record<string, unknown>; result: Record<string, unknown> | null }>;
   understand: Record<string, unknown> | null;
+  /** The newest card set any tool made this turn (understand, door_lock, ...); older hubs leave it out. */
+  latest?: Record<string, unknown> | null;
   ms: number;
 }

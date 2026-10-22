@@ -217,6 +217,16 @@ describe("maybe cards (not sure)", () => {
     expect(spokenUnsure(unsure)).toBe("I'm not sure. Please say it again, or say a number if one of these is right: One: Turn on the bedroom fan. Two: Turn off the bedroom fan.");
   });
 
+  it("never says “one of these” when there are no maybe cards to show", async () => {
+    const empty = cardSet({ pending_id: "p_empty", options: [], context: { heard: "mmf", unsure: true, confidence: [] } });
+    expect(spokenUnsure(empty)).toBe("I'm not sure. Please say it again.");
+    renderMain([empty]);
+    await screen.findByRole("heading", { name: "I'm not sure I got that." });
+    expect(screen.getByRole("button", { name: "Say it again" })).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/one of these\?|pick one below/i);
+    await waitFor(() => expect(screen.getByTestId("live-assertive").textContent).toBe("Not sure. Please say it again."));
+  });
+
   it("puts “Say it again” first, keeps the maybe cards confirmable, and passes axe", async () => {
     const { hub } = renderMain([unsure]);
     await screen.findByRole("heading", { name: "I'm not sure I got that." });

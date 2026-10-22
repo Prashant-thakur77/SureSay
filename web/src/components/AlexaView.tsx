@@ -168,8 +168,10 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
           log("→", `Nova: tools/call ${c.name} ${JSON.stringify(c.args)}`);
           log("←", `${typeof status === "string" ? status : "ok"}${c.name === "confirm" ? " (only your device can confirm)" : ""}`);
         }
-        if (out.understand) {
-          await present({ content: [{ type: "text", text: JSON.stringify(out.understand) }], structuredContent: out.understand });
+        // the newest card set, whichever tool made it (a door_lock after an ask-again understand is the door card)
+        const shown = out.latest ?? out.understand;
+        if (shown) {
+          await present({ content: [{ type: "text", text: JSON.stringify(shown) }], structuredContent: shown });
         }
         log("←", `Nova replied in ${(out.ms / 1000).toFixed(1)} s`);
         setReply(out.reply || "Done.");

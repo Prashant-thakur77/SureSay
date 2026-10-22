@@ -157,7 +157,7 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
               <h2 className="stage__title display">
                 I'm not sure <em>I got that.</em>
               </h2>
-              <p className="stage__lead">Please say it again. Or pick one below if it's right.</p>
+              <p className="stage__lead">{phase.set.options.length > 0 ? "Please say it again. Or pick one below if it's right." : "Please say it again."}</p>
               <button ref={againRef} type="button" className="btn btn--primary btn--xl unsure__again" onClick={actions.startRequest} {...againMark}>
                 <Icon name="mic" size={28} /> Say it again
               </button>

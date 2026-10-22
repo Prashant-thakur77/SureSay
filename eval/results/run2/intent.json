@@ -1,7 +1,7 @@
 {
   "name": "intent",
-  "generated_at": "2026-10-22T15:51:14+0530",
-  "git_sha": "ffe9c48",
+  "generated_at": "2026-10-22T16:24:13+0530",
+  "git_sha": "68d5e05",
   "python": "3.13.12",
   "claim": "2, 2b, 5",
   "asr_engine": "transcribe-streaming",
@@ -53,7 +53,7 @@
         "top3_pct": 96.3,
         "false_abstain_pct": 0.0,
         "correct_abstain_pct": 0.0,
-        "in_cards_with_maybe_pct": 96.3,
+        "in_cards_with_maybe_pct": 95.4,
         "maybe_cards_on_out_of_book_pct": 0.0,
         "acted_without_asking_wrong_pct": 53.7
       },
@@ -158,7 +158,7 @@
             "top3_pct": 100.0,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 0.0,
-            "in_cards_with_maybe_pct": 100.0,
+            "in_cards_with_maybe_pct": 95.0,
             "maybe_cards_on_out_of_book_pct": 0.0,
             "acted_without_asking_wrong_pct": 57.5
           },

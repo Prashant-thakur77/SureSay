@@ -136,6 +136,45 @@ describe("the Alexa+ view with a live AI", () => {
     expect(log).not.toContain(NONCE);
   });
 
+  it("shows the newest card set the model made, even when a later tool (not understand) made it", async () => {
+    const door = { status: "choose", pending_id: "p_door", stage: "final", heard: "front door", candidates: [{ n: 1, text: "Unlock the front door", risk: "high" }] };
+    const assistant = vi.fn(async () => ({
+      reply: "Do you want me to unlock the front door?", model: "amazon.nova-2-sonic-v1:0", ms: 1800,
+      tool_calls: [
+        { name: "understand", args: { transcript: "front door" }, result: { status: "ask_again", candidates: [] } },
+        { name: "door_lock", args: { locked: false }, result: door },
+      ],
+      understand: { status: "ask_again", candidates: [] },
+      latest: door,
+    }));
+    const onNewSet = vi.fn();
+    renderAlexa({ kind: "idle" }, { assistant, onNewSet });
+    fireEvent.click(screen.getByRole("radio", { name: /Amazon Nova 2 Sonic/ }));
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "front door" } });
+    fireEvent.submit(screen.getByRole("textbox").closest("form")!);
+    await waitFor(() => expect(onNewSet).toHaveBeenCalledWith("p_door"));
+    // the cards app on the Echo gets the door card set, not the empty ask-again
+    const frame = (await screen.findByTitle("SureSay cards (MCP App)")) as HTMLIFrameElement;
+    const win = frame.contentWindow!;
+    const sent = vi.spyOn(win, "postMessage").mockImplementation(() => undefined);
+    window.dispatchEvent(new MessageEvent("message", { data: { jsonrpc: "2.0", method: "ui/notifications/initialized" }, source: win }));
+    const results = sent.mock.calls.map((c) => c[0] as { method?: string; params?: { structuredContent?: { pending_id?: string } } }).filter((m) => m.method === "ui/notifications/tool-result");
+    expect(results.at(-1)?.params?.structuredContent?.pending_id).toBe("p_door");
+  });
+
+  it("falls back to the understand result when the hub sends no latest", async () => {
+    const assistant = vi.fn(async () => ({
+      reply: "Here you go.", model: "amazon.nova-2-sonic-v1:0", ms: 900, tool_calls: [],
+      understand: { status: "choose", pending_id: "p_u", candidates: [{ n: 1, text: "Turn on the TV" }] },
+    }));
+    const onNewSet = vi.fn();
+    renderAlexa({ kind: "idle" }, { assistant, onNewSet });
+    fireEvent.click(screen.getByRole("radio", { name: /Amazon Nova 2 Sonic/ }));
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "tv on" } });
+    fireEvent.submit(screen.getByRole("textbox").closest("form")!);
+    await waitFor(() => expect(onNewSet).toHaveBeenCalledWith("p_u"));
+  });
+
   it("offers no live AI choice when the hub has none", () => {
     renderAlexa({ kind: "idle" });
     expect(screen.queryByRole("radio", { name: /Amazon Nova 2 Sonic/ })).toBeNull();

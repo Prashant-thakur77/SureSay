@@ -36,6 +36,7 @@ export function isUnsure(set: Pick<PendingSet, "context">): boolean {
 /** Read-back for "maybe" cards. */
 export function spokenUnsure(set: Pick<PendingSet, "options" | "stage">): string {
   if (set.stage === "final") return `I'm not sure. Please say it again, or say yes if this is right: ${set.options[0]?.text ?? ""}?`;
+  if (set.options.length === 0) return "I'm not sure. Please say it again.";
   const parts = set.options.map((o) => `${numberWord(o.n)}: ${o.text}.`);
   return `I'm not sure. Please say it again, or say a number if one of these is right: ${parts.join(" ")}`;
 }
@@ -49,6 +50,7 @@ export function announceChoices(set: PendingSet): string {
   }
   if (isUnsure(set)) {
     const n = set.options.length;
+    if (n === 0) return "Not sure. Please say it again.";
     return `Not sure. ${n} possible ${n === 1 ? "match" : "matches"}.`;
   }
   const who = set.origin === "assistant" ? "The assistant suggested this. You did not ask for it. " : "";

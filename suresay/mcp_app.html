@@ -104,10 +104,10 @@ function render() {
   const heard = document.getElementById("heard");
   if (res.heard) { heard.hidden = false; heard.textContent = `I heard: “${res.heard}”`; }
   const unsure = res.status === "ask_again";
-  document.getElementById("title").innerHTML = unsure ? "Not sure. <em>Say it again</em> — or is it one of these?" :
+  const cards = (res.candidates || []).filter((c) => Number.isInteger(c.n) && c.n >= 1 && c.n <= 9 && typeof c.text === "string");
+  document.getElementById("title").innerHTML = unsure ? (cards.length ? "Not sure. <em>Say it again</em> — or is it one of these?" : "Not sure. <em>Say it again.</em>") :
     res.stage === "final" ? "This one asks twice:" : "Did you <em>mean</em>…";
   list.classList.toggle("maybe", unsure);
-  const cards = (res.candidates || []).filter((c) => Number.isInteger(c.n) && c.n >= 1 && c.n <= 9 && typeof c.text === "string");
   cards.forEach((c) => {
     const li = document.createElement("li"); const b = document.createElement("button"); b.className = "card"; b.dataset.n = String(c.n);
     b.setAttribute("aria-label", `Option ${c.n}: ${c.text}${c.risk === "high" ? ". Asks twice" : ""}${unsure ? ". Maybe" : ""}`);

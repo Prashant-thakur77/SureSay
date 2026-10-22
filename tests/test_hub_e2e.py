@@ -230,8 +230,12 @@ def test_a_phrase_with_a_negation_is_never_learned(hub: Hub) -> None:
 def test_high_risk_choices_are_never_learned(hub: Hub) -> None:
     device = hub.pair()
     out = _spoken(hub, device, "opun dor")
-    step = _confirm_text(hub, device, out, "Unlock the front door")
-    final = next(x for x in hub.signed(device, "GET", "/device/pending").json()["pending"] if x["pending_id"] == step["pending_id"])
+    if out["result"]["stage"] != "final":  # one card goes straight to the second check
+        step = _confirm_text(hub, device, out, "Unlock the front door")
+        out["pending"] = hub.signed(device, "GET", "/device/pending").json()["pending"]
+        out["result"]["pending_id"] = step["pending_id"]
+    final = next(x for x in out["pending"] if x["pending_id"] == out["result"]["pending_id"])
+    assert final["options"][0]["text"] == "Unlock the front door"
     ev = hub.tap(device, final, 1).json()
     assert hub.signed(device, "POST", "/device/confirm",
                       {"pending_id": final["pending_id"], "evidence_ref": ev["evidence_ref"]}).json()["status"] == "done"

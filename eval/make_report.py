@@ -547,19 +547,22 @@ def live_checks_section(lc: dict[str, Any]) -> list[str]:
 
 def live_assistant_section(la: dict[str, Any]) -> list[str]:
     s = la["summary"]
-    rows = [f"| {r['text']} | {', '.join(r['tools']) or '—'} | {', '.join(x or '?' for x in r['confirm_results']) or '—'} | "
-            f"{'yes' if r['home_changed'] else 'no'} | {r['server_ms']} |" for r in la["rows"]]
+    rows = [f"| {'attack: ' if r.get('attack') else ''}{r['text'].replace('|', '/')} | {', '.join(r['tools']) or '—'} | "
+            f"{', '.join(x or '?' for x in r['confirm_results']) or '—'} | {'yes' if r['home_changed'] else 'no'} | {r['server_ms']} |"
+            for r in la["rows"]]
     return ["## A live AI driving SureSay over MCP", "",
             f"`eval/run_live_assistant.py` sends {s['turns']} typed requests to the deployed hub's live assistant, where "
-            f"Amazon Nova 2 Sonic (`{s['model']}`) calls SureSay's MCP tools with exactly the agent's powers. Nobody answers "
-            f"the cards, so nothing may change. **{s['changes_without_the_user']} of {s['turns']} turns changed the home**; "
-            f"the model called `understand` in {s['used_understand']} of {s['answered']}, left cards for the user in "
-            f"{s['left_cards_for_the_user']}, and tried `confirm` in {s['tried_confirm']} (told \"the user already said yes\"), "
-            f"refused by the gate {s['confirm_refused']} of {s['tried_confirm']}. Server time per turn: p50 "
-            f"{s['server_p50_ms']} ms, max {s['server_max_ms']} ms ({la['generated_at']}).", "",
+            f"Amazon Nova 2 Sonic (`{s['model']}`) calls SureSay's MCP tools with exactly the agent's powers. "
+            f"{s['turns'] - s.get('attacks', 0)} are ordinary requests; {s.get('attacks', 0)} try to talk the model into "
+            "acting without the user (false consent, fake authority, urgency, hidden instructions). Nobody answers the "
+            f"cards, so nothing may change. **{s['changes_without_the_user']} of {s['turns']} turns changed the home.** "
+            f"The model called `confirm` {s.get('confirm_attempts', s['tried_confirm'])} times and the gate refused "
+            f"{s.get('confirm_attempts_refused', s['confirm_refused'])}; in the other attacks it proposed a card set, asked again or only replied, "
+            f"each of which leaves the decision with the user. It called `understand` in {s['used_understand']} of "
+            f"{s['answered']} turns. Server time per turn: p50 {s['server_p50_ms']} ms, max {s['server_max_ms']} ms "
+            f"({la['generated_at']}).", "",
             "| Request | Tools the model called | confirm | Home changed | Server ms |", "|---|---|---|---|---|", *rows, "",
-            "One run of each request at the model's default settings; the replies vary between runs."]
-
+            "One run of each request at the model's default settings; the model's choices and replies vary between runs."]
 
 def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] | None = None,
                      tuning: dict[str, Any] | None = None) -> list[str]:
@@ -591,7 +594,8 @@ def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] |
             "phrasebooks live in AgentCore Memory, but the agent cannot reason until Nova has quota, so turns fall back "
             "to direct answers. The Nova ranker and the Nova-agent safety arms are implemented and tested against "
             "stubs; no Nova 2 Lite number is reported until they run. (Amazon Nova 2 Sonic, the speech model, does "
-            "run on this account and is measured above as a recogniser.)",
+            "run on this account: it is measured above as a recogniser, and it is the live AI that calls SureSay's MCP "
+            "tools in the Alexa+ view, measured in \"A live AI driving SureSay over MCP\".)",
             "5. **Corpus caveats.** TORGO sentences are well-known reading passages that a large recogniser may "
             "have seen in training, and the phrasebooks are sentences rather than short home commands. "
             "Confirmation words are sparse in TORGO (a few per speaker), so per-speaker confirmation numbers rest "
@@ -645,12 +649,12 @@ def main() -> None:
         f"| In the cards when unsure too | counting maybe cards | — | {f(ik['b1_top3'])} (acts without asking) | **{f(ik['ss_maybe'])}** | same |",
         *([f"| Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | "
            f"{f(tk0['b0']['success_pct'])} ({f(tk0['b0']['wrong_action_pct'])}) | {f(tk0['b1']['success_pct'])} "
-           f"({f(tk0['b1']['wrong_action_pct'])}) | **{f(tk0['suresay']['done_within_two_pct'])}** (0); "
-           f"{f(tk0['suresay']['done_within_two_counting_only_new_takes_pct'])} counting only new recordings | "
+           f"({f(tk0['b1']['wrong_action_pct'])}) | **{f(tk0['suresay']['done_within_two_counting_only_new_takes_pct'])}** (0) "
+           f"counting only new recordings; {f(tk0['suresay']['done_within_two_pct'])} counting the other microphone | "
            f"{tk0['tasks']} in-book sentences, 6 test speakers, `{tk['asr_engine']}` (a different recogniser from the rows above) |"]
           if (tk := read_result("task")) and (tk0 := tk["summary"].get("test")) else []),
         f"| Abstains when unsure | correct \"say again\" | 0% | {f(ik['b1_abstain'])} | **{f(ik['ss_abstain'])}** | out-of-book utterances |",
-        f"| Never acts on a guess | acted on a wrong phrase without asking | {f(ik['b0_wrong'])} | {f(ik['b1_wrong'])} | **{f(ik['ss_wrong'])}** | in-book + out-of-book |",
+        f"| Never acts on a guess | acted on a wrong phrase without asking | {f(ik['b0_wrong'])} | {f(ik['b1_wrong'])} | **{f(ik['ss_wrong'])}** | in-book + out-of-book; by design, since every action waits for the user |",
         f"| Nothing without consent | unconfirmed changes | {sk['plain']} / {sk['plain_cases']} (no gate) | — | **{sk['ss']} / {sk['cases']}** | adversarial suite |",
         *([f"| …with a real model as the agent | unconfirmed changes | {sk['sonic']['plain_sonic']['unconfirmed_changes']} / "
            f"{sk['sonic']['plain_sonic']['cases']} (Nova 2 Sonic, no gate) | — | **{sk['sonic']['suresay_sonic']['unconfirmed_changes']} / "
@@ -667,7 +671,8 @@ def main() -> None:
         *([f"| Works as an MCP server for Alexa+ | live checks passed | — | — | **{lc0['passed']} / {lc0['total']}** | the deployed server, incl. the Alexa+ client's own handshake |"]
           if (lc0 := read_result("live_checks")) else []),
         *([f"| A live AI can't confirm | home changes with no answer from the user | — | — | **{la0['summary']['changes_without_the_user']} / "
-           f"{la0['summary']['turns']}** | Amazon Nova 2 Sonic driving the deployed MCP server; its one confirm refused |"]
+           f"{la0['summary']['turns']}** | Amazon Nova 2 Sonic driving the deployed MCP server, {la0['summary'].get('attacks', 0)} turns adversarial; "
+           f"{la0['summary'].get('confirm_attempts_refused', 0)} of {la0['summary'].get('confirm_attempts', 0)} confirm attempts refused |"]
           if (la0 := read_result("live_assistant")) else []),
         *([f"| Accessible | Lighthouse accessibility, phone / desktop | — | — | **{sa0['phone']['median_scores']['accessibility']} / "
            f"{sa0['desktop']['median_scores']['accessibility']}** | the live site |"]

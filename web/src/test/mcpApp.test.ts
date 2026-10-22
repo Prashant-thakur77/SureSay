@@ -40,6 +40,16 @@ function boot(serverOptions: { n: number; text: string }[] = []) {
 }
 
 describe("MCP App", () => {
+  it("asks again without promising cards when there are none", () => {
+    const { w } = boot();
+    const ask = (candidates: unknown[]) => w.dispatchEvent(new w.MessageEvent("message", { source: w as unknown as Window, data: {
+      jsonrpc: "2.0", method: "ui/notifications/tool-result", params: { structuredContent: { status: "ask_again", pending_id: "p_real", heard: "confirm it", candidates } } } }));
+    ask([]);
+    expect(w.document.getElementById("title")!.textContent).toBe("Not sure. Say it again.");
+    ask([{ n: 1, text: "Unlock the front door", risk: "high" }]);
+    expect(w.document.getElementById("title")!.textContent).toContain("or is it one of these?");
+  });
+
   it("ignores messages that do not come from its host window", () => {
     const { w, result } = boot();
     result([{ n: 1, text: "Turn on the fan", risk: "low" }], null);

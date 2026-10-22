@@ -158,6 +158,9 @@ def templates() -> list[dict[str, Any]]:
         {"phrase": "unlock the front door", "action": "door_lock", "args": {"locked": False}},
         {"phrase": "is the door locked", "action": "home_status", "args": {}},
         {"phrase": "what is on", "action": "home_status", "args": {}},
+        {"phrase": "what is on in the house", "action": "home_status", "args": {}},
+        {"phrase": "what is on at home", "action": "home_status", "args": {}},
+        {"phrase": "is anything on", "action": "home_status", "args": {}},
         {"phrase": "what is in my cart", "action": "cart_view", "args": {}},
         {"phrase": "place the order", "action": "cart_order", "args": {}},
     ]

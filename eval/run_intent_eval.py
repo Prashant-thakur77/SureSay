@@ -130,9 +130,11 @@ def metrics(rows: list[dict[str, Any]], system: str) -> dict[str, Any]:
         sres = r[system]
         if system in ("b0",):
             return sres["exact"]
-        if not sres["abstain"]:
-            return r["truth"] in sres["top"][:3]
         conf = sres.get("conf") or []
+        if not sres["abstain"]:
+            # beside the top guess, only cards at or above the noise floor are shown (suresay.understand)
+            return any(t == r["truth"] and (i == 0 or c >= MAYBE_FLOOR)
+                       for i, (t, c) in enumerate(zip(sres["top"][:3], conf or [1.0] * 3, strict=False)))
         rel = sres.get("rel") or [True] * len(conf)
         return any(t == r["truth"] and c >= MAYBE_FLOOR and ok
                    for t, c, ok in zip(sres["top"][:3], conf, rel, strict=False))
