@@ -42,3 +42,10 @@ def test_a_guest_code_pairs_only_into_the_guests_own_demo_home(hub: Hub) -> None
     code = hub.signed(guest, "POST", "/device/pair-code", {}).json()["code"]
     screen = hub.http.post("/device/pair", json={"code": code, "name": "screen"}).json()
     assert screen["user_id"] == guest.user_id and screen["user_id"].startswith("guest-")
+
+
+def test_a_code_dies_with_the_device_that_made_it(hub: Hub) -> None:
+    phone = hub.pair()
+    code = hub.signed(phone, "POST", "/device/pair-code", {}).json()["code"]
+    assert hub.signed(phone, "POST", "/device/unpair", {"device_id": phone.device_id}).status_code == 200
+    assert hub.http.post("/device/pair", json={"code": code, "name": "screen"}).status_code != 200

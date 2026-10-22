@@ -27,6 +27,13 @@ if TYPE_CHECKING:
 Device = Literal["living_lights", "bedroom_lights", "fan", "ac", "tv"]
 
 
+def _invoked(out: dict[str, Any]) -> str:
+    """The status line under the cards: cards waiting (confident or "maybe") or done."""
+    if out.get("pending_id"):
+        return "Choose a card on your screen, or say its number"
+    return "Please say it again" if out.get("status") == "ask_again" else "Done"
+
+
 def _result(payload: dict[str, Any], meta: dict[str, Any] | None = None) -> CallToolResult:
     """The tool's JSON as text and as structured content (what every client reads), plus an optional _meta."""
     return CallToolResult(content=[TextContent(type="text", text=json.dumps(payload))], structured_content=payload,
@@ -53,8 +60,7 @@ def register_tools(app: SureSay) -> None:
         ref = check_ref(audio_ref) if audio_ref else None
         out = run_understand(app, caller_user, transcript=transcript or None, audio_ref=ref)
         # Alexa+ renders custom visuals when the tool *response* names its UI; invoking/invoked are its status lines
-        ui = {"resourceUri": CARDS_UI, "invoking": "Working out what you meant…",
-              "invoked": "Choose a card on your screen, or say its number" if out.get("status") == "choose" else "Done"}
+        ui = {"resourceUri": CARDS_UI, "invoking": "Working out what you meant…", "invoked": _invoked(out)}
         return _result(out, meta={"ui": ui})
 
     # reads ------------------------------------------------------------------------------

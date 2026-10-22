@@ -122,8 +122,11 @@ _FUNCTION_WORDS = {
 RELEVANT = 0.55  # fixed before measuring: unrelated words score under 0.4, one misheard sound ("wan"/"fan") about 0.58
 
 
+_SHORT_NAMES = {"ac", "tv"}  # device names too short for the length rule
+
+
 def _content(text: str) -> list[str]:
-    return [w for w in norm(text).split() if len(w) >= 3 and w not in _FUNCTION_WORDS]
+    return [w for w in norm(text).split() if (len(w) >= 3 or w in _SHORT_NAMES) and w not in _FUNCTION_WORDS]
 
 
 def relevant(heard: str, phrase: str) -> bool:

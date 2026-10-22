@@ -625,7 +625,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
         """A one-time code that pairs another screen (an assistant's display, a second phone) for this same user."""
         if not await anyio.to_thread.run_sync(quota.take, "pair_code", device.user_id, PAIR_CODES_PER_HOUR, 3600):
             return JSONResponse({"error": "too many new codes; try again in an hour"}, status_code=429)
-        code = await anyio.to_thread.run_sync(s.devices.start_pairing, device.user_id)
+        code = await anyio.to_thread.run_sync(lambda: s.devices.start_pairing(device.user_id, minted_by=device.device_id))
         return JSONResponse({"code": code, "expires_in_s": 600})
 
     routes += [

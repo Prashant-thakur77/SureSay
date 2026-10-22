@@ -40,10 +40,13 @@ WRITE_ACTIONS = ("home_set", "ac_set", "door_lock", "call_contact", "message_con
 READ_ACTIONS = ("home_status", "cart_view")
 
 def _display_name(name: str) -> str:
-    """A contact's name for a card: cut at the first full stop or bracket (anything after it is not a name, and may
-    be an injected instruction), but keep an honorific's full stop ("Dr. Mehta")."""
-    kept = re.sub(r"\b(Dr|Mr|Mrs|Ms|Prof|Smt|Shri)\. ", "\\1\u2024 ", name)
-    return kept.split(".")[0].split(" (")[0].replace("\u2024", ".").strip()
+    """A contact's name for a card: its first line, cut at the first full stop or bracket (anything after it is not a
+    name, and may be an injected instruction). An honorific keeps its full stop and exactly one word: "Dr. Mehta"."""
+    first = (name or "").splitlines()[0] if name else ""
+    m = re.match(r"(Dr|Mr|Mrs|Ms|Prof|Smt|Shri)\. ([A-Z][A-Za-z'-]*)", first)
+    if m:
+        return f"{m.group(1)}. {m.group(2)}"
+    return first.split(".")[0].split(" (")[0].strip()
 
 
 _CONTACT_NAME = {c["id"]: _display_name(c["name"]) for c in CONTACTS}

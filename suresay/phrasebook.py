@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import tempfile
 import threading
 import time
 import uuid
@@ -108,8 +109,9 @@ class JsonPhrasebook:
     @staticmethod
     def _write(path: Path, entries: list[dict[str, Any]]) -> None:
         """Write whole or not at all: a reader sees the old file or the new one, never half of one."""
-        tmp = path.with_name(f".{path.name}.{threading.get_ident()}.tmp")
-        tmp.write_text(json.dumps(entries, indent=1))
+        fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+        with os.fdopen(fd, "w") as fh:
+            fh.write(json.dumps(entries, indent=1))
         os.replace(tmp, path)
 
 

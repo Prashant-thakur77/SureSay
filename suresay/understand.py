@@ -77,8 +77,15 @@ def understand(app: SureSay, user_id: str, *, transcript: str | None = None, aud
 
     # Never offer to place an order from an empty cart.
     cart_empty = isinstance(home, dict) and home.get("cart_items") == 0
-    ranked.candidates = [c for c in ranked.candidates
-                         if not (cart_empty and c.action == "cart_order" and not c.args.get("product_id"))]
+
+    def empty_order(c: Any) -> bool:
+        return cart_empty and c.action == "cart_order" and not c.args.get("product_id")
+
+    if ranked.candidates and empty_order(ranked.candidates[0]):
+        # they asked to order, and there is nothing to order: say so, rather than offer whatever ranked next
+        return {**base, "status": "answer", "action": "cart_view", "result": app.read(user_id, "cart_view"),
+                "say": "Your cart is empty, so there is nothing to order. Add something first."}
+    ranked.candidates = [c for c in ranked.candidates if not empty_order(c)]
 
     if ranked.abstain or not ranked.candidates:
         maybe_floor = getattr(getattr(app.ranker, "rule", None), "maybe_floor", 0.5)
