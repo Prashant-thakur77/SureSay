@@ -88,6 +88,20 @@ describe("MCP App", () => {
     expect(w.document.getElementById("result")!.textContent).toContain("Done: confirmed by you.");
   });
 
+  it("a new card set clears the last outcome, so an old \"Done\" never sits beside new cards", () => {
+    const { w, result } = boot();
+    result([{ n: 1, text: "Turn on the fan", risk: "low" }]);
+    w.dispatchEvent(new w.MessageEvent("message", { source: w as unknown as Window,
+      data: { jsonrpc: "2.0", method: "ui/notifications/tool-result", params: { structuredContent: { status: "answer", say: "Done: confirmed by you, on your own device." } } } }));
+    expect(w.document.getElementById("result")!.textContent).toContain("Done");
+    result([{ n: 1, text: "Turn on the TV", risk: "low" }, { n: 2, text: "Turn on the fan", risk: "low" }]);
+    const res = w.document.getElementById("result")!;
+    expect(res.textContent).toBe("");
+    expect(res.className).toBe("");
+    expect([...w.document.querySelectorAll("#cards .card")].map((c) => c.textContent)).toEqual(["1Turn on the TV", "2Turn on the fan"]);
+    expect(w.document.getElementById("actions")!.hidden).toBe(false);
+  });
+
   it("sends the tap when the shown card matches the server's", async () => {
     const { w, fetched, result, settle } = boot([{ n: 1, text: "Turn on the fan" }]);
     result([{ n: 1, text: "Turn on the fan", risk: "low" }]);

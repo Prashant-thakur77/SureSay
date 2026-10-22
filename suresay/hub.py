@@ -45,9 +45,27 @@ logger = logging.getLogger("suresay.hub")
 
 def make_live_agent(*, system_prompt: str, tools: list[dict[str, Any]], call: Any) -> Any:
     """The live assistant's model: Amazon Nova 2 Sonic taking a text turn and calling tools (tests replace this)."""
-    from strands_agent.sonic import SonicToolAgent
+    from strands_agent.live import make_agent
 
-    return SonicToolAgent(system_prompt=system_prompt, tools=tools, call=call, timeout=30.0, max_tool_calls=6)
+    return make_agent(system_prompt=system_prompt, tools=tools, call=call)
+
+
+def invoke_assistant_runtime(cfg: Any, payload: dict[str, Any]) -> dict[str, Any]:
+    """One live assistant turn on the agent deployed in AgentCore Runtime (``strands_agent.agentcore_app``)."""
+    import boto3
+    from botocore.config import Config
+
+    client = boto3.client("bedrock-agentcore", region_name=cfg.region,
+                          config=Config(read_timeout=45, connect_timeout=3, retries={"max_attempts": 1}))
+    resp = client.invoke_agent_runtime(agentRuntimeArn=cfg.agent_runtime_arn,
+                                       runtimeSessionId=f"assistant-{payload['user_id']}-{uuid.uuid4().hex}"[:100],
+                                       payload=json.dumps(payload).encode())
+    body = resp["response"].read() if hasattr(resp.get("response"), "read") else resp.get("response")
+    out = json.loads(body)
+    if not isinstance(out, dict) or "reply" not in out:
+        raise RuntimeError(f"unexpected runtime answer: {str(out)[:200]}")
+    return out
+
 
 # Evidence audio is transcribed WITHOUT vocabulary biasing. Chosen on dev speakers only
 # (eval/tune_confirm.py): biasing toward "yes/one/haan..." recovered every genuine answer but also pulled
@@ -652,50 +670,18 @@ def build_app(s: SureSay | None = None) -> Starlette:
             return JSONResponse({"error": "the live assistant has done enough for today here; the simple host still works"},
                                 status_code=429)
         base = (s.cfg.public_url or str(request.base_url)).rstrip("/")
-        headers = {"content-type": "application/json", "accept": "application/json, text/event-stream",
-                   "mcp-protocol-version": "2025-11-25", "authorization": f"Bearer {s.cfg.agent_token}",
-                   "x-suresay-user": u}
 
         def turn() -> dict[str, Any]:
-            with httpx.Client(base_url=base, timeout=20) as http:
-                def rpc(method: str, params: dict[str, Any]) -> dict[str, Any]:
-                    r = http.post("/mcp", headers=headers, json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params})
-                    r.raise_for_status()
-                    return r.json()["result"]
+            from strands_agent.live import assistant_turn
 
-                tools = [{"toolSpec": {"name": t["name"], "description": (t.get("description") or "")[:1000],
-                                       "inputSchema": {"json": json.dumps(t.get("inputSchema") or {"type": "object"})}}}
-                         for t in rpc("tools/list", {})["tools"]]
-                calls: list[dict[str, Any]] = []
-                last_understand: dict[str, Any] | None = None
-                latest: dict[str, Any] | None = None  # the newest card set, whichever tool proposed it
-
-                def call(name: str, args: dict[str, Any]) -> str:
-                    nonlocal last_understand, latest
-                    res = rpc("tools/call", {"name": name, "arguments": args})
-                    body = res.get("structuredContent")
-                    if not isinstance(body, dict):
-                        try:
-                            body = json.loads(res["content"][0]["text"])
-                        except (KeyError, IndexError, ValueError):
-                            body = {"text": (res.get("content") or [{}])[0].get("text", "")}
-                    calls.append({"name": name, "args": args, "result": body})
-                    if name == "understand":
-                        last_understand = body
-                    if body.get("pending_id"):
-                        latest = body
-                        if not body.get("candidates"):  # a direct proposal names its cards only as text
-                            view = s.gate.pending_status(body["pending_id"], user_id=u)
-                            latest = {**body, "stage": view.get("stage"), "candidates": view.get("options", [])}
-                    return json.dumps(body, default=str)
-
-                from strands_agent.prompts import SYSTEM_PROMPT
-
-                agent = make_live_agent(system_prompt=SYSTEM_PROMPT + f"\n\nThe user's id is {u}.", tools=tools, call=call)
-                t0 = time.perf_counter()
-                reply = agent(f"The user typed: {text}")
-                return {"reply": reply, "model": LIVE_AGENT_MODEL, "tool_calls": calls, "understand": last_understand,
-                        "latest": latest or last_understand, "ms": round((time.perf_counter() - t0) * 1000)}
+            if s.cfg.agent_runtime_arn:  # the same turn, run by the agent deployed on AgentCore Runtime
+                try:
+                    return {**invoke_assistant_runtime(s.cfg, {"mode": "assistant", "prompt": text, "user_id": u}),
+                            "runs_on": "AgentCore Runtime"}
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning("AgentCore Runtime turn failed, running it here: %s", exc)
+            out = assistant_turn(text, u, mcp_url=f"{base}/mcp", token=s.cfg.agent_token, agent_factory=make_live_agent)
+            return {**out, "runs_on": "the hub"}
 
         try:
             out = await anyio.to_thread.run_sync(turn)
@@ -763,7 +749,10 @@ def build_app(s: SureSay | None = None) -> Starlette:
 
         return JSONResponse({"name": "suresay", "version": __version__, "mcp": "/mcp", "transport": "streamable-http", "public_demo": s.cfg.public_demo,
                              "protocol_versions": ["2025-03-26", "2025-06-18", "2025-11-25"], "backend": s.cfg.backend,
-                             "turn_mode": bridge._mode or s.cfg.agent_mode})
+                             "turn_mode": bridge._mode or s.cfg.agent_mode,
+                             "live_assistant": None if s.cfg.live_agent != "nova-sonic" else {
+                                 "model": LIVE_AGENT_MODEL,
+                                 "runs_on": "AgentCore Runtime" if s.cfg.agent_runtime_arn else "the hub"}})
 
     async def privacy(request: Request) -> Response:
         return HTMLResponse(_doc_page("Privacy", PRIVACY))

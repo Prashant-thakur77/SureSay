@@ -101,8 +101,10 @@ function show(text) { const r = document.getElementById("result"); r.className =
 
 function render() {
   const res = current; const list = document.getElementById("cards"); list.replaceChildren();
+  // a new card set starts clean: an old outcome ("Done") must never sit beside cards that are not yet answered
+  const out = document.getElementById("result"); out.textContent = ""; out.className = "";
   const heard = document.getElementById("heard");
-  if (res.heard) { heard.hidden = false; heard.textContent = `I heard: “${res.heard}”`; }
+  heard.hidden = !res.heard; heard.textContent = res.heard ? `I heard: “${res.heard}”` : "";
   const unsure = res.status === "ask_again";
   const cards = (res.candidates || []).filter((c) => Number.isInteger(c.n) && c.n >= 1 && c.n <= 9 && typeof c.text === "string");
   document.getElementById("title").innerHTML = unsure ? (cards.length ? "Not sure. <em>Say it again</em> — or is it one of these?" : "Not sure. <em>Say it again.</em>") :

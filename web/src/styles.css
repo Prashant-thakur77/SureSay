@@ -4443,6 +4443,18 @@ code {
   color: #e8f6ff;
 }
 
+/* the gate refused the model's own confirm: one plain line under the reply */
+.echo__refused {
+  display: block;
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.7rem;
+  border-left: 4px solid #fb923c;
+  border-radius: 8px;
+  background: #3a2410;
+  color: #ffd8b0;
+  font-size: 1.15rem;
+}
+
 .echo__idle {
   margin: 3rem 0;
   text-align: center;
@@ -5847,4 +5859,63 @@ code {
   width: 1.2rem;
   height: 1.2rem;
   accent-color: #ffb070;
+}
+
+/* --- the three cards on one phone screen ------------------------------------
+   At 390 px the cards, the heading and "None of these" fit one screen: a smaller
+   number and icon beside the words, the likelihood on one line, tighter gaps.
+   Every card stays far above 44 px tall and its words at 18 px or more. TV mode
+   keeps its big cards. */
+@media (max-width: 30em) {
+  :root:not([data-tv="1"]) .cardset {
+    gap: 0.6rem;
+  }
+  :root:not([data-tv="1"]) .cardset__head {
+    gap: 0.2rem 0.75rem;
+    padding-bottom: 0.4rem;
+  }
+  :root:not([data-tv="1"]) .cardset__head .stage__title.display {
+    font-size: min(2rem, 10vw);
+  }
+  :root:not([data-tv="1"]) .cards {
+    gap: 0.6rem;
+  }
+  :root:not([data-tv="1"]) .card {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    gap: 0.25rem 0.6rem;
+    min-height: 0;
+    padding: 0.55rem 0.75rem 0.55rem 0.9rem;
+  }
+  :root:not([data-tv="1"]) .card__body {
+    grid-column: auto;
+    gap: 0.15rem;
+  }
+  :root:not([data-tv="1"]) .card__num {
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1.25rem;
+  }
+  :root:not([data-tv="1"]) .card__icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  :root:not([data-tv="1"]) .card__text {
+    font-size: 1.2rem;
+    line-height: 1.15;
+  }
+  :root:not([data-tv="1"]) .card__meta {
+    gap: 0.2rem 0.6rem;
+    line-height: 1.25;
+  }
+  :root:not([data-tv="1"]) .likely {
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+  }
+  :root:not([data-tv="1"]) .likely__bar {
+    width: 3.2rem;
+    height: 6px;
+  }
+  :root:not([data-tv="1"]) .badge {
+    padding: 0 0.5rem;
+  }
 }

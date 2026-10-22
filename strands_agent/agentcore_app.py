@@ -4,6 +4,8 @@ Locally: ``python -m strands_agent.agentcore_app`` serves ``POST /invocations`` 
 the same contract AgentCore Runtime uses. The hub calls it for each user turn.
 
 Payload: ``{"prompt": "...", "user_id": "demo", "session_id": "..."}``. Returns ``{"response": "..."}``.
+With ``"mode": "assistant"`` it runs one live assistant turn on Amazon Nova 2 Sonic (``strands_agent.live``) and
+returns the reply with every MCP tool call the model made.
 """
 
 from __future__ import annotations
@@ -14,7 +16,7 @@ import re
 
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
 
-from strands_agent.core import run_turn
+from strands_agent.live import assistant_turn
 
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
 logger = logging.getLogger("suresay.agent")
@@ -33,6 +35,11 @@ def invoke(payload: dict, context: object = None) -> dict:
     if not prompt:
         return {"response": "I didn't get anything to work with. Please say it again."}
     user_id = _clean(payload.get("user_id"), os.environ.get("SURESAY_DEFAULT_USER", "demo"))
+    if payload.get("mode") == "assistant":
+        out = assistant_turn(prompt[:300], user_id, mcp_url=os.environ["SURESAY_MCP_URL"],
+                             token=os.environ["SURESAY_AGENT_TOKEN"])
+        return {**out, "runs_on": "AgentCore Runtime"}
+    from strands_agent.core import run_turn  # Strands on Nova 2 Lite, for the hub's agent mode
     session_id = _clean(payload.get("session_id") or getattr(context, "session_id", None), "default-session-0000000000000000")
     if len(session_id) < 33:
         session_id = (session_id + "-" + "0" * 40)[:40]

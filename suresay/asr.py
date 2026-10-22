@@ -301,33 +301,6 @@ class TranscribeBatchAsr:
                      ms=(time.perf_counter() - t0) * 1000, audio_seconds=len(samples) / SAMPLE_RATE)
 
 
-class _SonicStream:
-    """The Bedrock bidirectional stream, reduced to send(event) / receive() -> bytes / close()."""
-
-    def __init__(self, stream: Any) -> None:
-        self._stream = stream
-        self._reader: Any = None
-
-    async def send(self, event: dict[str, Any]) -> None:
-        from aws_sdk_bedrock_runtime.models import (
-            BidirectionalInputPayloadPart,
-            InvokeModelWithBidirectionalStreamInputChunk,
-        )
-
-        await self._stream.input_stream.send(InvokeModelWithBidirectionalStreamInputChunk(
-            value=BidirectionalInputPayloadPart(bytes_=json.dumps({"event": event}).encode())))
-
-    async def receive(self) -> bytes | None:
-        if self._reader is None:
-            self._reader = (await self._stream.await_output())[1]
-        res = await self._reader.receive()
-        value = getattr(res, "value", None)
-        return getattr(value, "bytes_", None)
-
-    async def close(self) -> None:
-        await self._stream.input_stream.close()
-
-
 class NovaSonicAsr:
     """Amazon Nova 2 Sonic, a speech-to-speech model, used as a recogniser.
 
@@ -357,23 +330,10 @@ class NovaSonicAsr:
         return Heard(text=text, engine=self.name, ms=(time.perf_counter() - t0) * 1000,
                      audio_seconds=len(samples) / SAMPLE_RATE)
 
-    async def _open(self) -> _SonicStream:
-        import boto3
-        from aws_sdk_bedrock_runtime.client import (
-            AsyncBedrockRuntimeClient,
-            InvokeModelWithBidirectionalStreamOperationInput,
-        )
-        from aws_sdk_bedrock_runtime.config import AsyncBedrockRuntimeConfig
-        from smithy_http.aio.crt import AWSCRTHTTPClient
+    async def _open(self) -> Any:
+        from strands_agent.sonic import open_stream
 
-        creds = boto3.Session().get_credentials().get_frozen_credentials()
-        cfg = await AsyncBedrockRuntimeConfig.resolve(
-            region=self.region, aws_access_key_id=creds.access_key, aws_secret_access_key=creds.secret_key,
-            aws_session_token=creds.token, transport=AWSCRTHTTPClient())
-        client = AsyncBedrockRuntimeClient(config=cfg)
-        stream = await client.invoke_model_with_bidirectional_stream(
-            InvokeModelWithBidirectionalStreamOperationInput(model_id=self.model_id))
-        return _SonicStream(stream)
+        return await open_stream(self.model_id, self.region)
 
     async def _stream(self, pcm: bytes) -> str:
         import uuid

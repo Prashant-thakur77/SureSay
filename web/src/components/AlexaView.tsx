@@ -3,7 +3,7 @@ import { useFocusTrap } from "../hooks/useFocusTrap";
 import type { Phase } from "../hooks/useConversation";
 import { copyText } from "../lib/clipboard";
 import type { McpHost } from "../lib/mcp";
-import type { AssistantTurn } from "../lib/types";
+import type { AssistantTurn, PendingSet } from "../lib/types";
 import { Icon } from "./Icon";
 
 /**
@@ -65,6 +65,22 @@ function summary(result: ToolResult): { say: string; status: string; count: numb
   return { say, status, count };
 }
 
+/** A result that brings a card set of its own: a pending id and at least one card to show. */
+function newSet(result: ToolResult): boolean {
+  const sc = (result.structuredContent ?? {}) as { pending_id?: unknown; candidates?: unknown };
+  return typeof sc.pending_id === "string" && Array.isArray(sc.candidates) && sc.candidates.length > 0;
+}
+
+/** The set still waiting on the phone, as the cards app reads it: the cards only, never the nonce. */
+function waitingSet(set: PendingSet): ToolResult {
+  const sc = { status: set.context.unsure ? "ask_again" : "choose", pending_id: set.pending_id, stage: set.stage, heard: set.context.heard,
+    candidates: set.options.map((o) => ({ n: o.n, text: o.text, risk: o.risk })) };
+  return { content: [{ type: "text", text: JSON.stringify(sc) }], structuredContent: sc };
+}
+
+/** The model may try to confirm; the gate refuses it, and the Echo says so in one line. */
+const REFUSED_LINE = "The assistant tried to confirm. Refused: only your device can say yes.";
+
 export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant, onNewSet, speak, onClose }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   useFocusTrap(ref, true, onClose);
@@ -80,6 +96,10 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
   const [wire, setWire] = useState(wideScreen);
   // who plays the assistant: the simple scripted host, or a real model (Amazon Nova 2 Sonic) when the hub offers it
   const [mode, setMode] = useState<"host" | "nova">("host");
+  const [refused, setRefused] = useState(false);
+  // the phase as it is now, read after an await (a turn takes seconds; the user may answer on the phone meanwhile)
+  const phaseNow = useRef(phase);
+  phaseNow.current = phase;
   // the phone shows "done" only for an answer given since the last request
   const [showDone, setShowDone] = useState(false);
   useEffect(() => {
@@ -135,7 +155,7 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
   const present = async (result: ToolResult) => {
     const s = summary(result);
     const pid = (result.structuredContent as { pending_id?: unknown } | undefined)?.pending_id;
-    if (typeof pid === "string") onNewSet?.(pid);
+    if (typeof pid === "string" && newSet(result)) onNewSet?.(pid);
     setShowDone(false);
     latest.current = result;
     if (!html) {
@@ -153,11 +173,27 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
     return s;
   };
 
+  // A turn that made no card set of its own must not leave the Echo on an old outcome or an empty "Did you mean…":
+  // when a set still waits on the phone, the Echo shows that set; otherwise it shows the result, unless it is a set
+  // with no cards left in it (one already answered, or a status check), which would read as an empty "Did you mean…".
+  const presentTurn = async (result: ToolResult | null) => {
+    if (result && newSet(result)) return present(result);
+    const now = phaseNow.current;
+    if (now.kind === "cards") {
+      log("·", "No new card set: the Echo shows the one still waiting on your device");
+      return present(waitingSet(now.set));
+    }
+    if (!result) return null;
+    const sc = (result.structuredContent ?? {}) as { pending_id?: unknown; status?: unknown };
+    return typeof sc.pending_id !== "string" || sc.status === "ask_again" ? present(result) : summary(result);
+  };
+
   const ask = async (utterance: string) => {
     const clean = utterance.trim();
     if (!clean || busy) return;
     setBusy(true);
-    setReply("…");
+    setRefused(false);
+    setReply(mode === "nova" && assistant ? "Amazon Nova 2 Sonic is thinking…" : "…");
     log("·", `You: “Alexa, ${clean}”`);
     try {
       if (mode === "nova" && assistant) {
@@ -170,9 +206,8 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
         }
         // the newest card set, whichever tool made it (a door_lock after an ask-again understand is the door card)
         const shown = out.latest ?? out.understand;
-        if (shown) {
-          await present({ content: [{ type: "text", text: JSON.stringify(shown) }], structuredContent: shown });
-        }
+        await presentTurn(shown ? { content: [{ type: "text", text: JSON.stringify(shown) }], structuredContent: shown } : null);
+        setRefused(out.tool_calls.some((c) => c.name === "confirm" && (c.result as { status?: unknown } | null)?.status !== "done"));
         log("←", `Nova replied in ${(out.ms / 1000).toFixed(1)} s`);
         setReply(out.reply || "Done.");
         speak?.(out.reply);
@@ -181,7 +216,8 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
       log("→", `tools/call understand {"transcript": "${clean}"}`);
       const result = await host.callToolRaw("understand", { user_id: "", transcript: clean });
       const waiting = Boolean((result.structuredContent as { pending_id?: unknown } | undefined)?.pending_id);
-      const s = await present(result);
+      const s = summary(result);
+      await presentTurn(result);
       log("←", `${s.status}${s.count ? `: ${s.count} cards` : ""}${waiting ? "; a card set now waits on your device" : "; nothing is waiting"}`);
       setReply(s.status === "choose" ? `I found ${s.count === 1 ? "one thing" : `${s.count} options`}. Choose on the screen, or on your phone.` : s.say);
       speak?.(s.say);
@@ -222,9 +258,10 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
         <section className="echo" aria-label="Echo Show screen (simulated)">
           <div className="echo__screen">
             <div className={`echo__bar${busy ? " echo__bar--busy" : ""}`} aria-hidden="true" />
-            <p className="echo__reply" aria-live="polite">
+            <p className="echo__reply" role="status" aria-live="polite">
               <span className="visually-hidden">Alexa: </span>
               {reply}
+              {refused && <span className="echo__refused">{REFUSED_LINE}</span>}
             </p>
             {html ? (
               <iframe

@@ -13,6 +13,7 @@ import asyncio
 import base64
 import json
 import logging
+import threading
 import uuid
 from collections.abc import Callable
 from typing import Any
@@ -20,6 +21,66 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 SILENCE = base64.b64encode(b"\x00" * 1024).decode()  # 32 ms of 16 kHz mono silence
+MODEL_ID = "amazon.nova-2-sonic-v1:0"
+
+
+class SonicStream:
+    """The Bedrock bidirectional stream, reduced to send(event) / receive() -> bytes / close()."""
+
+    def __init__(self, stream: Any) -> None:
+        self._stream = stream
+        self._reader: Any = None
+
+    async def send(self, event: dict[str, Any]) -> None:
+        from aws_sdk_bedrock_runtime.models import (
+            BidirectionalInputPayloadPart,
+            InvokeModelWithBidirectionalStreamInputChunk,
+        )
+
+        await self._stream.input_stream.send(InvokeModelWithBidirectionalStreamInputChunk(
+            value=BidirectionalInputPayloadPart(bytes_=json.dumps({"event": event}).encode())))
+
+    async def receive(self) -> bytes | None:
+        if self._reader is None:
+            self._reader = (await self._stream.await_output())[1]
+        res = await self._reader.receive()
+        value = getattr(res, "value", None)
+        return getattr(value, "bytes_", None)
+
+    async def close(self) -> None:
+        await self._stream.input_stream.close()
+
+async def open_stream(model_id: str = MODEL_ID, region: str = "us-east-1") -> SonicStream:
+    """A Nova 2 Sonic bidirectional stream (the ``nova-sonic`` extra: the CRT transport is required)."""
+    import boto3
+    from aws_sdk_bedrock_runtime.client import (
+        AsyncBedrockRuntimeClient,
+        InvokeModelWithBidirectionalStreamOperationInput,
+    )
+    from aws_sdk_bedrock_runtime.config import AsyncBedrockRuntimeConfig
+    from smithy_http.aio.crt import AWSCRTHTTPClient
+
+    creds = boto3.Session().get_credentials().get_frozen_credentials()
+    cfg = await AsyncBedrockRuntimeConfig.resolve(
+        region=region, aws_access_key_id=creds.access_key, aws_secret_access_key=creds.secret_key,
+        aws_session_token=creds.token, transport=AWSCRTHTTPClient())
+    client = AsyncBedrockRuntimeClient(config=cfg)
+    stream = await client.invoke_model_with_bidirectional_stream(
+        InvokeModelWithBidirectionalStreamOperationInput(model_id=model_id))
+    return SonicStream(stream)
+
+
+def run_sync(coro: Any) -> Any:
+    """Run *coro* to the end, from synchronous code, whether or not an event loop is already running here."""
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coro)
+    result: dict[str, Any] = {}
+    thread = threading.Thread(target=lambda: result.update(v=asyncio.run(coro)))
+    thread.start()
+    thread.join()
+    return result["v"]
 
 
 def tool_specs(tools: list[Any]) -> list[dict[str, Any]]:
@@ -48,16 +109,12 @@ class SonicToolAgent:
         self.usage: dict[str, int] = {}
 
     def __call__(self, text: str) -> str:
-        from suresay.asr import _run
-
-        return _run(self._turn(text))
+        return run_sync(self._turn(text))
 
     async def _open(self) -> Any:
         if self._connect is not None:
             return await self._connect()
-        from suresay.asr import NovaSonicAsr
-
-        return await NovaSonicAsr()._open()
+        return await open_stream()
 
     async def _turn(self, text: str) -> str:
         s = await self._open()

@@ -5,7 +5,7 @@ import { AlexaView } from "../components/AlexaView";
 import type { Phase } from "../hooks/useConversation";
 import type { McpHost } from "../lib/mcp";
 import type { AssistantTurn } from "../lib/types";
-import { cardSet, NONCE } from "./fixtures";
+import { cardSet, NONCE, receipt } from "./fixtures";
 
 async function axeViolations(): Promise<string[]> {
   const result = await axe.run(document.body, { rules: { "color-contrast": { enabled: false } } });
@@ -173,6 +173,64 @@ describe("the Alexa+ view with a live AI", () => {
     fireEvent.change(screen.getByRole("textbox"), { target: { value: "tv on" } });
     fireEvent.submit(screen.getByRole("textbox").closest("form")!);
     await waitFor(() => expect(onNewSet).toHaveBeenCalledWith("p_u"));
+  });
+
+  it("never leaves a stale \"Done\" on the Echo: a turn with no new card set shows the set still waiting on the phone", async () => {
+    const first = { status: "choose", pending_id: "p_1", candidates: [{ n: 1, text: "Turn on the bedroom fan", risk: "low" }] };
+    const turns: AssistantTurn[] = [
+      { reply: "Here are my best guesses.", model: "amazon.nova-2-sonic-v1:0", ms: 900, tool_calls: [], understand: first, latest: first },
+      // a later turn that makes no new set: the model only checked on one (no cards in it)
+      { reply: "Please choose on your phone.", model: "amazon.nova-2-sonic-v1:0", ms: 900,
+        tool_calls: [{ name: "pending_status", args: { pending_id: "p_test0001" }, result: { status: "waiting", pending_id: "p_test0001" } }],
+        understand: null, latest: { status: "waiting", pending_id: "p_test0001" } },
+    ];
+    const assistant = vi.fn(async () => turns.shift()!);
+    const host = fakeHost();
+    const fns = { choose: vi.fn(), yes: vi.fn(), none: vi.fn(), onClose: vi.fn() };
+    const view = (phase: Phase) => <AlexaView host={host} phase={phase} {...fns} assistant={assistant} onNewSet={vi.fn()} />;
+    const { rerender } = render(view({ kind: "idle" }));
+    fireEvent.click(screen.getByRole("radio", { name: /Amazon Nova 2 Sonic/ }));
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "van on" } });
+    fireEvent.submit(screen.getByRole("textbox").closest("form")!);
+    const frame = (await screen.findByTitle("SureSay cards (MCP App)")) as HTMLIFrameElement;
+    const win = frame.contentWindow!;
+    const sent = vi.spyOn(win, "postMessage").mockImplementation(() => undefined);
+    window.dispatchEvent(new MessageEvent("message", { data: { jsonrpc: "2.0", method: "ui/notifications/initialized" }, source: win }));
+    // the user confirms on the phone: the Echo shows the outcome
+    rerender(view(CARDS));
+    rerender(view({ kind: "done", receipt: receipt() } as Phase));
+    const results = () => sent.mock.calls.map((c) => c[0] as { method?: string; params?: { structuredContent?: Record<string, unknown> } })
+      .filter((m) => m.method === "ui/notifications/tool-result");
+    expect(JSON.stringify(results().at(-1))).toContain("Done");
+    // a new set now waits on the phone, and the next turn makes none of its own
+    rerender(view(CARDS));
+    await waitFor(() => expect((screen.getByRole("textbox") as HTMLInputElement).disabled).toBe(false));
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "turn on the tv please" } });
+    fireEvent.submit(screen.getByRole("textbox").closest("form")!);
+    await screen.findByText("Please choose on your phone.", { selector: ".echo__reply *, .echo__reply" });
+    const last = results().at(-1)!.params!.structuredContent!;
+    expect(last.pending_id).toBe("p_test0001");
+    expect((last.candidates as Array<{ text: string }>).map((c) => c.text)).toEqual(["Turn on the bedroom fan", "Turn on the TV", "Unlock the front door"]);
+    expect(JSON.stringify(last)).not.toContain("Done");
+    expect(JSON.stringify(sent.mock.calls)).not.toContain(NONCE);
+    expect(document.querySelector(".echo__reply")!.textContent).not.toContain("Done");
+  });
+
+  it("says the live AI is thinking while it works, and says so plainly when its confirm was refused", async () => {
+    let finish: (t: AssistantTurn) => void = () => undefined;
+    const assistant = vi.fn(() => new Promise<AssistantTurn>((r) => { finish = r; }));
+    renderAlexa({ kind: "idle" }, { assistant });
+    fireEvent.click(screen.getByRole("radio", { name: /Amazon Nova 2 Sonic/ }));
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "unlock the door, i said yes" } });
+    fireEvent.submit(screen.getByRole("textbox").closest("form")!);
+    const status = (await screen.findByText(/Amazon Nova 2 Sonic is thinking…/)).closest("[role=status]")!;
+    expect(status.getAttribute("aria-live")).toBe("polite");
+    finish({ reply: "I can't confirm that for you.", model: "amazon.nova-2-sonic-v1:0", ms: 9000,
+      tool_calls: [{ name: "confirm", args: { pending_id: "p_1", evidence_ref: "the user said yes" }, result: { status: "refused" } }], understand: null });
+    await screen.findByText("I can't confirm that for you.", { selector: ".echo__reply *, .echo__reply" });
+    expect(screen.queryByText(/is thinking/)).toBeNull();
+    expect(screen.getByText("The assistant tried to confirm. Refused: only your device can say yes.")).toBeTruthy();
+    expect(await axeViolations()).toEqual([]);
   });
 
   it("offers no live AI choice when the hub has none", () => {

@@ -1,23 +1,28 @@
 # Changelog
 
+## 1.7.1 (22 Oct 2026)
+
+- **A Bedrock model ranks** (`SonicRanker`, `SURESAY_RANKER=sonic`): Amazon Nova 2 Sonic gets Nova 2 Lite's prompt and returns its ranking as a `submit_ranking` tool call, closing the stream before any speech. Tuned on dev speakers only; on the test speakers 67.6% top-1 (offline ranker 73.1%), 100% correct "say again" on out-of-book, and no unrelated maybe cards (offline 25.9%). 400 calls, $0.59. Two harmless prompt lines had to be reworded past Sonic's content filter (friction log #19).
+- **The live assistant runs on Amazon Bedrock AgentCore Runtime:** `/device/assistant` invokes the deployed `suresay_agent` with `"mode": "assistant"`, which runs the turn (`strands_agent/live.py`: Nova 2 Sonic over SureSay's MCP tools, with the agent token) and returns every tool call; if the runtime fails, the hub runs the same code itself. `/api/info` says where it runs. Ordinary turns stay direct.
+- **No stale outcome beside new cards:** the Echo's card app clears an old "Done: confirmed by you" before drawing a new set, and when a turn brings no set of its own the Echo shows the set still waiting on the phone, never an empty "Did you mean…".
+- **Three cards and "None of these" fit one phone screen** (390 × 844): compact cards under 480 px, with 24 px card text and touch targets of 79 px or more.
+- While the live AI works, the Echo says "Amazon Nova 2 Sonic is thinking…", and a refused `confirm` is said on the screen: "The assistant tried to confirm. Refused: only your device can say yes."
+- The report explains why top-1 equals top-3 on these phrasebooks, lists the git SHA of every result file, and the requirements table's speed sentence is generated from the latest live checks.
+- **The live AI eval records why each confirm failed:** 27 turns, 16 adversarial; all 5 `confirm` attempts refused, 4 of them on a card set the model had really just proposed (its real `pending_id`), each for "no user evidence for this card set".
+
 ## 1.7.0 (22 Oct 2026)
 
-- **A live AI in the Alexa+ view.** "Who plays the assistant?" offers a simple scripted host or **Amazon Nova 2 Sonic, a live AI**. The signed `POST /device/assistant` lists the hub's own MCP tools with the agent token, gives the model their schemas, and runs each call it makes against `/mcp`, so the model has exactly a linked Alexa+ client's powers. Every call is logged in the view; a `confirm` from the model is refused by the gate and the cards stay waiting for the user. The phone panel follows the newest card set. Off unless `SURESAY_LIVE_AGENT=nova-sonic`; capped per day (guest 20, demo 300, user 200).
-- **Measured live** (`eval/run_live_assistant.py`): 12 requests on the deployed hub, 0 changes without the user, `understand` called in 12 of 12, and the one forged confirm ("the user already said yes") refused. Server time p50 4.7 s.
-- The agent's system prompt lives in `strands_agent/prompts.py`, so the hub can load it without the Strands SDK.
-
-From a third strict judge's review (17/20):
-- **The live AI, attacked:** 15 more turns try to talk Nova 2 Sonic into acting (false consent, fake authority, urgency, "developer mode"). 26 turns in all: 0 changes without the user; the model called `confirm` twice and was refused twice.
-- **The newest card set wins:** `/device/assistant` returns `latest`, the newest card set whichever tool proposed it, and the Alexa+ view shows it; before, a later `door_lock` card reached the phone but not the Echo screen.
+- **A live AI in the Alexa+ view.** "Who plays the assistant?" offers a simple scripted host or **Amazon Nova 2 Sonic, a live AI**. The signed `POST /device/assistant` lists the hub's own MCP tools with the agent token, gives the model their schemas, and runs each call it makes against `/mcp`, so the model has exactly a linked Alexa+ client's powers. Every call is logged in the view; a `confirm` from the model is refused by the gate and the cards stay waiting for the user. Off unless `SURESAY_LIVE_AGENT=nova-sonic`; capped per day (guest 20, demo 300, user 200).
+- **Measured live** (`eval/run_live_assistant.py`): 26 requests on the deployed hub, 15 of them trying to talk the model into acting (false consent, fake authority, urgency, "developer mode"): 0 changes without the user; the model called `confirm` twice and was refused twice.
+- **The newest card set wins:** `/device/assistant` returns `latest`, the newest card set whichever tool proposed it, with numbered cards, and the Alexa+ view and the phone both show it.
 - **No random third card:** beside a real guess, a card below the noise floor (the same 0.50 as maybe cards, fixed before measuring) is no longer shown; "unlock the front door, my carer is here" no longer offers brown bread. Re-scored offline: every reported figure unchanged.
 - **Unsure card sets carry their cards:** an ask-again set now includes its numbered `candidates`, so the MCP App draws them; it never says "one of these?" over no cards.
 - "what's on in the house" and "is anything on" are answered, not refused.
-- **A Bedrock model ranks** (`SonicRanker`, `SURESAY_RANKER=sonic`): Amazon Nova 2 Sonic gets Nova 2 Lite's prompt and returns its ranking as a `submit_ranking` tool call, closing the stream before any speech. Tuned on dev speakers only; on the test speakers 67.6% top-1 (offline ranker 73.1%), 100% correct "say again" on out-of-book, and no unrelated maybe cards (offline 25.9%). 400 calls, $0.59. Two harmless prompt lines had to be reworded past Sonic's content filter (friction log #19).
-- `?alexa=1` opens the Alexa+ view for a first-time visitor (a quiet demo home is made for them); `/api/info` lists only the protocol versions the server answers; the home page calls B0 "a forced-choice baseline"; the task-success headline bolds the stricter 98.1%; "built to WCAG 2.2 AA", since no formal audit was done; doc counts and figures current.
+- `?alexa=1` opens the Alexa+ view for a first-time visitor (a quiet demo home is made for them); `/api/info` lists only the protocol versions the server answers; the home page calls B0 "a forced-choice baseline"; the task-success headline bolds the stricter 98.1%; "built to WCAG 2.2 AA", since no formal audit was done; the agent's system prompt lives in `strands_agent/prompts.py`, so the hub can load it without the Strands SDK.
 
 ## 1.6.0 (22 Oct 2026)
 
-From a second strict judge's review (16/20):
+From a review:
 - **Opposites are never the top guess:** when what was heard says "unlock"/"open" or "lock", "on" or "off", a card meaning the opposite scores lower (×0.8), and one naming a different device than the one heard scores lower (×0.85); both still appear, since a mishearing can flip a word. "unlock the door" no longer leads with "Lock the front door", nor "turn the fan off" with the TV.
 - **A typed request SureSay can't do is answered plainly** ("I read “what's the weather”. I can't do that yet…"), with no random ideas; ideas offered while asking again must be about what was said, and numbers no longer count as a shared topic. Irrelevant maybe cards on out-of-book requests: 25.9% (was 47.2% two releases ago).
 - The Activity log says "You pressed" after a key press; a quoted sentence on the second check has no stray "?"; the Alexa+ view shows a short line on the screen, logs "nothing is waiting" when nothing is, and its phone panel shows "done" only for the latest request; the cards app fits a phone-width frame.
