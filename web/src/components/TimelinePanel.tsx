@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { HubState, HubStats, Receipt } from "../lib/types";
 import { iconFor } from "../lib/words";
+import { copyText as copy } from "../lib/clipboard";
 import { Icon } from "./Icon";
 import { Checks } from "./ReceiptCard";
 
@@ -51,30 +52,6 @@ export function summaryText(state: HubState | null, now = new Date()): string {
   return lines.join("\n");
 }
 
-async function copy(text: string): Promise<boolean> {
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-  } catch {
-    /* fall through */
-  }
-  try {
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    ta.setAttribute("readonly", "");
-    ta.style.position = "fixed";
-    ta.style.opacity = "0";
-    document.body.appendChild(ta);
-    ta.select();
-    const ok = document.execCommand("copy");
-    ta.remove();
-    return ok;
-  } catch {
-    return false;
-  }
-}
 
 export function TimelinePanel({ state }: { state: HubState | null }) {
   const [status, setStatus] = useState("");

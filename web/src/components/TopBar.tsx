@@ -27,12 +27,16 @@ export function Wordmark({ as: Tag = "h1" }: { as?: "h1" | "p" }) {
 }
 
 export function McpChip({ mcp }: { mcp: McpInfo }) {
-  const text =
-    mcp.status === "connected"
-      ? `MCP connected${mcp.protocol ? ` · protocol ${mcp.protocol}` : ""}`
-      : mcp.status === "connecting"
-        ? "MCP connecting…"
-        : "MCP offline · using fallback";
+  // the first second after opening: a quiet dot, no words, until it is connected or has fallen back
+  if (mcp.status === "connecting") {
+    return (
+      <span className="chip chip--connecting" data-testid="mcp-chip">
+        <span className="chip__dot" aria-hidden="true" />
+        <span className="visually-hidden">MCP starting</span>
+      </span>
+    );
+  }
+  const text = mcp.status === "connected" ? `MCP connected${mcp.protocol ? ` · protocol ${mcp.protocol}` : ""}` : "MCP offline · using fallback";
   return (
     <span className={`chip chip--${mcp.status}`} data-testid="mcp-chip">
       <span className="chip__dot" aria-hidden="true" />

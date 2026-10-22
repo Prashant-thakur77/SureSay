@@ -120,6 +120,8 @@ describe("speak for me", () => {
     fireEvent.click(within(spoken).getByRole("button", { name: /Say again/ }));
     expect(say).toHaveBeenCalledTimes(2);
     expect(hub.propose).toHaveBeenCalledTimes(1);
+    fireEvent.click(within(spoken).getByRole("button", { name: "Back to Speak for me" }));
+    expect(screen.getByRole("tab", { name: "Speak for me" }).getAttribute("aria-selected")).toBe("true");
     expect(document.documentElement.outerHTML).not.toContain(NONCE);
     for (const spy of logs) for (const call of spy.mock.calls) expect(JSON.stringify(call)).not.toContain(NONCE);
     expect(await axeViolations()).toEqual([]);
