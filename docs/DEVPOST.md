@@ -67,6 +67,8 @@ On Alexa, in the Alexa developer console's simulator, 22 Oct 2026 (the skill in 
 > **You:** yes\
 > **Alexa:** Done: Unlock the front door. Confirmed by your voice (heard "yes").
 
+![SureSay on Alexa, in the Alexa developer console's simulator](devpost/13-real-alexa.jpg)
+
 
 ![The Alexa+ view](devpost/12-alexa-plus.jpg)
 

@@ -91,6 +91,8 @@ The classic skill in [`alexa_skill/`](alexa_skill/README.md) is live in developm
 > **You:** yes\
 > **Alexa:** Done: Unlock the front door. Confirmed by your voice (heard "yes").
 
+![SureSay on Alexa, in the Alexa developer console's simulator: the fan by "the first one", and the front door unlocked only after two separate yeses](docs/devpost/13-real-alexa.jpg)
+
 The spoken answer goes back as signed evidence through the same gate. To add the skill to your own account, follow [alexa_skill/README.md](alexa_skill/README.md).
 
 ### A live AI that can't confirm
