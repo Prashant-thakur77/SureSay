@@ -1,11 +1,17 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import axe from "axe-core";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ListenerView } from "../components/ListenerView";
 import { MainScreen } from "../components/MainScreen";
 import { DEFAULT_SETTINGS } from "../hooks/useSettings";
 import { Speaker } from "../lib/speech";
-import { cardSet, fakeGate, fakeHub } from "./fixtures";
+import type { Receipt } from "../lib/types";
+import { cardSet, fakeGate, fakeHub, receipt } from "./fixtures";
+
+function sayReceipt(text: string): Receipt {
+  const r = receipt();
+  return { ...r, receipt_id: "rcpt_say0000000000000000", what: { ...r.what, action: "say_for_me", args: { text }, shown_as: `Say out loud: “${text}”`, options_shown: 1, option_chosen: 1 }, result: { say: text } };
+}
 
 const QUIET = { ...DEFAULT_SETTINGS, readAloud: false, autoVoice: false };
 
@@ -22,6 +28,27 @@ describe("Talk to someone", () => {
     fireEvent.click(screen.getByRole("button", { name: /offer it/i }));
     await waitFor(() => expect(hub.turn).toHaveBeenCalledWith(expect.objectContaining({ text: "i'm proud of you", purpose: "say" })));
     await screen.findByText(/I'm proud of you\./);
+  });
+
+  it("once it is said, goes back to Talk to someone, not to Speak for me", async () => {
+    const hub = fakeHub([]);
+    const gate = fakeGate();
+    const speaker = new Speaker(hub);
+    vi.spyOn(speaker, "say").mockResolvedValue();
+    hub.turn.mockResolvedValue({ reply: "", mode: "direct", pending: [cardSet({ pending_id: "p_say", stage: "choose", options: [
+      { n: 1, text: "Say out loud: “I'm proud of you.”", action: "say_for_me", args: { text: "I'm proud of you." }, risk: "low" }] })],
+      result: { status: "choose", heard: "i'm proud of you", asr: "typed", ranker: "phrasebook", timing: {}, say: "", pending_id: "p_say" }, ms: 2 });
+    gate.confirm.mockResolvedValueOnce({ via: "mcp", result: { status: "done", pending_id: "p_say", receipt: sayReceipt("I'm proud of you."), result: { say: "I'm proud of you." } } });
+    render(<MainScreen hub={hub} gate={gate} speaker={speaker} settings={QUIET} bigScreen={false}
+                       onSettingsChange={() => undefined} onUnpair={() => undefined} pollMs={60000} />);
+    fireEvent.click(screen.getByRole("tab", { name: "Talk to someone" }));
+    fireEvent.change(screen.getByLabelText(/or type it/i), { target: { value: "i'm proud of you" } });
+    fireEvent.click(screen.getByRole("button", { name: /offer it/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /^Yes/ }));
+    const spoken = await screen.findByRole("region", { name: "Said out loud for you" });
+    expect(within(spoken).queryByRole("button", { name: /Speak for me/ })).toBeNull();
+    fireEvent.click(within(spoken).getByRole("button", { name: "Back to Talk to someone" }));
+    expect(screen.getByRole("tab", { name: "Talk to someone" }).getAttribute("aria-selected")).toBe("true");
   });
 
   it("an empty Offer it puts him in the text box instead of looking broken", () => {

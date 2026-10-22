@@ -53,7 +53,13 @@ const TABS: TabDef<TabId>[] = [
   { id: "teach", label: "Teach", icon: "book" },
 ];
 
-function scanItems(phase: Phase, a: ConversationActions, phrasebook: Phrase[]): ScanItem[] {
+/** Where a sentence said out loud goes back to: the tab it was asked from. */
+const BACK: Partial<Record<TabId, { label: string; icon: TabDef<TabId>["icon"] }>> = {
+  people: { label: "Back to Talk to someone", icon: "message" },
+  speak: { label: "Back to Speak for me", icon: "speech" },
+};
+
+function scanItems(phase: Phase, a: ConversationActions, phrasebook: Phrase[], back?: ScanItem): ScanItem[] {
   const mic: ScanItem = { id: "mic", label: "Microphone", activate: a.toggleMic };
   switch (phase.kind) {
     case "cards":
@@ -92,7 +98,7 @@ function scanItems(phase: Phase, a: ConversationActions, phrasebook: Phrase[]): 
         ? [{ id: "again", label: "Say it again", activate: a.startRequest }]
         : [{ id: "start", label: "Start again", activate: a.reset }, mic];
     case "done":
-      return phase.said ? [{ id: "replay", label: "Say it again out loud", activate: a.replay }, mic] : [mic];
+      return phase.said ? [{ id: "replay", label: "Say it again out loud", activate: a.replay }, ...(back ? [back] : []), mic] : [mic];
     case "thinking":
       return [];
     case "listening":
@@ -123,6 +129,8 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
   const [tab, setTab] = useState<TabId>("talk");
   const tabRef = useRef<TabId>("talk");
   tabRef.current = tab;
+  // the tab the current request was asked from: "Talk to someone" and "Speak for me" are answered on Talk, then go back
+  const [origin, setOrigin] = useState<TabId>("talk");
   const [sideOpen, setSideOpen] = useState(false);
   const motion = useMotionOK(settings.calm);
   const [speaking, setSpeaking] = useState(false);
@@ -193,6 +201,7 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
   };
   const ring = useCallback(
     (id: VisitorId) => {
+      setOrigin("talk");
       setTab("talk");
       void conv.ring(id);
     },
@@ -200,7 +209,8 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
   );
 
   const proposeFromTab = useCallback(
-    (action: string, args: Record<string, unknown>) => {
+    (from: TabId, action: string, args: Record<string, unknown>) => {
+      setOrigin(from);
       setTab("talk");
       void conv.propose(action, args);
     },
@@ -208,9 +218,16 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
   );
 
   const actions: ConversationActions = {
-    toggleMic: conv.toggleMic,
+    toggleMic: () => {
+      // a new request from the Talk tab itself (not an answer to open cards)
+      if (!["cards", "listening", "thinking"].includes(phaseRef.current.kind)) setOrigin("talk");
+      conv.toggleMic();
+    },
     startRequest: () => void conv.again(),
-    sendText: (t) => void conv.sendText(t),
+    sendText: (t) => {
+      setOrigin("talk");
+      void conv.sendText(t);
+    },
     choose: conv.choose,
     yes: conv.yes,
     none: conv.none,
@@ -224,13 +241,15 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
   actionsRef.current = actions;
 
   const phrasebook = state?.phrasebook ?? [];
+  const backTo = BACK[origin];
+  const back = backTo ? { ...backTo, onBack: () => setTab(origin) } : undefined;
   const tabItems: ScanItem[] = TABS.filter((t) => t.id !== tab).map((t) => ({ id: `tab-${t.id}`, label: `${t.label} tab`, activate: () => setTab(t.id) }));
   const items: ScanItem[] = settingsOpen
     ? []
     : tab === "talk"
-      ? scanItems(phase, actions, phrasebook)
+      ? scanItems(phase, actions, phrasebook, back && { id: "back", label: back.label, activate: back.onBack })
       : tab === "speak"
-        ? [...boardTiles(phrasebook).map((t) => ({ id: `tile-${t.key}`, label: `Say: ${t.title}`, activate: () => proposeFromTab("say_for_me", { text: t.text }) })), ...tabItems]
+        ? [...boardTiles(phrasebook).map((t) => ({ id: `tile-${t.key}`, label: `Say: ${t.title}`, activate: () => proposeFromTab("speak", "say_for_me", { text: t.text }) })), ...tabItems]
         : tabItems;
   const onHighlight = useCallback((label: string) => label && announce(label, "polite"), [announce]);
   const highlighted = useScan(items, settings.scan, settings.scanSpeed, onHighlight);
@@ -318,6 +337,7 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
             mcp={mcp}
             onSettings={() => setSettingsOpen(true)}
             onHelp={hub.help ? () => {
+              setOrigin("talk");
               setTab("talk");
               void conv.help();
             } : undefined}
@@ -379,24 +399,26 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
                 speaking={speaking}
                 history={!state || state.receipts.length > 0 || state.events.length > 0}
                 motion={motion}
-                onBackToBoard={() => setTab("speak")}
+                back={back}
               />
               </TabPanel>
               <TabPanel id="people" active={tab === "people"}>
                 <TalkPanel
                   busy={phase.kind === "thinking" || phase.kind === "listening"}
                   onSpeak={() => {
+                    setOrigin("people");
                     setTab("talk");
                     void conv.startRequest("say");
                   }}
                   onType={(text) => {
+                    setOrigin("people");
                     setTab("talk");
                     void conv.sendText(text, "say");
                   }}
                 />
               </TabPanel>
               <TabPanel id="speak" active={tab === "speak"}>
-                <SpeakBoard phrasebook={phrasebook} busy={phase.kind === "thinking"} onSay={(text) => proposeFromTab("say_for_me", { text })} />
+                <SpeakBoard phrasebook={phrasebook} busy={phase.kind === "thinking"} onSay={(text) => proposeFromTab("speak", "say_for_me", { text })} />
               </TabPanel>
               <TabPanel id="practice" active={tab === "practice"}>
                 {hub.practiceState && hub.practiceSubmit ? (
@@ -416,7 +438,7 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
                 <TimelinePanel state={state} />
               </TabPanel>
               <TabPanel id="teach" active={tab === "teach"}>
-                <TeachPanel phrasebook={phrasebook} busy={phase.kind === "thinking"} onTeach={(phrase, action, args) => proposeFromTab("phrasebook_add", { phrase, action, args })} />
+                <TeachPanel phrasebook={phrasebook} busy={phase.kind === "thinking"} onTeach={(phrase, action, args) => proposeFromTab("teach", "phrasebook_add", { phrase, action, args })} />
               </TabPanel>
               {settings.scan && (
                 <p className="scan-note">

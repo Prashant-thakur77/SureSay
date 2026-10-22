@@ -8,7 +8,7 @@ import { DoorbellHeader } from "./Doorbell";
 import { CardSet } from "./CardSet";
 import { Connector } from "./Connector";
 import { FinalCheck } from "./FinalCheck";
-import { Icon } from "./Icon";
+import { Icon, type AnyIcon } from "./Icon";
 import { ListenerView } from "./ListenerView";
 import { MicButton, type MicMode } from "./MicButton";
 import { ReceiptCard } from "./ReceiptCard";
@@ -46,8 +46,8 @@ interface Props {
   history?: boolean;
   /** Animation allowed (no reduced motion, Calm mode off). */
   motion?: boolean;
-  /** Go to the Speak-for-me board. */
-  onBackToBoard?: () => void;
+  /** After a sentence is said out loud: go back to the tab it came from (Talk to someone, Speak for me). */
+  back?: { label: string; icon: AnyIcon; onBack: () => void };
 }
 
 function ScanButton({ id, className = "btn btn--secondary", onClick, children, ...rest }: { id: string; className?: string; onClick: () => void; children: ReactNode; "aria-keyshortcuts"?: string }) {
@@ -70,7 +70,7 @@ export function micMode(phase: Phase): MicMode {
   return "request";
 }
 
-export function Conversation({ phase, actions, mic, level, tv, devices, phrasebook, announce, speaking = false, history = true, motion = true, onBackToBoard }: Props) {
+export function Conversation({ phase, actions, mic, level, tv, devices, phrasebook, announce, speaking = false, history = true, motion = true, back }: Props) {
   const [listener, setListener] = useState<string | null>(null);
   const againRef = useRef<HTMLButtonElement>(null);
   const againMark = useScanMark("again");
@@ -239,9 +239,9 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
                 <ScanButton id="show" onClick={() => setListener(phase.said ?? null)}>
                   <Icon name="spark" size={24} /> Show it to them
                 </ScanButton>
-                {onBackToBoard && (
-                  <ScanButton id="board" onClick={onBackToBoard}>
-                    <Icon name="speech" size={24} /> Back to Speak for me
+                {back && (
+                  <ScanButton id="back" onClick={back.onBack}>
+                    <Icon name={back.icon} size={24} /> {back.label}
                   </ScanButton>
                 )}
               </div>
