@@ -187,7 +187,7 @@ Built to WCAG 2.2 AA (most text meets AAA contrast), checked by axe in the tests
 
 ## Open-source gate
 
-[**confirm-gate-mcp**](https://github.com/Prashant-thakur77/confirm-gate-mcp) (MIT, its own repository with CI; source also in [`packages/confirm-gate-mcp`](packages/confirm-gate-mcp)) is the gate on its own. `confirm-gate serve --upstream <any MCP server>` puts confirm-before-act in front of any MCP server, with an approval page, so no SureSay is needed. Or use its `GatedServer` decorators in your own server. SureSay is built on it.
+[**confirm-gate-mcp**](https://github.com/Prashant-thakur77/confirm-gate-mcp) (MIT, its own repository with CI; source also in [`packages/confirm-gate-mcp`](packages/confirm-gate-mcp)) is the gate on its own, on PyPI: `pip install confirm-gate-mcp`, then `confirm-gate demo` shows a card waiting for a tap in under a minute. `confirm-gate serve --upstream <any MCP server>` puts confirm-before-act in front of any MCP server, with an approval page, so no SureSay is needed. Or use its `GatedServer` decorators in your own server. SureSay is built on it.
 
 ## Repository
 
