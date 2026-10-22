@@ -167,7 +167,7 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onC
     <div className="alexa" role="dialog" aria-modal="true" aria-labelledby="alexa-title" ref={ref}>
       <header className="alexa__head">
         <h2 id="alexa-title" className="alexa__title">
-          SureSay inside <em>Alexa+</em>
+          SureSay on a simulated <em>Alexa+</em> screen
         </h2>
         <p className="alexa__note">
           A simulated Alexa+ screen: this page plays the assistant, calling SureSay's real MCP server and showing its card app the way an add-on host

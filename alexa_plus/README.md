@@ -4,7 +4,7 @@ SureSay's MCP server meets the Alexa+ add-on requirements, so it can be onboarde
 
 | Requirement | SureSay |
 |---|---|
-| Streamable HTTP, MCP spec 2025-11-25 | `/mcp` (`mcp` 2.1, stateless); negotiates 2025-11-25 and 2026-07-28 |
+| Streamable HTTP, MCP spec 2025-11-25 | `/mcp` (`mcp` 2.1, stateless); answers 2025-11-25 and 2025-06-18 (checked on the live server) |
 | The Alexa+ MCP client's own `initialize` (protocol 2025-03-26, `"Alexa+ MCP Client"`) | answered in 2025-03-26; tested with Amazon's documented request in `tests/test_alexa_client.py` |
 | Remote HTTPS URL | the hub's Lambda function URL (`make deploy`) |
 | 401 for unauthenticated calls, without `WWW-Authenticate` | `McpAuth` in `suresay/hub.py`; tested in `tests/test_oauth.py` |

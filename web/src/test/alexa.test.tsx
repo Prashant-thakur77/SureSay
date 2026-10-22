@@ -39,7 +39,7 @@ afterEach(() => vi.restoreAllMocks());
 describe("the Alexa+ view", () => {
   it("has no axe violations, idle, with cards, and on the second check", async () => {
     const { rerender, choose, yes, none, onClose } = renderAlexa({ kind: "idle" }, { pairCode: async () => "123456" });
-    expect(screen.getByRole("dialog", { name: /SureSay inside Alexa\+/ })).toBeTruthy();
+    expect(screen.getByRole("dialog", { name: /SureSay on a simulated Alexa\+ screen/ })).toBeTruthy();
     expect(await axeViolations()).toEqual([]);
     rerender(<AlexaView host={fakeHost()} phase={CARDS} choose={choose} yes={yes} none={none} onClose={onClose} pairCode={async () => "123456"} />);
     expect(await axeViolations()).toEqual([]);

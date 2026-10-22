@@ -1,7 +1,7 @@
 {
   "name": "suresay-web",
   "private": true,
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "SureSay web client: three big guesses, and nothing happens until you choose one. WCAG 2.2 AA; voice, tap, keys or one switch.",
   "license": "MIT",
   "repository": {

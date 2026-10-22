@@ -1,36 +1,36 @@
 {
   "name": "site_audit",
-  "generated_at": "2026-10-22T15:09:24+0530",
-  "git_sha": "8e8856e",
+  "generated_at": "2026-10-22T15:32:40+0530",
+  "git_sha": "3de93fc",
   "python": "3.13.12",
   "url": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/",
   "runs_per_form_factor": 3,
   "phone": {
     "median_scores": {
-      "performance": 88,
+      "performance": 89,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
     },
     "median_metrics": {
-      "lcp_ms": 3026.892,
+      "lcp_ms": 3176.672,
       "cls": 0,
-      "tbt_ms": 0,
-      "fcp_ms": 2419.312
+      "tbt_ms": 7,
+      "fcp_ms": 1402.498
     },
     "runs": [
       {
         "scores": {
-          "performance": 92,
+          "performance": 89,
           "accessibility": 100,
           "best-practices": 100,
           "seo": 100
         },
         "metrics": {
-          "lcp_ms": 3026.892,
-          "cls": 0,
-          "tbt_ms": 0,
-          "fcp_ms": 1376.8919999999998
+          "lcp_ms": 3128.498,
+          "cls": 0.03053138500747518,
+          "tbt_ms": 55.5,
+          "fcp_ms": 1402.498
         },
         "failed_accessibility_audits": [
           "label-content-name-mismatch"
@@ -39,16 +39,16 @@
       },
       {
         "scores": {
-          "performance": 88,
+          "performance": 90,
           "accessibility": 100,
           "best-practices": 100,
           "seo": 100
         },
         "metrics": {
-          "lcp_ms": 3019.312,
+          "lcp_ms": 3184.98,
           "cls": 0,
-          "tbt_ms": 2.5,
-          "fcp_ms": 2419.312
+          "tbt_ms": 0,
+          "fcp_ms": 1384.98
         },
         "failed_accessibility_audits": [
           "label-content-name-mismatch"
@@ -57,16 +57,16 @@
       },
       {
         "scores": {
-          "performance": 88,
+          "performance": 87,
           "accessibility": 100,
           "best-practices": 100,
           "seo": 100
         },
         "metrics": {
-          "lcp_ms": 3039.124,
+          "lcp_ms": 3176.672,
           "cls": 0,
-          "tbt_ms": 0,
-          "fcp_ms": 2589.124
+          "tbt_ms": 7,
+          "fcp_ms": 2426.672
         },
         "failed_accessibility_audits": [
           "label-content-name-mismatch"
@@ -83,10 +83,10 @@
       "seo": 100
     },
     "median_metrics": {
-      "lcp_ms": 668.402,
+      "lcp_ms": 672.504,
       "cls": 0.0,
       "tbt_ms": 0,
-      "fcp_ms": 353.176
+      "fcp_ms": 362.55
     },
     "runs": [
       {
@@ -97,28 +97,10 @@
           "seo": 100
         },
         "metrics": {
-          "lcp_ms": 668.4019999999999,
+          "lcp_ms": 672.5039999999999,
           "cls": 6.381865111235865e-05,
           "tbt_ms": 0,
-          "fcp_ms": 348.40199999999993
-        },
-        "failed_accessibility_audits": [
-          "label-content-name-mismatch"
-        ],
-        "lighthouse": "12.8.2"
-      },
-      {
-        "scores": {
-          "performance": 95,
-          "accessibility": 100,
-          "best-practices": 100,
-          "seo": 100
-        },
-        "metrics": {
-          "lcp_ms": 644.176,
-          "cls": 6.381865111235865e-05,
-          "tbt_ms": 0,
-          "fcp_ms": 353.17600000000004
+          "fcp_ms": 352.50399999999996
         },
         "failed_accessibility_audits": [
           "label-content-name-mismatch"
@@ -133,10 +115,28 @@
           "seo": 100
         },
         "metrics": {
-          "lcp_ms": 675.6679999999999,
+          "lcp_ms": 682.55,
           "cls": 6.381865111235865e-05,
           "tbt_ms": 0,
-          "fcp_ms": 355.66799999999995
+          "fcp_ms": 362.55
+        },
+        "failed_accessibility_audits": [
+          "label-content-name-mismatch"
+        ],
+        "lighthouse": "12.8.2"
+      },
+      {
+        "scores": {
+          "performance": 97,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "metrics": {
+          "lcp_ms": 640.092,
+          "cls": 6.381865111235865e-05,
+          "tbt_ms": 0,
+          "fcp_ms": 560.092
         },
         "failed_accessibility_audits": [
           "label-content-name-mismatch"

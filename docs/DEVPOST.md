@@ -41,7 +41,7 @@ SureSay is a self-hosted MCP server built to the Alexa+ add-on requirements, and
 
 | Alexa+ asks for | SureSay |
 |---|---|
-| MCP spec 2025-11-25, Streamable HTTP, a remote URL | `/mcp` on AWS Lambda; negotiates 2025-11-25 (and 2026-07-28) |
+| MCP spec 2025-11-25, Streamable HTTP, a remote URL | `/mcp` on AWS Lambda; answers 2025-11-25, 2025-06-18 and the Alexa+ client's 2025-03-26 (live checks) |
 | Account linking: OAuth 2.1 code flow + PKCE S256, Protected Resource Metadata (RFC 9728), auth-server metadata, Bearer in the header, 401 without `WWW-Authenticate` | All implemented and tested (`suresay/oauth.py`, `tests/test_oauth.py`). Linking means entering your SureSay pairing code. The link is listed under Your devices: unpairing it ends every token at once, and a replayed refresh token ends the link too |
 | The Alexa+ MCP client itself | Its documented `initialize` (protocol 2025-03-26, "Alexa+ MCP Client") is answered in its own version; tested (`tests/test_alexa_client.py`) |
 | Visuals through MCP Apps | `understand` declares `ui://suresay/cards.html`, and its result carries `_meta.ui` (`resourceUri`, `invoking`, `invoked`), where Alexa+ looks for custom visuals. The three cards render on an Echo Show or Fire TV, and that screen can pair as one of your devices, so a tap there is your own evidence |
@@ -140,11 +140,11 @@ Everything user-facing is new:
 - **The Alexa skill**, deployed and flow-tested on AWS.
 - **The web client:** WCAG 2.2 AA, voice, tap, keys or one switch, three themes, TV mode.
 - **The evaluation:** TORGO on Amazon Transcribe with two runs, repeated with Amazon Nova 2 Sonic and a local recogniser, a 50-case safety suite with a linked-client arm, latency measured in region, per-user calibration and a Hinglish check.
-- **One-command deploy and teardown**, and more than 700 tests (382 for the gate, 161 for the hub, 174 for the web client).
+- **One-command deploy and teardown**, and 788 tests (423 for the gate, 182 for the hub, 183 for the web client).
 
 ## Open source
 
-[confirm-gate-mcp](https://github.com/Prashant-thakur77/confirm-gate-mcp) is the gate on its own: MIT, its own repository, CI on Python 3.12 and 3.13 plus a packaging check, and releases v0.2.0 to v0.4.0 built during the window. `confirm-gate serve --upstream <any MCP server>` puts confirm-before-act, with an approval page, in front of any MCP server. With `--strict` it ignores the upstream's own read-only claims, because MCP tool annotations are hints from the server, so it is safe in front of servers you didn't write. Install: `pip install "git+https://github.com/Prashant-thakur77/confirm-gate-mcp"`.
+[confirm-gate-mcp](https://github.com/Prashant-thakur77/confirm-gate-mcp) is the gate on its own: MIT, its own repository, CI on Python 3.12 and 3.13 plus a packaging check, and releases v0.2.0 to v0.6.0 built during the window. `confirm-gate serve --upstream <any MCP server>` puts confirm-before-act, with an approval page, in front of any MCP server. With `--strict` it ignores the upstream's own read-only claims, because MCP tool annotations are hints from the server, so it is safe in front of servers you didn't write. Install: `pip install "git+https://github.com/Prashant-thakur77/confirm-gate-mcp"`.
 
 Why it matters: as assistants gain the power to act, prompt injection becomes a way to act. A gate that keeps the confirmation secret away from the model turns "never act without the user" from a prompt into a property of the code, for any MCP server. In SureSay's safety suite a real model (Amazon Nova 2 Sonic) as the agent made 11 unconfirmed changes in 35 cases without the gate, and 0 behind it.
 

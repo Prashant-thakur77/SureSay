@@ -82,7 +82,7 @@ def conformance(lv: Live) -> None:
     lv.check("authorization server metadata: PKCE S256", asm.get("code_challenge_methods_supported") == ["S256"])
 
     for version, client in (("2025-03-26", "Alexa+ MCP Client"), ("2025-06-18", "any MCP client"),
-                            ("2025-11-25", "any MCP client"), ("2026-07-28", "any MCP client")):
+                            ("2025-11-25", "any MCP client")):
         init = lv.result("initialize", {"protocolVersion": version, "capabilities": {"roots": {"listChanged": True}},
                                         "clientInfo": {"name": client, "version": "1.0.0"}}, version=version)
         lv.check(f"initialize answered in {version} ({client})", init.get("protocolVersion") == version,

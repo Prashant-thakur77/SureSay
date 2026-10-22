@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.0 (22 Oct 2026)
+
+- **Task success on dysarthric speech** (`eval/run_task_eval.py`): a sentence done within two tries, 100.0% for SureSay with 0 wrong actions, against 98.1% with 1.9% wrong actions for the phrasebook baseline and 33.3% for a plain assistant (local recogniser; caveats in the report).
+- **A fourth adversarial review**, every finding fixed with a failing test first: negated answers ("I wouldn't go ahead") are a no; a question after a filler ("um, is two the fan") is still a question, while "can I have two" still chooses; "the number one" chooses one; a pairing code dies with the device that made it; a malformed input is a 400; ordering from an empty cart says so; "ac" and "tv" count for relevance; an honorific keeps one name word; the status line says when cards are waiting.
+- **The app:** "Back to Talk to someone" after a sentence is said; a calm, wordless dot while MCP connects; Help fits the phone top bar; the Alexa+ view shows the pairing code big with Copy and New code, large answer buttons, and a log that folds away on a phone.
+- **Honest claims throughout:** the reviews are by separate AI reviewer agents; Nova 2 Lite and the agent are marked as awaiting quota; unsourced timings removed.
+
 ## 1.4.0 (22 Oct 2026)
 
 - **Consent stress test** (`eval/run_consent_stress.py`): 7,093 generated non-answers and 190 genuine answers. It found two real gaps, now fixed with a failing test each: a question without a question mark ("is two the fan") chose a card, and "the to one" (a misheard "the two one") chose option one. "Go ahead" now counts as a yes. Result: 0 non-answers taken as consent (keyword spotting: 95.5%), 100% of genuine answers understood. Claim 1 recomputed: unchanged.

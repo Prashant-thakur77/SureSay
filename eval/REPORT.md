@@ -333,14 +333,14 @@ Lighthouse 12.8.2 on the live home page (https://fig5s4lcztnov5vd3us22pnmoi0srph
 
 | Form factor | Performance | Accessibility | Best practices | SEO | First paint | Largest paint | Layout shift |
 |---|---|---|---|---|---|---|---|
-| Phone | 88 | **100** | 100 | 100 | 2.4 s | 3.0 s | 0.000 |
+| Phone | 89 | **100** | 100 | 100 | 1.4 s | 3.2 s | 0.000 |
 | Desktop | 97 | **100** | 100 | 100 | 0.4 s | 0.7 s | 0.000 |
 
 The web client's own tests also run axe on every screen (`web/src/test`).
 
 ## The live server, checked as an MCP client
 
-`eval/run_live_checks.py` runs against the deployed hub (https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws) over HTTPS as an MCP client: **20 of 20 checks passed** (2026-10-22T15:04:23+0530).
+`eval/run_live_checks.py` runs against the deployed hub (https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws) over HTTPS as an MCP client: **20 of 20 checks passed** (2026-10-22T15:30:51+0530).
 
 | | Check | Detail |
 |---|---|---|
@@ -369,16 +369,16 @@ Round trips from the test machine (they include the network to us-east-1; `/heal
 
 | Request | p50 ms | p95 ms | p50 minus network, ms |
 |---|---|---|---|
-| healthz (network baseline) | 256.6 | 260.7 | — |
-| tools/list | 269.3 | 275.4 | 12.7 |
-| tools/call home_status | 269.4 | 281.7 | 12.8 |
-| tools/call understand (typed) | 285.8 | 291.4 | 29.2 |
+| healthz (network baseline) | 253.3 | 258.2 | — |
+| tools/list | 269.1 | 277.7 | 15.8 |
+| tools/call home_status | 266.4 | 272.2 | 13.1 |
+| tools/call understand (typed) | 291.8 | 306.6 | 38.5 |
 
 The server's own processing time for real requests in the last 48 hours, from the CloudWatch metric the hub emits (`UnderstandMs`; voice includes speech recognition):
 
 | Request | Requests | p50 ms | p95 ms |
 |---|---|---|---|
-| understand, typed | 89 | 9.5 | 1360.9 |
+| understand, typed | 109 | 8.9 | 1335.2 |
 | understand, voice | 62 | 1472.8 | 4890.1 |
 
 ## What does not work yet (published on purpose)
