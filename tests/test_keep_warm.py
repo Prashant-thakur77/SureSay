@@ -16,3 +16,9 @@ def test_ending_an_mcp_session_is_answered_cleanly(hub: Hub) -> None:
     # stateless server: there is no session to end, and the spec allows a 405 (the SDK sent no response at all)
     r = hub.http.delete("/mcp", headers={"authorization": f"Bearer {hub.s.cfg.agent_token}"})
     assert r.status_code == 405 and "POST" in r.headers.get("allow", "")
+
+
+def test_no_standalone_stream_is_offered(hub: Hub) -> None:
+    # a GET opens a server-to-client stream that never ends behind Lambda; the spec lets a server decline with 405
+    r = hub.http.get("/mcp", headers={"authorization": f"Bearer {hub.s.cfg.agent_token}", "accept": "text/event-stream"})
+    assert r.status_code == 405 and "POST" in r.headers.get("allow", "")

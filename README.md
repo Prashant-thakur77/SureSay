@@ -149,7 +149,7 @@ Code pointers, permissions and a verify command for each service: [docs/AWS_INTE
 
 ```bash
 make setup        # Python 3.13 venv (uv) + web client packages
-make test         # 808 Python tests (530 for the gate, 278 for the hub) plus 222 web tests: account linking, the Alexa skill, the 50-case safety suite
+make test         # 809 Python tests (530 for the gate, 279 for the hub) plus 222 web tests: account linking, the Alexa skill, the 50-case safety suite
 make demo         # hub + web client (+ agent when Bedrock is reachable) on http://127.0.0.1:9000
 ```
 

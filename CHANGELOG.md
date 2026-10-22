@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.3 (22 Oct 2026)
+
+- **No hanging MCP stream.** A client's optional `GET /mcp` (a standalone server-to-client stream) never finished behind Lambda: it billed time until the client gave up, and logged "ASGI callable returned without completing response". The stateless hub now declines `GET` and `DELETE` with 405, as the spec allows; the Python MCP client (live checks, 20 of 20), the browser's TypeScript client and the Strands agent in AgentCore all carry on over POST.
+- confirm-gate-mcp 0.8.0: `confirm-gate demo` shows a card in 60 seconds, client configs, an API reference, and community files (GitHub community health 100%).
+
 ## 1.8.2 (22 Oct 2026)
 
 From AWS Builder and open-source reviews:

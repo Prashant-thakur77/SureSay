@@ -156,9 +156,11 @@ class McpAuth:
         if scope["type"] != "http" or not scope["path"].startswith("/mcp") or scope["method"] == "OPTIONS":
             await self.app(scope, receive, send)
             return
-        if scope["method"] == "DELETE":  # stateless: no session to end (the spec allows 405; the SDK sent nothing)
-            await JSONResponse({"error": "this server keeps no sessions"}, status_code=405,
-                               headers={"allow": "GET, POST"})(scope, receive, send)
+        if scope["method"] in ("GET", "DELETE"):
+            # Stateless, behind Lambda: no session to end, and no standalone server-to-client stream (a GET would hang
+            # until the client gave up). The spec lets a server decline both with 405; clients then use POST only.
+            await JSONResponse({"error": "this server answers MCP over POST only"}, status_code=405,
+                               headers={"allow": "POST"})(scope, receive, send)
             return
         headers = {k.decode().lower(): v.decode() for k, v in scope["headers"]}
         auth = headers.get("authorization", "")
