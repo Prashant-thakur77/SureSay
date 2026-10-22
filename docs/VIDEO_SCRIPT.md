@@ -23,7 +23,7 @@ The submission film is built from code in [`video/`](../video) and attached to e
 | Graphics | HTML in SureSay's own design system ([`video/graphics.html`](../video/graphics.html)), every number read from `eval/results` |
 | Voice | Chatterbox, cloned from an Amazon Polly Kajal reference; three takes of each line, the best chosen by Whisper word error; pauses capped at 0.35 s |
 | The app's own voice | At the end, SureSay says his sentence in its real read-aloud voice (Amazon Polly Kajal) |
-| Music | Soft piano under the story, an uplifting track after; ducked 10 to 20 dB under the voice (`python3 video/assemble.py --check-audio`) |
+| Music | SureSay's own piano theme, composed in code (`video/music.py`) to the film's timeline: sparse under the story, warmer from the title, one instrument throughout; at least 12 dB under the voice (`python3 video/assemble.py --check-audio`) |
 | Captions | Burned in, for viewers on mute; loudness normalised to -14 LUFS |
 
 ## Rebuild it
