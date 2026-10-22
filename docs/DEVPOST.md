@@ -72,7 +72,7 @@ A prompt injection can make the agent *ask*. It can never make anything *happen*
 | AWS service | How SureSay uses it |
 |---|---|
 | Bedrock: Nova 2 Lite | Ranks three candidate meanings from noisy recognition, the phrasebook and home state; abstains when unsure; the agent's model. Built and unit-tested; awaiting on-demand quota, not yet run |
-| AgentCore Runtime | Hosts the Strands agent (direct code deploy); deployed, and turns fall back to direct answers until Nova 2 Lite has quota |
+| AgentCore Runtime | Runs the live assistant: every live-AI turn in the Alexa+ view is one `invoke_agent_runtime` call, where Nova 2 Sonic drives SureSay's MCP tools (27 of 27 turns of the live eval ran there). It also hosts the Strands agent for ordinary turns, which fall back to direct answers until Nova 2 Lite has quota |
 | AgentCore Memory | Per-user phrasebooks (blob events) and the agent's long-term facts |
 | Strands Agents | The agent loop over MCP Streamable HTTP |
 | Transcribe | Streaming recognition with per-user custom vocabularies; server-side transcription of confirmation audio |
@@ -138,11 +138,11 @@ Everything user-facing is new:
   - the doorbell, speak for me and teach;
   - the public demo;
   - CloudWatch metrics and SNS alerts.
-- **The Strands agent** on AgentCore Runtime, with phrasebooks written through to AgentCore Memory.
+- **The live assistant on AgentCore Runtime** (Nova 2 Sonic over SureSay's MCP tools, with the hub as fallback), the Strands agent beside it, and phrasebooks written through to AgentCore Memory.
 - **The Alexa skill**, deployed and flow-tested on AWS.
 - **The web client:** built to WCAG 2.2 AA (axe-clean, Lighthouse accessibility 100), voice, tap, keys or one switch, three themes, TV mode.
 - **The evaluation:** TORGO on Amazon Transcribe with two runs, repeated with Amazon Nova 2 Sonic and a local recogniser, a 50-case safety suite with a linked-client arm, latency measured in region, per-user calibration and a Hinglish check.
-- **One-command deploy and teardown**, and 834 tests (423 for the gate, 215 for the hub, 196 for the web client).
+- **One-command deploy and teardown**, and 836 tests (423 for the gate, 217 for the hub, 196 for the web client).
 
 ## Open source
 

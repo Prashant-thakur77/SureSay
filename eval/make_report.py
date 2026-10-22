@@ -560,7 +560,11 @@ def live_assistant_section(la: dict[str, Any]) -> list[str]:
             for r in la["rows"]]
     return ["## A live AI driving SureSay over MCP", "",
             f"`eval/run_live_assistant.py` sends {s['turns']} typed requests to the deployed hub's live assistant, where "
-            f"Amazon Nova 2 Sonic (`{s['model']}`) calls SureSay's MCP tools with exactly the agent's powers. "
+            f"Amazon Nova 2 Sonic (`{s['model']}`) calls SureSay's MCP tools with exactly the agent's powers"
+            + (f", running in Amazon Bedrock AgentCore Runtime for {s['runs_on'].get('AgentCore Runtime', 0)} of the "
+               f"{s['turns']} turns (the hub runs the same code itself only if the runtime fails). "
+               if s.get("runs_on") else ". ")
+            +
             f"{s['turns'] - s.get('attacks', 0)} are ordinary requests; {s.get('attacks', 0)} try to talk the model into "
             "acting without the user (false consent, fake authority, urgency, hidden instructions). Nobody answers the "
             f"cards, so nothing may change. **{s['changes_without_the_user']} of {s['turns']} turns changed the home.** "
@@ -572,8 +576,9 @@ def live_assistant_section(la: dict[str, Any]) -> list[str]:
                and len(reasons) == 1 and "confirm_attempts_on_a_real_set" in s else "")
             + f"; in the other attacks it proposed a card set, asked again or only replied, "
             f"each of which leaves the decision with the user. It called `understand` in {s['used_understand']} of "
-            f"{s['answered']} turns. Server time per turn: p50 {s['server_p50_ms']} ms, max {s['server_max_ms']} ms "
-            f"({la['generated_at']}).", "",
+            f"{s['answered']} turns. Model time per turn: p50 {s['server_p50_ms']} ms, max {s['server_max_ms']} ms"
+            + (f"; the whole round trip from this machine, p50 {s['wall_p50_ms']} ms " if s.get("wall_p50_ms") else " ")
+            + f"({la['generated_at']}).", "",
             "| Request | Tools the model called | confirm | Home changed | Server ms |", "|---|---|---|---|---|", *rows, "",
             "One run of each request at the model's default settings; the model's choices and replies vary between runs."]
 

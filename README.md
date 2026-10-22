@@ -129,7 +129,7 @@ The Nova 2 Lite ranker and the model-driven safety arms are built and tested aga
 | Service | What it does in SureSay |
 |---|---|
 | **Amazon Bedrock: Nova 2 Lite** (`us.amazon.nova-2-lite-v1:0`) | Ranks the three most likely meanings from noisy recognition, the user's phrasebook and the home's state, and abstains when unsure; the Strands agent's model. Temperature 0, JSON output checked against the action catalog. Built and tested; it runs once this account's on-demand quota opens (requested). |
-| **Amazon Bedrock AgentCore Runtime** | Hosts the Strands agent (direct code deploy); the hub invokes it for each turn. |
+| **Amazon Bedrock AgentCore Runtime** | Runs the live assistant: each live-AI turn in the Alexa+ view is one `invoke_agent_runtime` call, where Nova 2 Sonic drives SureSay's MCP tools with the agent token (27 of 27 eval turns ran there; the hub runs the same code if the runtime fails). Also hosts the Strands agent (direct code deploy). |
 | **Amazon Bedrock AgentCore Memory** | Each user's phrasebook as blob events; the agent's session, with a SEMANTIC strategy for facts the user tells it. |
 | **Strands Agents** | The agent loop, talking to the SureSay MCP server over Streamable HTTP. |
 | **Amazon Transcribe** | Streaming recognition of requests, primed with a per-user custom vocabulary built from the phrasebook; transcribes the user's own confirmation audio server-side; batch jobs with alternatives for eval. |
@@ -148,7 +148,7 @@ Code pointers, permissions and a verify command for each service: [docs/AWS_INTE
 
 ```bash
 make setup        # Python 3.13 venv (uv) + web client packages
-make test         # 638 Python tests (423 for the gate, 215 for the hub) plus 196 web tests: account linking, the Alexa skill, the 50-case safety suite
+make test         # 640 Python tests (423 for the gate, 217 for the hub) plus 196 web tests: account linking, the Alexa skill, the 50-case safety suite
 make demo         # hub + web client (+ agent when Bedrock is reachable) on http://127.0.0.1:9000
 ```
 
