@@ -645,38 +645,38 @@ def main() -> None:
         "| Claim | Metric | B0 plain | B1 + phrasebook | SureSay | Data |",
         "|---|---|---|---|---|---|",
         f"| Confirm heard right | false accepts | {f(ck['b0_fa'])} | — | **{f(ck['ss_fa'])}** | {ck['fa_counts'][2]} decisions, 6 test speakers |",
-        f"| Meaning recovered | top-1 / top-3 | {f(ik['b0_top1'])} / — | {f(ik['b1_top1'])} / {f(ik['b1_top3'])} | {f(ik['ss_top1'])} / {f(ik['ss_top3'])} | 50-phrase books, 6 test speakers |",
-        f"| In the cards when unsure too | counting maybe cards | — | {f(ik['b1_top3'])} (acts without asking) | **{f(ik['ss_maybe'])}** | same |",
+        f"| Nothing without consent | unconfirmed changes | {sk['plain']} / {sk['plain_cases']} (no gate) | — | **{sk['ss']} / {sk['cases']}** | adversarial suite |",
+        *([f"| …with a real model as the agent | unconfirmed changes | {sk['sonic']['plain_sonic']['unconfirmed_changes']} / "
+           f"{sk['sonic']['plain_sonic']['cases']} (Nova 2 Sonic, no gate) | — | **{sk['sonic']['suresay_sonic']['unconfirmed_changes']} / "
+           f"{sk['sonic']['suresay_sonic']['cases']}** | Amazon Nova 2 Sonic, injections + near-misses |"]
+          if all(sk["sonic"].values()) else []),
+        *([f"| A live AI can't confirm | home changes with no answer from the user | — | — | **{la0['summary']['changes_without_the_user']} / "
+           f"{la0['summary']['turns']}** | Amazon Nova 2 Sonic driving the deployed MCP server, {la0['summary'].get('attacks', 0)} turns adversarial; "
+           f"{la0['summary'].get('confirm_attempts_refused', 0)} of {la0['summary'].get('confirm_attempts', 0)} confirm attempts refused |"]
+          if (la0 := read_result("live_assistant")) else []),
+        *([f"| Never mistakes a non-answer for consent | non-answers taken as consent | "
+           f"{f(cs0['baseline']['false_accept_rate'] * 100)} (keyword spotting) | — | **{f(cs0['suresay']['false_accept_rate'] * 100)}** | "
+           f"{cs0['negatives']:,} generated non-answers, {f(cs0['suresay']['answer_rate'] * 100)} of {cs0['positives']} genuine answers understood |"]
+          if (cs0 := read_result("consent_stress")) else []),
+        f"| Never acts on a guess | acted on a wrong phrase without asking | {f(ik['b0_wrong'])} | {f(ik['b1_wrong'])} | **{f(ik['ss_wrong'])}** | in-book + out-of-book; by design, since every action waits for the user |",
         *([f"| Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | "
            f"{f(tk0['b0']['success_pct'])} ({f(tk0['b0']['wrong_action_pct'])}) | {f(tk0['b1']['success_pct'])} "
            f"({f(tk0['b1']['wrong_action_pct'])}) | **{f(tk0['suresay']['done_within_two_counting_only_new_takes_pct'])}** (0) "
            f"counting only new recordings; {f(tk0['suresay']['done_within_two_pct'])} counting the other microphone | "
            f"{tk0['tasks']} in-book sentences, 6 test speakers, `{tk['asr_engine']}` (a different recogniser from the rows above) |"]
           if (tk := read_result("task")) and (tk0 := tk["summary"].get("test")) else []),
+        f"| In the cards when unsure too | counting maybe cards | — | {f(ik['b1_top3'])} (acts without asking) | **{f(ik['ss_maybe'])}** | same |",
         f"| Abstains when unsure | correct \"say again\" | 0% | {f(ik['b1_abstain'])} | **{f(ik['ss_abstain'])}** | out-of-book utterances |",
-        f"| Never acts on a guess | acted on a wrong phrase without asking | {f(ik['b0_wrong'])} | {f(ik['b1_wrong'])} | **{f(ik['ss_wrong'])}** | in-book + out-of-book; by design, since every action waits for the user |",
-        f"| Nothing without consent | unconfirmed changes | {sk['plain']} / {sk['plain_cases']} (no gate) | — | **{sk['ss']} / {sk['cases']}** | adversarial suite |",
-        *([f"| …with a real model as the agent | unconfirmed changes | {sk['sonic']['plain_sonic']['unconfirmed_changes']} / "
-           f"{sk['sonic']['plain_sonic']['cases']} (Nova 2 Sonic, no gate) | — | **{sk['sonic']['suresay_sonic']['unconfirmed_changes']} / "
-           f"{sk['sonic']['suresay_sonic']['cases']}** | Amazon Nova 2 Sonic, injections + near-misses |"]
-          if all(sk["sonic"].values()) else []),
+        f"| Meaning recovered | top-1 / top-3 | {f(ik['b0_top1'])} / — | {f(ik['b1_top1'])} / {f(ik['b1_top3'])} | {f(ik['ss_top1'])} / {f(ik['ss_top3'])} | 50-phrase books, 6 test speakers |",
+        *([f"| Works as an MCP server for Alexa+ | live checks passed | — | — | **{lc0['passed']} / {lc0['total']}** | the deployed server, incl. the Alexa+ client's own handshake |"]
+          if (lc0 := read_result("live_checks")) else []),
+        *([f"| Accessible | Lighthouse accessibility, phone / desktop | — | — | **{sa0['phone']['median_scores']['accessibility']} / "
+           f"{sa0['desktop']['median_scores']['accessibility']}** | the live site |"]
+          if (sa0 := read_result("site_audit")) else []),
         f"| Speed | understand p50 / p95 | — | — | {lk['u50']} / {lk['u95']} ms | 100 dev clips, {lk['u_where']} |",
         f"| Gate overhead | p50 / p95 | — | — | {lk.get('c50', lk['g50'])} / {lk.get('c95', lk['g95'])} ms | "
         f"{'Lambda + DynamoDB' if 'c50' in lk else 'SQLite'} |",
         f"| No regression | top-1, controls | {f(ik['ctrl_b0'])} | — | {f(ik['ctrl_ss'])} | control speakers |",
-        *([f"| Never mistakes a non-answer for consent | non-answers taken as consent | "
-           f"{f(cs0['baseline']['false_accept_rate'] * 100)} (keyword spotting) | — | **{f(cs0['suresay']['false_accept_rate'] * 100)}** | "
-           f"{cs0['negatives']:,} generated non-answers, {f(cs0['suresay']['answer_rate'] * 100)} of {cs0['positives']} genuine answers understood |"]
-          if (cs0 := read_result("consent_stress")) else []),
-        *([f"| Works as an MCP server for Alexa+ | live checks passed | — | — | **{lc0['passed']} / {lc0['total']}** | the deployed server, incl. the Alexa+ client's own handshake |"]
-          if (lc0 := read_result("live_checks")) else []),
-        *([f"| A live AI can't confirm | home changes with no answer from the user | — | — | **{la0['summary']['changes_without_the_user']} / "
-           f"{la0['summary']['turns']}** | Amazon Nova 2 Sonic driving the deployed MCP server, {la0['summary'].get('attacks', 0)} turns adversarial; "
-           f"{la0['summary'].get('confirm_attempts_refused', 0)} of {la0['summary'].get('confirm_attempts', 0)} confirm attempts refused |"]
-          if (la0 := read_result("live_assistant")) else []),
-        *([f"| Accessible | Lighthouse accessibility, phone / desktop | — | — | **{sa0['phone']['median_scores']['accessibility']} / "
-           f"{sa0['desktop']['median_scores']['accessibility']}** | the live site |"]
-          if (sa0 := read_result("site_audit")) else []),
         "",
         f"SureSay column: {ik['ss_name']}; the Nova 2 Lite ranker is pending Bedrock access. B1 recovers more phrases at "
         "top-1 because it never abstains, and pays for it by acting on a wrong phrase without asking.",

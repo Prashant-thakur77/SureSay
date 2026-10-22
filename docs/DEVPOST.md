@@ -94,20 +94,20 @@ Held-out speakers from TORGO, a public dysarthric speech corpus. Thresholds were
 | Claim | Metric | B0 plain | B1 + phrasebook | SureSay | Data |
 |---|---|---|---|---|---|
 | Confirm heard right | false accepts | 62.8% | — | **2.3%** | 430 decisions, 6 test speakers |
-| Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers |
-| In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **91.7%** | same |
-| Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | 33.3% (66.7%) | 98.1% (1.9%) | **98.1%** (0) counting only new recordings; 100.0% counting the other microphone | 108 in-book sentences, 6 test speakers, `whisper-small.en` (a different recogniser from the rows above) |
-| Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances |
-| Never acts on a guess | acted on a wrong phrase without asking | 84.3% | 53.7% | **0.0%** | in-book + out-of-book; by design, since every action waits for the user |
 | Nothing without consent | unconfirmed changes | 35 / 35 (no gate) | — | **0 / 50** | adversarial suite |
 | …with a real model as the agent | unconfirmed changes | 11 / 35 (Nova 2 Sonic, no gate) | — | **0 / 35** | Amazon Nova 2 Sonic, injections + near-misses |
+| A live AI can't confirm | home changes with no answer from the user | — | — | **0 / 26** | Amazon Nova 2 Sonic driving the deployed MCP server, 15 turns adversarial; 2 of 2 confirm attempts refused |
+| Never mistakes a non-answer for consent | non-answers taken as consent | 95.54% (keyword spotting) | — | **0.0%** | 7,093 generated non-answers, 100.0% of 190 genuine answers understood |
+| Never acts on a guess | acted on a wrong phrase without asking | 84.3% | 53.7% | **0.0%** | in-book + out-of-book; by design, since every action waits for the user |
+| Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | 33.3% (66.7%) | 98.1% (1.9%) | **98.1%** (0) counting only new recordings; 100.0% counting the other microphone | 108 in-book sentences, 6 test speakers, `whisper-small.en` (a different recogniser from the rows above) |
+| In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **91.7%** | same |
+| Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances |
+| Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers |
+| Works as an MCP server for Alexa+ | live checks passed | — | — | **20 / 20** | the deployed server, incl. the Alexa+ client's own handshake |
+| Accessible | Lighthouse accessibility, phone / desktop | — | — | **100 / 100** | the live site |
 | Speed | understand p50 / p95 | — | — | 869.6 / 2434.6 ms | 100 dev clips, Lambda + Transcribe |
 | Gate overhead | p50 / p95 | — | — | 48.9 / 58.1 ms | Lambda + DynamoDB |
 | No regression | top-1, controls | 80.8% | — | 100.0% | control speakers |
-| Never mistakes a non-answer for consent | non-answers taken as consent | 95.54% (keyword spotting) | — | **0.0%** | 7,093 generated non-answers, 100.0% of 190 genuine answers understood |
-| Works as an MCP server for Alexa+ | live checks passed | — | — | **20 / 20** | the deployed server, incl. the Alexa+ client's own handshake |
-| A live AI can't confirm | home changes with no answer from the user | — | — | **0 / 26** | Amazon Nova 2 Sonic driving the deployed MCP server, 15 turns adversarial; 2 of 2 confirm attempts refused |
-| Accessible | Lighthouse accessibility, phone / desktop | — | — | **100 / 100** | the live site |
 
 SureSay column: SureSay (offline ranker); the Nova 2 Lite ranker is pending Bedrock access. B1 recovers more phrases at top-1 because it never abstains, and pays for it by acting on a wrong phrase without asking.
 <!-- results:end -->
@@ -150,6 +150,8 @@ Everything user-facing is new:
 Why it matters: as assistants gain the power to act, prompt injection becomes a way to act. A gate that keeps the confirmation secret away from the model turns "never act without the user" from a prompt into a property of the code, for any MCP server. In SureSay's safety suite a real model (Amazon Nova 2 Sonic) as the agent made 11 unconfirmed changes in 35 cases without the gate, and 0 behind it.
 
 ## What's next
+
+**Validation with real users comes first.** Every number above is from recorded speech; nobody with dysarthria has used SureSay yet. The plan: a supervised session with a speech-language therapist and five to ten people with dysarthria and their carers, each doing the same twenty home tasks by voice with SureSay and with a plain assistant. We would measure tasks done within two tries, wrong actions, time per task and how often they had to fall back to touch, then ask each person whether they would keep using it. Results would go in the evaluation report, failures included.
 
 - A real Alexa+ integration once access opens.
 - Per-user thresholds and recognition adapted from each user's own confirmations.
