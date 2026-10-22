@@ -48,7 +48,7 @@ People with dysarthria (after a stroke, or living with Parkinson's, ALS or cereb
 3. **Choose.** By voice, tap, keyboard (1, 2, 3) or single-switch scanning. Risky actions (unlock, order, call, message) ask a second yes.
 4. **Only then does it happen.** The gate checks your evidence, consumes a one-time nonce, runs exactly the card you chose, and writes a receipt that says who confirmed what, when, and how.
 
-It also speaks *for* you: confirm a phrase like "I am thirsty" and SureSay says it out loud, clearly, to the people in the room. And it **learns from you**: each card you confirm teaches SureSay your way of saying it, so the same mishearing goes straight to what you meant next time.
+It also speaks *for* you: confirm a phrase like "I am thirsty" and SureSay says it out loud, clearly, to the people in the room. And it **learns from you**: each card you confirm teaches SureSay your way of saying it, so the exact same mishearing goes straight to what you meant next time. (On TORGO's repeated sentences this has not yet shown a measurable gain, because a second recording is rarely heard the same way twice: see the report.)
 
 **Built for Alexa+.** SureSay's MCP server meets the Alexa+ add-on requirements ([`alexa_plus/`](alexa_plus)):
 
@@ -103,7 +103,7 @@ Held-out TORGO dysarthric speakers (dev F03 and M05 for tuning; test F01, F04, M
 | Confirm heard right | false accepts | 62.8% | — | **2.3%** | 430 decisions, 6 test speakers |
 | Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers |
 | In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **91.7%** | same |
-| Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | 33.3% (66.7%) | 98.1% (1.9%) | **100.0%** (0) | 108 in-book sentences, 6 test speakers, `whisper-small.en` |
+| Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | 33.3% (66.7%) | 98.1% (1.9%) | **100.0%** (0); 98.1% counting only new recordings | 108 in-book sentences, 6 test speakers, `whisper-small.en` (a different recogniser from the rows above) |
 | Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances |
 | Never acts on a guess | acted on a wrong phrase without asking | 84.3% | 53.7% | **0.0%** | in-book + out-of-book |
 | Nothing without consent | unconfirmed changes | 35 / 35 (no gate) | — | **0 / 50** | adversarial suite |

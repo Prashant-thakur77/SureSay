@@ -73,6 +73,11 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onC
   const [busy, setBusy] = useState(false);
   const [reply, setReply] = useState("Try “Alexa, van on”.");
   const [wire, setWire] = useState(wideScreen);
+  // the phone shows "done" only for an answer given since the last request
+  const [showDone, setShowDone] = useState(false);
+  useEffect(() => {
+    if (phase.kind === "done") setShowDone(true);
+  }, [phase.kind]);
   const log = useCallback((dir: Line["dir"], t: string) => setLines((l) => [...l.slice(-11), { dir, text: t }]), []);
 
   const post = useCallback((msg: unknown) => frame.current?.contentWindow?.postMessage(msg, "*"), []);
@@ -129,7 +134,9 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onC
       log("→", `tools/call understand {"transcript": "${clean}"}`);
       const result = await host.callToolRaw("understand", { user_id: "", transcript: clean });
       const s = summary(result);
-      log("←", `${s.status}${s.count ? `: ${s.count} cards` : ""}; a card set now waits on your device`);
+      const waiting = Boolean((result.structuredContent as { pending_id?: unknown } | undefined)?.pending_id);
+      log("←", `${s.status}${s.count ? `: ${s.count} cards` : ""}${waiting ? "; a card set now waits on your device" : "; nothing is waiting"}`);
+      setShowDone(false);
       latest.current = result;
       if (!html) {
         const uri = await host.toolUi("understand");
@@ -143,7 +150,7 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onC
       } else if (ready.current) {
         sendResult(result);
       }
-      setReply(s.say);
+      setReply(s.status === "choose" ? `I found ${s.count === 1 ? "one thing" : `${s.count} options`}. Choose on the screen, or on your phone.` : s.say);
       speak?.(s.say);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -240,7 +247,7 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onC
               </>
             ) : (
               <p className="phone__idle">
-                {phase.kind === "done" ? "Done, confirmed by you. The receipt is in your timeline." : phase.kind === "thinking" ? "Checking…" : "Nothing is waiting for you."}
+                {phase.kind === "done" && showDone ? "Done, confirmed by you. The receipt is in your timeline." : phase.kind === "thinking" ? "Checking…" : "Nothing is waiting for you."}
               </p>
             )}
             {pairCode && <PairThisScreen pairCode={pairCode} />}

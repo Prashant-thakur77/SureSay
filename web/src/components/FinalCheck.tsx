@@ -52,7 +52,7 @@ export function FinalCheck({ set, deadline, busy, devices, onYes, onNo, onExpire
         <span className="card__icon" aria-hidden="true">
           <Icon name={iconFor(option, devices)} size="100%" />
         </span>
-        <p className="final__text">{option.text}?</p>
+        <p className="final__text">{/[”"'.!?]$/.test(option.text) ? option.text : `${option.text}?`}</p>
       </div>
       <div className="yesno" role="group" aria-labelledby="final-title">
         <button

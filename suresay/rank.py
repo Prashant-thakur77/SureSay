@@ -116,6 +116,9 @@ _FUNCTION_WORDS = {
     "turn", "make", "put", "get", "set", "let", "lets", "let's", "want", "need", "like", "him", "her", "his", "they",
     "them", "she", "our", "one", "two", "three", "who", "how", "why", "when", "where", "about", "again", "also",
     "good", "okay", "yes", "kar", "karo", "mujhe", "hai",
+    # numbers are not a topic: "an alarm for six" is not about "the AC to 26"
+    "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+    "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "thirty", "forty", "fifty", "hundred", "thousand",
 }
 
 
@@ -148,6 +151,36 @@ def _dedupe(cands: list[Candidate]) -> list[Candidate]:
     return out
 
 
+# Opposite meanings that differ by a letter or two ("lock"/"unlock", "on"/"off"), and the devices a request names.
+_POLES = (({"unlock", "open"}, {"lock", "close", "shut"}), ({"on", "start"}, {"off", "stop"}))
+_DEVICE_WORDS = {"fan": "fan", "pankha": "fan", "tv": "tv", "television": "tv", "ac": "ac", "light": "lights",
+                 "lights": "lights", "lite": "lights", "door": "door"}
+OPPOSITE = 0.8  # fixed before measuring: an opposite can still be shown, never first over the matching meaning
+OTHER_DEVICE = 0.85
+
+
+def _side(words: set[str], pole: tuple[set[str], set[str]]) -> int:
+    a, b = bool(words & pole[0]), bool(words & pole[1])
+    return 0 if a == b else (1 if a else 2)
+
+
+def mismatch(heard: str, phrase: str) -> float:
+    """A score multiplier: lower when the phrase says the opposite of what was heard ("lock" for "unlock", "off" for
+    "on"), or names a different device than the one heard. Only words actually heard count, so a mishearing that
+    drops the word changes nothing."""
+    hw, pw = set(norm(heard).split()), set(norm(phrase).split())
+    k = 1.0
+    for pole in _POLES:
+        hs, ps = _side(hw, pole), _side(pw, pole)
+        if hs and ps and hs != ps:
+            k *= OPPOSITE
+    hd = {_DEVICE_WORDS[w] for w in hw if w in _DEVICE_WORDS}
+    pd = {_DEVICE_WORDS[w] for w in pw if w in _DEVICE_WORDS}
+    if hd and pd and not hd & pd:
+        k *= OTHER_DEVICE
+    return k
+
+
 class FuzzyRanker:
     name = "fuzzy"
 
@@ -163,7 +196,7 @@ class FuzzyRanker:
             pool += [{**t, "id": None, "_book": False} for t in catalog.templates()]
         scored = []
         for e in pool:
-            s = max(similarity(h, e["phrase"]) for h in hyps)
+            s = max(similarity(h, e["phrase"]) * mismatch(h, e["phrase"]) for h in hyps)
             if not e["_book"]:
                 s *= 0.97  # the user's own phrase wins a tie with a standard phrasing
             scored.append((s, e))

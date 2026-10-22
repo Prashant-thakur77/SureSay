@@ -161,7 +161,7 @@ export function describeEvents(events: GateEvent[]): ActivityLine[] {
       }
       case "evidence": {
         const d = e.decision;
-        const how = e.channel === "voice" ? "You said" : "You tapped";
+        const how = e.channel === "voice" ? "You said" : e.input === "key" ? "You pressed" : e.input === "switch" ? "You chose, with your switch," : "You tapped";
         const heard = e.channel === "voice" ? `“${e.transcript ?? d?.heard ?? ""}”` : (d?.heard ?? "").replace(/^tap:\s*/, "");
         if (d?.kind === "unclear") lines.push({ key, at: e.at, tone: "info", label: "Not clear", text: `${how} ${heard}. That was not a clear answer.` });
         else lines.push({ key, at: e.at, tone: "info", label: "Answer", text: `${how} ${heard}` });

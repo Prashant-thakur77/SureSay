@@ -53,7 +53,7 @@ def test_carer_is_alerted_for_high_risk_confirmations_only(hub: Hub) -> None:
     ev = hub.tap(device, p, 1).json()
     hub.signed(device, "POST", "/device/confirm", {"pending_id": p["pending_id"], "evidence_ref": ev["evidence_ref"]})
     assert sns.published == []
-    out = hub.say(device, "open the door")
+    out = hub.say(device, "do the door")  # ambiguous: choose unlock, then the second yes
     p = out["pending"][0]
     n = next(c["n"] for c in out["result"]["candidates"] if c["text"] == "Unlock the front door")
     ev = hub.tap(device, p, n).json()

@@ -608,7 +608,7 @@ def main() -> None:
         "; controls = " + ", ".join(SPLIT["controls"]) + ". Prompts and thresholds were tuned on dev only. "
         + SEVERITY_NOTE,
         "",
-        "**Revisions:** on 21 Oct an independent security review hardened the consent parser (hesitations, questions and "
+        "**Revisions:** on 21 Oct an adversarial security review (a separate AI reviewer agent) hardened the consent parser (hesitations, questions and "
         "qualifiers such as \"ok hang on\" or \"okay, who is it\" are never a yes; unreadable Hindi words count as unknown). "
         "Claim 1 was recomputed from the same cached transcripts and did not change. On 22 Oct the consent stress test "
         "found two gaps in the parser (below); after the fixes Claim 1 was recomputed again and did not change. Also on "
@@ -629,8 +629,9 @@ def main() -> None:
         f"| In the cards when unsure too | counting maybe cards | — | {f(ik['b1_top3'])} (acts without asking) | **{f(ik['ss_maybe'])}** | same |",
         *([f"| Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | "
            f"{f(tk0['b0']['success_pct'])} ({f(tk0['b0']['wrong_action_pct'])}) | {f(tk0['b1']['success_pct'])} "
-           f"({f(tk0['b1']['wrong_action_pct'])}) | **{f(tk0['suresay']['done_within_two_pct'])}** (0) | "
-           f"{tk0['tasks']} in-book sentences, 6 test speakers, `{tk['asr_engine']}` |"]
+           f"({f(tk0['b1']['wrong_action_pct'])}) | **{f(tk0['suresay']['done_within_two_pct'])}** (0); "
+           f"{f(tk0['suresay']['done_within_two_counting_only_new_takes_pct'])} counting only new recordings | "
+           f"{tk0['tasks']} in-book sentences, 6 test speakers, `{tk['asr_engine']}` (a different recogniser from the rows above) |"]
           if (tk := read_result("task")) and (tk0 := tk["summary"].get("test")) else []),
         f"| Abstains when unsure | correct \"say again\" | 0% | {f(ik['b1_abstain'])} | **{f(ik['ss_abstain'])}** | out-of-book utterances |",
         f"| Never acts on a guess | acted on a wrong phrase without asking | {f(ik['b0_wrong'])} | {f(ik['b1_wrong'])} | **{f(ik['ss_wrong'])}** | in-book + out-of-book |",

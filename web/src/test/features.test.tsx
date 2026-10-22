@@ -108,7 +108,7 @@ describe("speak for me", () => {
     // the confirm card appears on the Talk tab
     await screen.findByRole("heading", { name: "Is this right?" });
     expect(screen.getByRole("tab", { name: "Talk" }).getAttribute("aria-selected")).toBe("true");
-    expect(screen.getByText("Say out loud: “I need help.”?")).toBeTruthy();
+    expect(screen.getByText("Say out loud: “I need help.”")).toBeTruthy(); // no stray "?" after a quoted sentence
     expect(document.documentElement.outerHTML).not.toContain(NONCE);
     fireEvent.click(screen.getByRole("button", { name: /Yes/ }));
     await waitFor(() => expect(hub.evidenceTap).toHaveBeenCalledWith(expect.objectContaining({ pending_id: "p_proposed", nonce: NONCE }), { option: 1 }, "touch"));

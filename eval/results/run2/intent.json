@@ -1,7 +1,7 @@
 {
   "name": "intent",
-  "generated_at": "2026-10-22T15:20:32+0530",
-  "git_sha": "4883775",
+  "generated_at": "2026-10-22T15:51:14+0530",
+  "git_sha": "ffe9c48",
   "python": "3.13.12",
   "claim": "2, 2b, 5",
   "asr_engine": "transcribe-streaming",
@@ -65,7 +65,7 @@
         "false_abstain_pct": 26.9,
         "correct_abstain_pct": 100.0,
         "in_cards_with_maybe_pct": 91.7,
-        "maybe_cards_on_out_of_book_pct": 27.8,
+        "maybe_cards_on_out_of_book_pct": 25.9,
         "acted_without_asking_wrong_pct": 0.0
       },
       "per_speaker": {
@@ -135,7 +135,7 @@
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 100.0,
             "in_cards_with_maybe_pct": 100.0,
-            "maybe_cards_on_out_of_book_pct": 40.0,
+            "maybe_cards_on_out_of_book_pct": 35.0,
             "acted_without_asking_wrong_pct": 0.0
           }
         },
@@ -240,7 +240,7 @@
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 100.0,
             "in_cards_with_maybe_pct": 100.0,
-            "maybe_cards_on_out_of_book_pct": 35.0,
+            "maybe_cards_on_out_of_book_pct": 30.0,
             "acted_without_asking_wrong_pct": 0.0
           }
         },
@@ -2187,7 +2187,7 @@
         ],
         "abstain": true,
         "rel": [
-          true,
+          false,
           true,
           true
         ]
@@ -2557,7 +2557,7 @@
         "rel": [
           true,
           true,
-          true
+          false
         ]
       }
     },
@@ -2693,7 +2693,7 @@
         ],
         "abstain": true,
         "rel": [
-          true,
+          false,
           false,
           true
         ]
@@ -8019,7 +8019,7 @@
         ],
         "abstain": true,
         "rel": [
-          true,
+          false,
           true,
           false
         ]
@@ -8111,7 +8111,7 @@
         ],
         "abstain": true,
         "rel": [
-          true,
+          false,
           true,
           false
         ]

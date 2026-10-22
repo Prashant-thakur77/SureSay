@@ -146,7 +146,7 @@ def test_the_device_can_use_mcp_with_its_signature(hub: Hub) -> None:
 
 def test_a_high_risk_card_needs_a_second_yes_end_to_end(hub: Hub) -> None:
     device = hub.pair()
-    out = hub.say(device, "open the door")
+    out = hub.say(device, "do the door")  # ambiguous: lock or unlock, so the unlock is chosen first, then asked twice
     pending = out["pending"][0]
     unlock_n = next(c["n"] for c in out["result"]["candidates"] if c["text"] == "Unlock the front door")
     ev = hub.tap(device, pending, unlock_n).json()

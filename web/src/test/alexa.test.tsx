@@ -101,7 +101,8 @@ describe("the Alexa+ view", () => {
     fireEvent.change(screen.getByLabelText("Alexa,"), { target: { value: "van on" } });
     fireEvent.click(screen.getByRole("button", { name: /Ask/ }));
     await waitFor(() => expect(host.callToolRaw).toHaveBeenCalledWith("understand", { user_id: "", transcript: "van on" }));
-    await screen.findByText("Did you mean one of these?", { selector: ".echo__reply *, .echo__reply" });
+    // the screen shows a short line; the full sentence is what Alexa would say aloud
+    await screen.findByText("I found 3 options. Choose on the screen, or on your phone.", { selector: ".echo__reply *, .echo__reply" });
     expect(screen.getByText(/tools\/call understand/)).toBeTruthy();
     expect(screen.getByText(/messages$/).textContent).toMatch(/^\d+ messages$/);
     expect(document.documentElement.outerHTML).not.toContain(NONCE);

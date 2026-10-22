@@ -279,7 +279,8 @@ def forged_case(hub: LiveHub, short_hub: LiveHub, user: UserDevice, adv: Adversa
         for key in (window, f"{window}:src:127.0.0.1"):
             hub.s.store.add("pairing_attempts", key, -hub.s.store.add("pairing_attempts", key, 0))
     elif fid == "F12":
-        u = adv.call("understand", {"user_id": "demo", "transcript": "open the door"})
+        # ambiguous ("open the door" alone is one unambiguous card, which asks its single yes directly)
+        u = adv.call("understand", {"user_id": "demo", "transcript": "do the door"})
         p2 = next(x for x in user.pending() if x["pending_id"] == u["pending_id"])
         n = next(o["n"] for o in p2["options"] if o["action"] == "door_lock" and o["args"] == {"locked": False})
         ev = user.tap(p2, option=n)

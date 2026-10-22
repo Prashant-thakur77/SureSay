@@ -24,6 +24,8 @@ logger = logging.getLogger(__name__)
 
 CONFIRM_WORDS = ["yes", "no", "one", "two", "three", "cancel", "haan", "nahin"]
 
+CANT_DO = ("I read “{heard}”. I can't do that yet. I can help with the lights, the fan, the AC, the TV, the front "
+           "door, calls, messages, shopping, and saying things for you.")
 ASK_AGAIN = "Sorry, I didn't catch that. Please say it again, or type it."
 NEGATED = "I heard “{word}”, so nothing will change. Tell me what you'd like instead."
 
@@ -91,8 +93,13 @@ def understand(app: SureSay, user_id: str, *, transcript: str | None = None, aud
         maybe_floor = getattr(getattr(app.ranker, "rule", None), "maybe_floor", 0.5)
         weak = [c for c in ranked.candidates if c.action in catalog.WRITE_ACTIONS and c.confidence >= maybe_floor
                 and relevant(heard.text, c.phrase or c.text)][:3]
-        maybe = [{"text": c.text, "phrase": c.phrase, "confidence": c.confidence} for c in ranked.candidates]
+        about = [c for c in ranked.candidates if relevant(heard.text, c.phrase or c.text)]
+        maybe = [{"text": c.text, "phrase": c.phrase, "confidence": c.confidence} for c in about]
         out = {**base, "status": "ask_again", "reason": ranked.reason, "maybe": maybe, "say": ASK_AGAIN}
+        if audio is None and not about and heard.text.strip():
+            # typed, so it was read exactly: say plainly that SureSay can't do it, not that it misheard
+            out.update(reason="out_of_scope", say=CANT_DO.format(heard=heard.text.strip()))
+            return out
         if weak:
             # Not sure: ask again, and offer the best guesses as "maybe" cards. They still need the user's own
             # confirmation, so a wrong maybe is simply declined.

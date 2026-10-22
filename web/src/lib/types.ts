@@ -192,6 +192,7 @@ export interface GateEvent {
   options?: Array<{ n: number; text: string; action: string; risk: Risk }>;
   decision?: { kind: DecisionKind; option: number | null; heard: string };
   transcript?: string | null;
+  input?: TapInput | null;
   channel?: "voice" | "tap" | "transcript";
   caller?: string;
   text?: string;

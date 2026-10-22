@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.6.0 (22 Oct 2026)
+
+From a second strict judge's review (16/20):
+- **Opposites are never the top guess:** when what was heard says "unlock"/"open" or "lock", "on" or "off", a card meaning the opposite scores lower (×0.8), and one naming a different device than the one heard scores lower (×0.85); both still appear, since a mishearing can flip a word. "unlock the door" no longer leads with "Lock the front door", nor "turn the fan off" with the TV.
+- **A typed request SureSay can't do is answered plainly** ("I read “what's the weather”. I can't do that yet…"), with no random ideas; ideas offered while asking again must be about what was said, and numbers no longer count as a shared topic. Irrelevant maybe cards on out-of-book requests: 25.9% (was 47.2% two releases ago).
+- The Activity log says "You pressed" after a key press; a quoted sentence on the second check has no stray "?"; the Alexa+ view shows a short line on the screen, logs "nothing is waiting" when nothing is, and its phone panel shows "done" only for the latest request; the cards app fits a phone-width frame.
+- The report's headline row for task success shows the stricter 98.1% (new recordings only) and names its recogniser; the README's "learns from you" says what the evaluation found.
+
 ## 1.5.0 (22 Oct 2026)
 
 - **Task success on dysarthric speech** (`eval/run_task_eval.py`): a sentence done within two tries, 100.0% for SureSay with 0 wrong actions, against 98.1% with 1.9% wrong actions for the phrasebook baseline and 33.3% for a plain assistant (local recogniser; caveats in the report).
