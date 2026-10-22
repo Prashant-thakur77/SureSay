@@ -72,3 +72,12 @@ def test_talk_about_consent_gets_a_plain_answer_not_guesses(hub: Hub, text: str)
 def test_a_real_request_that_mentions_confirming_still_gets_its_cards(hub: Hub) -> None:
     r = _say(hub, "turn on the bedroom lights and confirm it")["result"]
     assert r["status"] == "choose" and r["candidates"][0]["text"] == "Turn on the bedroom lights"
+
+
+def test_a_typed_sentence_never_offers_an_unrelated_phrase(hub: Hub) -> None:
+    d = hub.pair()
+    r = hub.signed(d, "POST", "/device/turn", {"text": "I am proud of you", "purpose": "say"}).json()["result"]
+    texts = [c["text"] for c in r.get("candidates") or []]
+    assert texts and "proud" in texts[0] and not any("thirsty" in t for t in texts), texts
+    r = hub.signed(d, "POST", "/device/turn", {"text": "I am proud of you"}).json()["result"]
+    assert not any("thirsty" in c["text"] for c in r.get("candidates") or []), r

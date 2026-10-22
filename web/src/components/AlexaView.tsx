@@ -319,7 +319,7 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
         const shown = out.latest ?? out.understand;
         await presentTurn(shown ? { content: [{ type: "text", text: JSON.stringify(shown) }], structuredContent: shown } : null);
         setRefused(out.tool_calls.some((c) => c.name === "confirm" && (c.result as { status?: unknown } | null)?.status !== "done"));
-        log("←", `Nova replied in ${(out.ms / 1000).toFixed(1)} s`);
+        log("←", `Nova answered: model time ${(out.ms / 1000).toFixed(1)} s`);
         setReply(out.reply || "Done.");
         speak?.(out.reply);
         return;
@@ -358,8 +358,13 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
       <div className={`echo__bar${busy ? " echo__bar--busy" : ""}`} aria-hidden="true" />
       <p className="echo__reply" role="status" aria-live="polite">
         <span className="visually-hidden">Alexa: </span>
-        {reply}
-        {refused && <span className="echo__refused">{REFUSED_LINE}</span>}
+        <span className="echo__said">{reply}</span>
+        {refused && (
+          <>
+            {" "}
+            <span className="echo__refused">{REFUSED_LINE}</span>
+          </>
+        )}
       </p>
       {html ? (
         <iframe

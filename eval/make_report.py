@@ -221,7 +221,8 @@ def intent_section(i: dict[str, Any], i2: dict[str, Any] | None) -> tuple[list[s
                 "| Out-of-book: correctly asked again | " + " | ".join(f(ctrl[s]["correct_abstain_pct"]) for s in systems) + " |"]
     if i2:
         t2 = i2["summary"]["test"]
-        out += ["", "Run 2 (stability), test top-1: " + ", ".join(f"{names[s]} {f(t2[s]['top1_pct'])}" for s in i2["systems"])]
+        out += ["", "Run 2 (stability: the same clips transcribed again, so only the recogniser's own variation differs), "
+                "test top-1: " + ", ".join(f"{names[s]} {f(t2[s]['top1_pct'])}" for s in i2["systems"])]
     ss = "ss_nova" if "ss_nova" in systems else "ss_fuzzy"
     worst = min(test["per_speaker"].items(), key=lambda kv: kv[1][ss]["top1_pct"] or 0)
     key = {"b0_top1": test["b0"]["top1_pct"], "b1_top1": test["b1"]["top1_pct"], "b1_top3": test["b1"]["top3_pct"], "ss_top1": test[ss]["top1_pct"],

@@ -94,6 +94,12 @@ def understand(app: SureSay, user_id: str, *, transcript: str | None = None, aud
         return {**base, "status": "answer", "action": "cart_view", "result": app.read(user_id, "cart_view"),
                 "say": "Your cart is empty, so there is nothing to order. Add something first."}
     ranked.candidates = [c for c in ranked.candidates if not empty_order(c)]
+    # A "say this for me" card is a whole sentence, so it can look close to another sentence that merely starts the same
+    # way ("I am proud of you" and "I am thirsty…"). Typed text was read exactly: a phrase card must share a real word
+    # with it. Heard text may be misheard, so there only the cards beside the best guess must.
+    ranked.candidates = [c for i, c in enumerate(ranked.candidates)
+                         if c.action != "say_for_me" or (audio is not None and i == 0)
+                         or relevant(heard.text, c.phrase or c.text)]
 
     if (ranked.abstain or not ranked.candidates) and _CONSENT_TALK.search(heard.text or ""):
         return {**base, "status": "ask_again", "reason": "consent_talk", "maybe": [], "say": CONSENT_TALK}
@@ -201,7 +207,9 @@ def understand_say(app: SureSay, user_id: str, *, transcript: str | None = None,
     sentences = [e for e in book if e["action"] == "say_for_me" and (e.get("args") or {}).get("text")]
     scored = sorted(((max(similarity(heard.text, e["phrase"]), similarity(heard.text, e["args"]["text"])), e["args"]["text"])
                      for e in sentences), reverse=True)
-    close = [(s, t) for s, t in scored if s >= 0.45 and norm(t) != norm(said)][:2]
+    # a suggestion must share a real word with what was said, unless it was heard (not typed) and is very close
+    close = [(s, t) for s, t in scored if s >= 0.45 and norm(t) != norm(said)
+             and (relevant(heard.text, t) or (audio_ref is not None and s >= 0.7))][:2]
     options: list[tuple[str, float]] = [(said, 1.0)]
     if close and close[0][0] >= 0.7:
         options.insert(0, (close.pop(0)[1], round(scored[0][0], 3)))

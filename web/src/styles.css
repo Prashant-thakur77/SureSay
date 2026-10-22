@@ -999,6 +999,21 @@ code {
   box-shadow: var(--shadow);
 }
 
+/* the second yes: a badge and an amber edge, so asking again never looks like the screen glitched */
+.badge--second {
+  align-self: flex-start;
+  margin: 0;
+  border: var(--bw) solid var(--on-accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 1.05rem;
+}
+
+.final__card--second {
+  border-color: var(--accent-ink);
+  border-left-width: 12px;
+}
+
 .final__card .card__icon {
   flex: 0 0 auto;
   width: min(3.5rem, 13vw);
@@ -4446,6 +4461,10 @@ code {
   50% {
     opacity: 0.45;
   }
+}
+
+.echo__said {
+  display: block;
 }
 
 .echo__reply {

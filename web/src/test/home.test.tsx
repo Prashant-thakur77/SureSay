@@ -46,7 +46,30 @@ describe("the home page", () => {
   it("shows every number from the report as plain text for screen readers", () => {
     render(<App />);
     expect(screen.getByRole("article", { name: /Misheard words taken as a “yes” or a choice: from 62.8% to 2.3%/ })).toBeTruthy();
-    expect(screen.getByRole("article", { name: /Attacks that changed anything: 0 \/ 50/ })).toBeTruthy();
+    expect(screen.getByRole("article", { name: /Attacks that changed anything: from 35 \/ 35 to 0 \/ 35/ })).toBeTruthy();
+  });
+
+  it("compares the same 35 attacks with and without the gate, and counts the forgeries apart", () => {
+    render(<App />);
+    const attacks = screen.getByRole("article", { name: /Attacks that changed anything/ });
+    expect(attacks.textContent).toContain("35 / 35");
+    expect(attacks.textContent).toContain("0 / 35");
+    expect(attacks.textContent).toContain("plus 0 / 15 forged");
+    expect(document.body.textContent).not.toContain("0 / 50");
+    expect(screen.getByRole("article", { name: /Acted on a wrong phrase without asking: from 84.3% to 0.0%.*\(by design\)/ })).toBeTruthy();
+    expect(screen.getByRole("article", { name: /Misheard words taken as a “yes” or a choice.*forced-choice baseline/ })).toBeTruthy();
+  });
+
+  it("says plainly where SureSay is on Alexa today, and that Alexa+ is simulated", () => {
+    render(<App />);
+    const text = document.body.textContent!;
+    expect(text).not.toMatch(/built and tested on AWS Lambda/);
+    expect(text).toMatch(/live in development on our Alexa developer account/);
+    expect(text).toMatch(/end to end in the Alexa simulator/);
+    const faq = screen.getByText("Does it work with Alexa today?").closest("details")!;
+    expect(faq.textContent).toMatch(/Yes, as a classic Alexa skill/);
+    expect(faq.textContent).toMatch(/22 Oct 2026 .*end to end in the Alexa simulator/);
+    expect(faq.textContent).toMatch(/Alexa\+ .*simulated/);
   });
 
   it("“Open the Alexa+ view” starts quietly and goes on to pairing, remembering where to go", async () => {

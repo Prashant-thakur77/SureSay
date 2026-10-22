@@ -132,6 +132,14 @@ describe("main screen", () => {
     const final = cardSet({ pending_id: "p_final", stage: "final", options: [{ n: 1, text: "Unlock the front door", action: "door_lock", args: { locked: false }, risk: "high" }] });
     renderMain(final);
     await screen.findByText("Unlock the front door?");
+    // the second yes looks different from the first, so a repeat question doesn't read as a glitch
+    expect(screen.getByText("Second yes")).toBeTruthy();
+    expect(document.querySelector(".final__card--second")).toBeTruthy();
+    const title = screen.getByRole("heading", { level: 2, name: /Please check.*this one asks twice/ });
+    expect(title.textContent).toBe("Please check: this one asks twice");
+    // the title is a flex box: the words must be one flex item, or the gap shows up as "check : this"
+    expect(Array.from(title.childNodes).every((n) => n.nodeType === Node.ELEMENT_NODE)).toBe(true);
+    expect(title.children).toHaveLength(1);
     expect(screen.getByRole("button", { name: /Yes/ })).toBeTruthy();
     expect(screen.getByRole("button", { name: /No/ })).toBeTruthy();
     expect(await axeViolations()).toEqual([]);

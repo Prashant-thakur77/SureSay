@@ -1,7 +1,7 @@
 {
   "name": "intent",
-  "generated_at": "2026-10-22T16:24:13+0530",
-  "git_sha": "68d5e05",
+  "generated_at": "2026-10-22T19:51:46+0530",
+  "git_sha": "4375ff7",
   "python": "3.13.12",
   "claim": "2, 2b, 5",
   "asr_engine": "transcribe-streaming",
@@ -15,6 +15,7 @@
     "ss_fuzzy"
   ],
   "nova": "pending: Bedrock access not available; not estimated",
+  "ranker_model": null,
   "rules": {
     "fuzzy": {
       "floor": 0.65,
@@ -30,8 +31,8 @@
     }
   },
   "tokens": {
-    "input": 0,
-    "output": 0
+    "input_tokens": 0,
+    "output_tokens": 0
   },
   "summary": {
     "test": {
@@ -49,23 +50,23 @@
       "b1": {
         "in_book": 108,
         "out_of_book": 108,
-        "top1_pct": 92.6,
-        "top3_pct": 96.3,
+        "top1_pct": 90.7,
+        "top3_pct": 94.4,
         "false_abstain_pct": 0.0,
         "correct_abstain_pct": 0.0,
-        "in_cards_with_maybe_pct": 95.4,
+        "in_cards_with_maybe_pct": 93.5,
         "maybe_cards_on_out_of_book_pct": 0.0,
-        "acted_without_asking_wrong_pct": 53.7
+        "acted_without_asking_wrong_pct": 54.6
       },
       "ss_fuzzy": {
         "in_book": 108,
         "out_of_book": 108,
-        "top1_pct": 73.1,
-        "top3_pct": 73.1,
-        "false_abstain_pct": 26.9,
+        "top1_pct": 75.0,
+        "top3_pct": 75.0,
+        "false_abstain_pct": 25.0,
         "correct_abstain_pct": 100.0,
-        "in_cards_with_maybe_pct": 91.7,
-        "maybe_cards_on_out_of_book_pct": 25.9,
+        "in_cards_with_maybe_pct": 92.6,
+        "maybe_cards_on_out_of_book_pct": 23.1,
         "acted_without_asking_wrong_pct": 0.0
       },
       "per_speaker": {
@@ -154,22 +155,22 @@
           "b1": {
             "in_book": 20,
             "out_of_book": 20,
-            "top1_pct": 85.0,
-            "top3_pct": 100.0,
+            "top1_pct": 75.0,
+            "top3_pct": 90.0,
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 0.0,
-            "in_cards_with_maybe_pct": 95.0,
+            "in_cards_with_maybe_pct": 85.0,
             "maybe_cards_on_out_of_book_pct": 0.0,
-            "acted_without_asking_wrong_pct": 57.5
+            "acted_without_asking_wrong_pct": 62.5
           },
           "ss_fuzzy": {
             "in_book": 20,
             "out_of_book": 20,
-            "top1_pct": 45.0,
-            "top3_pct": 45.0,
-            "false_abstain_pct": 55.0,
+            "top1_pct": 50.0,
+            "top3_pct": 50.0,
+            "false_abstain_pct": 50.0,
             "correct_abstain_pct": 100.0,
-            "in_cards_with_maybe_pct": 80.0,
+            "in_cards_with_maybe_pct": 85.0,
             "maybe_cards_on_out_of_book_pct": 10.0,
             "acted_without_asking_wrong_pct": 0.0
           }
@@ -200,9 +201,9 @@
           "ss_fuzzy": {
             "in_book": 20,
             "out_of_book": 20,
-            "top1_pct": 80.0,
-            "top3_pct": 80.0,
-            "false_abstain_pct": 20.0,
+            "top1_pct": 85.0,
+            "top3_pct": 85.0,
+            "false_abstain_pct": 15.0,
             "correct_abstain_pct": 100.0,
             "in_cards_with_maybe_pct": 95.0,
             "maybe_cards_on_out_of_book_pct": 25.0,
@@ -275,7 +276,7 @@
             "false_abstain_pct": 60.0,
             "correct_abstain_pct": 100.0,
             "in_cards_with_maybe_pct": 85.0,
-            "maybe_cards_on_out_of_book_pct": 35.0,
+            "maybe_cards_on_out_of_book_pct": 20.0,
             "acted_without_asking_wrong_pct": 0.0
           }
         }
@@ -651,7 +652,7 @@
       "wav": "raw/F01/Session1/wav_headMic/0008.wav",
       "truth": "ph_07",
       "heard_b0": "And so in the way. We also.",
-      "heard_b1": "I slept in the window. we also.",
+      "heard_b1": "and so in the way. we also.",
       "b0": {
         "top": [],
         "exact": false,
@@ -659,33 +660,33 @@
       },
       "b1": {
         "top": [
+          "ph_49",
           "ph_19",
-          "ph_20",
-          "ph_49"
+          "ph_22"
         ],
         "conf": [
-          0.5344,
-          0.525,
-          0.5146
+          0.5371,
+          0.5096,
+          0.5066
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
+          "ph_49",
           "ph_19",
-          "ph_20",
-          "ph_49"
+          "ph_22"
         ],
         "conf": [
-          0.5344,
-          0.525,
-          0.5146
+          0.5371,
+          0.5096,
+          0.5066
         ],
         "abstain": true,
         "rel": [
           false,
           false,
-          false
+          true
         ]
       }
     },
@@ -789,7 +790,7 @@
       "wav": "raw/F01/Session1/wav_headMic/0132.wav",
       "truth": null,
       "heard_b0": "When he speaks, his voice and we was just cry.",
-      "heard_b1": "when he speaks, his voice is something quick and we was just cry.",
+      "heard_b1": "when he speaks, his voice and we was just cry.",
       "b0": {
         "top": [],
         "exact": false,
@@ -797,32 +798,32 @@
       },
       "b1": {
         "top": [
-          "ph_04",
-          "ph_11",
-          "ph_36"
+          "ph_01",
+          "ph_02",
+          "ph_33"
         ],
         "conf": [
-          0.4794,
-          0.4753,
-          0.4683
+          0.4993,
+          0.4817,
+          0.4803
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
-          "ph_04",
-          "ph_11",
-          "ph_36"
+          "ph_01",
+          "ph_02",
+          "ph_33"
         ],
         "conf": [
-          0.4794,
-          0.4753,
-          0.4683
+          0.4993,
+          0.4817,
+          0.4803
         ],
         "abstain": true,
         "rel": [
           true,
-          true,
+          false,
           true
         ]
       }
@@ -880,8 +881,8 @@
       "text": "A long, flowing beard clings to his chin,",
       "wav": "raw/F01/Session1/wav_headMic/0093.wav",
       "truth": null,
-      "heard_b0": "A long low we made clink cling king.",
-      "heard_b1": "A long lowy made cling cling king.",
+      "heard_b0": "A long lowy made clink cling king.",
+      "heard_b1": "A long low we made clink cling king.",
       "b0": {
         "top": [],
         "exact": false,
@@ -889,33 +890,33 @@
       },
       "b1": {
         "top": [
-          "ph_18",
-          "ph_09",
-          "ph_00"
+          "ph_00",
+          "ph_46",
+          "ph_18"
         ],
         "conf": [
-          0.4708,
-          0.4531,
-          0.4516
+          0.4802,
+          0.4746,
+          0.4615
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
-          "ph_18",
-          "ph_09",
-          "ph_00"
+          "ph_00",
+          "ph_46",
+          "ph_18"
         ],
         "conf": [
-          0.4708,
-          0.4531,
-          0.4516
+          0.4802,
+          0.4746,
+          0.4615
         ],
         "abstain": true,
         "rel": [
-          false,
           true,
-          true
+          true,
+          false
         ]
       }
     },
@@ -1019,7 +1020,7 @@
       "wav": "raw/F01/Session1/wav_headMic/0020.wav",
       "truth": null,
       "heard_b0": "You buy several buckets.",
-      "heard_b1": "you buy several bucks.",
+      "heard_b1": "you buy several buckets.",
       "b0": {
         "top": [],
         "exact": false,
@@ -1027,33 +1028,33 @@
       },
       "b1": {
         "top": [
+          "ph_34",
           "ph_42",
-          "ph_32",
-          "ph_34"
+          "ph_32"
         ],
         "conf": [
-          0.4673,
-          0.45,
-          0.4343
+          0.4674,
+          0.4482,
+          0.4305
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
+          "ph_34",
           "ph_42",
-          "ph_32",
-          "ph_34"
+          "ph_32"
         ],
         "conf": [
-          0.4673,
-          0.45,
-          0.4343
+          0.4674,
+          0.4482,
+          0.4305
         ],
         "abstain": true,
         "rel": [
+          true,
           false,
-          false,
-          true
+          false
         ]
       }
     },
@@ -1449,7 +1450,7 @@
       "wav": "raw/F04/Session2/wav_headMic/0057.wav",
       "truth": "ph_08",
       "heard_b0": "They carried me off. On the structure.",
-      "heard_b1": "they carried me off. on the structure.",
+      "heard_b1": "they carried me off. on the stretcher.",
       "b0": {
         "top": [],
         "exact": false,
@@ -1459,12 +1460,12 @@
         "top": [
           "ph_08",
           "ph_47",
-          "ph_17"
+          "ph_24"
         ],
         "conf": [
-          0.9096,
-          0.5643,
-          0.5032
+          1.0,
+          0.5485,
+          0.4924
         ],
         "abstain": false
       },
@@ -1472,18 +1473,18 @@
         "top": [
           "ph_08",
           "ph_47",
-          "ph_17"
+          "ph_24"
         ],
         "conf": [
-          0.9096,
-          0.5643,
-          0.5032
+          1.0,
+          0.5485,
+          0.4924
         ],
         "abstain": false,
         "rel": [
           true,
-          true,
-          true
+          false,
+          false
         ]
       }
     },
@@ -1687,7 +1688,7 @@
       "wav": "raw/F04/Session1/wav_arrayMic/0091.wav",
       "truth": "ph_13",
       "heard_b0": "Except in the winter when the os. Or snow or ice prevents.",
-      "heard_b1": "except in the winter when the os. or snow or ice prevents.",
+      "heard_b1": "except in the winter when the owes. or snow or ice prevents.",
       "b0": {
         "top": [],
         "exact": false,
@@ -1700,9 +1701,9 @@
           "ph_34"
         ],
         "conf": [
-          0.9766,
-          0.5003,
-          0.4875
+          0.9711,
+          0.4921,
+          0.4896
         ],
         "abstain": false
       },
@@ -1713,9 +1714,9 @@
           "ph_34"
         ],
         "conf": [
-          0.9766,
-          0.5003,
-          0.4875
+          0.9711,
+          0.4921,
+          0.4896
         ],
         "abstain": false,
         "rel": [
@@ -3075,7 +3076,7 @@
       "wav": "raw/M01/Session2_3/wav_headMic/0235.wav",
       "truth": "ph_03",
       "heard_b0": "The BMI. Music in every evening.",
-      "heard_b1": "the BMI. Music in every evening.",
+      "heard_b1": "the BM I. Music in every evening.",
       "b0": {
         "top": [],
         "exact": false,
@@ -3085,12 +3086,12 @@
         "top": [
           "ph_03",
           "ph_33",
-          "ph_26"
+          "ph_21"
         ],
         "conf": [
-          0.7696,
-          0.5234,
-          0.4512
+          0.7835,
+          0.5076,
+          0.4605
         ],
         "abstain": false
       },
@@ -3098,12 +3099,12 @@
         "top": [
           "ph_03",
           "ph_33",
-          "ph_26"
+          "ph_21"
         ],
         "conf": [
-          0.7696,
-          0.5234,
-          0.4512
+          0.7835,
+          0.5076,
+          0.4605
         ],
         "abstain": false,
         "rel": [
@@ -3167,7 +3168,7 @@
       "wav": "raw/M01/Session2_3/wav_headMic/0239.wav",
       "truth": "ph_05",
       "heard_b0": "Above. It's easy for you.",
-      "heard_b1": "Above. It's for you.",
+      "heard_b1": "Above. It's easy for you.",
       "b0": {
         "top": [],
         "exact": false,
@@ -3177,12 +3178,12 @@
         "top": [
           "ph_05",
           "ph_31",
-          "ph_28"
+          "ph_40"
         ],
         "conf": [
-          0.6176,
-          0.4826,
-          0.4606
+          0.6703,
+          0.5084,
+          0.4511
         ],
         "abstain": false
       },
@@ -3190,14 +3191,14 @@
         "top": [
           "ph_05",
           "ph_31",
-          "ph_28"
+          "ph_40"
         ],
         "conf": [
-          0.6176,
-          0.4826,
-          0.4606
+          0.6703,
+          0.5084,
+          0.4511
         ],
-        "abstain": true,
+        "abstain": false,
         "rel": [
           false,
           false,
@@ -3350,8 +3351,8 @@
       "text": "Twice each day he plays skillfully and with zest upon our small organ.",
       "wav": "raw/M01/Session1/wav_headMic/0084.wav",
       "truth": "ph_09",
-      "heard_b0": "It ain't you do it. we and we. Yeah, about an hour. T",
-      "heard_b1": "you do it. good and we. Yeah, about an hour. organ",
+      "heard_b0": "you do it. Good and we. Yeah, about an hour. T",
+      "heard_b1": "it ain't you do it. good and we. Yeah, about an hour. T",
       "b0": {
         "top": [],
         "exact": false,
@@ -3359,33 +3360,33 @@
       },
       "b1": {
         "top": [
-          "ph_09",
-          "ph_15",
+          "ph_24",
+          "ph_20",
           "ph_46"
         ],
         "conf": [
-          0.4959,
-          0.4569,
-          0.4519
+          0.4964,
+          0.4665,
+          0.4564
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
-          "ph_09",
-          "ph_15",
+          "ph_24",
+          "ph_20",
           "ph_46"
         ],
         "conf": [
-          0.4959,
-          0.4569,
-          0.4519
+          0.4964,
+          0.4665,
+          0.4564
         ],
         "abstain": true,
         "rel": [
           true,
           false,
-          false
+          true
         ]
       }
     },
@@ -3397,7 +3398,7 @@
       "wav": "raw/M01/Session2_3/wav_headMic/0173.wav",
       "truth": "ph_10",
       "heard_b0": "We run our back in the bar.",
-      "heard_b1": "we rode on back in the bar.",
+      "heard_b1": "we rode on back in the farm.",
       "b0": {
         "top": [],
         "exact": false,
@@ -3407,12 +3408,12 @@
         "top": [
           "ph_10",
           "ph_34",
-          "ph_26"
+          "ph_14"
         ],
         "conf": [
-          0.7152,
-          0.5352,
-          0.502
+          0.7891,
+          0.5212,
+          0.4944
         ],
         "abstain": false
       },
@@ -3420,18 +3421,18 @@
         "top": [
           "ph_10",
           "ph_34",
-          "ph_26"
+          "ph_14"
         ],
         "conf": [
-          0.7152,
-          0.5352,
-          0.502
+          0.7891,
+          0.5212,
+          0.4944
         ],
         "abstain": false,
         "rel": [
           true,
-          true,
-          false
+          false,
+          true
         ]
       }
     },
@@ -3489,7 +3490,7 @@
       "wav": "raw/M01/Session2_3/wav_headMic/0271.wav",
       "truth": "ph_12",
       "heard_b0": "Here the bag in AD.",
-      "heard_b1": "the baged AD.",
+      "heard_b1": "the bag in AD.",
       "b0": {
         "top": [],
         "exact": false,
@@ -3499,12 +3500,12 @@
         "top": [
           "ph_26",
           "ph_34",
-          "ph_12"
+          "ph_24"
         ],
         "conf": [
-          0.4395,
-          0.4381,
-          0.4226
+          0.5081,
+          0.4674,
+          0.4519
         ],
         "abstain": false
       },
@@ -3512,17 +3513,17 @@
         "top": [
           "ph_26",
           "ph_34",
-          "ph_12"
+          "ph_24"
         ],
         "conf": [
-          0.4395,
-          0.4381,
-          0.4226
+          0.5081,
+          0.4674,
+          0.4519
         ],
         "abstain": true,
         "rel": [
           false,
-          true,
+          false,
           false
         ]
       }
@@ -3535,7 +3536,7 @@
       "wav": "raw/M01/Session2_3/wav_headMic/0029.wav",
       "truth": "ph_13",
       "heard_b0": "I would. Oh did they.",
-      "heard_b1": "I would. Oh they do.",
+      "heard_b1": "I would. Oh did they.",
       "b0": {
         "top": [],
         "exact": false,
@@ -3543,27 +3544,27 @@
       },
       "b1": {
         "top": [
+          "ph_35",
           "ph_13",
-          "ph_22",
-          "ph_35"
+          "ph_22"
         ],
         "conf": [
-          0.515,
-          0.5099,
-          0.4939
+          0.4803,
+          0.4674,
+          0.4538
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
+          "ph_35",
           "ph_13",
-          "ph_22",
-          "ph_35"
+          "ph_22"
         ],
         "conf": [
-          0.515,
-          0.5099,
-          0.4939
+          0.4803,
+          0.4674,
+          0.4538
         ],
         "abstain": true,
         "rel": [
@@ -3581,7 +3582,7 @@
       "wav": "raw/M01/Session2_3/wav_headMic/0202.wav",
       "truth": "ph_14",
       "heard_b0": "Did it a period of. Trendy in for me.",
-      "heard_b1": "did in a period of. Trendy in for me.",
+      "heard_b1": "did it a period of. Trendy in for me.",
       "b0": {
         "top": [],
         "exact": false,
@@ -3590,32 +3591,32 @@
       "b1": {
         "top": [
           "ph_14",
-          "ph_29",
-          "ph_40"
+          "ph_40",
+          "ph_29"
         ],
         "conf": [
           0.7851,
-          0.5417,
-          0.5139
+          0.5139,
+          0.5118
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
           "ph_14",
-          "ph_29",
-          "ph_40"
+          "ph_40",
+          "ph_29"
         ],
         "conf": [
           0.7851,
-          0.5417,
-          0.5139
+          0.5139,
+          0.5118
         ],
         "abstain": false,
         "rel": [
           true,
-          false,
-          true
+          true,
+          false
         ]
       }
     },
@@ -3995,7 +3996,7 @@
       "wav": "raw/M01/Session2_3/wav_headMic/0165.wav",
       "truth": null,
       "heard_b0": "In I provide for burn to clear. Y and elk. Um, they do.",
-      "heard_b1": "in I provide for burn to clear. Y and elk. Um, they do.",
+      "heard_b1": "in I provide for burn to clear. Um and. Um, they do.",
       "b0": {
         "top": [],
         "exact": false,
@@ -4004,32 +4005,32 @@
       "b1": {
         "top": [
           "ph_14",
-          "ph_10",
-          "ph_00"
+          "ph_35",
+          "ph_46"
         ],
         "conf": [
-          0.458,
-          0.448,
-          0.4428
+          0.4772,
+          0.4708,
+          0.4609
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
           "ph_14",
-          "ph_10",
-          "ph_00"
+          "ph_35",
+          "ph_46"
         ],
         "conf": [
-          0.458,
-          0.448,
-          0.4428
+          0.4772,
+          0.4708,
+          0.4609
         ],
         "abstain": true,
         "rel": [
           true,
-          true,
-          true
+          false,
+          false
         ]
       }
     },
@@ -4178,8 +4179,8 @@
       "text": "When he speaks, his voice is just a bit cracked and quivers a trifle.",
       "wav": "raw/M01/Session1/wav_headMic/0005.wav",
       "truth": null,
-      "heard_b0": "When he in wind amid crack. And I dream.",
-      "heard_b1": "when he in wind amid crack. and I dream.",
+      "heard_b0": "When he in mine and then a bit crack. And I dream.",
+      "heard_b1": "when he in mine and then a bit crack. and I dream.",
       "b0": {
         "top": [],
         "exact": false,
@@ -4187,32 +4188,32 @@
       },
       "b1": {
         "top": [
-          "ph_24",
-          "ph_10",
-          "ph_40"
+          "ph_40",
+          "ph_02",
+          "ph_04"
         ],
         "conf": [
-          0.5139,
-          0.5091,
-          0.4804
+          0.4881,
+          0.4794,
+          0.474
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
-          "ph_24",
-          "ph_10",
-          "ph_40"
+          "ph_40",
+          "ph_02",
+          "ph_04"
         ],
         "conf": [
-          0.5139,
-          0.5091,
-          0.4804
+          0.4881,
+          0.4794,
+          0.474
         ],
         "abstain": true,
         "rel": [
-          true,
-          true,
+          false,
+          false,
           true
         ]
       }
@@ -4317,7 +4318,7 @@
       "wav": "raw/M01/Session1/wav_headMic/0066.wav",
       "truth": null,
       "heard_b0": "You minded yeah bro. No I didn't.",
-      "heard_b1": "you minded yeah bro. no I didn't.",
+      "heard_b1": "you mind bro. no I didn't.",
       "b0": {
         "top": [],
         "exact": false,
@@ -4325,33 +4326,33 @@
       },
       "b1": {
         "top": [
-          "ph_24",
-          "ph_31",
-          "ph_26"
+          "ph_26",
+          "ph_35",
+          "ph_04"
         ],
         "conf": [
-          0.4785,
-          0.4722,
-          0.4697
+          0.4813,
+          0.47,
+          0.4589
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
-          "ph_24",
-          "ph_31",
-          "ph_26"
+          "ph_26",
+          "ph_35",
+          "ph_04"
         ],
         "conf": [
-          0.4785,
-          0.4722,
-          0.4697
+          0.4813,
+          0.47,
+          0.4589
         ],
         "abstain": true,
         "rel": [
-          true,
           false,
-          false
+          true,
+          true
         ]
       }
     },
@@ -4639,7 +4640,7 @@
       "wav": "raw/M01/Session2_3/wav_headMic/0209.wav",
       "truth": null,
       "heard_b0": "Night after night they read a point card.",
-      "heard_b1": "Night after night they read a nine point card.",
+      "heard_b1": "Night after night they read a point card.",
       "b0": {
         "top": [],
         "exact": false,
@@ -4647,32 +4648,32 @@
       },
       "b1": {
         "top": [
-          "ph_45",
-          "ph_16",
-          "ph_40"
+          "ph_24",
+          "ph_40",
+          "ph_49"
         ],
         "conf": [
-          0.4921,
-          0.492,
-          0.4846
+          0.5035,
+          0.5021,
+          0.4994
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
-          "ph_45",
-          "ph_16",
-          "ph_40"
+          "ph_24",
+          "ph_40",
+          "ph_49"
         ],
         "conf": [
-          0.4921,
-          0.492,
-          0.4846
+          0.5035,
+          0.5021,
+          0.4994
         ],
         "abstain": true,
         "rel": [
-          false,
-          false,
+          true,
+          true,
           true
         ]
       }
@@ -4776,7 +4777,7 @@
       "text": "Nothing has been done yet to take advantage of the enabling legislation.",
       "wav": "raw/M02/Session2/wav_headMic/0208.wav",
       "truth": "ph_00",
-      "heard_b0": "Uh Nothing has been done yet to take advantage of and everything the yeah.",
+      "heard_b0": "Uh Nothing has been done yet to take advantage of and everything the letter, yeah.",
       "heard_b1": "Uh nothing has been done yet to take advantage of and everything the yeah.",
       "b0": {
         "top": [],
@@ -5009,7 +5010,7 @@
       "wav": "raw/M02/Session2/wav_headMic/0137.wav",
       "truth": "ph_05",
       "heard_b0": "This is not the Progra of So so like I just uh.",
-      "heard_b1": "this is not the Progra of S Sel so like I just uh.",
+      "heard_b1": "this is not the Progra of so so like I just uh.",
       "b0": {
         "top": [],
         "exact": false,
@@ -5019,12 +5020,12 @@
         "top": [
           "ph_05",
           "ph_02",
-          "ph_41"
+          "ph_39"
         ],
         "conf": [
-          0.6711,
-          0.4866,
-          0.4825
+          0.6984,
+          0.49,
+          0.4764
         ],
         "abstain": false
       },
@@ -5032,12 +5033,12 @@
         "top": [
           "ph_05",
           "ph_02",
-          "ph_41"
+          "ph_39"
         ],
         "conf": [
-          0.6711,
-          0.4866,
-          0.4825
+          0.6984,
+          0.49,
+          0.4764
         ],
         "abstain": false,
         "rel": [
@@ -5100,8 +5101,8 @@
       "text": "She wore warm, fleecy, woolen overalls.",
       "wav": "raw/M02/Session2/wav_headMic/0163.wav",
       "truth": "ph_07",
-      "heard_b0": "She was one. La 31 overall.",
-      "heard_b1": "she was one. La 31 overall.",
+      "heard_b0": "She wore one. La 31 overall.",
+      "heard_b1": "she wore warm. La 31 overall.",
       "b0": {
         "top": [],
         "exact": false,
@@ -5110,28 +5111,28 @@
       "b1": {
         "top": [
           "ph_07",
-          "ph_42",
-          "ph_19"
+          "ph_28",
+          "ph_49"
         ],
         "conf": [
-          0.6028,
-          0.4847,
-          0.4836
+          0.781,
+          0.4594,
+          0.4587
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
           "ph_07",
-          "ph_42",
-          "ph_19"
+          "ph_28",
+          "ph_49"
         ],
         "conf": [
-          0.6028,
-          0.4847,
-          0.4836
+          0.781,
+          0.4594,
+          0.4587
         ],
-        "abstain": true,
+        "abstain": false,
         "rel": [
           true,
           false,
@@ -5473,7 +5474,7 @@
       "wav": "raw/M02/Session2/wav_headMic/0188.wav",
       "truth": "ph_15",
       "heard_b0": "The love how the",
-      "heard_b1": "the love and the",
+      "heard_b1": "the love how the",
       "b0": {
         "top": [],
         "exact": false,
@@ -5481,27 +5482,27 @@
       },
       "b1": {
         "top": [
-          "ph_09",
+          "ph_49",
           "ph_21",
-          "ph_49"
+          "ph_13"
         ],
         "conf": [
-          0.5389,
-          0.508,
-          0.5064
+          0.4837,
+          0.4667,
+          0.4622
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
-          "ph_09",
+          "ph_49",
           "ph_21",
-          "ph_49"
+          "ph_13"
         ],
         "conf": [
-          0.5389,
-          0.508,
-          0.5064
+          0.4837,
+          0.4667,
+          0.4622
         ],
         "abstain": true,
         "rel": [
@@ -5749,7 +5750,7 @@
       "wav": "raw/M02/Session1/wav_headMic/0066.wav",
       "truth": null,
       "heard_b0": "Yet he still thinks that swiftly as ever.",
-      "heard_b1": "Yeah, he still thinks that swiftly as ever.",
+      "heard_b1": "yet he still thinks that swiftly as ever.",
       "b0": {
         "top": [],
         "exact": false,
@@ -5759,12 +5760,12 @@
         "top": [
           "ph_24",
           "ph_26",
-          "ph_09"
+          "ph_48"
         ],
         "conf": [
-          0.4789,
-          0.4745,
-          0.4677
+          0.5071,
+          0.4852,
+          0.4747
         ],
         "abstain": false
       },
@@ -5772,12 +5773,12 @@
         "top": [
           "ph_24",
           "ph_26",
-          "ph_09"
+          "ph_48"
         ],
         "conf": [
-          0.4789,
-          0.4745,
-          0.4677
+          0.5071,
+          0.4852,
+          0.4747
         ],
         "abstain": true,
         "rel": [
@@ -5795,7 +5796,7 @@
       "wav": "raw/M02/Session1/wav_headMic/0055.wav",
       "truth": null,
       "heard_b0": "She had your dog so. And greasy was for all year.",
-      "heard_b1": "she had your dark so. and greasy was for all year.",
+      "heard_b1": "she had your dog so. and greasy was for all year.",
       "b0": {
         "top": [],
         "exact": false,
@@ -5803,33 +5804,33 @@
       },
       "b1": {
         "top": [
-          "ph_28",
           "ph_47",
-          "ph_07"
+          "ph_33",
+          "ph_04"
         ],
         "conf": [
-          0.5093,
-          0.499,
-          0.4745
+          0.4895,
+          0.4818,
+          0.4605
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
-          "ph_28",
           "ph_47",
-          "ph_07"
+          "ph_33",
+          "ph_04"
         ],
         "conf": [
-          0.5093,
-          0.499,
-          0.4745
+          0.4895,
+          0.4818,
+          0.4605
         ],
         "abstain": true,
         "rel": [
-          true,
           false,
-          false
+          false,
+          true
         ]
       }
     },
@@ -6071,7 +6072,7 @@
       "wav": "raw/M02/Session2/wav_headMic/0111.wav",
       "truth": null,
       "heard_b0": "bumps injuries were the To the same lake.",
-      "heard_b1": "Bomps injuries were the to the same lake.",
+      "heard_b1": "bumps injuries were the to the same lake.",
       "b0": {
         "top": [],
         "exact": false,
@@ -6079,32 +6080,32 @@
       },
       "b1": {
         "top": [
-          "ph_01",
           "ph_10",
-          "ph_13"
+          "ph_01",
+          "ph_16"
         ],
         "conf": [
-          0.4699,
-          0.4697,
-          0.4615
+          0.4576,
+          0.4572,
+          0.4529
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
-          "ph_01",
           "ph_10",
-          "ph_13"
+          "ph_01",
+          "ph_16"
         ],
         "conf": [
-          0.4699,
-          0.4697,
-          0.4615
+          0.4576,
+          0.4572,
+          0.4529
         ],
         "abstain": true,
         "rel": [
-          false,
           true,
+          false,
           false
         ]
       }
@@ -6301,7 +6302,7 @@
       "wav": "raw/M02/Session1/wav_headMic/0222.wav",
       "truth": null,
       "heard_b0": "One valid day that I to screw on this.",
-      "heard_b1": "one valid day that I to screw on this.",
+      "heard_b1": "one valid day that I to squib on this.",
       "b0": {
         "top": [],
         "exact": false,
@@ -6309,31 +6310,31 @@
       },
       "b1": {
         "top": [
+          "ph_35",
           "ph_01",
-          "ph_46",
-          "ph_16"
+          "ph_26"
         ],
         "conf": [
+          0.4957,
           0.4949,
-          0.4821,
-          0.4763
+          0.475
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
+          "ph_35",
           "ph_01",
-          "ph_46",
-          "ph_16"
+          "ph_26"
         ],
         "conf": [
+          0.4957,
           0.4949,
-          0.4821,
-          0.4763
+          0.475
         ],
         "abstain": true,
         "rel": [
-          false,
+          true,
           false,
           false
         ]
@@ -7619,7 +7620,7 @@
       "wav": "raw/M03/Session2/wav_headMic/0410.wav",
       "truth": null,
       "heard_b0": "Beg that guard for 1 gallon of gas.",
-      "heard_b1": "beg that guard for 1 gallon of gas.",
+      "heard_b1": "Beg that guard for 1 gallon of gas.",
       "b0": {
         "top": [],
         "exact": true,
@@ -8493,7 +8494,7 @@
       "wav": "raw/M04/Session2/wav_headMic/0288.wav",
       "truth": "ph_00",
       "heard_b0": "Did it not um but when um Total.",
-      "heard_b1": "Did it not um but when um to me.",
+      "heard_b1": "Did it not um but when um Total.",
       "b0": {
         "top": [],
         "exact": false,
@@ -8501,33 +8502,33 @@
       },
       "b1": {
         "top": [
+          "ph_15",
           "ph_42",
-          "ph_13",
-          "ph_15"
+          "ph_32"
         ],
         "conf": [
-          0.5313,
-          0.5018,
-          0.4983
+          0.4801,
+          0.4796,
+          0.4614
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
+          "ph_15",
           "ph_42",
-          "ph_13",
-          "ph_15"
+          "ph_32"
         ],
         "conf": [
-          0.5313,
-          0.5018,
-          0.4983
+          0.4801,
+          0.4796,
+          0.4614
         ],
         "abstain": true,
         "rel": [
           false,
           false,
-          false
+          true
         ]
       }
     },
@@ -8538,7 +8539,7 @@
       "text": "If you destroy confidence in banks, you do something to the economy, he said.",
       "wav": "raw/M04/Session2/wav_headMic/0194.wav",
       "truth": "ph_01",
-      "heard_b0": "If you did did called it in in in Ben you do something to thy. He did.",
+      "heard_b0": "If you did did called it in in in Ben you do something to the family. He did.",
       "heard_b1": "if you did did called it in in in Ben you do something to the family. he did.",
       "b0": {
         "top": [],
@@ -8723,7 +8724,7 @@
       "wav": "raw/M04/Session1/wav_arrayMic/0064.wav",
       "truth": "ph_05",
       "heard_b0": "He probably good work. In the open air. Then",
-      "heard_b1": "he probably good work. in the open air. Then",
+      "heard_b1": "he probably a good walk. in the open air. Then",
       "b0": {
         "top": [],
         "exact": false,
@@ -8733,12 +8734,12 @@
         "top": [
           "ph_05",
           "ph_36",
-          "ph_03"
+          "ph_29"
         ],
         "conf": [
-          0.6648,
-          0.5085,
-          0.4931
+          0.719,
+          0.4853,
+          0.4773
         ],
         "abstain": false
       },
@@ -8746,18 +8747,18 @@
         "top": [
           "ph_05",
           "ph_36",
-          "ph_03"
+          "ph_29"
         ],
         "conf": [
-          0.6648,
-          0.5085,
-          0.4931
+          0.719,
+          0.4853,
+          0.4773
         ],
         "abstain": false,
         "rel": [
           true,
           true,
-          true
+          false
         ]
       }
     },
@@ -8907,7 +8908,7 @@
       "wav": "raw/M04/Session1/wav_arrayMic/0040.wav",
       "truth": "ph_09",
       "heard_b0": "Grandmother. Like, do. Be my rate. And, and Language.",
-      "heard_b1": "grandfather. like, do. be my rate. and, and language.",
+      "heard_b1": "Grandmother. like, do. be my rate. and, and language.",
       "b0": {
         "top": [],
         "exact": false,
@@ -8920,7 +8921,7 @@
           "ph_19"
         ],
         "conf": [
-          0.7839,
+          0.7465,
           0.4903,
           0.4735
         ],
@@ -8933,7 +8934,7 @@
           "ph_19"
         ],
         "conf": [
-          0.7839,
+          0.7465,
           0.4903,
           0.4735
         ],
@@ -9136,7 +9137,7 @@
       "text": "giving those who observe him a pronounced feeling of the utmost respect.",
       "wav": "raw/M04/Session1/wav_arrayMic/0120.wav",
       "truth": "ph_14",
-      "heard_b0": "Give it. So who? Well, I, I don't. If, if Uh, now. Philly. Of That we that.",
+      "heard_b0": "Give it. So who? Well, I, I don't. If, if, if Uh, now. Philly. Of That we that.",
       "heard_b1": "Give it. So who? well, I, I don't. if, if, if Uh, no. Philly. of that we that.",
       "b0": {
         "top": [],
@@ -9229,7 +9230,7 @@
       "wav": "raw/M04/Session2/wav_headMic/0191.wav",
       "truth": "ph_16",
       "heard_b0": "Well I've been where I.",
-      "heard_b1": "well I've been where I.",
+      "heard_b1": "well I've been where Ay.",
       "b0": {
         "top": [],
         "exact": false,
@@ -9238,32 +9239,32 @@
       "b1": {
         "top": [
           "ph_16",
-          "ph_31",
-          "ph_36"
+          "ph_36",
+          "ph_31"
         ],
         "conf": [
-          0.5549,
-          0.4474,
-          0.4343
+          0.5833,
+          0.4667,
+          0.4621
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
           "ph_16",
-          "ph_31",
-          "ph_36"
+          "ph_36",
+          "ph_31"
         ],
         "conf": [
-          0.5549,
-          0.4474,
-          0.4343
+          0.5833,
+          0.4667,
+          0.4621
         ],
         "abstain": true,
         "rel": [
           true,
-          false,
-          true
+          true,
+          false
         ]
       }
     },
@@ -9413,7 +9414,7 @@
       "wav": "raw/M04/Session2/wav_headMic/0274.wav",
       "truth": null,
       "heard_b0": "The island I'm bu but Happy like. Then",
-      "heard_b1": "the island I'm bu but Happyla. Then",
+      "heard_b1": "the island I'mbuling but. Happy like. Then",
       "b0": {
         "top": [],
         "exact": false,
@@ -9421,31 +9422,31 @@
       },
       "b1": {
         "top": [
-          "ph_35",
+          "ph_48",
           "ph_23",
-          "ph_25"
+          "ph_35"
         ],
         "conf": [
-          0.5096,
-          0.4891,
-          0.4869
+          0.4948,
+          0.4832,
+          0.48
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
-          "ph_35",
+          "ph_48",
           "ph_23",
-          "ph_25"
+          "ph_35"
         ],
         "conf": [
-          0.5096,
-          0.4891,
-          0.4869
+          0.4948,
+          0.4832,
+          0.48
         ],
         "abstain": true,
         "rel": [
-          true,
+          false,
           true,
           false
         ]
@@ -9459,7 +9460,7 @@
       "wav": "raw/M04/Session1/wav_arrayMic/0052.wav",
       "truth": null,
       "heard_b0": "He didn't, uh. And, and the luck. Fuck!",
-      "heard_b1": "he didn't, uh. and, and the luck. fuck.",
+      "heard_b1": "he didn't, uh. and, and Didn't luck. fuck.",
       "b0": {
         "top": [],
         "exact": false,
@@ -9468,26 +9469,26 @@
       "b1": {
         "top": [
           "ph_13",
-          "ph_04",
-          "ph_32"
+          "ph_32",
+          "ph_04"
         ],
         "conf": [
-          0.526,
-          0.5109,
-          0.4991
+          0.5185,
+          0.5086,
+          0.475
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
           "ph_13",
-          "ph_04",
-          "ph_32"
+          "ph_32",
+          "ph_04"
         ],
         "conf": [
-          0.526,
-          0.5109,
-          0.4991
+          0.5185,
+          0.5086,
+          0.475
         ],
         "abstain": true,
         "rel": [
@@ -9551,7 +9552,7 @@
       "wav": "raw/M04/Session2/wav_headMic/0285.wav",
       "truth": null,
       "heard_b0": "I doesn't. Be. Mm. I, I that we were burn ban and then did we.",
-      "heard_b1": "I doesn't. be. Mm. I, I that we were bound by and then did we.",
+      "heard_b1": "I doesn't. be. Mm. I, I that we were bound ban and then did we.",
       "b0": {
         "top": [],
         "exact": false,
@@ -9560,26 +9561,26 @@
       "b1": {
         "top": [
           "ph_04",
-          "ph_39",
-          "ph_01"
+          "ph_01",
+          "ph_39"
         ],
         "conf": [
-          0.4864,
-          0.4594,
-          0.4563
+          0.4805,
+          0.4708,
+          0.4531
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
           "ph_04",
-          "ph_39",
-          "ph_01"
+          "ph_01",
+          "ph_39"
         ],
         "conf": [
-          0.4864,
-          0.4594,
-          0.4563
+          0.4805,
+          0.4708,
+          0.4531
         ],
         "abstain": true,
         "rel": [
@@ -9597,7 +9598,7 @@
       "wav": "raw/M04/Session1/wav_arrayMic/0036.wav",
       "truth": null,
       "heard_b0": "That was. Can over, But Lady Do.",
-      "heard_b1": "that was. can over, But Lady do.",
+      "heard_b1": "that was. can over, But lady the Dog.",
       "b0": {
         "top": [],
         "exact": false,
@@ -9605,27 +9606,27 @@
       },
       "b1": {
         "top": [
-          "ph_37",
-          "ph_48",
+          "ph_17",
+          "ph_43",
           "ph_04"
         ],
         "conf": [
-          0.5231,
-          0.5016,
-          0.5014
+          0.5507,
+          0.5295,
+          0.503
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
-          "ph_37",
-          "ph_48",
+          "ph_17",
+          "ph_43",
           "ph_04"
         ],
         "conf": [
-          0.5231,
-          0.5016,
-          0.5014
+          0.5507,
+          0.5295,
+          0.503
         ],
         "abstain": true,
         "rel": [
@@ -9643,7 +9644,7 @@
       "wav": "raw/M04/Session1/wav_arrayMic/0012.wav",
       "truth": null,
       "heard_b0": "Wait there. It killed me. And we That. A I, I Organ.",
-      "heard_b1": "Wait in the. it killed me. and we that. A I, I organ.",
+      "heard_b1": "Wait there. it killed me. and we that. A I, I organ.",
       "b0": {
         "top": [],
         "exact": false,
@@ -9652,32 +9653,32 @@
       "b1": {
         "top": [
           "ph_04",
-          "ph_25",
-          "ph_13"
+          "ph_18",
+          "ph_25"
         ],
         "conf": [
-          0.5099,
-          0.472,
-          0.467
+          0.4937,
+          0.4868,
+          0.481
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
           "ph_04",
-          "ph_25",
-          "ph_13"
+          "ph_18",
+          "ph_25"
         ],
         "conf": [
-          0.5099,
-          0.472,
-          0.467
+          0.4937,
+          0.4868,
+          0.481
         ],
         "abstain": true,
         "rel": [
           true,
-          false,
-          true
+          true,
+          false
         ]
       }
     },
@@ -9919,7 +9920,7 @@
       "wav": "raw/M04/Session1/wav_arrayMic/0082.wav",
       "truth": null,
       "heard_b0": "I love. Following. Ben. Mm. Don't.",
-      "heard_b1": "I love. Following. Ben. Mm. Don't.",
+      "heard_b1": "I love. Flowing. Ben. Mm. Don't.",
       "b0": {
         "top": [],
         "exact": false,
@@ -9932,9 +9933,9 @@
           "ph_13"
         ],
         "conf": [
-          0.4873,
-          0.4512,
-          0.4423
+          0.4781,
+          0.4574,
+          0.4488
         ],
         "abstain": false
       },
@@ -9945,9 +9946,9 @@
           "ph_13"
         ],
         "conf": [
-          0.4873,
-          0.4512,
-          0.4423
+          0.4781,
+          0.4574,
+          0.4488
         ],
         "abstain": true,
         "rel": [
@@ -9965,7 +9966,7 @@
       "wav": "raw/M04/Session2/wav_headMic/0157.wav",
       "truth": null,
       "heard_b0": "Do you with dinner than I am.",
-      "heard_b1": "you with dinner than I am.",
+      "heard_b1": "do you with dinner than I am.",
       "b0": {
         "top": [],
         "exact": false,
@@ -9975,12 +9976,12 @@
         "top": [
           "ph_29",
           "ph_39",
-          "ph_23"
+          "ph_36"
         ],
         "conf": [
-          0.5406,
-          0.4885,
-          0.4623
+          0.5693,
+          0.4978,
+          0.4868
         ],
         "abstain": false
       },
@@ -9988,12 +9989,12 @@
         "top": [
           "ph_29",
           "ph_39",
-          "ph_23"
+          "ph_36"
         ],
         "conf": [
-          0.5406,
-          0.4885,
-          0.4623
+          0.5693,
+          0.4978,
+          0.4868
         ],
         "abstain": true,
         "rel": [
@@ -10057,7 +10058,7 @@
       "wav": "raw/M04/Session1/wav_arrayMic/0099.wav",
       "truth": null,
       "heard_b0": "We have early. And you walk. More. And won't let.",
-      "heard_b1": "we have ear. and you walk. More. and won't let.",
+      "heard_b1": "we have not. and you walk. More. and won't let.",
       "b0": {
         "top": [],
         "exact": false,
@@ -10066,32 +10067,32 @@
       "b1": {
         "top": [
           "ph_20",
-          "ph_18",
+          "ph_13",
           "ph_44"
         ],
         "conf": [
           0.5477,
-          0.5153,
-          0.4947
+          0.5106,
+          0.5096
         ],
         "abstain": false
       },
       "ss_fuzzy": {
         "top": [
           "ph_20",
-          "ph_18",
+          "ph_13",
           "ph_44"
         ],
         "conf": [
           0.5477,
-          0.5153,
-          0.4947
+          0.5106,
+          0.5096
         ],
         "abstain": true,
         "rel": [
-          true,
-          true,
-          true
+          false,
+          false,
+          false
         ]
       }
     },
@@ -10241,7 +10242,7 @@
       "wav": "raw/M04/Session2/wav_headMic/0190.wav",
       "truth": null,
       "heard_b0": "Well, uh You Well we we were away.",
-      "heard_b1": "well, uh you well we we were away.",
+      "heard_b1": "well, uh you well we we were we",
       "b0": {
         "top": [],
         "exact": false,
@@ -10254,9 +10255,9 @@
           "ph_30"
         ],
         "conf": [
-          0.4964,
-          0.4681,
-          0.4422
+          0.4788,
+          0.4659,
+          0.4385
         ],
         "abstain": false
       },
@@ -10267,9 +10268,9 @@
           "ph_30"
         ],
         "conf": [
-          0.4964,
-          0.4681,
-          0.4422
+          0.4788,
+          0.4659,
+          0.4385
         ],
         "abstain": true,
         "rel": [

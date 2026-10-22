@@ -34,23 +34,29 @@ export function FinalCheck({ set, deadline, busy, devices, onYes, onNo, onExpire
 
   if (!option) return null;
   return (
-    <section className="final" aria-labelledby="final-title">
+    <section className={`final${single ? "" : " final--second"}`} aria-labelledby="final-title">
+      {!single && (
+        <p className="badge badge--second">
+          <Icon name="shield" size={20} /> Second yes
+        </p>
+      )}
       <div className="cardset__head">
         <h2 id="final-title" className="stage__title display">
+          {/* one span: the title is a flex box, and loose words would each get the flex gap ("check : this") */}
           {single ? (
-            <>
+            <span>
               Is this <em>right?</em>
-            </>
+            </span>
           ) : (
-            <>
+            <span>
               Please <em>check</em>: this one asks twice
-            </>
+            </span>
           )}
         </h2>
         <Countdown deadline={deadline} pendingId={set.pending_id} onExpire={onExpire} announce={announce} onMoreTime={onMoreTime} />
       </div>
       {set.origin === "assistant" && <AssistantBanner />}
-      <div className="final__card" ref={cardRef} tabIndex={-1}>
+      <div className={`final__card${single ? "" : " final__card--second"}`} ref={cardRef} tabIndex={-1}>
         <span className="card__icon" aria-hidden="true">
           <Icon name={iconFor(option, devices)} size="100%" />
         </span>

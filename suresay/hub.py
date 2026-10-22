@@ -29,6 +29,7 @@ from confirm_gate.device import authenticate
 from mcp.server.transport_security import TransportSecuritySettings
 from starlette.applications import Starlette
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.routing import Mount, Route
@@ -367,6 +368,26 @@ class DeviceCallerTag:
                 current_caller.reset(token)
             return
         await self.app(scope, receive, send)
+
+
+def _cached(app: Any) -> Any:
+    """Cache headers for the web client: hashed files under /assets never change; everything else is checked each time."""
+    async def wrapped(scope: Any, receive: Any, send: Any) -> None:
+        if scope["type"] != "http":
+            await app(scope, receive, send)
+            return
+        forever = scope.get("path", "").startswith("/assets/")
+
+        async def tagged(message: Any) -> None:
+            if message["type"] == "http.response.start":
+                rule = b"public, max-age=31536000, immutable" if forever else b"no-cache"
+                message["headers"] = [*(h for h in message.get("headers", []) if h[0].lower() != b"cache-control"),
+                                      (b"cache-control", rule)]
+            await send(message)
+
+        await app(scope, receive, tagged)
+
+    return wrapped
 
 
 def _signed(handler: Any, s: SureSay) -> Any:
@@ -958,7 +979,8 @@ def build_app(s: SureSay | None = None) -> Starlette:
     routes += s.oauth.routes()
     dist = ROOT / "web" / "dist"
     if dist.exists():
-        routes.append(Mount("/", app=StaticFiles(directory=dist, html=True), name="web"))
+        routes.append(Mount("/", app=GZipMiddleware(_cached(StaticFiles(directory=dist, html=True)), minimum_size=1000),
+                            name="web"))
     app.router.routes.extend(routes)
     app.add_middleware(AssistantProgress, progress=progress)  # inside McpAuth: it knows the caller by then
     app.add_middleware(McpAuth, suresay=s)

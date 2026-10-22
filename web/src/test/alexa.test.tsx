@@ -336,6 +336,15 @@ describe("the Alexa+ view with a live AI", () => {
     await screen.findByText("I can't confirm that for you.", { selector: ".echo__reply *, .echo__reply" });
     expect(screen.queryByText(/is thinking/)).toBeNull();
     expect(screen.getByText("The assistant tried to confirm. Refused: only your device can say yes.")).toBeTruthy();
+    // the reply and the refused line are two elements, and read as two sentences
+    const echo = document.querySelector(".echo__reply")!;
+    expect(echo.querySelector(".echo__said")!.textContent).toBe("I can't confirm that for you.");
+    expect(echo.textContent).toContain("for you. The assistant tried to confirm.");
+    expect(echo.textContent).not.toMatch(/\.The/);
+    // the wire log gives the server's model time, not a wall-clock reply time
+    const wire = document.querySelector(".wire__log")!.textContent!;
+    expect(wire).toContain("model time 9.0 s");
+    expect(wire).not.toContain("replied in");
     expect(await axeViolations()).toEqual([]);
   });
 

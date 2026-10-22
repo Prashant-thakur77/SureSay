@@ -368,10 +368,10 @@ function Proof({ motion }: { motion: boolean }) {
   const [ref, seen] = useReveal<HTMLDivElement>(0.3);
   const run = motion && seen;
   const stats: Array<{ label: string; from: string; to: ReactNode; final: string; note: string }> = [
-    { label: "Misheard words taken as a “yes” or a choice", from: "62.8%", to: <CountTo value={2.3} from={62.8} suffix="%" run={run} />, final: "2.3%", note: "430 decisions, six people held out from tuning" },
-    { label: "Acted on a wrong phrase without asking", from: "84.3%", to: <CountTo value={0} from={84.3} suffix="%" run={run} />, final: "0.0%", note: "plain assistant → SureSay" },
+    { label: "Misheard words taken as a “yes” or a choice", from: "62.8%", to: <CountTo value={2.3} from={62.8} suffix="%" run={run} />, final: "2.3%", note: "forced-choice baseline → SureSay; 430 decisions, six people held out from tuning" },
+    { label: "Acted on a wrong phrase without asking", from: "84.3%", to: <CountTo value={0} from={84.3} suffix="%" run={run} />, final: "0.0%", note: "plain assistant → SureSay (by design)" },
     { label: "A real AI agent (Amazon Nova 2 Sonic): changes nobody confirmed", from: "11 / 35", to: <>0 / 35</>, final: "0 / 35", note: "prompt injections and near-misses, without → with the gate" },
-    { label: "Attacks that changed anything", from: "", to: <>0 / 50</>, final: "0 / 50", note: "injections, near-misses, forged and replayed confirmations" },
+    { label: "Attacks that changed anything", from: "35 / 35", to: <>0 / 35</>, final: "0 / 35", note: "the same 35 injections and near-misses, worst-case scripted agent, without → with the gate; plus 0 / 15 forged or replayed confirmations" },
   ];
   return (
     <Chapter id="proof" n="05" kicker="Proof" tone="night" labelledBy="proof-title">
@@ -384,7 +384,7 @@ function Proof({ motion }: { motion: boolean }) {
       </p>
       <div className="stats" ref={ref}>
         {stats.map((s) => (
-          <article key={s.label} className="stat" aria-label={`${s.label}: ${s.from ? `from ${s.from} to ` : ""}${s.final}`}>
+          <article key={s.label} className="stat" aria-label={`${s.label}: ${s.from ? `from ${s.from} to ` : ""}${s.final}. ${s.note}`}>
             <p className="stat__l" aria-hidden="true">{s.label}</p>
             <p className="stat__v" aria-hidden="true">
               {s.from && <s className="stat__from">{s.from}</s>}
@@ -414,7 +414,8 @@ function Alexa({ onAlexa }: { onAlexa: () => void }) {
             <li>The three cards as an MCP App, rendered on an Echo Show or Fire TV.</li>
             <li>Account linking with OAuth 2.1, and one tap to unlink.</li>
             <li>Amazon's own add-on rules (“explicit confirmation before any high-consequence action”, “prevent duplicate transactions”) enforced in code.</li>
-            <li>An Agent Skill, and a classic Alexa skill (built and tested on AWS Lambda) that pairs as the user's voice device.</li>
+            <li>A classic Alexa skill that pairs as the user's voice device: live in development on our Alexa developer account, and tried end to end in the Alexa simulator.</li>
+            <li>An Agent Skill. Alexa+ itself isn't open to developers yet, so the Alexa+ view below is simulated around SureSay's real MCP server.</li>
           </ul>
           <button type="button" className="btn btn--dawn" onClick={onAlexa}>
             <Icon name="speech" size={24} /> Open the Alexa+ view
@@ -478,7 +479,7 @@ function Developers() {
 const FAQ: Array<[string, string]> = [
   ["Is SureSay a speech therapy app?", "No. It helps people use technology and talk to others safely as they speak today. Practice gives an honest clarity score, but it is a practice signal, not a medical test."],
   ["Can the AI ever do something on its own?", "No. It can understand, read and ask. Every change needs your own tap or voice on a device you paired, and the code that releases it never reaches the model."],
-  ["Does it work with Alexa today?", "SureSay comes with a classic Alexa skill that pairs as your voice device: its code runs on AWS Lambda and is tested, and it is added to an Alexa account from the Alexa developer console. SureSay is also built as an Alexa+ add-on, ready for when Alexa+ opens to developers."],
+  ["Does it work with Alexa today?", "Yes, as a classic Alexa skill that pairs as your voice device. It is live in development on our Alexa developer account (not in the skill store), and on 22 Oct 2026 we tried it end to end in the Alexa simulator: “the first one” turned on the fan, and the door unlocked only after two separate yeses. The Alexa+ add-on is built too, but Alexa+ is not open to developers yet, so on this site Alexa+ is simulated."],
   ["What happens to my voice?", "Recordings are private, encrypted, and deleted after 30 days. A receipt keeps only a fingerprint of the recording, to prove which one was used."],
   ["Which languages does it understand?", "English, with Hinglish and Hindi confirmations such as “haan”, “doosra” or “do number”. A bare “do” is never read as “two”."],
   ["Is it free?", "The code is open source under the MIT licence. The live demo is free to try, with no sign-up."],
