@@ -106,3 +106,26 @@ def test_requests_from_another_skill_are_refused(alexa: Any, hub: Hub, monkeypat
         alexa.lambda_handler(ev)
     ev["context"]["System"]["application"]["applicationId"] = "amzn1.ask.skill.ours"
     assert "Turn on the bedroom fan" in speech(alexa.lambda_handler(ev))
+
+
+def test_a_one_shot_command_keeps_its_first_word(alexa: Any, hub: Hub) -> None:
+    # "Alexa, ask sure say to turn on the fan": Alexa eats "to", so the command arrives as a verb intent with the rest
+    r = alexa.handle(intent("TurnIntent", utterance="on the fan"))
+    assert "Turn on the bedroom fan" in speech(r) and "waiting" not in speech(r)
+    r = alexa.handle(intent("OpenIntent", utterance="the door"))
+    assert "Unlock the front door" in speech(r) and "nothing waiting" not in speech(r)
+    r = alexa.handle(intent("LockIntent", utterance="the door"))
+    assert "Lock the front door" in speech(r)
+
+
+def test_every_verb_intent_in_the_model_is_handled_and_vice_versa() -> None:
+    import json
+
+    model = json.loads((ROOT_DIR / "alexa_skill" / "interaction_model.json").read_text())
+    intents = {i["name"]: i for i in model["interactionModel"]["languageModel"]["intents"]}
+    verbs = {n for n in intents if n not in ("CommandIntent", "ChooseIntent") and not n.startswith("AMAZON.")}
+    assert verbs == set(skill.VERB_INTENTS)
+    for name, word in skill.VERB_INTENTS.items():
+        samples = intents[name]["samples"]
+        assert f"{word} {{utterance}}" in samples, name
+        assert intents[name]["slots"] == [{"name": "utterance", "type": "AMAZON.SearchQuery"}]

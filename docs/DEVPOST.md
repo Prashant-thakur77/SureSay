@@ -142,7 +142,7 @@ Everything user-facing is new:
 - **The Alexa skill**, deployed and flow-tested on AWS.
 - **The web client:** built to WCAG 2.2 AA (axe-clean, Lighthouse accessibility 100), voice, tap, keys or one switch, three themes, TV mode.
 - **The evaluation:** TORGO on Amazon Transcribe with two runs, repeated with Amazon Nova 2 Sonic and a local recogniser, a 50-case safety suite with a linked-client arm, latency measured in region, per-user calibration and a Hinglish check.
-- **One-command deploy and teardown**, and 990 tests (522 for the gate, 257 for the hub, 211 for the web client).
+- **One-command deploy and teardown**, and 992 tests (522 for the gate, 259 for the hub, 211 for the web client).
 
 ## Open source
 

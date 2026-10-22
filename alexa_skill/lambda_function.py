@@ -62,6 +62,36 @@ def say(text: str, *, end: bool = False, reprompt: str | None = None, attrs: dic
     return out
 
 
+# In "Alexa, ask sure say to turn on the fan" Alexa keeps "to" for itself and hands over "turn on the fan"; a free-text
+# slot needs words around it, so each first word of a command is its own intent, and the word is put back here.
+VERB_INTENTS = {
+    "TurnIntent": "turn",
+    "SwitchIntent": "switch",
+    "OpenIntent": "open",
+    "CloseIntent": "close",
+    "ShutIntent": "shut",
+    "UnlockIntent": "unlock",
+    "LockIntent": "lock",
+    "CallIntent": "call",
+    "RingIntent": "ring",
+    "MessageIntent": "message",
+    "TextIntent": "text",
+    "SendIntent": "send",
+    "AddIntent": "add",
+    "BuyIntent": "buy",
+    "OrderIntent": "order",
+    "PlaceIntent": "place",
+    "SetIntent": "set",
+    "MakeIntent": "make",
+    "SayIntent": "say",
+    "TellIntent": "tell",
+    "PutIntent": "put",
+    "WhatIntent": "what",
+    "IsIntent": "is",
+    "IAmIntent": "i am",
+}
+
+
 def _escape(text: str) -> str:
     return text.replace("&", "and").replace("<", "").replace(">", "")
 
@@ -132,8 +162,11 @@ def handle(event: dict[str, Any], hub: Hub | None = None) -> dict[str, Any]:
     intent = req.get("intent", {})
     name = intent.get("name")
     slots = {k: (v.get("value") or "") for k, v in (intent.get("slots") or {}).items()}
-    if name == "CommandIntent":
-        turn = hub.call("POST", "/device/turn", {"text": slots.get("utterance", ""), "session_id": "alexa"})
+    if name == "CommandIntent" or name in VERB_INTENTS:
+        text = slots.get("utterance", "")
+        if name in VERB_INTENTS:
+            text = f"{VERB_INTENTS[name]} {text}".strip()
+        turn = hub.call("POST", "/device/turn", {"text": text, "session_id": "alexa"})
         if "error" in turn:
             return say(f"Sorry, {turn['error']}.", end=True)
         result = turn.get("result") or {}

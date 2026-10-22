@@ -5,23 +5,432 @@
       "intents": [
         {
           "name": "CommandIntent",
-          "slots": [{"name": "utterance", "type": "AMAZON.SearchQuery"}],
-          "samples": ["to {utterance}", "please {utterance}", "i want to {utterance}", "can you {utterance}",
-                      "could you {utterance}", "i need {utterance}", "i want {utterance}"]
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "to {utterance}",
+            "please {utterance}",
+            "i want to {utterance}",
+            "can you {utterance}",
+            "could you {utterance}",
+            "i need {utterance}",
+            "i want {utterance}"
+          ]
+        },
+        {
+          "name": "TurnIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "turn {utterance}",
+            "please turn {utterance}",
+            "to turn {utterance}",
+            "can you turn {utterance}"
+          ]
+        },
+        {
+          "name": "SwitchIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "switch {utterance}",
+            "please switch {utterance}",
+            "to switch {utterance}",
+            "can you switch {utterance}"
+          ]
+        },
+        {
+          "name": "OpenIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "open {utterance}",
+            "please open {utterance}",
+            "to open {utterance}",
+            "can you open {utterance}"
+          ]
+        },
+        {
+          "name": "CloseIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "close {utterance}",
+            "please close {utterance}",
+            "to close {utterance}",
+            "can you close {utterance}"
+          ]
+        },
+        {
+          "name": "ShutIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "shut {utterance}",
+            "please shut {utterance}",
+            "to shut {utterance}",
+            "can you shut {utterance}"
+          ]
+        },
+        {
+          "name": "UnlockIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "unlock {utterance}",
+            "please unlock {utterance}",
+            "to unlock {utterance}",
+            "can you unlock {utterance}"
+          ]
+        },
+        {
+          "name": "LockIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "lock {utterance}",
+            "please lock {utterance}",
+            "to lock {utterance}",
+            "can you lock {utterance}"
+          ]
+        },
+        {
+          "name": "CallIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "call {utterance}",
+            "please call {utterance}",
+            "to call {utterance}",
+            "can you call {utterance}"
+          ]
+        },
+        {
+          "name": "RingIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "ring {utterance}",
+            "please ring {utterance}",
+            "to ring {utterance}",
+            "can you ring {utterance}"
+          ]
+        },
+        {
+          "name": "MessageIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "message {utterance}",
+            "please message {utterance}",
+            "to message {utterance}",
+            "can you message {utterance}"
+          ]
+        },
+        {
+          "name": "TextIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "text {utterance}",
+            "please text {utterance}",
+            "to text {utterance}",
+            "can you text {utterance}"
+          ]
+        },
+        {
+          "name": "SendIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "send {utterance}",
+            "please send {utterance}",
+            "to send {utterance}",
+            "can you send {utterance}"
+          ]
+        },
+        {
+          "name": "AddIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "add {utterance}",
+            "please add {utterance}",
+            "to add {utterance}",
+            "can you add {utterance}"
+          ]
+        },
+        {
+          "name": "BuyIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "buy {utterance}",
+            "please buy {utterance}",
+            "to buy {utterance}",
+            "can you buy {utterance}"
+          ]
+        },
+        {
+          "name": "OrderIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "order {utterance}",
+            "please order {utterance}",
+            "to order {utterance}",
+            "can you order {utterance}"
+          ]
+        },
+        {
+          "name": "PlaceIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "place {utterance}",
+            "please place {utterance}",
+            "to place {utterance}",
+            "can you place {utterance}"
+          ]
+        },
+        {
+          "name": "SetIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "set {utterance}",
+            "please set {utterance}",
+            "to set {utterance}",
+            "can you set {utterance}"
+          ]
+        },
+        {
+          "name": "MakeIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "make {utterance}",
+            "please make {utterance}",
+            "to make {utterance}",
+            "can you make {utterance}"
+          ]
+        },
+        {
+          "name": "SayIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "say {utterance}",
+            "please say {utterance}",
+            "to say {utterance}",
+            "can you say {utterance}"
+          ]
+        },
+        {
+          "name": "TellIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "tell {utterance}",
+            "please tell {utterance}",
+            "to tell {utterance}",
+            "can you tell {utterance}"
+          ]
+        },
+        {
+          "name": "PutIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "put {utterance}",
+            "please put {utterance}",
+            "to put {utterance}",
+            "can you put {utterance}"
+          ]
+        },
+        {
+          "name": "WhatIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "what {utterance}",
+            "please what {utterance}",
+            "to what {utterance}",
+            "can you what {utterance}"
+          ]
+        },
+        {
+          "name": "IsIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "is {utterance}",
+            "please is {utterance}",
+            "to is {utterance}",
+            "can you is {utterance}"
+          ]
+        },
+        {
+          "name": "IAmIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "i am {utterance}",
+            "i'm {utterance}",
+            "please i am {utterance}"
+          ]
         },
         {
           "name": "ChooseIntent",
-          "slots": [{"name": "number", "type": "AMAZON.NUMBER"}, {"name": "ordinal", "type": "AMAZON.Ordinal"}],
-          "samples": ["{number}", "number {number}", "option {number}", "card {number}", "the {ordinal} one",
-                      "{ordinal}", "the {ordinal}", "{ordinal} one"]
+          "slots": [
+            {
+              "name": "number",
+              "type": "AMAZON.NUMBER"
+            },
+            {
+              "name": "ordinal",
+              "type": "AMAZON.Ordinal"
+            }
+          ],
+          "samples": [
+            "{number}",
+            "number {number}",
+            "option {number}",
+            "card {number}",
+            "the {ordinal} one",
+            "{ordinal}",
+            "the {ordinal}",
+            "{ordinal} one"
+          ]
         },
-        {"name": "AMAZON.YesIntent", "samples": []},
-        {"name": "AMAZON.NoIntent", "samples": []},
-        {"name": "AMAZON.CancelIntent", "samples": []},
-        {"name": "AMAZON.StopIntent", "samples": []},
-        {"name": "AMAZON.HelpIntent", "samples": []},
-        {"name": "AMAZON.FallbackIntent", "samples": []},
-        {"name": "AMAZON.NavigateHomeIntent", "samples": []}
+        {
+          "name": "AMAZON.YesIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NoIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        }
       ],
       "types": []
     }
