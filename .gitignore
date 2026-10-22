@@ -42,3 +42,6 @@ CLAUDE.md
 plan.md
 docs/BRIEF.md
 docs/SUBMISSION.md
+
+# local agent workspaces
+.claude/
