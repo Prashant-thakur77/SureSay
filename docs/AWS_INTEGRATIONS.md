@@ -32,4 +32,4 @@ make teardown   # removes only suresay-* resources
 
 ## Spend so far
 
-About $6.8: Transcribe eval requests (15-second minimum each, about $5.96) and Nova 2 Sonic ($0.76). The running tally is in `eval/results/spend.json`.
+About $7.2: Transcribe requests (15-second minimum each, about $6.40) and Nova 2 Sonic ($0.76). The running tally is in `eval/results/spend.json`.
