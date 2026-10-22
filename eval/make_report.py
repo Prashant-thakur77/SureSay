@@ -477,6 +477,26 @@ def site_audit_section(sa: dict[str, Any]) -> list[str]:
             "|---|---|---|---|---|---|---|---|", row("phone", "Phone"), row("desktop", "Desktop"), "",
             "The web client's own tests also run axe on every screen (`web/src/test`)."]
 
+
+def live_checks_section(lc: dict[str, Any]) -> list[str]:
+    rows = [f"| {'✓' if c['passed'] else '✗'} | {c['check']} | {c['detail'].replace('|', '/')} |" for c in lc["checks"]]
+    lat = lc["round_trip_from_test_machine"]
+    lrows = [f"| {k} | {v['p50_ms']} | {v['p95_ms']} | {v.get('minus_network_p50_ms', '—')} |" for k, v in lat.items()]
+    srv = lc.get("server_side_understand") or {}
+    srows = [f"| understand, {k} | {v['requests']} | {v['p50_ms']} | {v['p95_ms']} |" for k, v in srv.items()]
+    out = ["## The live server, checked as an MCP client", "",
+           f"`eval/run_live_checks.py` runs against the deployed hub ({lc['url']}) over HTTPS as an MCP client: "
+           f"**{lc['passed']} of {lc['total']} checks passed** ({lc['generated_at']}).", "",
+           "| | Check | Detail |", "|---|---|---|", *rows, "",
+           "Round trips from the test machine (they include the network to us-east-1; `/healthz` measures that network "
+           "on its own, and the last column subtracts it):", "",
+           "| Request | p50 ms | p95 ms | p50 minus network, ms |", "|---|---|---|---|", *lrows]
+    if srows:
+        out += ["", "The server's own processing time for real requests in the last 48 hours, from the CloudWatch "
+                "metric the hub emits (`UnderstandMs`; voice includes speech recognition):", "",
+                "| Request | Requests | p50 ms | p95 ms |", "|---|---|---|---|", *srows]
+    return out
+
 def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] | None = None,
                      tuning: dict[str, Any] | None = None) -> list[str]:
     spk, ss_t1, b1_t1, fab, ss_maybe = ik["worst"]
@@ -574,6 +594,8 @@ def main() -> None:
            f"{f(cs0['baseline']['false_accept_rate'] * 100)} (keyword spotting) | — | **{f(cs0['suresay']['false_accept_rate'] * 100)}** | "
            f"{cs0['negatives']:,} generated non-answers, {f(cs0['suresay']['answer_rate'] * 100)} of {cs0['positives']} genuine answers understood |"]
           if (cs0 := read_result("consent_stress")) else []),
+        *([f"| Works as an MCP server for Alexa+ | live checks passed | — | — | **{lc0['passed']} / {lc0['total']}** | the deployed server, incl. the Alexa+ client's own handshake |"]
+          if (lc0 := read_result("live_checks")) else []),
         *([f"| Accessible | Lighthouse accessibility, phone / desktop | — | — | **{sa0['phone']['median_scores']['accessibility']} / "
            f"{sa0['desktop']['median_scores']['accessibility']}** | the live site |"]
           if (sa0 := read_result("site_audit")) else []),
@@ -602,6 +624,9 @@ def main() -> None:
         body += consent_stress_section(cs) + [""]
     if sa:
         body += site_audit_section(sa) + [""]
+    lc = read_result("live_checks")
+    if lc:
+        body += live_checks_section(lc) + [""]
     body += negative_section(ck, ik, c, tuning) + [""]
     (EVAL / "REPORT.md").write_text("\n".join(body))
     block = "\n".join(head[head.index("## Headline") + 2: -1])

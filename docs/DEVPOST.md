@@ -104,6 +104,7 @@ Held-out speakers from TORGO, a public dysarthric speech corpus. Thresholds were
 | Gate overhead | p50 / p95 | — | — | 48.9 / 58.1 ms | Lambda + DynamoDB |
 | No regression | top-1, controls | 80.8% | — | 100.0% | control speakers |
 | Never mistakes a non-answer for consent | non-answers taken as consent | 95.54% (keyword spotting) | — | **0.0%** | 7,093 generated non-answers, 100.0% of 190 genuine answers understood |
+| Works as an MCP server for Alexa+ | live checks passed | — | — | **20 / 20** | the deployed server, incl. the Alexa+ client's own handshake |
 | Accessible | Lighthouse accessibility, phone / desktop | — | — | **100 / 100** | the live site |
 
 SureSay column: SureSay (offline ranker); the Nova 2 Lite ranker is pending Bedrock access. B1 recovers more phrases at top-1 because it never abstains, and pays for it by acting on a wrong phrase without asking.

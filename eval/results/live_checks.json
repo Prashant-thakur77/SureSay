@@ -1,0 +1,149 @@
+{
+  "name": "live_checks",
+  "generated_at": "2026-10-22T15:04:23+0530",
+  "git_sha": "8c97711",
+  "python": "3.13.12",
+  "url": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws",
+  "checks": [
+    {
+      "check": "no credentials: 401",
+      "passed": true,
+      "detail": "status 401"
+    },
+    {
+      "check": "401 carries no WWW-Authenticate (Alexa+ requirement)",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Protected Resource Metadata (RFC 9728)",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "authorization server metadata: PKCE S256",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "initialize answered in 2025-03-26 (Alexa+ MCP Client)",
+      "passed": true,
+      "detail": "server said 2025-03-26"
+    },
+    {
+      "check": "initialize answered in 2025-06-18 (any MCP client)",
+      "passed": true,
+      "detail": "server said 2025-06-18"
+    },
+    {
+      "check": "initialize answered in 2025-11-25 (any MCP client)",
+      "passed": true,
+      "detail": "server said 2025-11-25"
+    },
+    {
+      "check": "tools listed",
+      "passed": true,
+      "detail": "20 tools"
+    },
+    {
+      "check": "every tool has a description and an input schema",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "every tool is annotated read-only or not",
+      "passed": true,
+      "detail": "9 reads, 11 writes"
+    },
+    {
+      "check": "understand declares its MCP Apps UI",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "the card UI is an MCP App resource",
+      "passed": true,
+      "detail": "10 KB"
+    },
+    {
+      "check": "understand: three cards for a misheard command",
+      "passed": true,
+      "detail": "Turn on the bedroom fan / Turn on the TV / Turn off the bedroom fan"
+    },
+    {
+      "check": "the result names its UI with invoking/invoked (where Alexa+ looks)",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "no nonce in any tool result",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "a write only proposes",
+      "passed": true,
+      "detail": "pending_user_confirmation"
+    },
+    {
+      "check": "the agent's own confirm is refused",
+      "passed": true,
+      "detail": "no user evidence for this card set: only the user's own voice or tap on their pa"
+    },
+    {
+      "check": "nothing changed",
+      "passed": true,
+      "detail": "front door locked"
+    },
+    {
+      "check": "pending_status tells the agent it is still waiting",
+      "passed": true,
+      "detail": "waiting_for_user"
+    },
+    {
+      "check": "names",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "passed": 20,
+  "total": 20,
+  "round_trip_from_test_machine": {
+    "healthz (network baseline)": {
+      "p50_ms": 256.6,
+      "p95_ms": 260.7,
+      "n": 15
+    },
+    "tools/list": {
+      "p50_ms": 269.3,
+      "p95_ms": 275.4,
+      "n": 15,
+      "minus_network_p50_ms": 12.7
+    },
+    "tools/call home_status": {
+      "p50_ms": 269.4,
+      "p95_ms": 281.7,
+      "n": 15,
+      "minus_network_p50_ms": 12.8
+    },
+    "tools/call understand (typed)": {
+      "p50_ms": 285.8,
+      "p95_ms": 291.4,
+      "n": 15,
+      "minus_network_p50_ms": 29.2
+    }
+  },
+  "server_side_understand": {
+    "typed": {
+      "requests": 89,
+      "p50_ms": 9.5,
+      "p95_ms": 1360.9
+    },
+    "voice": {
+      "requests": 62,
+      "p50_ms": 1472.8,
+      "p95_ms": 4890.1
+    }
+  },
+  "note": "round trips include the network from the test machine to us-east-1"
+}
