@@ -11,6 +11,7 @@ order (``add`` / ``remove``). Locally, a JSON file per user.
 from __future__ import annotations
 
 import json
+import os
 import re
 import threading
 import time
@@ -77,7 +78,7 @@ class JsonPhrasebook:
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
         self.seed_users = seed_users
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()  # add() reads through list(), which may seed a new home under the same lock
 
     def _path(self, user_id: str) -> Path:
         safe = re.sub(r"[^A-Za-z0-9_.-]", "_", user_id)
@@ -86,10 +87,11 @@ class JsonPhrasebook:
     def list(self, user_id: str) -> list[dict[str, Any]]:
         p = self._path(user_id)
         if not p.exists():
-            if user_id in self.seed_users or user_id.startswith("guest-"):
-                self.replace(user_id, [entry(**s, entry_id=f"ph_start{i:02d}") for i, s in enumerate(STARTER)])
-            else:
+            if not (user_id in self.seed_users or user_id.startswith("guest-")):
                 return []
+            with self._lock:  # a new home is seeded once, however many requests arrive together
+                if not p.exists():
+                    self._write(p, [entry(**s, entry_id=f"ph_start{i:02d}") for i, s in enumerate(STARTER)])
         return json.loads(p.read_text())
 
     def add(self, user_id: str, phrase: str, action: str, args: dict[str, Any]) -> dict[str, Any]:
@@ -97,11 +99,18 @@ class JsonPhrasebook:
             entries = [e for e in self.list(user_id) if e["phrase"].lower() != phrase.strip().lower()]
             e = entry(phrase, action, args)
             entries.append(e)
-            self._path(user_id).write_text(json.dumps(entries, indent=1))
+            self._write(self._path(user_id), entries)
             return e
 
     def replace(self, user_id: str, entries: list[dict[str, Any]]) -> None:
-        self._path(user_id).write_text(json.dumps(entries, indent=1))
+        self._write(self._path(user_id), entries)
+
+    @staticmethod
+    def _write(path: Path, entries: list[dict[str, Any]]) -> None:
+        """Write whole or not at all: a reader sees the old file or the new one, never half of one."""
+        tmp = path.with_name(f".{path.name}.{threading.get_ident()}.tmp")
+        tmp.write_text(json.dumps(entries, indent=1))
+        os.replace(tmp, path)
 
 
 class StorePhrasebook:

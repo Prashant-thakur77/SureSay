@@ -126,7 +126,10 @@ function onResult(params) {
   let data = params && params.structuredContent;
   if (!data && params && params.content) { try { data = JSON.parse(params.content[0].text); } catch {} }
   if (!data) return;
-  if (data.status === "answer") { show(data.say); return; }
+  if (data.status === "answer") {  // an outcome (or a spoken answer): no cards are waiting any more
+    current = null; document.getElementById("cards").replaceChildren(); document.getElementById("actions").hidden = true;
+    show(data.say); return;
+  }
   if (!data.pending_id) { show(data.say || "Please say it again."); return; }
   current = data; render();
 }

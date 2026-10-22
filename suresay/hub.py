@@ -54,6 +54,7 @@ DEMO_SPEAK_PER_DAY = 400
 DEMO_TURNS_PER_DAY = 4000
 DEMO_GUESTS_PER_DAY = 500
 TRY_PER_HOUR = 20  # new demo homes per source address
+PAIR_CODES_PER_HOUR = 5  # codes a paired device may create to add another screen for its user
 TRY_PER_DAY = 60
 # One address's share of the day (across all the demo homes it made), well below the whole demo's ceilings.
 ADDRESS_VOICE_PER_DAY = 80
@@ -618,7 +619,15 @@ def build_app(s: SureSay | None = None) -> Starlette:
         await anyio.to_thread.run_sync(s.devices.revoke, target.device_id)
         return JSONResponse({"ok": True})
 
+    async def pair_code(request: Request, device: Any, data: dict[str, Any]) -> Response:
+        """A one-time code that pairs another screen (an assistant's display, a second phone) for this same user."""
+        if not await anyio.to_thread.run_sync(quota.take, "pair_code", device.user_id, PAIR_CODES_PER_HOUR, 3600):
+            return JSONResponse({"error": "too many new codes; try again in an hour"}, status_code=429)
+        code = await anyio.to_thread.run_sync(s.devices.start_pairing, device.user_id)
+        return JSONResponse({"code": code, "expires_in_s": 600})
+
     routes += [
+        Route("/device/pair-code", _signed(pair_code, s), methods=["POST"]),
         Route("/device/devices", _signed(devices, s), methods=["GET"]),
         Route("/device/practice", _signed(practice, s), methods=["GET", "POST"]),
         Route("/device/unpair", _signed(unpair, s), methods=["POST"]),
@@ -634,8 +643,8 @@ def build_app(s: SureSay | None = None) -> Starlette:
     async def try_demo(request: Request) -> Response:
         """Public demo (SURESAY_PUBLIC_DEMO=1): a private sandbox home per visitor, with its own device at once.
 
-        Same gate, same rules; a guest can only ever touch their own simulated home. The device is issued directly
-        (no pairing code exists for a guest), new homes are limited per source address and per day.
+        Same gate, same rules; a guest can only ever touch their own simulated home. The device is issued directly,
+        and any screen the guest pairs later joins the same home; new homes are limited per source address and per day.
         """
         if not s.cfg.public_demo:
             return JSONResponse({"error": "not found"}, status_code=404)

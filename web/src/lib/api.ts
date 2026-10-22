@@ -51,6 +51,8 @@ export interface HubApi {
   devices?(): Promise<PairedDevice[]>;
   /** Unpair one of them (for an assistant link, that ends its access). */
   unpairDevice?(deviceId: string): Promise<void>;
+  /** A one-time code that pairs another screen (e.g. an assistant's display) for this same user. */
+  pairCode?(): Promise<string>;
   /** The signing fetch, for the MCP transport. */
   signingFetch: (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 }
@@ -158,6 +160,10 @@ export class HubClient implements HubApi {
 
   async unpairDevice(deviceId: string): Promise<void> {
     await this.call<{ ok: boolean }>("POST", "/device/unpair", { device_id: deviceId });
+  }
+
+  async pairCode(): Promise<string> {
+    return (await this.call<{ code: string }>("POST", "/device/pair-code", {})).code;
   }
 
   async pending(): Promise<PendingSet[]> {

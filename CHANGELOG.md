@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.0 (22 Oct 2026)
+
+- **The Alexa+ view:** a simulated Echo Show that plays the host against the real server. It calls `tools/call understand`, reads `ui://suresay/cards.html`, renders the MCP App in a sandboxed frame over the MCP Apps messages, and shows every message on the wire; "Your phone" beside it is where the yes comes from. When the user answers there, the screen shows the outcome. Open it from the top bar or with `?alexa=1`.
+- **Speaks the Alexa+ client's protocol:** its documented `initialize` (2025-03-26, "Alexa+ MCP Client") is answered in its own version, and `understand` now names its card UI in the tool *result* (`_meta.ui` with `resourceUri`, `invoking`, `invoked`).
+- **An Agent Skill** (`skills/suresay/SKILL.md`) for any agent connected to SureSay.
+- **Amazon's add-on functional requirements** (explicit confirmation, no duplicate transactions, reject a changed amount, receipts) mapped to the gate's checks in `alexa_plus/README.md`.
+- **Pair another screen:** `POST /device/pair-code` gives a paired device a one-time code for its own user (5 an hour), so an assistant's display can become one of your devices.
+- **Phone first:** the microphone under the headline, a one-row top bar, a short demo note, one scrolling tab row that fits its panel.
+- Fixed: the local phrasebook files are written atomically, so a new home seeded by several requests at once is never read half-written.
+- The repository keeps working notes and submission drafts out of version control.
+
 ## 1.1.0 (21 Oct 2026)
 
 - **Talk to someone:** be understood by people, not only machines. His words become up to three sentences to say (as heard, and his closest phrasebook sentences); nothing is said until he chooses; then it is spoken and shown huge, with a full-screen listener view that turns around.

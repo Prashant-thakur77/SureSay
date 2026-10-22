@@ -12,6 +12,8 @@ Dysarthria makes speech hard for machines to understand, after a stroke or with 
 
 Getting it wrong is not the worst part. Acting on it is. A misheard command switches off the wrong light, calls the wrong person, or unlocks the door instead of locking it. As assistants like Alexa+ gain the power to act, a misheard request that acts is worse than no request at all.
 
+Better recognition helps (Voiceitt, an Alexa Fund company, trains recognition on each person's speech). SureSay works on what happens after hearing: whatever the recogniser, nothing acts until the person chooses, and the same gate works with any MCP host.
+
 ## What it does
 
 1. **You speak** (or type). Recognition is primed with your own phrasebook.
@@ -41,13 +43,18 @@ SureSay is a self-hosted MCP server built to the Alexa+ add-on requirements, and
 |---|---|
 | MCP spec 2025-11-25, Streamable HTTP, a remote URL | `/mcp` on AWS Lambda; negotiates 2025-11-25 (and 2026-07-28) |
 | Account linking: OAuth 2.1 code flow + PKCE S256, Protected Resource Metadata (RFC 9728), auth-server metadata, Bearer in the header, 401 without `WWW-Authenticate` | All implemented and tested (`suresay/oauth.py`, `tests/test_oauth.py`). Linking means entering your SureSay pairing code. The link is listed under Your devices: unpairing it ends every token at once, and a replayed refresh token ends the link too |
-| Visuals through MCP Apps | `understand` carries `_meta.ui.resourceUri = ui://suresay/cards.html`: the three cards render on an Echo Show or Fire TV, and that screen can pair as one of your devices, so a tap there is your own evidence |
+| The Alexa+ MCP client itself | Its documented `initialize` (protocol 2025-03-26, "Alexa+ MCP Client") is answered in its own version; tested (`tests/test_alexa_client.py`) |
+| Visuals through MCP Apps | `understand` declares `ui://suresay/cards.html`, and its result carries `_meta.ui` (`resourceUri`, `invoking`, `invoked`), where Alexa+ looks for custom visuals. The three cards render on an Echo Show or Fire TV, and that screen can pair as one of your devices, so a tap there is your own evidence |
+| Agent Skills | `skills/suresay/SKILL.md` (open SKILL.md format) teaches any agent to use SureSay safely; the open-source gate ships `add-confirm-gate` |
+| Amazon's add-on functional requirements | "Explicit confirmation with key details before any high-consequence action", "detect and prevent duplicate transactions", "reject if the amount differs", "deliver a receipt": each enforced by the gate in code, mapped in `alexa_plus/README.md` |
 | An add-on package | `alexa_plus/addon-package/addon.json`, six icon sizes, a 600×900 carousel, `/privacy`, `/terms` |
 | Fast query responses (under 500 ms) | `home_status` and typed `understand` run in milliseconds; spoken `understand` is 870 ms p50 because it includes speech recognition |
 
+**See it as Alexa+ would:** the live demo's Alexa+ view (`?alexa=1`) is a simulated Echo Show that plays the host against the real server: it calls `understand`, renders the cards MCP App over the MCP Apps messages, and shows every message on the wire, while "Your phone" beside it is where the yes comes from.
+
 A linked Alexa+ client gets exactly the agent's powers: it can understand, read and propose, never confirm. Until Alexa+ developer access opens, `alexa_skill/` runs the same flow as a classic Alexa skill. There, Alexa is a paired device, and the user's spoken "the second one" goes back as signed evidence.
 
-![Cards](img/cards.png)
+![The Alexa+ view](devpost/12-alexa-plus.jpg)
 
 ## How it works
 

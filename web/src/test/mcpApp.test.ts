@@ -67,6 +67,17 @@ describe("MCP App", () => {
     expect(w.document.getElementById("result")!.textContent).toMatch(/changed/i);
   });
 
+  it("an answer from the host replaces the cards with the outcome", () => {
+    const { w, result } = boot();
+    result([{ n: 1, text: "Turn on the fan", risk: "low" }]);
+    expect(w.document.querySelectorAll("#cards .card")).toHaveLength(1);
+    w.dispatchEvent(new w.MessageEvent("message", { source: w as unknown as Window,
+      data: { jsonrpc: "2.0", method: "ui/notifications/tool-result", params: { structuredContent: { status: "answer", say: "Done: confirmed by you." } } } }));
+    expect(w.document.querySelectorAll("#cards .card")).toHaveLength(0);
+    expect(w.document.getElementById("actions")!.hidden).toBe(true);
+    expect(w.document.getElementById("result")!.textContent).toContain("Done: confirmed by you.");
+  });
+
   it("sends the tap when the shown card matches the server's", async () => {
     const { w, fetched, result, settle } = boot([{ n: 1, text: "Turn on the fan" }]);
     result([{ n: 1, text: "Turn on the fan", risk: "low" }]);

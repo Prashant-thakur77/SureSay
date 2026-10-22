@@ -9,19 +9,28 @@ Run it on its own with ``python -m mcp_server.server`` (same as ``suresay-hub``)
 
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING, Any, Literal
 
-from mcp_types import ToolAnnotations
+from mcp_types import CallToolResult, TextContent, ToolAnnotations
 
 from suresay import catalog
 from suresay.media import check_ref
 from suresay.state import Home
 from suresay.understand import understand as run_understand
 
+CARDS_UI = "ui://suresay/cards.html"  # the MCP App with the three cards (suresay/mcp_app.html)
+
 if TYPE_CHECKING:
     from suresay.app import SureSay
 
 Device = Literal["living_lights", "bedroom_lights", "fan", "ac", "tv"]
+
+
+def _result(payload: dict[str, Any], meta: dict[str, Any] | None = None) -> CallToolResult:
+    """The tool's JSON as text and as structured content (what every client reads), plus an optional _meta."""
+    return CallToolResult(content=[TextContent(type="text", text=json.dumps(payload))], structured_content=payload,
+                          _meta=meta)
 
 
 def register_tools(app: SureSay) -> None:
@@ -30,8 +39,8 @@ def register_tools(app: SureSay) -> None:
     home = app.home
 
     # understanding ------------------------------------------------------------------------
-    @mcp.tool(annotations=ToolAnnotations(read_only_hint=True), meta={"ui": {"resourceUri": "ui://suresay/cards.html"}})
-    def understand(user_id: str, transcript: str = "", audio_ref: str = "") -> dict[str, Any]:
+    @mcp.tool(annotations=ToolAnnotations(read_only_hint=True), meta={"ui": {"resourceUri": CARDS_UI}})
+    def understand(user_id: str, transcript: str = "", audio_ref: str = "") -> CallToolResult:
         """Work out what the user meant. Give the transcript they typed, or the audio_ref of what they said.
 
         Returns status "choose" with up to 3 candidate cards (shown and read aloud on the user's device;
@@ -40,9 +49,13 @@ def register_tools(app: SureSay) -> None:
         """
         caller_user = app.user()  # the authenticated identity: the agent's X-SureSay-User, a device's or a linked user's
         if user_id and user_id != caller_user:
-            return {"status": "refused", "reason": "not your user: understand acts only for the authenticated user"}
+            return _result({"status": "refused", "reason": "not your user: understand acts only for the authenticated user"})
         ref = check_ref(audio_ref) if audio_ref else None
-        return run_understand(app, caller_user, transcript=transcript or None, audio_ref=ref)
+        out = run_understand(app, caller_user, transcript=transcript or None, audio_ref=ref)
+        # Alexa+ renders custom visuals when the tool *response* names its UI; invoking/invoked are its status lines
+        ui = {"resourceUri": CARDS_UI, "invoking": "Working out what you meant…",
+              "invoked": "Choose a card on your screen, or say its number" if out.get("status") == "choose" else "Done"}
+        return _result(out, meta={"ui": ui})
 
     # reads ------------------------------------------------------------------------------
     @gs.read(pass_user=True)

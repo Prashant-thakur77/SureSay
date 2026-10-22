@@ -47,11 +47,13 @@ interface Props {
   onSettings: () => void;
   /** The Help button: offers to call or message his carer (still confirmed like everything else). */
   onHelp?: () => void;
+  /** Opens the simulated Alexa+ screen (SureSay's MCP server and card app inside an assistant). */
+  onAlexa?: () => void;
   /** Big-screen mode: the side panel hides behind a "Home" button. */
   sideToggle?: { open: boolean; onToggle: () => void };
 }
 
-export const TopBar = forwardRef<HTMLButtonElement, Props>(function TopBar({ user, mcp, onSettings, onHelp, sideToggle }, ref) {
+export const TopBar = forwardRef<HTMLButtonElement, Props>(function TopBar({ user, mcp, onSettings, onHelp, onAlexa, sideToggle }, ref) {
   return (
     <header className="topbar" data-scan-exempt>
       <a href="#main" className="skip">
@@ -75,6 +77,12 @@ export const TopBar = forwardRef<HTMLButtonElement, Props>(function TopBar({ use
         <button type="button" className="btn btn--secondary" aria-expanded={sideToggle.open} aria-controls="side-panel" onClick={sideToggle.onToggle}>
           <Icon name="home" size={26} />
           {sideToggle.open ? "Hide home" : "Home"}
+        </button>
+      )}
+      {onAlexa && (
+        <button type="button" className="btn btn--secondary topbar__alexa" onClick={onAlexa} aria-haspopup="dialog">
+          <Icon name="speech" size={24} />
+          <span className="topbar__label">Alexa+ view</span>
         </button>
       )}
       {onHelp && (

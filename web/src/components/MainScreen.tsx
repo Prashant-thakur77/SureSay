@@ -12,6 +12,8 @@ import { randomHex } from "../lib/sign.js";
 import type { Speaker } from "../lib/speech";
 import { boardTiles } from "../lib/phrases";
 import type { Phrase } from "../lib/types";
+import { isMcpHost } from "../lib/mcp";
+import { AlexaView } from "./AlexaView";
 import { Conversation, type ConversationActions } from "./Conversation";
 import { Icon } from "./Icon";
 import { LiveRegions } from "./LiveRegions";
@@ -108,6 +110,16 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
   const recorder = useRecorder();
   const sessionId = useMemo(() => `s_${randomHex(8)}`, []);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // the simulated Alexa+ screen: also opened straight from a link with ?alexa=1
+  const [alexaOpen, setAlexaOpen] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).get("alexa") === "1";
+    } catch {
+      return false;
+    }
+  });
+  const overlayRef = useRef(false);
+  overlayRef.current = alexaOpen;
   const [tab, setTab] = useState<TabId>("talk");
   const tabRef = useRef<TabId>("talk");
   tabRef.current = tab;
@@ -226,7 +238,7 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
   // keyboard: Space = microphone, 1-3 = choose, Esc/N = none or no, Y = yes on the second check
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (settingsOpen || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (settingsOpen || overlayRef.current || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
       const target = e.target instanceof HTMLElement ? e.target : null;
       if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
       const a = actionsRef.current;
@@ -267,9 +279,9 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
   useEffect(() => {
     const el = shellRef.current;
     if (!el) return;
-    if (settingsOpen) el.setAttribute("inert", "");
+    if (settingsOpen || alexaOpen) el.setAttribute("inert", "");
     else el.removeAttribute("inert");
-  }, [settingsOpen]);
+  }, [settingsOpen, alexaOpen]);
 
   // guests get a slim note about the demo home, which they can hide
   const guest = isGuest(hub.creds.user_id);
@@ -310,6 +322,7 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
               void conv.help();
             } : undefined}
             sideToggle={bigScreen ? { open: sideOpen, onToggle: () => setSideOpen((o) => !o) } : undefined}
+            onAlexa={isMcpHost(gate) ? () => setAlexaOpen(true) : undefined}
           />
           {guestNote && (
             <div className="guest-note" role="region" aria-label="About this demo">
@@ -426,6 +439,18 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
           loadDevices={loadDevices}
           unpairDevice={unpairDevice}
         />
+        {alexaOpen && isMcpHost(gate) && (
+          <AlexaView
+            host={gate}
+            phase={phase}
+            choose={conv.choose}
+            yes={conv.yes}
+            none={conv.none}
+            pairCode={hub.pairCode ? () => hub.pairCode!() : undefined}
+            speak={settings.readAloud ? (t) => void speaker.say(t) : undefined}
+            onClose={() => setAlexaOpen(false)}
+          />
+        )}
         <LiveRegions assertive={assertive} polite={polite} />
       </div>
     </ScanContext.Provider>

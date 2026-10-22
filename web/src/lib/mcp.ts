@@ -29,7 +29,18 @@ export interface ConfirmChannel {
   confirm(pending_id: string, evidence_ref: string): Promise<ConfirmOutcome>;
 }
 
-interface ToolResultLike {
+/** What an MCP Apps host needs: the raw tool result, the tool's UI resource, and the resource's HTML. */
+export interface McpHost {
+  callToolRaw(name: string, args: Record<string, unknown>): Promise<ToolResultLike & { _meta?: unknown }>;
+  toolUi(name: string): Promise<string | null>;
+  readUi(uri: string): Promise<string>;
+}
+
+export function isMcpHost(x: unknown): x is McpHost {
+  return !!x && typeof (x as McpHost).callToolRaw === "function" && typeof (x as McpHost).readUi === "function";
+}
+
+export interface ToolResultLike {
   content?: Array<{ type: string; text?: string }>;
   structuredContent?: unknown;
   isError?: boolean;
@@ -50,7 +61,7 @@ export function parseToolJson<T>(result: ToolResultLike): T {
   throw new Error("the tool returned no JSON");
 }
 
-export class McpGate implements ConfirmChannel {
+export class McpGate implements ConfirmChannel, McpHost {
   status: McpStatus = "connecting";
   protocol: string | null = null;
   private client: Client | null = null;
@@ -99,6 +110,32 @@ export class McpGate implements ConfirmChannel {
     if (!this.client) throw new Error("MCP is not connected");
     const result = (await this.client.callTool({ name, arguments: args })) as ToolResultLike;
     return parseToolJson<T>(result);
+  }
+
+  /** The raw tool result (content, structuredContent, _meta), as an MCP host such as Alexa+ receives it. */
+  async callToolRaw(name: string, args: Record<string, unknown>): Promise<ToolResultLike & { _meta?: unknown }> {
+    await this.connect();
+    if (!this.client) throw new Error("MCP is not connected");
+    return (await this.client.callTool({ name, arguments: args })) as ToolResultLike & { _meta?: unknown };
+  }
+
+  /** The UI resource a tool declares (`_meta.ui.resourceUri`), for an MCP Apps host. */
+  async toolUi(name: string): Promise<string | null> {
+    await this.connect();
+    if (!this.client) throw new Error("MCP is not connected");
+    const { tools } = await this.client.listTools();
+    const meta = tools.find((t) => t.name === name)?._meta as { ui?: { resourceUri?: unknown } } | undefined;
+    return typeof meta?.ui?.resourceUri === "string" ? meta.ui.resourceUri : null;
+  }
+
+  /** The HTML of a `ui://` resource. */
+  async readUi(uri: string): Promise<string> {
+    await this.connect();
+    if (!this.client) throw new Error("MCP is not connected");
+    const { contents } = await this.client.readResource({ uri });
+    const first = contents[0] as { text?: unknown } | undefined;
+    if (typeof first?.text !== "string") throw new Error(`${uri} has no HTML`);
+    return first.text;
   }
 
   async receiptsList(): Promise<Receipt[]> {

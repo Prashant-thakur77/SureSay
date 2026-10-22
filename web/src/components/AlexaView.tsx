@@ -1,0 +1,269 @@
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
+import type { Phase } from "../hooks/useConversation";
+import type { McpHost } from "../lib/mcp";
+import { Icon } from "./Icon";
+
+/**
+ * How SureSay looks inside Alexa+: this page plays the assistant's part. It calls SureSay's MCP server the way an
+ * add-on host does (tools/call understand), reads the tool's UI resource (ui://suresay/cards.html) and renders it in
+ * a sandboxed frame over the MCP Apps messages. The assistant only shows the cards: the yes comes from the user's own
+ * device (the phone panel here, or this screen once it is paired as one of his devices).
+ */
+
+export const ALEXA_EXAMPLES = ["van on", "unlock the front door", "call mum", "i'm hot"];
+
+interface Line {
+  dir: "→" | "←" | "⇄" | "·";
+  text: string;
+}
+
+interface Props {
+  host: McpHost;
+  phase: Phase;
+  choose: (n: number) => void;
+  yes: () => void;
+  none: () => void;
+  pairCode?: () => Promise<string>;
+  speak?: (text: string) => void;
+  onClose: () => void;
+}
+
+type ToolResult = Awaited<ReturnType<McpHost["callToolRaw"]>>;
+
+function summary(result: ToolResult): { say: string; status: string; count: number } {
+  const sc = (result.structuredContent ?? {}) as { say?: unknown; status?: unknown; candidates?: unknown };
+  let data = sc;
+  if (!("status" in sc)) {
+    const text = result.content?.find((c) => c.type === "text")?.text;
+    try {
+      data = text ? (JSON.parse(text) as typeof sc) : sc;
+    } catch {
+      data = sc;
+    }
+  }
+  const count = Array.isArray(data.candidates) ? data.candidates.length : 0;
+  const status = typeof data.status === "string" ? data.status : "unknown";
+  const say = typeof data.say === "string" && data.say ? data.say
+    : status === "choose" ? `I found ${count} options. Choose on your screen or your phone.`
+    : status === "ask_again" ? "I'm not sure. Please say it again." : "Done.";
+  return { say, status, count };
+}
+
+export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onClose }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  useFocusTrap(ref, true, onClose);
+  const frame = useRef<HTMLIFrameElement>(null);
+  const ready = useRef(false);
+  const latest = useRef<ToolResult | null>(null);
+  const [html, setHtml] = useState<string | null>(null);
+  const [height, setHeight] = useState(320);
+  const [lines, setLines] = useState<Line[]>([]);
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [reply, setReply] = useState("Try “Alexa, van on”.");
+  const [code, setCode] = useState<string | null>(null);
+  const log = useCallback((dir: Line["dir"], t: string) => setLines((l) => [...l.slice(-11), { dir, text: t }]), []);
+
+  const post = useCallback((msg: unknown) => frame.current?.contentWindow?.postMessage(msg, "*"), []);
+  const sendResult = useCallback(
+    (result: ToolResult) => {
+      post({ jsonrpc: "2.0", method: "ui/notifications/tool-result", params: { content: result.content, structuredContent: result.structuredContent } });
+      log("→", "ui/notifications/tool-result (the cards' data, no secret)");
+    },
+    [post, log],
+  );
+
+  // the MCP Apps side of the host: answer the app's handshake, hand it the result, follow its size
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      if (!frame.current || e.source !== frame.current.contentWindow) return;
+      const m = (e.data ?? {}) as { id?: number; method?: string; params?: { height?: number } };
+      if (m.method === "ui/initialize" && m.id !== undefined) {
+        post({ jsonrpc: "2.0", id: m.id, result: { protocolVersion: "2026-01-26", hostInfo: { name: "Alexa+ (simulated)", version: "1" },
+          hostCapabilities: {}, hostContext: { theme: "dark", displayMode: "inline" } } });
+        log("⇄", "ui/initialize");
+      } else if (m.method === "ui/notifications/initialized") {
+        ready.current = true;
+        if (latest.current) sendResult(latest.current);
+      } else if (m.method === "ui/notifications/size-changed" && typeof m.params?.height === "number") {
+        setHeight(Math.max(200, Math.min(900, Math.ceil(m.params.height) + 8)));
+      } else if (m.id !== undefined && m.method) {
+        post({ jsonrpc: "2.0", id: m.id, error: { code: -32601, message: `${m.method} is not supported by this host` } });
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [post, log, sendResult]);
+
+  // when the user answers on their own device, the screen shows the outcome instead of stale cards
+  const prevKind = useRef(phase.kind);
+  useEffect(() => {
+    const was = prevKind.current;
+    prevKind.current = phase.kind;
+    if (was !== "cards" || phase.kind === "cards" || !latest.current || !ready.current) return;
+    const say = phase.kind === "done" ? "Done: confirmed by you, on your own device." : phase.kind === "cancelled" ? "Nothing was changed." : "";
+    if (!say) return;
+    post({ jsonrpc: "2.0", method: "ui/notifications/tool-result", params: { structuredContent: { status: "answer", say } } });
+    log("→", `ui/notifications/tool-result (${phase.kind === "done" ? "done" : "cancelled"})`);
+    setReply(say);
+  }, [phase.kind, post, log]);
+
+  const ask = async (utterance: string) => {
+    const clean = utterance.trim();
+    if (!clean || busy) return;
+    setBusy(true);
+    setReply("…");
+    log("·", `You: “Alexa, ${clean}”`);
+    try {
+      log("→", `tools/call understand {"transcript": "${clean}"}`);
+      const result = await host.callToolRaw("understand", { user_id: "", transcript: clean });
+      const s = summary(result);
+      log("←", `${s.status}${s.count ? `: ${s.count} cards` : ""}; a card set now waits on your device`);
+      latest.current = result;
+      if (!html) {
+        const uri = await host.toolUi("understand");
+        if (uri) {
+          log("→", `resources/read ${uri}`);
+          const page = await host.readUi(uri);
+          log("←", `${uri} (${Math.round(page.length / 1024)} KB of HTML), rendered in a sandboxed frame`);
+          ready.current = false;
+          setHtml(page);
+        }
+      } else if (ready.current) {
+        sendResult(result);
+      }
+      setReply(s.say);
+      speak?.(s.say);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      log("←", `error: ${msg}`);
+      setReply("I couldn't reach SureSay just now.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    void ask(text);
+    setText("");
+  };
+
+  const cards = phase.kind === "cards" && phase.answer !== "listening" ? phase.set : null;
+  const final = cards && (cards.stage === "final" || cards.options.length === 1);
+
+  return (
+    <div className="alexa" role="dialog" aria-modal="true" aria-labelledby="alexa-title" ref={ref}>
+      <header className="alexa__head">
+        <h2 id="alexa-title" className="alexa__title">
+          SureSay inside <em>Alexa+</em>
+        </h2>
+        <p className="alexa__note">
+          A simulated Alexa+ screen: this page plays the assistant, calling SureSay's real MCP server and showing its card app the way an add-on host
+          does. The assistant can show the cards. Only your own device can say yes.
+        </p>
+        <button type="button" className="btn btn--secondary alexa__close" onClick={onClose}>
+          <Icon name="close" size={24} /> Close
+        </button>
+      </header>
+
+      <div className="alexa__stage">
+        <section className="echo" aria-label="Echo Show screen (simulated)">
+          <div className="echo__screen">
+            <div className={`echo__bar${busy ? " echo__bar--busy" : ""}`} aria-hidden="true" />
+            <p className="echo__reply" aria-live="polite">
+              <span className="visually-hidden">Alexa: </span>
+              {reply}
+            </p>
+            {html ? (
+              <iframe
+                ref={frame}
+                className="echo__app"
+                title="SureSay cards (MCP App)"
+                sandbox="allow-scripts allow-forms"
+                srcDoc={html}
+                style={{ height }}
+              />
+            ) : (
+              <p className="echo__idle">Ask for something. SureSay's cards will appear here.</p>
+            )}
+          </div>
+          <form className="echo__ask" onSubmit={submit} aria-label="Talk to Alexa">
+            <label htmlFor="alexa-input" className="echo__wake">
+              Alexa,
+            </label>
+            <input id="alexa-input" className="input" value={text} onChange={(e) => setText(e.target.value)} placeholder="van on" autoComplete="off" disabled={busy} />
+            <button type="submit" className="btn btn--primary" disabled={busy}>
+              <Icon name="send" size={22} /> Ask
+            </button>
+          </form>
+          <div className="echo__chips" role="group" aria-label="Examples">
+            {ALEXA_EXAMPLES.map((x) => (
+              <button key={x} type="button" className="btn btn--secondary btn--chip" disabled={busy} onClick={() => void ask(x)}>
+                “{x}”
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <aside className="alexa__side">
+          <section className="phone" aria-labelledby="phone-title">
+            <h3 id="phone-title" className="phone__title">
+              <Icon name="phone" size={22} /> Your phone: only you can say yes
+            </h3>
+            {cards ? (
+              <>
+                <ol className="phone__cards">
+                  {cards.options.map((o) => (
+                    <li key={o.n}>
+                      <button type="button" className="phone__card" onClick={() => (final ? yes() : choose(o.n))}>
+                        <span className="phone__n" aria-hidden="true">{o.n}</span>
+                        <span>{final ? `Yes: ${o.text}` : o.text}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+                <button type="button" className="btn btn--secondary" onClick={none}>
+                  <Icon name="close" size={22} /> {final ? "No" : "None of these"}
+                </button>
+              </>
+            ) : (
+              <p className="phone__idle">
+                {phase.kind === "done" ? "Done, confirmed by you. The receipt is in your timeline." : phase.kind === "thinking" ? "Checking…" : "Nothing is waiting for you."}
+              </p>
+            )}
+            {pairCode && (
+              <p className="phone__pair">
+                {code ? (
+                  <>
+                    Type <strong className="phone__code">{code}</strong> into the screen to pair it as one of your devices; then a tap there counts too.
+                  </>
+                ) : (
+                  <button type="button" className="linkish" onClick={() => void pairCode().then(setCode).catch(() => setCode(null))}>
+                    Pair this screen as one of my devices
+                  </button>
+                )}
+              </p>
+            )}
+          </section>
+
+          <section className="wire" aria-labelledby="wire-title">
+            <h3 id="wire-title" className="wire__title">
+              What Alexa+ and SureSay say to each other (MCP)
+            </h3>
+            <ol className="wire__log" aria-live="off">
+              {lines.length === 0 && <li className="wire__empty">Nothing yet.</li>}
+              {lines.map((l, i) => (
+                <li key={i}>
+                  <span className="wire__dir" aria-hidden="true">{l.dir}</span> {l.text}
+                </li>
+              ))}
+            </ol>
+            <p className="wire__foot">The one-time code that releases a card set never appears here: it goes only to your devices.</p>
+          </section>
+        </aside>
+      </div>
+    </div>
+  );
+}

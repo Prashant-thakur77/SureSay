@@ -56,6 +56,13 @@ It also speaks *for* you: confirm a phrase like "I am thirsty" and SureSay says 
 - OAuth 2.1 account linking with PKCE S256, Protected Resource Metadata, and a bare 401. Linking means entering your SureSay pairing code, and the link shows up under Settings, **Your devices**: unpair it and Alexa+'s access ends at once (a replayed refresh token ends it too).
 - An **MCP Apps** card UI that Alexa+ renders on an Echo Show or Fire TV screen. That screen pairs as one of your devices.
 - A ready `addon.json` with icons and a carousel image.
+- Speaks the real Alexa+ client's protocol: its `initialize` (2025-03-26) is answered in its version, and the card UI is named in the tool *result* with `invoking`/`invoked` lines, where Alexa+ looks for custom visuals.
+- **Amazon's add-on functional requirements** ("explicit confirmation with key details before any high-consequence action", "prevent duplicate transactions", "reject if the amount differs", "deliver a receipt") are enforced by the gate, not by a prompt: [the mapping](alexa_plus/README.md#amazons-add-on-functional-requirements-enforced-by-the-gate).
+- **An Agent Skill** ([`skills/suresay/SKILL.md`](skills/suresay/SKILL.md)) teaches any agent to use SureSay safely: understand first, read the cards, never confirm.
+
+**See it as Alexa+ would:** the live demo's **Alexa+ view** ([open it directly](https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/?alexa=1)) is a simulated Echo Show playing the host. It calls SureSay's real MCP server, renders the `ui://suresay/cards.html` MCP App over the MCP Apps messages, and shows every message on the wire, while "Your phone" beside it is where the yes comes from.
+
+![The Alexa+ view: a simulated Echo Show renders SureSay's MCP App cards; your phone confirms; the MCP messages are shown on the side](docs/devpost/12-alexa-plus.jpg)
 
 Until Alexa+ developer access opens, [`alexa_skill/`](alexa_skill) runs the same flow as a classic skill: "Alexa, ask Sure Say to turn on the fan" reads the three guesses, and your spoken "the first one" goes back as signed evidence through the same gate.
 
@@ -133,7 +140,7 @@ Code pointers, permissions and a verify command for each service: [docs/AWS_INTE
 
 ```bash
 make setup        # Python 3.13 venv (uv) + web client packages
-make test         # 506 Python tests (355 for the gate, 151 for the hub) plus 169 web tests: account linking, the Alexa skill, the 50-case safety suite
+make test         # 516 Python tests (355 for the gate, 161 for the hub) plus 170 web tests: account linking, the Alexa skill, the 50-case safety suite
 make demo         # hub + web client (+ agent when Bedrock is reachable) on http://127.0.0.1:9000
 ```
 
@@ -183,6 +190,8 @@ Confirmations work in English, Hinglish and Devanagari ("doosra", "teen number",
 | `suresay/` | The hub, understand (ASR → rank → abstain), actions, home state, phrasebook, speech |
 | `mcp_server/server.py` | The `MCPServer("suresay")` tools |
 | `strands_agent/` | The Strands agent and its AgentCore Runtime entrypoint |
+| `skills/suresay/` | The Agent Skill for any agent connected to SureSay |
+| `alexa_plus/`, `alexa_skill/` | The Alexa+ add-on package and requirements mapping; the classic Alexa skill |
 | `web/` | The web client (Vite + React + TypeScript) |
 | `eval/` | TORGO preparation, the four claim scripts, tuning, cost, the report |
 | `infra/` | deploy, teardown, smoke test, IAM |
