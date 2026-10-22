@@ -495,6 +495,19 @@ code {
   background: var(--muted);
 }
 
+/* while MCP connects: just the dot, so the first thing seen is not a status message */
+.chip--connecting {
+  justify-content: center;
+  min-width: 44px;
+  padding-inline: 0;
+  border-color: transparent;
+  background: transparent;
+}
+
+.chip--connecting .chip__dot {
+  opacity: 0.6;
+}
+
 .chip--connected .chip__dot {
   background: var(--ok-dot);
 }

@@ -3,6 +3,7 @@ import axe from "axe-core";
 import { describe, expect, it, vi } from "vitest";
 import { MainScreen } from "../components/MainScreen";
 import { PairScreen } from "../components/PairScreen";
+import { McpChip } from "../components/TopBar";
 import { DEFAULT_SETTINGS, type Settings } from "../hooks/useSettings";
 import { Speaker } from "../lib/speech";
 import { cardSet, fakeGate, fakeHub, NONCE, receipt } from "./fixtures";
@@ -40,6 +41,18 @@ describe("main screen", () => {
     expect(screen.getByRole("navigation")).toBeTruthy();
     await waitFor(() => expect(screen.getByTestId("mcp-chip").textContent).toContain("MCP connected · protocol 2025-11-25"));
     expect(await axeViolations()).toEqual([]);
+  });
+
+  it("the MCP chip is a quiet dot while it connects, then says connected or offline", () => {
+    const { rerender } = render(<McpChip mcp={{ status: "connecting", protocol: null, receipts: null }} />);
+    const chip = screen.getByTestId("mcp-chip");
+    expect(chip.textContent).not.toMatch(/connecting|…/i);
+    // nothing visible but the dot: the words are for screen readers only
+    expect([...chip.childNodes].every((n) => n instanceof HTMLElement && (n.classList.contains("chip__dot") || n.classList.contains("visually-hidden")))).toBe(true);
+    rerender(<McpChip mcp={{ status: "connected", protocol: "2025-11-25", receipts: 1 }} />);
+    expect(screen.getByTestId("mcp-chip").textContent).toBe("MCP connected · protocol 2025-11-25");
+    rerender(<McpChip mcp={{ status: "failed", protocol: null, receipts: null }} />);
+    expect(screen.getByTestId("mcp-chip").textContent).toBe("MCP offline · using fallback");
   });
 
   it("labels assistant suggestions and stays accessible", async () => {
