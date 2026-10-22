@@ -200,11 +200,161 @@ Upload in this order, with these captions:
 
 ---
 
-## Step 3 · Additional info
+## Step 3 · Additional info (the form, field by field)
 
-**Which track(s)?** Alexa+
+**Upload a File** (optional): `~/Videos/suresay/SureSay-judges-pack.zip`. It holds the evaluation report, judges' guide, AWS integrations, product feedback, feature requests, friction log, architecture and results image.
 
-**Which mini challenge(s)?** AWS Builder, and Open Source
+| Field | Answer |
+|---|---|
+| Submitter Type | Individual |
+| Organization Name | N/A |
+| Country of Residence | India |
+| Canada province | N/A |
+| Primary Track(s) | **Alexa+** (only this one) |
+| Code repository URL | `https://github.com/Prashant-thakur77/SureSay` |
+| New or existing prior to August 31, 2026? | Your call (see the note below) |
+| AWS Builder Mini Challenge? | Yes |
+| Open Source Mini Challenge? | Yes |
+| OS: Contribution URL | `https://github.com/Prashant-thakur77/confirm-gate-mcp` |
+| OS: Project Repository URL | `https://github.com/Prashant-thakur77/SureSay` |
+| OS: GitHub Username | `Prashant-thakur77` |
+| Friction Log (URL) | `https://github.com/Prashant-thakur77/SureSay/blob/main/docs/FRICTION_LOG.md` |
+| Project Testing Link | `https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws` |
+| The three eligibility boxes | Tick all three, if true for you |
+| Level of learning | The highest option |
+| AI value for your career? | Yes |
+
+**New or existing?** The SureSay repository and product were created during the window (first commit 20 Oct 2026). If you reused code you wrote before 31 Aug (the earlier agent template or Beacon's consent pieces), choose **Existing** and use the explanation below. Otherwise choose **New**.
+
+> SureSay is new in this window: the product, the confirm gate as an open-source package, the MCP server with MCP Apps and OAuth account linking, the Strands agent on AgentCore, the Alexa skill, the accessible web client, the TORGO evaluation and the safety suite. [Add one line here naming any earlier code you reused and what it was used for.] The film shows each feature working: https://youtu.be/dvMJsOJvrfg
+
+### AWS Builder: "Which AWS services did you incorporate and how?"
+
+```
+SureSay runs entirely on AWS (us-east-1), with one-command deploy and teardown. Every service below does real work; docs/AWS_INTEGRATIONS.md in the repo maps each one to the code that calls it, its IAM permission, and how to verify it.
+
+- Amazon Bedrock AgentCore Runtime: hosts SureSay's Strands agent (direct code deploy). The hub invokes it per turn.
+- Strands Agents SDK: the agent loop. It connects to SureSay's own MCP server over Streamable HTTP (spec 2025-11-25), where it can understand, read and propose, but never confirm.
+- Amazon Bedrock AgentCore Memory: per-user phrasebooks as blob events, plus the agent's long-term facts (semantic strategy).
+- Amazon Nova 2 Lite (Bedrock Converse): ranks the three most likely meanings as JSON checked against the action catalog, and abstains when unsure. Built and tested; it runs as soon as the account's on-demand quota (currently 0, increase requested) opens.
+- Amazon Nova 2 Sonic (Bedrock bidirectional streaming): a second speech recogniser measured on real dysarthric speech, and the real-model agent in our safety suite (11 unconfirmed changes without the gate, 0 with it).
+- Amazon Transcribe streaming: recognises each request, primed with a per-user custom vocabulary built from the phrasebook; transcribes the user's own confirmation audio on the server; and ran the whole TORGO evaluation.
+- Amazon Polly (neural, Kajal): reads the three cards aloud and speaks confirmed sentences for the user ("Talk to someone", "Speak for me").
+- Amazon DynamoDB: the confirm gate's ledger. The one-time nonce is consumed by a conditional write, so exactly one of any racing confirmations wins (tested on the real service). Also home state and events.
+- Amazon S3: private, encrypted, 30-day utterance and evidence audio.
+- AWS Lambda + Web Adapter: the whole hub (MCP server, signed device channel, OAuth, web client) behind one function URL. Lambda also runs the Alexa skill, paired as the user's voice device.
+- Amazon SNS: alerts family when the user presses Help or confirms a high-risk action.
+- Amazon CloudWatch: safety metrics (confirmed, refused, cancelled, by caller) and latency via Embedded Metric Format, on a SureSay dashboard.
+- AWS IAM: a least-privilege role scoped to the table, bucket, models and agent.
+- AWS Price List API: real prices for the cost-per-1,000-turns estimate. Service Quotas: diagnosing new-account limits.
+```
+
+### Open Source: "what you did, how it works, and why it matters"
+
+Use the text block in the **Open Source mini challenge** section further down this file (unchanged).
+
+### Feature Requests (optional)
+
+```
+1. Alexa+: a host-mediated confirmation primitive for MCP add-ons, e.g. elicitation answered by the user's voice or tap on the device and delivered to the server out of band from the model. Why: write tools need a confirmation the model cannot fake; today every add-on must build its own device channel, as SureSay does. Priority: Critical.
+2. Alexa+: pass a device-attested "user said" signal with tool calls (the ASR transcript and confidence, signed by Alexa). Why: lets a server tell the user's own words from the model's paraphrase, the core of consent. Priority: Important.
+3. Amazon Transcribe: a shorter billing minimum for streaming, or per-second billing for short utterances. Why: voice UIs send 1-3 s clips; the 15 s minimum makes recognition about 60% of our cost per turn. Priority: Important.
+4. Transcribe: an abstain signal or calibrated confidence, and alternatives, in streaming results. Why: an accessible assistant should ask again rather than guess. Priority: Important.
+5. Bedrock: name the cause when a new account has zero quotas ("this account's quota is 0", with a link to request it) instead of "Operation not allowed" or "Too many tokens per day". Why: we lost hours checking IAM for an account-state problem. Priority: Important.
+6. AgentCore Memory: a "latest state" read or compacted snapshot per session. Why: replaying 42 events took 9 s; voice needs sub-second reads. Priority: Important.
+7. MCP Python SDK: emit [] as text for an empty list result, and publish a 1.x to 2.x migration table. Why: an empty list produced no content block and crashed clients reading content[0]. Priority: Nice-to-have.
+8. Strands Agents: an MCP SDK compatibility table (currently mcp<2.2). Priority: Nice-to-have.
+9. Polly: an SSML preset for slow, clear speech for listeners with cognitive or hearing differences. Priority: Nice-to-have.
+```
+
+### Testing instructions (under the testing link)
+
+```
+No sign-up. Open the link, choose "Start quietly" (or "Start with voice"), then "Try it now": you get your own private demo home; every device, contact and shop is simulated.
+1. Tap the "van on" example (or type it): three numbered cards appear. Press 1 or tap the first card: the consent trail ticks through the gate's checks, the fan turns on, and a receipt appears.
+2. Type "unlock the front door" and choose it: a second card asks "Unlock the front door?". Press Esc or tap No: nothing changes.
+3. Type "don't unlock the door": no cards, and SureSay says nothing will change.
+4. Talk to someone tab: type "I am proud of you", Offer it, choose it, then "Show it to them".
+5. Help (top right): offers to call or message family, still confirmed by you.
+The MCP endpoint is /mcp on the same URL (Streamable HTTP, 2025-11-25); the agent cannot confirm anything there by design. A five-minute guide: https://github.com/Prashant-thakur77/SureSay/blob/main/docs/JUDGES.md
+```
+
+### Feedback Question 1: which developer tools, APIs and SDKs did you use, and for what?
+
+```
+- Amazon Bedrock AgentCore Runtime (starter toolkit, direct code deploy): hosts our Strands agent.
+- Amazon Bedrock AgentCore Memory (MemoryClient + Strands session manager): per-user phrasebooks and agent facts.
+- Strands Agents SDK: the agent loop, connected to our MCP server over Streamable HTTP.
+- Amazon Bedrock Converse API with Amazon Nova 2 Lite: ranking three candidate meanings (built and tested; waiting on quota).
+- Amazon Bedrock bidirectional streaming (aws-sdk-bedrock-runtime) with Amazon Nova 2 Sonic: a second speech recogniser, and a real-model agent in our safety tests.
+- Amazon Transcribe streaming (amazon-transcribe SDK) with custom vocabularies: speech recognition and the TORGO evaluation.
+- Amazon Polly (neural voice Kajal): reading cards aloud and speaking for the user.
+- Amazon DynamoDB (conditional writes): the confirm gate's one-time ledger. Amazon S3: private audio.
+- AWS Lambda + Lambda Web Adapter + function URLs: the hub and the Alexa skill.
+- Alexa Skills Kit: the Alexa skill that pairs as the user's voice device.
+- Alexa+ MCP add-on toolkit docs: building the MCP server, OAuth account linking and MCP Apps to the add-on requirements.
+- Amazon SNS (family alerts), Amazon CloudWatch (Embedded Metric Format, dashboard), AWS IAM, Service Quotas, AWS Price List API, AWS CLI.
+- MCP Python SDK 2.x (server, proxy and tests) and MCP TypeScript SDK (the web client confirms through it).
+```
+
+### Feedback Question 2: what worked well?
+
+```
+- AgentCore Runtime: direct_code_deploy is excellent: it cross-compiled our dependencies for ARM64, created the role and uploaded the package with no Docker, in about two minutes.
+- AgentCore Memory: a pleasant MemoryClient; blob events made a per-user phrasebook an append-only log; the Strands session manager is one constructor.
+- Strands Agents: the best part of the stack. MCPClient(url=..., headers=...) connected to our Streamable HTTP server first time, and headers made per-user routing trivial.
+- Nova 2 Lite (Converse): a temperature-0, JSON-only ranker with a stubbed client was easy to unit-test, and it is cheap enough to call on every turn.
+- Nova 2 Sonic: once running, it took text turns and called tools, so it served as a real agent in our safety suite; as a recogniser it was as safe as Transcribe on held-out speakers at about a third of the cost per clip.
+- Transcribe: after activation, streaming just worked, about 0.8 s at p50 in-region, and per-user custom vocabularies are exactly what atypical speech needs.
+- Polly: worked first time; Kajal (en-IN) is warm and clear; PCM output also gave us clean test audio.
+- DynamoDB: conditional writes carry our safety property: 150 trials of 16 racing writers on the real service, exactly one winner every time.
+- S3, SNS, CloudWatch EMF: each took minutes. Lambda + Web Adapter ran our whole Starlette app as a function URL with no code changes; the gate adds 47 ms at p50.
+- MCP SDKs: stateless Streamable HTTP and the in-memory test client gave fast tests; the TypeScript SDK's custom fetch let us sign every request without forking it.
+```
+
+### Feedback Question 3: what needs work?
+
+```
+- Bedrock / Nova 2 Lite: on a new account calls failed with "Operation not allowed", then (after authorisation) "Too many tokens per day", because every on-demand quota was 0. Neither message names the cause. Service Quotas rejects requests below the default (2,000 RPM), so a modest request becomes a support case. Still pending as we submit.
+- AgentCore Runtime: "maxAgents limit exceeded" because Total Agents per Account was 0 on a new account; also a warning that X-Ray needs a CloudWatch Logs destination. Please check quotas before packaging and set up the trace destination automatically.
+- AgentCore Memory: CreateMemory said "Access Denied … contact customer support" (a quota of 0). Reading a phrasebook back means replaying events: 9 s for 42 events, too slow for voice, so we read from DynamoDB and write through to Memory.
+- Nova 2 Sonic: the Python bidirectional SDK needs awscrt 0.32 while the Transcribe streaming SDK pins 0.26, so they can't be installed together normally (we installed one with --no-deps). IAM changes needed a redeploy before warm containers stopped returning AccessDenied. "amazon.nova-sonic-v1:0" is an invalid model id in us-east-1; a tool-using session also needs silence fed between turns.
+- Transcribe: "SubscriptionRequiredException: The AWS Access Key Id needs a subscription" for ~4.5 h on a new account reads like a key problem; a custom vocabulary failed minutes later with "incorrectly formatted term on line 115" (the term was i'm); the 15-second billing minimum dominates short voice turns; unbiased, it can turn an unclear word into "Yeah" or "OK".
+- Strands: pins mcp<2.2, so the newest MCP SDK can't be installed beside it; a compatibility table would help.
+- MCP Python SDK 2.x: no single 1.x to 2.x migration table; a tool returning an empty list produced no content block and crashed clients reading content[0].
+- Lambda: our 56 MB zip had to go through S3; public function URLs now need both InvokeFunctionUrl and InvokeFunction.
+- DynamoDB: a query on a still-backfilling GSI fails; the popular moto mock is not atomic under threads (easy to mistake for your own bug).
+- Polly: we'd like an SSML preset for slow, clear speech.
+Full log with steps and workarounds: docs/FRICTION_LOG.md.
+```
+
+### Feedback Question 4: how was onboarding (zero to hello world)?
+
+```
+- Strands Agents, Polly, S3, SNS, DynamoDB, CloudWatch EMF: minutes. First call worked.
+- Lambda + Web Adapter: quick; the whole hub ran behind a function URL with no code changes.
+- AgentCore Runtime: two minutes once the agent quota was raised; blocked until then by a quota of 0 on a new account.
+- AgentCore Memory: easy API, blocked first by a "Memories" quota of 0.
+- Transcribe: blocked ~4.5 h by an account-activation error that looked like a key problem, then smooth.
+- Nova 2 Sonic: the longest of the stack: a new streaming SDK, a native-library version conflict, an IAM redeploy, and finding the right model id.
+- Nova 2 Lite: not reached; authorised but with zero on-demand quota through the window, so everything runs against stubs plus an offline ranker until the quota opens.
+- Alexa+ MCP add-on docs: clear requirements (spec version, transport, OAuth metadata, MCP Apps); we built to them, and the classic Alexa Skills Kit path let us demo on real Alexa meanwhile.
+The common theme: on a new account most "access denied" or "not allowed" errors were quotas of 0, and nothing said so.
+```
+
+### Feedback Question 5: would you build with these again?
+
+```
+Yes. Strands + AgentCore + MCP is the right shape for an agent that has to stay behind a safety gate: the agent runs managed, talks to our own MCP server, and can never hold the user's confirmation. Transcribe, Polly and DynamoDB carried the product's core with almost no friction once running, and Nova 2 Sonic surprised us as both a recogniser and an agent. Alexa+ add-ons over MCP are the most promising way to bring an accessible, confirm-first assistant to people's homes, and we'd ship SureSay there as soon as access opens. What would make it easier: name zero quotas in error messages, and give MCP add-ons a host-mediated confirmation primitive.
+```
+
+### Which AI tools have you leveraged?
+
+```
+Claude Code (Anthropic) for planning, coding, test-writing, security reviews and the scripted video pipeline; Amazon Nova 2 Sonic and Nova 2 Lite inside the product; Chatterbox TTS for the film's narration; Whisper (local) for checking narration takes and as an offline speech recogniser in the evaluation.
+```
+
+---
 
 ### Open Source mini challenge
 
@@ -224,22 +374,6 @@ How it works: read tools pass straight through. Every write tool returns a pendi
 Why it matters: as agents gain the power to act, prompt injection becomes a way to act. This turns "never act without the user" from a prompt into a property of the code. In SureSay's safety suite a real model (Amazon Nova 2 Sonic) as the agent made 11 unconfirmed changes in 35 cases without the gate, and 0 behind it; a worst-case scripted agent made 0 in 50 adversarial cases, including forged confirmations. It started as the safety layer of SureSay, for people with dysarthria, whose speech is misheard most, but nothing in it is specific to speech.
 ```
 
-### Product feedback (and AWS Builder: services used and how)
-
-Paste this summary first, then the whole of [PRODUCT_FEEDBACK.md](PRODUCT_FEEDBACK.md):
-
-```
-AWS services and how SureSay uses them (full table with code paths, IAM and how to verify each: docs/AWS_INTEGRATIONS.md in the repo): a Strands agent on Amazon Bedrock AgentCore Runtime with AgentCore Memory, calling SureSay's MCP server over Streamable HTTP; Amazon Nova 2 Lite ranks the three meanings (code ready, waiting on quota); Amazon Nova 2 Sonic as a second speech recogniser and as a real-model agent in the safety suite; Amazon Transcribe streaming with per-user custom vocabularies; Amazon Polly reads the cards aloud and speaks for the user; DynamoDB holds the gate ledger with conditional one-time writes; S3 stores audio privately; the whole hub runs on AWS Lambda behind a function URL; the Alexa skill runs on Lambda; SNS sends family alerts; CloudWatch carries the safety metrics and dashboard; one command deploys and tears down everything.
-```
-
-### Other fields
-
-| Field | Answer |
-|---|---|
-| Did the project exist before the hackathon? / What was built during the window | "Built during the window" in [DEVPOST.md](DEVPOST.md). Add your own note on any earlier code you reused. |
-| Feature requests (optional) | [FEATURE_REQUESTS.md](FEATURE_REQUESTS.md) |
-| Friction log (optional, up to +10%) | [FRICTION_LOG.md](FRICTION_LOG.md) |
-| Testing instructions, if asked | Open the live link, choose "Start quietly", then "Try it now". Type "van on" and pick a card; type "unlock the front door" to see it ask twice; type "don't unlock the door". Five-minute guide: [JUDGES.md](JUDGES.md). |
 
 ---
 
