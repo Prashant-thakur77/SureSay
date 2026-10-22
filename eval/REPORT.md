@@ -341,7 +341,7 @@ The web client's own tests also run axe on every screen (`web/src/test`).
 
 ## The live server, checked as an MCP client
 
-`eval/run_live_checks.py` runs against the deployed hub (https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws) over HTTPS as an MCP client: **20 of 20 checks passed** (2026-10-22T15:57:01+0530).
+`eval/run_live_checks.py` runs against the deployed hub (https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws) over HTTPS as an MCP client: **20 of 20 checks passed** (2026-10-22T16:18:03+0530).
 
 | | Check | Detail |
 |---|---|---|
@@ -370,16 +370,16 @@ Round trips from the test machine (they include the network to us-east-1; `/heal
 
 | Request | p50 ms | p95 ms | p50 minus network, ms |
 |---|---|---|---|
-| healthz (network baseline) | 270.4 | 279.2 | — |
-| tools/list | 285.4 | 306.1 | 15.0 |
-| tools/call home_status | 277.5 | 282.3 | 7.1 |
-| tools/call understand (typed) | 306.4 | 310.3 | 36.0 |
+| healthz (network baseline) | 292.1 | 300.0 | — |
+| tools/list | 299.6 | 303.0 | 7.5 |
+| tools/call home_status | 300.3 | 305.6 | 8.2 |
+| tools/call understand (typed) | 319.6 | 323.1 | 27.5 |
 
 The server's own processing time for real requests in the last 48 hours, from the CloudWatch metric the hub emits (`UnderstandMs`; voice includes speech recognition):
 
 | Request | Requests | p50 ms | p95 ms |
 |---|---|---|---|
-| understand, typed | 157 | 9.4 | 1275.5 |
+| understand, typed | 198 | 9.3 | 1007.0 |
 | understand, voice | 62 | 1472.8 | 4890.1 |
 
 ## A live AI driving SureSay over MCP
