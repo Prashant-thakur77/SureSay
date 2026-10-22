@@ -4,7 +4,7 @@
 
 **Try it live:** https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws. "Try it now" opens a private demo home, with no sign-up.
 
-**Watch the film (2:58):** https://github.com/Prashant-thakur77/SureSay/releases/latest/download/SureSay.mp4
+**Watch the film (2:58):** https://youtu.be/dvMJsOJvrfg
 
 ## The problem
 

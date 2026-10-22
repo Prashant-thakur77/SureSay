@@ -10,11 +10,11 @@
 
 **A voice assistant for people whose speech other assistants mishear. It shows its three best guesses, and nothing happens until you choose one.**
 
-[![Watch the 3-minute film](docs/img/video-poster.jpg)](https://github.com/Prashant-thakur77/SureSay/releases/latest/download/SureSay.mp4)
+[![Watch the 3-minute film](docs/img/video-poster.jpg)](https://youtu.be/dvMJsOJvrfg)
 
 <p align="center">
 <a href="https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws"><b>Try it live</b></a> (no sign-up) ·
-<a href="https://github.com/Prashant-thakur77/SureSay/releases/latest/download/SureSay.mp4"><b>Watch the film</b></a> (2:58) ·
+<a href="https://youtu.be/dvMJsOJvrfg"><b>Watch the film</b></a> (2:58, YouTube) ·
 <a href="docs/JUDGES.md"><b>Judges' guide</b></a> (5 minutes) ·
 <a href="eval/REPORT.md"><b>Evaluation report</b></a> ·
 <a href="https://github.com/Prashant-thakur77/confirm-gate-mcp"><b>Open-source gate</b></a>

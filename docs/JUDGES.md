@@ -1,5 +1,7 @@
 # SureSay in five minutes (for judges)
 
+**Watch first (2:58):** https://youtu.be/dvMJsOJvrfg
+
 ## Try it (two minutes, no setup)
 
 Open the live demo, choose **Start quietly** or **Start with voice**, then **Try it now**. That creates your own private demo home; everything in it is simulated.

@@ -159,7 +159,11 @@ https://github.com/Prashant-thakur77/confirm-gate-mcp
 
 ### Video demo link
 
-Your YouTube link. Upload `SureSay.mp4` from https://github.com/Prashant-thakur77/SureSay/releases/latest. Set it to **Public**, in English. Not "unlisted"; Devpost needs public.
+```
+https://youtu.be/dvMJsOJvrfg
+```
+
+The film is on YouTube, public (the same file is attached to the latest GitHub release).
 
 - **YouTube title:** `SureSay: a voice assistant that never acts on a guess (Alexa+ · AWS)`
 - **YouTube description:**
