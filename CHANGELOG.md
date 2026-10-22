@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0 (22 Oct 2026)
+
+- **The site.** The home page is now the whole story in chapters, from night (misheard) to dawn (heard): the start choices first, as before, then the problem, how it works (an animated three-card demo), safety (a technical drawing of who holds the one-time code, and a step-by-step version on phones), understood by people, proof (every number counted up from the evaluation report), Alexa+, developers and the open-source gate, questions, and a closing call. A floating pill navigation, a footer, reduced-motion and Calm mode respected everywhere, axe-clean.
+- "Open the Alexa+ view" on the home page goes straight to it once there is a device. `?home` brings the home page back after the first run; the app's wordmark links there.
+
 ## 1.2.0 (22 Oct 2026)
 
 - **The Alexa+ view:** a simulated Echo Show that plays the host against the real server. It calls `tools/call understand`, reads `ui://suresay/cards.html`, renders the MCP App in a sandboxed frame over the MCP Apps messages, and shows every message on the wire; "Your phone" beside it is where the yes comes from. When the user answers there, the screen shows the outcome. Open it from the top bar or with `?alexa=1`.

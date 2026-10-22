@@ -22,7 +22,7 @@ export function StartGate({ onChoose }: { onChoose: (choice: StartChoice) => voi
 
   return (
     <div className="gate">
-      <main className="gate__inner" aria-labelledby="gate-hero">
+      <section id="start" className="gate__inner" aria-labelledby="gate-hero">
         <div className="sky" aria-hidden="true">
           <span className="sky__glow sky__glow--a" />
           <span className="sky__glow sky__glow--b" />
@@ -87,37 +87,12 @@ export function StartGate({ onChoose }: { onChoose: (choice: StartChoice) => voi
           </button>
         </div>
         <p className="gate__note">You can change this any time in Settings.</p>
-      </main>
-      <section className="gate__features" aria-label="What SureSay does">
-        {FEATURES.map((f) => (
-          <article key={f.badge} className="feature">
-            <p className="feature__badge">
-              <Icon name={f.icon} size={18} /> {f.badge}
-            </p>
-            <h3 className="feature__title">{f.title}</h3>
-            <ul className="feature__list">
-              {f.points.map((pt) => (
-                <li key={pt}>
-                  <Icon name="check" size={20} /> {pt}
-                </li>
-              ))}
-            </ul>
-          </article>
-        ))}
+        <a href="#problem" className="gate__more">
+          What SureSay does <Icon name="chevron" size={20} />
+        </a>
       </section>
     </div>
   );
 }
 
 const FAN: Array<[string, string]> = [["Turn on the bedroom fan", "Fan on"], ["Turn on the TV", "TV on"], ["Turn off the fan", "Fan off"]];
-
-const FEATURES: Array<{ badge: string; icon: "mic" | "message" | "spark" | "shield"; title: string; points: string[] }> = [
-  { badge: "Talk", icon: "mic", title: "Three guesses, never a guess acted on",
-    points: ["Big, numbered cards, read aloud", "Answer by voice, tap, key or one switch", "Risky things ask twice"] },
-  { badge: "Talk to someone", icon: "message", title: "Understood by people, too",
-    points: ["Say it your way, choose the right sentence", "Said clearly, out loud", "Shown huge, turned around for them"] },
-  { badge: "Practice", icon: "spark", title: "A little every day",
-    points: ["Five sentences a day", "An honest clarity score", "Every try teaches SureSay your voice"] },
-  { badge: "Safe by design", icon: "shield", title: "Only you can confirm",
-    points: ["The AI can suggest, never confirm", "Every change leaves a receipt", "Help reaches your family in one press"] },
-];

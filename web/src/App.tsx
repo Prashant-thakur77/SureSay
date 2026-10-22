@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { MainScreen } from "./components/MainScreen";
 import { PairScreen } from "./components/PairScreen";
-import { StartGate, type StartChoice } from "./components/StartGate";
+import { HomePage } from "./components/HomePage";
+import type { StartChoice } from "./components/StartGate";
 import { useSettings } from "./hooks/useSettings";
 import { HubClient } from "./lib/api";
 import { hubBaseUrl } from "./lib/config";
@@ -18,6 +19,25 @@ function savedCreds(): DeviceCreds | null {
   return null;
 }
 
+/** `?home` shows the home page again after the first run (the app's "About SureSay" link). */
+function wantsHome(): boolean {
+  try {
+    return new URLSearchParams(window.location.search).has("home");
+  } catch {
+    return false;
+  }
+}
+
+function setQuery(change: (q: URLSearchParams) => void): void {
+  try {
+    const url = new URL(window.location.href);
+    change(url.searchParams);
+    window.history.replaceState(null, "", url.toString());
+  } catch {
+    /* ignore */
+  }
+}
+
 function savedStart(): StartChoice | null {
   const v = readJson<string>(KEYS.start);
   return v === "voice" || v === "quiet" ? v : null;
@@ -27,6 +47,7 @@ export function App() {
   const { settings, update, bigScreen } = useSettings();
   const [creds, setCreds] = useState<DeviceCreds | null>(savedCreds);
   const [start, setStart] = useState<StartChoice | null>(savedStart);
+  const [home, setHome] = useState(wantsHome);
   const base = hubBaseUrl();
 
   const services = useMemo(() => {
@@ -35,14 +56,25 @@ export function App() {
     return { hub, gate: new McpGate(hub), speaker: new Speaker(hub) };
   }, [base, creds]);
 
-  if (!start) {
+  const choose = (choice: StartChoice) => {
+    const voice = choice === "voice";
+    update({ readAloud: voice, autoVoice: voice });
+    writeJson(KEYS.start, choice);
+    setQuery((q) => q.delete("home"));
+    setHome(false);
+    setStart(choice);
+  };
+
+  if (!start || home) {
     return (
-      <StartGate
-        onChoose={(choice) => {
-          const voice = choice === "voice";
-          update({ readAloud: voice, autoVoice: voice });
-          writeJson(KEYS.start, choice);
-          setStart(choice);
+      <HomePage
+        calm={settings.calm}
+        onChoose={choose}
+        onAlexa={() => {
+          // straight on to the simulated Alexa+ screen once there is a device (Try it now, or pairing)
+          setQuery((q) => q.set("alexa", "1"));
+          choose("quiet");
+          document.documentElement.scrollTop = 0;
         }}
       />
     );

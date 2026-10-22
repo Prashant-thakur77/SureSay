@@ -59,7 +59,9 @@ export const TopBar = forwardRef<HTMLButtonElement, Props>(function TopBar({ use
       <a href="#main" className="skip">
         Skip to the conversation
       </a>
-      <Wordmark />
+      <a href="/?home" className="topbar__home" aria-label="About SureSay (home page)">
+        <Wordmark />
+      </a>
       <div className="topbar__meta">
         {user.startsWith("guest-") ? (
           <span className="chip chip--user chip--demo">
