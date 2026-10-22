@@ -1,7 +1,7 @@
 {
   "name": "confirm",
-  "generated_at": "2026-10-22T14:47:29+0530",
-  "git_sha": "3fbe62e",
+  "generated_at": "2026-10-22T15:20:21+0530",
+  "git_sha": "4883775",
   "python": "3.13.12",
   "claim": 1,
   "asr_engine": "transcribe-streaming",
@@ -90,10 +90,10 @@
     "suresay": {
       "test": {
         "clips": 430,
-        "accuracy_pct": 92.1,
+        "accuracy_pct": 91.9,
         "false_accept_pct": 2.3,
         "false_accepts": 10,
-        "refused_pct": 79.1,
+        "refused_pct": 78.8,
         "true_accepts_recovered_pct": 80.6
       },
       "test_confirm_words_only": {
@@ -106,10 +106,10 @@
       },
       "test_distractors_only": {
         "clips": 360,
-        "accuracy_pct": 92.5,
+        "accuracy_pct": 92.2,
         "false_accept_pct": 2.8,
         "false_accepts": 10,
-        "refused_pct": 92.5,
+        "refused_pct": 92.2,
         "true_accepts_recovered_pct": null
       },
       "per_speaker": {
@@ -155,10 +155,10 @@
         },
         "M04": {
           "clips": 74,
-          "accuracy_pct": 82.4,
+          "accuracy_pct": 81.1,
           "false_accept_pct": 4.1,
           "false_accepts": 3,
-          "refused_pct": 68.9,
+          "refused_pct": 67.6,
           "true_accepts_recovered_pct": 75.0
         }
       }
@@ -10170,7 +10170,7 @@
       "suresay": {
         "heard": "The kid didn't",
         "decision": [
-          "unclear",
+          "no",
           null
         ]
       }

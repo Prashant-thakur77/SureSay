@@ -14,7 +14,7 @@ Please open a private security advisory on this repository ("Security" tab → "
 ## How it is tested
 
 - The 50-case adversarial suite (`eval/run_safety_suite.py`) runs in CI: prompt injections in tool output, near-miss commands, and 15 forgeries (self-confirmation, replayed evidence and recordings, expired sets, cross-user evidence, a captured signed request, pairing brute force, racing confirms). Results: [eval/REPORT.md](eval/REPORT.md), claim 3.
-- Three independent adversarial reviews of the code. Every confirmed finding was fixed with a failing test first, among them:
+- Four adversarial reviews, each by a separate AI reviewer agent briefed only to break the guarantee. Every confirmed finding was fixed with a failing test first, among them:
   - `understand` trusting a `user_id` argument (cross-user cards);
   - hesitations ("ok, hang on", "ek second", "haan shayad") read as consent;
   - a pairing-lockout reset through the public demo, and a lockout anyone could trigger;

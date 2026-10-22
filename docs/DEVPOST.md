@@ -18,7 +18,7 @@ Better recognition helps (Voiceitt, an Alexa Fund company, trains recognition on
 
 1. **You speak** (or type). Recognition is primed with your own phrasebook.
 2. **You see three guesses**: three huge numbered cards, read aloud. If SureSay isn't confident, it doesn't guess; it asks you to say it again.
-3. **You choose**: say "two", "the second one", "haan", "do number", or tap, press a key, or use a single switch. Risky actions (unlock, order, call) ask a second yes.
+3. **You choose**: say "two", "the second one", "haan", "do number", or tap, press a key, or use a single switch. Risky actions (unlock, order, call, message) ask a second yes.
 4. **Only then does it happen**, and a consent receipt records who confirmed what, when and how.
 
 When the phrase is something to say to people rather than to a device ("I am thirsty"), SureSay speaks it aloud for you, clearly, once you've confirmed it. Around that core:
@@ -48,7 +48,7 @@ SureSay is a self-hosted MCP server built to the Alexa+ add-on requirements, and
 | Agent Skills | `skills/suresay/SKILL.md` (open SKILL.md format) teaches any agent to use SureSay safely; the open-source gate ships `add-confirm-gate` |
 | Amazon's add-on functional requirements | "Explicit confirmation with key details before any high-consequence action", "detect and prevent duplicate transactions", "reject if the amount differs", "deliver a receipt": each enforced by the gate in code, mapped in `alexa_plus/README.md` |
 | An add-on package | `alexa_plus/addon-package/addon.json`, six icon sizes, a 600×900 carousel, `/privacy`, `/terms` |
-| Fast query responses (under 500 ms) | `home_status` and typed `understand` run in milliseconds; spoken `understand` is 870 ms p50 because it includes speech recognition |
+| Fast query responses (under 500 ms) | On the live server every MCP call adds 7–25 ms to the network round trip; the server's own time for typed `understand` is about 10 ms at p50 (CloudWatch; p95 1.4 s over real requests); spoken `understand` is 870 ms p50 because it includes speech recognition (all in the evaluation report) |
 
 **See it as Alexa+ would:** the live demo's Alexa+ view (`?alexa=1`) is a simulated Echo Show that plays the host against the real server: it calls `understand`, renders the cards MCP App over the MCP Apps messages, and shows every message on the wire, while "Your phone" beside it is where the yes comes from.
 
@@ -71,16 +71,16 @@ A prompt injection can make the agent *ask*. It can never make anything *happen*
 
 | AWS service | How SureSay uses it |
 |---|---|
-| Bedrock: Nova 2 Lite | Ranks three candidate meanings from noisy recognition, the phrasebook and home state; abstains when unsure; powers the agent |
-| AgentCore Runtime | Hosts the Strands agent (direct code deploy) |
+| Bedrock: Nova 2 Lite | Ranks three candidate meanings from noisy recognition, the phrasebook and home state; abstains when unsure; the agent's model. Built and unit-tested; awaiting on-demand quota, not yet run |
+| AgentCore Runtime | Hosts the Strands agent (direct code deploy); deployed, and turns fall back to direct answers until Nova 2 Lite has quota |
 | AgentCore Memory | Per-user phrasebooks (blob events) and the agent's long-term facts |
 | Strands Agents | The agent loop over MCP Streamable HTTP |
 | Transcribe | Streaming recognition with per-user custom vocabularies; server-side transcription of confirmation audio |
-| Bedrock: Nova 2 Sonic | A second recogniser over a bidirectional stream: the user's own words come back and the stream closes before Sonic replies. On the held-out speakers it was as safe as Transcribe at a third of the cost per clip, and 650 ms slower in Lambda, so it is an option for spoken answers |
+| Bedrock: Nova 2 Sonic | A second recogniser over a bidirectional stream: the user's own words come back and the stream closes before Sonic replies. On the held-out speakers it was as safe as Transcribe at a third of the cost per clip, and about 640 ms slower in Lambda, so it is an option for spoken answers |
 | Polly | Reads the cards aloud; speaks confirmed sentences for the user |
 | DynamoDB | The gate ledger with conditional one-time writes; home state |
 | S3 | Private, expiring utterance and evidence audio |
-| Lambda | The hub (MCP + device channel + web client) behind a function URL; the Alexa skill (paired as the user's voice device, about 160 ms warm) |
+| Lambda | The hub (MCP + device channel + web client) behind a function URL; the Alexa skill (paired as the user's voice device) |
 | CloudWatch | Safety metrics (confirmed, refused, cancelled by caller kind) and latency through Embedded Metric Format, on a "SureSay" dashboard |
 | SNS | Opt-in carer alerts when the user confirms a high-risk action |
 
@@ -96,6 +96,7 @@ Held-out speakers from TORGO, a public dysarthric speech corpus. Thresholds were
 | Confirm heard right | false accepts | 62.8% | — | **2.3%** | 430 decisions, 6 test speakers |
 | Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers |
 | In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **91.7%** | same |
+| Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | 33.3% (66.7%) | 98.1% (1.9%) | **100.0%** (0) | 108 in-book sentences, 6 test speakers, `whisper-small.en` |
 | Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances |
 | Never acts on a guess | acted on a wrong phrase without asking | 84.3% | 53.7% | **0.0%** | in-book + out-of-book |
 | Nothing without consent | unconfirmed changes | 35 / 35 (no gate) | — | **0 / 50** | adversarial suite |
@@ -125,7 +126,7 @@ SureSay column: SureSay (offline ranker); the Nova 2 Lite ranker is pending Bedr
 
 Everything user-facing is new:
 
-- **The confirm gate:** the consent parser, stores, device pairing and signing, evidence, receipts and an MCP proxy. Three independent adversarial reviews were run; every confirmed finding was fixed with a failing test first, including a pairing brute force through the public demo, an Alexa answer landing on a card set the user never heard, and "ek second" (one moment) read as "option 2".
+- **The confirm gate:** the consent parser, stores, device pairing and signing, evidence, receipts and an MCP proxy. Four adversarial reviews were run, each by a separate AI reviewer agent briefed only to break the guarantee; every confirmed finding was fixed with a failing test first, including a pairing brute force through the public demo, an Alexa answer landing on a card set the user never heard, and "ek second" (one moment) read as "option 2".
 - **The hub:**
   - an MCP server with MCP Apps;
   - a signed device channel;

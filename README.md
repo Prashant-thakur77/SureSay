@@ -64,7 +64,7 @@ It also speaks *for* you: confirm a phrase like "I am thirsty" and SureSay says 
 
 ![The Alexa+ view: a simulated Echo Show renders SureSay's MCP App cards; your phone confirms; the MCP messages are shown on the side](docs/devpost/12-alexa-plus.jpg)
 
-Until Alexa+ developer access opens, [`alexa_skill/`](alexa_skill) runs the same flow as a classic skill: "Alexa, ask Sure Say to turn on the fan" reads the three guesses, and your spoken "the first one" goes back as signed evidence through the same gate.
+Until Alexa+ developer access opens, [`alexa_skill/`](alexa_skill) runs the same flow as a classic skill (built and tested on Lambda; you add it from the Alexa developer console, [step by step](alexa_skill/README.md)): "Alexa, ask Sure Say to turn on the fan" reads the three guesses, and your spoken "the first one" goes back as signed evidence through the same gate.
 
 **Understood by people, too:**
 - **Talk to someone:** he says what he wants to tell the person in front of him; SureSay offers what it heard and his own usual sentences, he chooses, and it is said clearly and shown huge (turned around for someone across the table). Nothing is said until he chooses.
@@ -103,6 +103,7 @@ Held-out TORGO dysarthric speakers (dev F03 and M05 for tuning; test F01, F04, M
 | Confirm heard right | false accepts | 62.8% | — | **2.3%** | 430 decisions, 6 test speakers |
 | Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers |
 | In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **91.7%** | same |
+| Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | 33.3% (66.7%) | 98.1% (1.9%) | **100.0%** (0) | 108 in-book sentences, 6 test speakers, `whisper-small.en` |
 | Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances |
 | Never acts on a guess | acted on a wrong phrase without asking | 84.3% | 53.7% | **0.0%** | in-book + out-of-book |
 | Nothing without consent | unconfirmed changes | 35 / 35 (no gate) | — | **0 / 50** | adversarial suite |
@@ -147,7 +148,7 @@ make test         # 516 Python tests (355 for the gate, 161 for the hub) plus 17
 make demo         # hub + web client (+ agent when Bedrock is reachable) on http://127.0.0.1:9000
 ```
 
-`make demo` prints a 6-digit pairing code. Open http://127.0.0.1:9000, enter the code, and try "van on", "open the door" or "call mum". Without AWS access, the demo runs on local engines: faster-whisper for speech and a sound-alike ranker. With AWS, it uses Transcribe, Nova and Polly.
+`make demo` prints a 6-digit pairing code. Open http://127.0.0.1:9000, enter the code, and try "van on", "open the door" or "call mum". Without AWS access, the demo runs on local engines: faster-whisper for speech and a sound-alike ranker. With AWS, it uses Transcribe and Polly; the Nova 2 Lite ranker switches on once this account has quota.
 
 ```bash
 make deploy       # DynamoDB, S3, AgentCore Memory + Runtime, Lambda hub; prints the URL and a pairing code
@@ -161,8 +162,8 @@ make report       # regenerate eval/REPORT.md and the table above
 
 The guarantee is structural: the one-time code that releases a card set goes only to the user's paired device, over an HMAC-signed channel, and never into any MCP result, log or receipt. The model holds the `confirm` tool and is refused every time.
 
-- Three independent adversarial reviews; every confirmed finding was fixed with a failing test first ([SECURITY.md](SECURITY.md) lists them).
-- 50-case safety suite in CI: prompt injections, near-miss commands, forged confirmations, replays, races, pairing brute force, a captured signed request. 0 unconfirmed changes, also through an OAuth-linked client and with a real Amazon Nova model as the agent.
+- Four adversarial reviews, each by a separate AI reviewer agent briefed only to break the guarantee; every confirmed finding was fixed with a failing test first ([SECURITY.md](SECURITY.md) lists them).
+- 50-case safety suite in CI: prompt injections, near-miss commands, forged confirmations, replays, races, pairing brute force, a captured signed request. 0 / 50 unconfirmed changes, also through an OAuth-linked client; and 0 / 35 with Amazon Nova 2 Sonic as the agent (run once, outside CI).
 - Atomic one-time use on DynamoDB (conditional writes, never get-then-put); per-source pairing budgets; quotas on the public demo.
 
 Report a vulnerability: see [SECURITY.md](SECURITY.md).
@@ -196,7 +197,7 @@ Confirmations work in English, Hinglish and Devanagari ("doosra", "teen number",
 | `skills/suresay/` | The Agent Skill for any agent connected to SureSay |
 | `alexa_plus/`, `alexa_skill/` | The Alexa+ add-on package and requirements mapping; the classic Alexa skill |
 | `web/` | The web client (Vite + React + TypeScript) |
-| `eval/` | TORGO preparation, the four claim scripts, tuning, cost, the report |
+| `eval/` | TORGO preparation, the evaluation scripts (confirm, intent, task success, safety, consent stress, live checks, site audit), tuning, cost, the report |
 | `infra/` | deploy, teardown, smoke test, IAM |
 | `docs/` | Judges' guide, AWS integrations, friction log, product feedback, feature requests, the write-up, video script, images |
 

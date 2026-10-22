@@ -22,7 +22,7 @@ Check quotas before packaging, and enable the trace destination automatically. W
 
 **Amazon Bedrock AgentCore Memory.** The `MemoryClient` API is pleasant. Blob events made a per-user phrasebook an append-only log, and the Strands session manager is one constructor.
 
-`CreateMemory` was first refused with "Access Denied … Contact customer support" because of a "Memories" quota of 0; it worked as soon as the quota opened. The real lesson came after: reading a phrasebook back means replaying events, and the first read took 9 seconds, which broke an Alexa skill's ~8-second budget. We now read from DynamoDB and write every change through to Memory, so Memory keeps the agent-visible history and the hot path stays fast.
+`CreateMemory` was first refused with "Access Denied … Contact customer support" because of a "Memories" quota of 0; it worked as soon as the quota opened. The real lesson came after: reading a phrasebook back means replaying events, and the first read took several seconds, which broke an Alexa skill's ~8-second budget. We now read from DynamoDB and write every change through to Memory, so Memory keeps the agent-visible history and the hot path stays fast.
 
 A "latest state" read, or a compacted snapshot per session, would let Memory serve reads directly. We'd use it again.
 
@@ -41,7 +41,7 @@ We'd use it again.
 
 **Amazon S3.** Content-addressed, private, encrypted audio with a 30-day lifecycle took four CLI calls and needed no changes afterwards. We'd use it again.
 
-**AWS Lambda with the Lambda Web Adapter.** Running the whole hub (MCP Streamable HTTP, the device channel and the static web client) as one function URL behind the Web Adapter worked with no code changes to the Starlette app. The gate adds 47 ms at p50 in-region. Two snags: our zip came to 56 MB, so it had to go through S3, and a public function URL now needs both `InvokeFunctionUrl` and `InvokeFunction` permissions. We'd use it again.
+**AWS Lambda with the Lambda Web Adapter.** Running the whole hub (MCP Streamable HTTP, the device channel and the static web client) as one function URL behind the Web Adapter worked with no code changes to the Starlette app. The gate adds 49 ms at p50 in-region. Two snags: our zip came to 56 MB, so it had to go through S3, and a public function URL now needs both `InvokeFunctionUrl` and `InvokeFunction` permissions. We'd use it again.
 
 **MCP Python SDK 2.x.** `MCPServer`, stateless Streamable HTTP with JSON responses, and the in-memory `Client(server)` for tests made a clean server and fast tests; the low-level `Server` handlers let us proxy arbitrary upstream schemas. What hurt: the 1.x to 2.x renames (`FastMCP` → `MCPServer`, SSE de-emphasised, transport options moving) have no single migration table. A tool that returns an empty list produces no content block at all, which crashed a client reading `content[0]`. We'd use it again.
 

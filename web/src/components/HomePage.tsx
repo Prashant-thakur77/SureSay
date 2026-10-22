@@ -126,7 +126,7 @@ function Problem() {
         </p>
         <p className="chapter__aside">
           <strong className="chapter__big">62.8%</strong>
-          of misheard single words a plain assistant took as a “yes” or a choice, on real dysarthric speech from six people it never trained on.
+          of single words a plain assistant wrongly took as a “yes” or a choice (430 decisions), on real dysarthric speech from six people held out from tuning.
           <span className="source">SureSay evaluation, TORGO corpus</span>
         </p>
       </div>
@@ -368,7 +368,7 @@ function Proof({ motion }: { motion: boolean }) {
   const [ref, seen] = useReveal<HTMLDivElement>(0.3);
   const run = motion && seen;
   const stats: Array<{ label: string; from: string; to: ReactNode; final: string; note: string }> = [
-    { label: "Misheard words taken as a “yes” or a choice", from: "62.8%", to: <CountTo value={2.3} from={62.8} suffix="%" run={run} />, final: "2.3%", note: "430 decisions, six people never trained on" },
+    { label: "Misheard words taken as a “yes” or a choice", from: "62.8%", to: <CountTo value={2.3} from={62.8} suffix="%" run={run} />, final: "2.3%", note: "430 decisions, six people held out from tuning" },
     { label: "Acted on a wrong phrase without asking", from: "84.3%", to: <CountTo value={0} from={84.3} suffix="%" run={run} />, final: "0.0%", note: "plain assistant → SureSay" },
     { label: "A real AI agent (Amazon Nova 2 Sonic): changes nobody confirmed", from: "11 / 35", to: <>0 / 35</>, final: "0 / 35", note: "prompt injections and near-misses, without → with the gate" },
     { label: "Attacks that changed anything", from: "", to: <>0 / 50</>, final: "0 / 50", note: "injections, near-misses, forged and replayed confirmations" },
