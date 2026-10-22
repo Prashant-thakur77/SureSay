@@ -156,6 +156,54 @@ def intent_section(i: dict[str, Any], i2: dict[str, Any] | None) -> tuple[list[s
     return out, key
 
 
+def task_section(t: dict[str, Any], i: dict[str, Any] | None) -> list[str]:
+    """Task success within two tries (eval/run_task_eval.py)."""
+    test = t["summary"]["test"]
+    ss, b1, b0 = test["suresay"], test["b1"], test["b0"]
+    src = t["second_recording_available"]
+    by = ss["second_tries_by_source"]
+    tries = "; ".join(f"{k}: {v['attempts']}, {v['done']} done" for k, v in by.items()) or "none"
+    out = ["## Task success: done within two tries", "",
+           f"`eval/run_task_eval.py`. Every in-book sentence of the six test speakers is a task ({test['tasks']} in all): "
+           "the user wants it said for them. SureSay's first try is the recording Claim 2 uses; the task is done when "
+           "the sentence is on a card (a confident card, or a \"maybe\" card under the same 0.50 floor and shared-word "
+           "rule as above) and the user confirms it. If it is not on a card (SureSay asked again, or the user declined "
+           "every card), the user says it again: a different TORGO recording of the same sentence by the same speaker, "
+           "preferring another session, then another take in the same session, then the same take as heard by TORGO's "
+           "other microphone. The baselines act at once on the first recording. Recogniser for every try: "
+           f"`{t['asr_engine']}` (local and free), with the phrasebook bias and the dev-tuned abstain rule for that "
+           "recogniser.", "",
+           "| Test speakers | B0 plain | B1 + phrasebook | SureSay |", "|---|---|---|---|",
+           f"| Done on the first try | {f(b0['success_pct'])} | {f(b1['success_pct'])} | {f(ss['done_first_try_pct'])} |",
+           f"| **Done within two tries** | {f(b0['success_pct'])} (acts at once) | {f(b1['success_pct'])} (acts at once) | "
+           f"**{f(ss['done_within_two_pct'])}** |",
+           f"| Wrong action taken | {f(b0['wrong_action_pct'])} ({b0['wrong_actions']}) | {f(b1['wrong_action_pct'])} "
+           f"({b1['wrong_actions']}) | **0** (acted without confirmation: {ss['acted_without_confirmation']}) |",
+           f"| Tries per done task, mean | 1 | 1 | {ss['mean_tries_when_done']} |",
+           f"| Sets of cards the user had to decline | — | — | {ss['card_sets_declined']} |", "",
+           "| Speaker | tasks | B0 | B1 (wrong actions) | SureSay first try → within two |", "|---|---|---|---|---|"]
+    for spk, v in test["per_speaker"].items():
+        out.append(f"| {spk} | {v['tasks']} | {f(v['b0']['success_pct'])} | {f(v['b1']['success_pct'])} "
+                   f"({v['b1']['wrong_actions']}) | {f(v['suresay']['done_first_try_pct'])} → "
+                   f"{f(v['suresay']['done_within_two_pct'])} |")
+    out += ["", f"Second tries made: {ss['second_tries']} ({tries}). Second recordings available for the "
+            f"{test['tasks']} sentences: " + "; ".join(f"{k}: {v}" for k, v in src.items()) + ". TORGO rarely has a "
+            "sentence read twice by the same speaker, so most \"second tries\" available are the same performance "
+            "through the other microphone, which is not a fresh try; counting only genuinely new recordings as a "
+            f"second try, SureSay is done within two tries {f(ss['done_within_two_counting_only_new_takes_pct'])} of "
+            f"the time. Tasks that needed a second try but had no other recording: "
+            f"{ss['needed_second_try_but_no_other_recording']}."]
+    if i and i.get("asr_engine") != t["asr_engine"]:
+        it = i["summary"]["test"]
+        out += ["", f"Caveats: the local recogniser hears these well-known reading passages better than "
+                f"`{i['asr_engine']}` does (Claim 2: with it, the first try puts the sentence on a card "
+                f"{f(it['ss_fuzzy'].get('in_cards_with_maybe_pct'))} of the time and B1's top-1 is "
+                f"{f(it['b1']['top1_pct'])}); second tries were not run with it, to keep this evaluation free. "
+                f"With only {ss['second_tries']} second tries, the second-try gain rests on a handful of cases. "
+                "Out-of-book requests, where B1 always acts wrongly, are not part of this task set (see Claim 2)."]
+    return out
+
+
 def safety_section(s: dict[str, Any], s2: dict[str, Any] | None) -> tuple[list[str], dict[str, Any]]:
     arms = s["arms"]
     adv = arms["suresay_adversary"]["summary"]
@@ -579,6 +627,11 @@ def main() -> None:
         f"| Confirm heard right | false accepts | {f(ck['b0_fa'])} | — | **{f(ck['ss_fa'])}** | {ck['fa_counts'][2]} decisions, 6 test speakers |",
         f"| Meaning recovered | top-1 / top-3 | {f(ik['b0_top1'])} / — | {f(ik['b1_top1'])} / {f(ik['b1_top3'])} | {f(ik['ss_top1'])} / {f(ik['ss_top3'])} | 50-phrase books, 6 test speakers |",
         f"| In the cards when unsure too | counting maybe cards | — | {f(ik['b1_top3'])} (acts without asking) | **{f(ik['ss_maybe'])}** | same |",
+        *([f"| Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | "
+           f"{f(tk0['b0']['success_pct'])} ({f(tk0['b0']['wrong_action_pct'])}) | {f(tk0['b1']['success_pct'])} "
+           f"({f(tk0['b1']['wrong_action_pct'])}) | **{f(tk0['suresay']['done_within_two_pct'])}** (0) | "
+           f"{tk0['tasks']} in-book sentences, 6 test speakers, `{tk['asr_engine']}` |"]
+          if (tk := read_result("task")) and (tk0 := tk["summary"].get("test")) else []),
         f"| Abstains when unsure | correct \"say again\" | 0% | {f(ik['b1_abstain'])} | **{f(ik['ss_abstain'])}** | out-of-book utterances |",
         f"| Never acts on a guess | acted on a wrong phrase without asking | {f(ik['b0_wrong'])} | {f(ik['b1_wrong'])} | **{f(ik['ss_wrong'])}** | in-book + out-of-book |",
         f"| Nothing without consent | unconfirmed changes | {sk['plain']} / {sk['plain_cases']} (no gate) | — | **{sk['ss']} / {sk['cases']}** | adversarial suite |",
@@ -604,7 +657,11 @@ def main() -> None:
         "top-1 because it never abstains, and pays for it by acting on a wrong phrase without asking.",
         "",
     ]
-    body = head + conf + [""] + intent + [""] + safety + [""] + latency + [""]
+    body = head + conf + [""] + intent + [""]
+    task = read_result("task")
+    if task:
+        body += task_section(task, i) + [""]
+    body += safety + [""] + latency + [""]
     body += asr_section(c, i) + [""]
     pe = load("personal")
     if pe:
