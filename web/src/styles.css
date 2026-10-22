@@ -5873,6 +5873,24 @@ code {
   accent-color: #ffb070;
 }
 
+/* On a phone the controls come before the Echo (AlexaView renders them first there), so asking needs no scroll:
+   the ask bar on one line, then the examples, then the Echo. */
+.echo--ask-first .echo__mode {
+  margin-top: 0;
+}
+
+.echo--ask-first > .echo__ask:first-child {
+  margin-top: 0;
+}
+
+.echo--ask-first .echo__ask .input {
+  flex-basis: 6rem;
+}
+
+.echo--ask-first .echo__chips {
+  margin-bottom: 1rem;
+}
+
 /* --- the three cards on one phone screen ------------------------------------
    At 390 px the cards, the heading and "None of these" fit one screen: a smaller
    number and icon beside the words, the likelihood on one line, tighter gaps.

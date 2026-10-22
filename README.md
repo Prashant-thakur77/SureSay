@@ -100,7 +100,7 @@ Held-out TORGO dysarthric speakers (dev F03 and M05 for tuning; test F01, F04, M
 <!-- results:start -->
 | Claim | Metric | B0 plain | B1 + phrasebook | SureSay | Data |
 |---|---|---|---|---|---|
-| Confirm heard right | false accepts | 62.8% | — | **2.3%** | 430 decisions, 6 test speakers |
+| Confirm heard right | false accepts | 62.8% (forced) / 36.0% (with reject, on `whisper-small.en`, where forced is 62.3% and SureSay 1.4%) | — | **2.3%** | 430 decisions, 6 test speakers; the reject arm needs a recogniser confidence, which Transcribe does not give |
 | Nothing without consent | unconfirmed changes | 35 / 35 (no gate) | — | **0 / 50** | adversarial suite |
 | …with a real model as the agent | unconfirmed changes | 11 / 35 (Nova 2 Sonic, no gate) | — | **0 / 35** | Amazon Nova 2 Sonic, injections + near-misses |
 | A live AI can't confirm | home changes with no answer from the user | — | — | **0 / 27** | Amazon Nova 2 Sonic driving the deployed MCP server, 16 turns adversarial; 5 of 5 confirm attempts refused |
@@ -113,7 +113,7 @@ Held-out TORGO dysarthric speakers (dev F03 and M05 for tuning; test F01, F04, M
 | Meaning recovered by a Bedrock model | top-1 / in the cards | — | — | 67.6% / 67.6%; maybe cards on out-of-book 0.0% | Amazon Nova 2 Sonic as the ranker, same 6 test speakers |
 | Works as an MCP server for Alexa+ | live checks passed | — | — | **20 / 20** | the deployed server, incl. the Alexa+ client's own handshake |
 | Accessible | Lighthouse accessibility, phone / desktop | — | — | **100 / 100** | the live site |
-| Speed | understand p50 / p95 | — | — | 869.6 / 2434.6 ms | 100 dev clips, Lambda + Transcribe |
+| Speed | understand p50 / p95 | — | — | 869.6 / 2434.6 ms | 100 dev clips, Lambda + Transcribe; real spoken requests on the live server: 1473 / 4890 ms (62 requests, CloudWatch, incl. recognition) |
 | Gate overhead | p50 / p95 | — | — | 48.9 / 58.1 ms | Lambda + DynamoDB |
 | No regression | top-1, controls | 80.8% | — | 100.0% | control speakers |
 
@@ -148,7 +148,7 @@ Code pointers, permissions and a verify command for each service: [docs/AWS_INTE
 
 ```bash
 make setup        # Python 3.13 venv (uv) + web client packages
-make test         # 769 Python tests (520 for the gate, 249 for the hub) plus 207 web tests: account linking, the Alexa skill, the 50-case safety suite
+make test         # 779 Python tests (522 for the gate, 257 for the hub) plus 211 web tests: account linking, the Alexa skill, the 50-case safety suite
 make demo         # hub + web client (+ agent when Bedrock is reachable) on http://127.0.0.1:9000
 ```
 

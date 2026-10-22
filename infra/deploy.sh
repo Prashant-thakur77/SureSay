@@ -19,8 +19,10 @@ FUNCTION="suresay-hub"
 ROLE="suresay-hub-role"
 AGENT="suresay_agent"
 STATE="$ROOT/infra/.state"
+ALEXA_SKILL_ID="${ALEXA_SKILL_ID:-$(cat "$STATE/alexa_skill_id" 2>/dev/null || true)}"  # remembered from the first deploy that set it
 PY="$ROOT/.venv/bin/python"
 mkdir -p "$STATE"
+[ -n "$ALEXA_SKILL_ID" ] && echo "$ALEXA_SKILL_ID" > "$STATE/alexa_skill_id"
 export AWS_REGION="$REGION" AWS_DEFAULT_REGION="$REGION"
 say() { printf '\n\033[1m== %s\033[0m\n' "$*"; }
 
@@ -229,6 +231,14 @@ PYEOF
   echo "skill test: $("$PY" -c "import json,sys; print(json.load(open(sys.argv[1]))['response']['outputSpeech']['ssml'][:140])" "$STATE/alexa_test.json")"
   echo "Alexa skill endpoint ARN: $(aws lambda get-function --function-name suresay-alexa-skill --query Configuration.FunctionArn --output text)"
 fi
+
+say "Keep warm: EventBridge pings the hub every 5 minutes (a first visit should not wait for a cold start)"
+WARM_RULE_ARN="$(aws events put-rule --name suresay-keep-warm --schedule-expression "rate(5 minutes)" --state ENABLED --query RuleArn --output text)"
+aws lambda add-permission --function-name "$FUNCTION" --statement-id suresay-keep-warm --action lambda:InvokeFunction \
+  --principal events.amazonaws.com --source-arn "$WARM_RULE_ARN" >/dev/null 2>&1 || true
+aws events put-targets --rule suresay-keep-warm \
+  --targets "Id=hub,Arn=arn:aws:lambda:$REGION:$ACCOUNT:function:$FUNCTION" >/dev/null
+echo "$WARM_RULE_ARN"
 
 say "CloudWatch dashboard SureSay"
 REGION="$REGION" FUNCTION="$FUNCTION" envsubst '${REGION} ${FUNCTION}' < infra/dashboard.json.tmpl > "$STATE/dashboard.json"

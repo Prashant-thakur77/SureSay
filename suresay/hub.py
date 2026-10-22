@@ -930,6 +930,10 @@ def build_app(s: SureSay | None = None) -> Starlette:
     async def healthz(request: Request) -> Response:
         return JSONResponse({"ok": True})
 
+    async def scheduled(request: Request) -> Response:
+        """EventBridge's keep-warm ping, which the Lambda Web Adapter posts here: it only keeps a container warm."""
+        return Response(status_code=204)
+
     async def info(request: Request) -> Response:
         from .app import __version__
 
@@ -946,7 +950,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
     async def terms(request: Request) -> Response:
         return HTMLResponse(_doc_page("Terms of use", TERMS))
 
-    routes += [Route("/healthz", healthz), Route("/api/info", info), Route("/privacy", privacy), Route("/terms", terms),
+    routes += [Route("/events", scheduled, methods=["POST"]), Route("/healthz", healthz), Route("/api/info", info), Route("/privacy", privacy), Route("/terms", terms),
                Route("/device/try", try_demo, methods=["POST"])]
     brand = ROOT / "alexa_plus" / "assets"
     if brand.exists():

@@ -14,7 +14,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from eval.common import EVAL, ROOT, SPLIT, read_result  # noqa: E402
+from eval.common import EVAL, ROOT, SPLIT, read_result, tuning_name  # noqa: E402
 
 SEVERITY_NOTE = ("Severity labels are not used to pick the split; dev speakers were fixed before any run "
                  "(eval/common.py).")
@@ -76,10 +76,83 @@ def confirm_section(c: dict[str, Any], c2: dict[str, Any] | None) -> tuple[list[
         for r in sures_fa:
             out.append(f"- {r['speaker']}, said \"{r['word']}\" ({r['context']} card) → heard \"{r['suresay']['heard']}\" → "
                        f"{r['suresay']['decision'][0]} {r['suresay']['decision'][1] or ''}".rstrip())
+    reject_lines, reject_key = b0_reject_block(c)
+    out += reject_lines
     key = {"b0_fa": t0["false_accept_pct"], "ss_fa": t1["false_accept_pct"], "b0_acc": t0["accuracy_pct"],
            "ss_acc": t1["accuracy_pct"], "b0_rec": g0["true_accepts_recovered_pct"],
            "ss_rec": g1["true_accepts_recovered_pct"], "ss_refused": g1["refused_pct"],
-           "fa_counts": (t0["false_accepts"], t1["false_accepts"], t1["clips"])}
+           "fa_counts": (t0["false_accepts"], t1["false_accepts"], t1["clips"]), "b0_reject": reject_key}
+    return out, key
+
+
+def confirm_b0_cell(ck: dict[str, Any]) -> str:
+    """Headline B0 cell: the forced baseline, and B0 + reject where a recogniser confidence exists to measure it."""
+    r = ck.get("b0_reject")
+    if not r:
+        return f(ck["b0_fa"])
+    return (f"{f(ck['b0_fa'])} (forced) / {f(r['fa'])} (with reject, on `{r['engine']}`, where forced is "
+            f"{f(r['b0_fa'])} and SureSay {f(r['ss_fa'])})")
+
+
+def _confirm_runs(c: dict[str, Any]) -> list[dict[str, Any]]:
+    """The headline confirm result, then the same claim with the other recognisers."""
+    return [c, *(o for run, _ in OTHER_RECOGNISERS if (o := read_result("confirm", run)))]
+
+
+def b0_reject_block(c: dict[str, Any]) -> tuple[list[str], dict[str, Any] | None]:
+    """B0 + reject: plain B0 that asks again when the recogniser is unsure, on every engine that gives a confidence."""
+    runs = _confirm_runs(c)
+    have = [r for r in runs if "b0_reject" in r["summary"]]
+    without = [r for r in runs if "b0_reject" not in r["summary"]]
+    if not have:
+        return [], None
+    out = ["", "### A fairer baseline: B0 + reject", "",
+           "B0 above never refuses. B0 + reject is the same plain recogniser path, but it asks again when the "
+           "recogniser is unsure: it heard nothing, or its per-utterance confidence is below a threshold. The "
+           "threshold was chosen on dev speakers only (F03, M05) by a rule fixed before any test-speaker result for "
+           "this arm was computed (`eval/tune_b0_reject.py`): among thresholds that recover at least as many genuine "
+           "answers on dev as SureSay does, take the one with the fewest dev false accepts (ties: the lower threshold). "
+           "When it does not ask again it is plain B0, forced to the nearest word."]
+    if without:
+        out += ["", "It needs a confidence from the recogniser, and not every recogniser gives one. "
+                + "; ".join(f"`{r['asr_engine']}`: {r.get('b0_reject_status') or 'not run'}" for r in without)
+                + ". So it is measured only on "
+                + ", ".join(f"`{r['asr_engine']}`" for r in have) + ", next to that recogniser's own B0 and SureSay."]
+    key = None
+    for r in have:
+        b0, br, ss = (r["summary"][a] for a in ("b0", "b0_reject", "suresay"))
+        tune = read_result(tuning_name(r["asr_engine"]) + "_b0_reject") or {}
+        d = tune.get("dev", {})
+        if tune.get("available"):
+            out += ["", f"`{r['asr_engine']}`: threshold {r['b0_reject_threshold']:.3f} (confidence = exp of the "
+                    "mean token log-probability). Dev: SureSay recovered "
+                    f"{tune['suresay_dev']['recovered']} genuine answers with {tune['suresay_dev']['false_accepts']} "
+                    f"false accepts in {tune['suresay_dev']['clips']} decisions; B0 + reject at this threshold recovered "
+                    f"{d.get('recovered')} with {d.get('false_accepts')} false accepts"
+                    + ("" if tune.get("constraint_met") else " (no threshold met the floor; it falls back to never "
+                       "rejecting)") + f", out of {tune['candidates_tried']} thresholds tried."]
+        rows = [("**False accepts, all clips**", lambda s: f"**{f(s['test']['false_accept_pct'])}** "
+                 f"({s['test']['false_accepts']}/{s['test']['clips']})"),
+                ("False accepts, other words only", lambda s: f"{s['test_distractors_only']['false_accepts']}/"
+                 f"{s['test_distractors_only']['clips']}"),
+                ("Genuine answers recovered", lambda s: f(s["test_confirm_words_only"]["true_accepts_recovered_pct"])),
+                ("Genuine answers asked again", lambda s: f(s["test_confirm_words_only"]["refused_pct"])),
+                ("Asked again, all clips (right for other words)", lambda s: f(s["test"]["refused_pct"])),
+                ("Decision accuracy, all clips", lambda s: f(s["test"]["accuracy_pct"]))]
+        out += ["", f"Test speakers, `{r['asr_engine']}`:", "",
+                "| Test speakers | B0 (forced nearest word) | B0 + reject (asks again when unsure) | SureSay |",
+                "|---|---|---|---|",
+                *(f"| {name} | {cell(b0)} | {cell(br)} | {cell(ss)} |" for name, cell in rows),
+                "", "Per speaker, false-accept rate (all clips): "
+                + ", ".join(f"{spk} {f(br['per_speaker'][spk]['false_accept_pct'])}"
+                            for spk in SPLIT["test"] if spk in br["per_speaker"]) + " (B0 + reject).",
+                "", f"It asks again only on the recogniser's own doubt: {br['test_distractors_only']['false_accepts']} of "
+                f"its {br['test']['false_accepts']} false accepts here are other words (not answers) heard with enough "
+                "confidence and then forced to the nearest allowed word, where SureSay's parser refuses anything that "
+                "is not an answer."]
+        if key is None:
+            key = {"engine": r["asr_engine"], "b0_fa": b0["test"]["false_accept_pct"],
+                   "fa": br["test"]["false_accept_pct"], "ss_fa": ss["test"]["false_accept_pct"]}
     return out, key
 
 
@@ -368,7 +441,9 @@ def asr_section(c: dict[str, Any], i: dict[str, Any]) -> list[str]:
         gen = conf["summary"]["suresay"]["test_confirm_words_only"]
         it = intent["summary"]["test"]
         maybe = it["ss_fuzzy"].get("in_cards_with_maybe_pct")
-        rows.append(f"| `{label}` | {f(b0c['false_accept_pct'])} | {f(ssc['false_accept_pct'])} | "
+        brc = conf["summary"].get("b0_reject", {}).get("test")
+        rows.append(f"| `{label}` | {f(b0c['false_accept_pct'])} | {f(brc['false_accept_pct']) if brc else '—'} | "
+                    f"{f(ssc['false_accept_pct'])} | "
                     f"{f(gen['true_accepts_recovered_pct'])} | {f(it['b0']['top1_pct'])} | {f(it['b1']['top1_pct'])} | "
                     f"{f(it['ss_fuzzy']['top1_pct'])} | {f(maybe) if maybe is not None else '—'} | "
                     f"{f(it['ss_fuzzy']['correct_abstain_pct'])} |")
@@ -376,10 +451,13 @@ def asr_section(c: dict[str, Any], i: dict[str, Any]) -> list[str]:
     return ["## The same claims with other recognisers", "",
             f"Everything above uses Amazon Transcribe. The same pipeline was also run with {also}, each with its own "
             "dev-only tuning, to show the gate's effect does not depend on one recogniser. Test speakers:", "",
-            "| Recogniser | false accepts B0 | false accepts SureSay | genuine answers recovered (SureSay) | "
+            "| Recogniser | false accepts B0 | false accepts B0 + reject | false accepts SureSay | "
+            "genuine answers recovered (SureSay) | "
             "top-1 B0 | top-1 B1 | top-1 SureSay | in the cards, with maybe cards (SureSay) | "
             "correct \"say again\" (SureSay) |",
-            "|---|---|---|---|---|---|---|---|---|", *rows, "", *sonic_note()]
+            "|---|---|---|---|---|---|---|---|---|---|", *rows, "",
+            "B0 + reject needs a per-utterance confidence from the recogniser; \"—\" means the recogniser gives none "
+            "(see Claim 1).", "", *sonic_note()]
 
 
 def _sonic_latency() -> str:
@@ -475,6 +553,19 @@ def tuning_section(t: dict[str, Any]) -> list[str]:
                 f"{r['margin']} ({t['fuzzy']['dev_objective']}/{t['fuzzy']['dev_utterances']} dev utterances handled right)."]
     if t.get("nova_status"):
         out += ["", f"Nova abstain rule: {t['nova_status']}."]
+    for engine in ("transcribe-streaming", "whisper-small.en", "nova-2-sonic"):
+        br = read_result(tuning_name(engine) + "_b0_reject")
+        if not br:
+            continue
+        if not br.get("available"):
+            out += ["", f"B0 + reject threshold, `{engine}`: none, {br['reason']}."]
+            continue
+        d, sd = br["dev"], br["suresay_dev"]
+        out += ["", f"B0 + reject threshold, `{engine}`: {br['threshold']:.3f}, by the rule in Claim 1 "
+                f"({br['candidates_tried']} thresholds tried; floor: SureSay's {sd['recovered']} genuine answers on dev, "
+                f"{'met' if br['constraint_met'] else 'not met'}). Dev: {d['false_accepts']} / {d['clips']} false accepts, "
+                f"{d['recovered']} genuine answers recovered, asked again on {f(d['refused_pct'])} of decisions "
+                f"(SureSay: {sd['false_accepts']} / {sd['clips']}, {sd['recovered']}, {f(sd['refused_pct'])})."]
     return out
 
 
@@ -667,8 +758,6 @@ def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] |
 def main() -> None:
     c, i, s, lat = load("confirm"), load("intent"), load("safety"), load("latency")
     c2, i2, s2 = read_result("confirm", "run2"), read_result("intent", "run2"), read_result("safety", "run2")
-    from eval.common import tuning_name
-
     tuning = read_result(tuning_name(c["asr_engine"])) if c else None
     cost, atom = read_result("cost"), read_result("store_atomicity")
     missing = [n for n, v in (("confirm", c), ("intent", i), ("safety", s), ("latency", lat)) if v is None]
@@ -706,7 +795,8 @@ def main() -> None:
         "",
         "| Claim | Metric | B0 plain | B1 + phrasebook | SureSay | Data |",
         "|---|---|---|---|---|---|",
-        f"| Confirm heard right | false accepts | {f(ck['b0_fa'])} | — | **{f(ck['ss_fa'])}** | {ck['fa_counts'][2]} decisions, 6 test speakers |",
+        f"| Confirm heard right | false accepts | {confirm_b0_cell(ck)} | — | **{f(ck['ss_fa'])}** | {ck['fa_counts'][2]} decisions, 6 test speakers"
+        f"{'; the reject arm needs a recogniser confidence, which Transcribe does not give' if ck.get('b0_reject') else ''} |",
         f"| Nothing without consent | unconfirmed changes | {sk['plain']} / {sk['plain_cases']} (no gate) | — | **{sk['ss']} / {sk['cases']}** | adversarial suite |",
         *([f"| …with a real model as the agent | unconfirmed changes | {sk['sonic']['plain_sonic']['unconfirmed_changes']} / "
            f"{sk['sonic']['plain_sonic']['cases']} (Nova 2 Sonic, no gate) | — | **{sk['sonic']['suresay_sonic']['unconfirmed_changes']} / "
@@ -740,7 +830,10 @@ def main() -> None:
         *([f"| Accessible | Lighthouse accessibility, phone / desktop | — | — | **{sa0['phone']['median_scores']['accessibility']} / "
            f"{sa0['desktop']['median_scores']['accessibility']}** | the live site |"]
           if (sa0 := read_result("site_audit")) else []),
-        f"| Speed | understand p50 / p95 | — | — | {lk['u50']} / {lk['u95']} ms | 100 dev clips, {lk['u_where']} |",
+        f"| Speed | understand p50 / p95 | — | — | {lk['u50']} / {lk['u95']} ms | 100 dev clips, {lk['u_where']}"
+        + (f"; real spoken requests on the live server: {v['p50_ms']:.0f} / {v['p95_ms']:.0f} ms ({v['requests']} requests, "
+           "CloudWatch, incl. recognition)" if (v := ((read_result("live_checks") or {}).get("server_side_understand") or {})
+                                                 .get("voice")) else "") + " |",
         f"| Gate overhead | p50 / p95 | — | — | {lk.get('c50', lk['g50'])} / {lk.get('c95', lk['g95'])} ms | "
         f"{'Lambda + DynamoDB' if 'c50' in lk else 'SQLite'} |",
         f"| No regression | top-1, controls | {f(ik['ctrl_b0'])} | — | {f(ik['ctrl_ss'])} | control speakers |",

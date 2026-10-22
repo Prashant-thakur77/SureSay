@@ -1,0 +1,10 @@
+{
+  "name": "tuning_transcribe_streaming_b0_reject",
+  "generated_at": "2026-10-22T18:36:11+0530",
+  "git_sha": "1b1c78e",
+  "python": "3.13.12",
+  "asr_engine": "transcribe-streaming",
+  "available": false,
+  "reason": "its cached transcripts carry no per-utterance confidence (0 of 86 dev clips)",
+  "speakers": "dev only (F03, M05)"
+}

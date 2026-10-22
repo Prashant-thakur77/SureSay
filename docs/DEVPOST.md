@@ -48,7 +48,7 @@ SureSay is a self-hosted MCP server built to the Alexa+ add-on requirements, and
 | Agent Skills | `skills/suresay/SKILL.md` (open SKILL.md format) teaches any agent to use SureSay safely; the open-source gate ships `add-confirm-gate` |
 | Amazon's add-on functional requirements | "Explicit confirmation with key details before any high-consequence action", "detect and prevent duplicate transactions", "reject if the amount differs", "deliver a receipt": each enforced by the gate in code, mapped in `alexa_plus/README.md` |
 | An add-on package | `alexa_plus/addon-package/addon.json`, six icon sizes, a 600×900 carousel, `/privacy`, `/terms` |
-| Fast query responses (under 500 ms) | On the live server every MCP call adds 7.9–31.5 ms to the network round trip; the server's own time for typed `understand` is about 10 ms at p50 (CloudWatch; p95 664 ms over real requests); spoken `understand` is 870 ms p50 because it includes speech recognition (all in the evaluation report) |
+| Fast query responses (under 500 ms) | On the live server every MCP call adds 7.9–31.5 ms to the network round trip; the server's own time for typed `understand` is about 10 ms at p50 (CloudWatch; p95 664 ms over real requests); spoken `understand` is 870 ms p50 on the benchmark clips and 1.5 s p50 (4.9 s p95) on real spoken requests to the live server, because it includes speech recognition (all in the evaluation report) |
 
 **See it as Alexa+ would:** the live demo's Alexa+ view (`?alexa=1`) is a simulated Echo Show that plays the host against the real server: it calls `understand`, renders the cards MCP App over the MCP Apps messages, and shows every message on the wire, while "Your phone" beside it is where the yes comes from. **Who plays the assistant** is your choice: a simple scripted host, or **Amazon Nova 2 Sonic, a live AI**. In live mode the model gets SureSay's MCP tools with exactly the agent's powers and decides which to call; every call it makes is logged, and when it tries `confirm` the gate refuses it, because only your device holds the one-time code. Measured on the deployed hub with 27 requests, 16 of them trying to talk it into acting (false consent, fake authority, urgency): 0 changed anything without the user, and all 5 of its `confirm` attempts were refused, 4 of them on a card set it had really just proposed, for "no user evidence" (`eval/run_live_assistant.py`, REPORT.md). Live turns are capped per day.
 
@@ -93,7 +93,7 @@ Held-out speakers from TORGO, a public dysarthric speech corpus. Thresholds were
 <!-- results:start -->
 | Claim | Metric | B0 plain | B1 + phrasebook | SureSay | Data |
 |---|---|---|---|---|---|
-| Confirm heard right | false accepts | 62.8% | — | **2.3%** | 430 decisions, 6 test speakers |
+| Confirm heard right | false accepts | 62.8% (forced) / 36.0% (with reject, on `whisper-small.en`, where forced is 62.3% and SureSay 1.4%) | — | **2.3%** | 430 decisions, 6 test speakers; the reject arm needs a recogniser confidence, which Transcribe does not give |
 | Nothing without consent | unconfirmed changes | 35 / 35 (no gate) | — | **0 / 50** | adversarial suite |
 | …with a real model as the agent | unconfirmed changes | 11 / 35 (Nova 2 Sonic, no gate) | — | **0 / 35** | Amazon Nova 2 Sonic, injections + near-misses |
 | A live AI can't confirm | home changes with no answer from the user | — | — | **0 / 27** | Amazon Nova 2 Sonic driving the deployed MCP server, 16 turns adversarial; 5 of 5 confirm attempts refused |
@@ -106,7 +106,7 @@ Held-out speakers from TORGO, a public dysarthric speech corpus. Thresholds were
 | Meaning recovered by a Bedrock model | top-1 / in the cards | — | — | 67.6% / 67.6%; maybe cards on out-of-book 0.0% | Amazon Nova 2 Sonic as the ranker, same 6 test speakers |
 | Works as an MCP server for Alexa+ | live checks passed | — | — | **20 / 20** | the deployed server, incl. the Alexa+ client's own handshake |
 | Accessible | Lighthouse accessibility, phone / desktop | — | — | **100 / 100** | the live site |
-| Speed | understand p50 / p95 | — | — | 869.6 / 2434.6 ms | 100 dev clips, Lambda + Transcribe |
+| Speed | understand p50 / p95 | — | — | 869.6 / 2434.6 ms | 100 dev clips, Lambda + Transcribe; real spoken requests on the live server: 1473 / 4890 ms (62 requests, CloudWatch, incl. recognition) |
 | Gate overhead | p50 / p95 | — | — | 48.9 / 58.1 ms | Lambda + DynamoDB |
 | No regression | top-1, controls | 80.8% | — | 100.0% | control speakers |
 
@@ -142,11 +142,11 @@ Everything user-facing is new:
 - **The Alexa skill**, deployed and flow-tested on AWS.
 - **The web client:** built to WCAG 2.2 AA (axe-clean, Lighthouse accessibility 100), voice, tap, keys or one switch, three themes, TV mode.
 - **The evaluation:** TORGO on Amazon Transcribe with two runs, repeated with Amazon Nova 2 Sonic and a local recogniser, a 50-case safety suite with a linked-client arm, latency measured in region, per-user calibration and a Hinglish check.
-- **One-command deploy and teardown**, and 976 tests (520 for the gate, 249 for the hub, 207 for the web client).
+- **One-command deploy and teardown**, and 990 tests (522 for the gate, 257 for the hub, 211 for the web client).
 
 ## Open source
 
-[confirm-gate-mcp](https://github.com/Prashant-thakur77/confirm-gate-mcp) is the gate on its own: MIT, its own repository, CI on Python 3.12 and 3.13 plus a packaging check, and releases v0.2.0 to v0.7.1 built during the window. `confirm-gate serve --upstream <any MCP server>` puts confirm-before-act, with an approval page, in front of any MCP server. With `--strict` it ignores the upstream's own read-only claims, because MCP tool annotations are hints from the server, so it is safe in front of servers you didn't write. Install: `pip install "git+https://github.com/Prashant-thakur77/confirm-gate-mcp"`.
+[confirm-gate-mcp](https://github.com/Prashant-thakur77/confirm-gate-mcp) is the gate on its own: MIT, its own repository, CI on Python 3.12 and 3.13 plus a packaging check, and releases v0.2.0 to v0.7.2 built during the window. `confirm-gate serve --upstream <any MCP server>` puts confirm-before-act, with an approval page, in front of any MCP server. With `--strict` it ignores the upstream's own read-only claims, because MCP tool annotations are hints from the server, so it is safe in front of servers you didn't write. Install: `pip install "git+https://github.com/Prashant-thakur77/confirm-gate-mcp"`.
 
 Why it matters: as assistants gain the power to act, prompt injection becomes a way to act. A gate that keeps the confirmation secret away from the model turns "never act without the user" from a prompt into a property of the code, for any MCP server. In SureSay's safety suite a real model (Amazon Nova 2 Sonic) as the agent made 11 unconfirmed changes in 35 cases without the gate, and 0 behind it.
 

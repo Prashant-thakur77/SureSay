@@ -101,7 +101,7 @@ def test_the_newest_card_set_comes_back_whichever_tool_made_it(live: Hub) -> Non
     assert door.get("pending_id") and out["latest"]["pending_id"] == door["pending_id"]
     assert out["understand"]["pending_id"] != door["pending_id"]
     assert [c["text"] for c in out["latest"]["candidates"]] == ["Unlock the front door"]  # numbered cards to draw
-    assert out["latest"]["stage"] == "final" and "nonce" not in json.dumps(out["latest"])
+    assert out["latest"]["stage"] == "choose" and "nonce" not in json.dumps(out["latest"])  # it still asks twice
 
 
 def test_info_names_only_the_protocol_versions_the_server_answers(hub: Hub) -> None:

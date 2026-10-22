@@ -26,6 +26,8 @@ RID="$(aws bedrock-agentcore-control list-agent-runtimes --query "agentRuntimes[
 if [ -n "$RID" ] && [ "$RID" != "None" ]; then aws bedrock-agentcore-control delete-agent-runtime --agent-runtime-id "$RID" >/dev/null || true; fi
 
 step "Lambda"
+aws events remove-targets --rule suresay-keep-warm --ids hub >/dev/null 2>&1 || true
+aws events delete-rule --name suresay-keep-warm 2>/dev/null || true
 aws lambda delete-function-url-config --function-name "$FUNCTION" 2>/dev/null || true
 aws lambda delete-function --function-name "$FUNCTION" 2>/dev/null || true
 aws logs delete-log-group --log-group-name "/aws/lambda/$FUNCTION" 2>/dev/null || true

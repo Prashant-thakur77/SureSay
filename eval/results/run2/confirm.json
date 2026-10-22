@@ -1,7 +1,7 @@
 {
   "name": "confirm",
-  "generated_at": "2026-10-22T15:20:21+0530",
-  "git_sha": "4883775",
+  "generated_at": "2026-10-22T18:37:58+0530",
+  "git_sha": "1b1c78e",
   "python": "3.13.12",
   "claim": 1,
   "asr_engine": "transcribe-streaming",
@@ -9,6 +9,8 @@
     "test"
   ],
   "suresay_bias": "none",
+  "b0_reject_threshold": null,
+  "b0_reject_status": "its cached transcripts carry no per-utterance confidence (0 of 86 dev clips)",
   "distractors_per_speaker": 30,
   "summary": {
     "b0": {
@@ -9797,14 +9799,14 @@
       ],
       "wav": "raw/M04/Session1/wav_arrayMic/0074.wav",
       "b0": {
-        "heard": "That.",
+        "heard": "That",
         "decision": [
           "choose",
           3
         ]
       },
       "suresay": {
-        "heard": "That.",
+        "heard": "That",
         "decision": [
           "unclear",
           null
@@ -9823,14 +9825,14 @@
       ],
       "wav": "raw/M04/Session1/wav_arrayMic/0074.wav",
       "b0": {
-        "heard": "That.",
+        "heard": "That",
         "decision": [
           "yes",
           null
         ]
       },
       "suresay": {
-        "heard": "That.",
+        "heard": "That",
         "decision": [
           "unclear",
           null
@@ -10161,14 +10163,14 @@
       ],
       "wav": "raw/M04/Session2/wav_headMic/0284.wav",
       "b0": {
-        "heard": "The kid didn't",
+        "heard": "He didn't",
         "decision": [
           "choose",
-          3
+          1
         ]
       },
       "suresay": {
-        "heard": "The kid didn't",
+        "heard": "He didn't",
         "decision": [
           "no",
           null
@@ -10187,14 +10189,14 @@
       ],
       "wav": "raw/M04/Session2/wav_headMic/0284.wav",
       "b0": {
-        "heard": "The kid didn't",
+        "heard": "He didn't",
         "decision": [
           "no",
           null
         ]
       },
       "suresay": {
-        "heard": "The kid didn't",
+        "heard": "He didn't",
         "decision": [
           "unclear",
           null

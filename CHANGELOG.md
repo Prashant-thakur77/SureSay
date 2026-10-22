@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.7.4 (22 Oct 2026)
+
+- **A lone risky card still asks twice.** "open the door" offers just "Unlock the front door", and that set used to open straight at the final yes/no, so one yes unlocked the door, unlike the same card shown beside others. Now it is chosen first and then asks a second, separately nonced yes; "no" still cancels at once. confirm-gate-mcp 0.7.2.
+- **No cold start for a first visitor:** EventBridge pings the hub every 5 minutes (`POST /events`, answered with 204 and nothing else); teardown removes the rule.
+- **A fairer baseline for Claim 1:** "B0 + reject", a plain recogniser that asks again when its own confidence is low, with the threshold tuned on dev speakers only. On the test speakers (`whisper-small.en`, the only recogniser here that reports a confidence) it still takes 36.0% of non-answers as consent, against 62.3% forced and SureSay's 1.4%. Transcribe gives no confidence, so the arm is "—" there. Spent nothing; every earlier figure unchanged.
+- Run 2 of the confirmation evaluation is now built from its own fresh transcripts, as the report says (it had reused run 1's; the summary is identical).
+- The speed row also gives real spoken requests on the live server (CloudWatch): 1.5 s p50, 4.9 s p95, next to the 870 ms benchmark.
+- **Alexa+ view on a phone:** the ask bar, the examples and "Who plays the assistant?" come first, in reading order too; asking scrolls the Echo into view. Focus no longer jumps to Close on every render, and returns to the control that asked when a turn ends.
+- The judges' guide: the agent-can't-confirm check works on the live site (the Alexa+ view's live AI) or on `make demo`; a live-AI turn takes about 10 s and shows its steps.
+
 ## 1.7.3 (22 Oct 2026)
 
 - **The Echo shows the live AI's steps as they happen:** "Nova is calling understand…", "Nova called understand: cards to choose from.", "Nova tried confirm: refused, only your device can say yes." The web client names each turn with a random id; the hub's MCP layer records each `tools/call` the agent makes under it (the tool's name and one status word, never its arguments or a nonce), and the device polls `GET /device/assistant/progress` for its own turns only. Works in AgentCore Runtime and in the hub.

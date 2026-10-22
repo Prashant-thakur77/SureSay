@@ -36,6 +36,30 @@ function mockWide(wide: boolean) {
     removeListener: () => undefined, addEventListener: () => undefined, removeEventListener: () => undefined, dispatchEvent: () => false }) as MediaQueryList);
 }
 
+/** A screen this many CSS px wide: each (min|max)-width query in em is answered for it, and can be resized later. */
+function mockWidth(px: number) {
+  let width = px;
+  const lists: Array<{ q: MediaQueryList; on: Set<() => void> }> = [];
+  const answer = (query: string) => {
+    const m = /\((min|max)-width:\s*([\d.]+)em\)/.exec(query);
+    return m ? (m[1] === "min" ? width >= Number(m[2]) * 16 : width <= Number(m[2]) * 16) : false;
+  };
+  vi.spyOn(window, "matchMedia").mockImplementation((query: string) => {
+    const on = new Set<() => void>();
+    const q = { get matches() { return answer(query); }, media: query, onchange: null, addListener: () => undefined, removeListener: () => undefined,
+      addEventListener: (_: string, f: () => void) => on.add(f), removeEventListener: (_: string, f: () => void) => on.delete(f), dispatchEvent: () => false } as unknown as MediaQueryList;
+    lists.push({ q, on });
+    return q;
+  });
+  return (next: number) => {
+    width = next;
+    act(() => lists.forEach(({ on }) => on.forEach((f) => f())));
+  };
+}
+
+/** True when a comes before b in the document. */
+const before = (a: Node, b: Node) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+
 afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
@@ -99,6 +123,84 @@ describe("the Alexa+ view", () => {
     mockWide(true);
     renderAlexa({ kind: "idle" });
     expect(screen.getByText(/What Alexa\+ and SureSay say to each other/).closest("details")!.open).toBe(true);
+  });
+
+  it("puts the ask bar, the examples and the assistant choice above the Echo on a phone, and below it on a wide screen", async () => {
+    const parts = () => ({
+      mode: screen.getByRole("group", { name: "Who plays the assistant?" }),
+      ask: screen.getByRole("form", { name: "Talk to Alexa" }),
+      chips: screen.getByRole("group", { name: "Examples" }),
+      echo: document.querySelector(".echo__screen")!,
+    });
+    mockWidth(390);
+    const { unmount } = renderAlexa({ kind: "idle" }, { assistant: vi.fn() });
+    let p = parts();
+    // read in this order on a phone: who answers, the ask bar, the examples, then the Echo
+    expect(before(p.mode, p.ask) && before(p.ask, p.chips) && before(p.chips, p.echo)).toBe(true);
+    expect(await axeViolations()).toEqual([]);
+    unmount();
+    const resize = mockWidth(1500);
+    renderAlexa({ kind: "idle" }, { assistant: vi.fn() });
+    p = parts();
+    expect(before(p.echo, p.mode) && before(p.mode, p.ask) && before(p.ask, p.chips)).toBe(true);
+    // turning a phone (or narrowing a window) moves the ask bar up and keeps what was typed
+    fireEvent.change(screen.getByLabelText("Alexa,"), { target: { value: "call mum" } });
+    resize(400);
+    p = parts();
+    expect(before(p.chips, p.echo)).toBe(true);
+    expect((screen.getByLabelText("Alexa,") as HTMLInputElement).value).toBe("call mum");
+    resize(481);
+    expect(before(parts().echo, parts().ask)).toBe(true);
+  });
+
+  it("keeps focus where it is when the page behind re-renders with a new onClose", () => {
+    const host = fakeHost();
+    const fns = { choose: vi.fn(), yes: vi.fn(), none: vi.fn() };
+    const first = vi.fn();
+    const { rerender } = render(<AlexaView host={host} phase={{ kind: "idle" }} {...fns} onClose={first} />);
+    const input = screen.getByLabelText("Alexa,") as HTMLInputElement;
+    input.focus();
+    const second = vi.fn();
+    rerender(<AlexaView host={host} phase={{ kind: "idle" }} {...fns} onClose={second} />);
+    expect(document.activeElement).toBe(input);
+    fireEvent.keyDown(input, { key: "Escape" });
+    expect(second).toHaveBeenCalled(); // Escape still closes, with the newest onClose
+    expect(first).not.toHaveBeenCalled();
+  });
+
+  it("gives focus back to the control that asked once the turn is over (it is disabled meanwhile, which drops focus)", async () => {
+    let finish: (t: AssistantTurn) => void = () => undefined;
+    const assistant = vi.fn(() => new Promise<AssistantTurn>((r) => { finish = r; }));
+    renderAlexa({ kind: "idle" }, { assistant });
+    fireEvent.click(screen.getByRole("radio", { name: /Amazon Nova 2 Sonic/ }));
+    const chip = screen.getByRole("button", { name: /“call mum”/ });
+    chip.focus();
+    fireEvent.click(chip);
+    expect((chip as HTMLButtonElement).disabled).toBe(true);
+    // a browser drops focus to the page from a control that becomes disabled (jsdom keeps it there)
+    const lost = vi.spyOn(document, "activeElement", "get").mockReturnValue(document.body);
+    const focused = vi.spyOn(chip, "focus");
+    await act(async () => finish({ reply: "Calling Mum needs your yes.", model: "amazon.nova-2-sonic-v1:0", ms: 900, tool_calls: [], understand: null }));
+    lost.mockRestore();
+    expect(focused).toHaveBeenCalledWith({ preventScroll: true }); // the Echo, just brought into view, stays in view
+    expect(document.activeElement).toBe(chip);
+  });
+
+  it("on a phone, asking brings the Echo into view, so its answer is seen; a wide screen does not scroll", async () => {
+    const scrolled = vi.spyOn(Element.prototype, "scrollIntoView").mockImplementation(() => undefined);
+    mockWidth(390);
+    const { host, unmount } = renderAlexa({ kind: "idle" });
+    fireEvent.click(screen.getByRole("button", { name: /“van on”/ }));
+    await waitFor(() => expect(host.callToolRaw).toHaveBeenCalled());
+    expect(scrolled.mock.contexts).toContain(document.querySelector(".echo__screen"));
+    await waitFor(() => expect((screen.getByLabelText("Alexa,") as HTMLInputElement).disabled).toBe(false));
+    unmount();
+    scrolled.mockClear();
+    mockWidth(1500);
+    const wide = renderAlexa({ kind: "idle" });
+    fireEvent.click(screen.getByRole("button", { name: /“van on”/ }));
+    await waitFor(() => expect(wide.host.callToolRaw).toHaveBeenCalled());
+    expect(scrolled.mock.contexts).not.toContain(document.querySelector(".echo__screen"));
   });
 
   it("asks SureSay over MCP and logs the call, with no secret in it", async () => {

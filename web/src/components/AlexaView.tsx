@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 import type { Phase } from "../hooks/useConversation";
 import { newTurnId } from "../lib/api";
@@ -41,12 +41,34 @@ interface Props {
 type ToolResult = Awaited<ReturnType<McpHost["callToolRaw"]>>;
 
 /** Wide enough for the side-by-side layout: the MCP log starts open there, folded on a phone. */
-function wideScreen(): boolean {
+const WIDE = "(min-width: 60em)";
+/** A phone (the 480 px breakpoint of the other phone rules): the ask bar comes before the Echo, so it is on the first screen. */
+const NARROW = "(max-width: 30em)";
+
+function matches(query: string): boolean {
   try {
-    return window.matchMedia("(min-width: 60em)").matches;
+    return window.matchMedia(query).matches;
   } catch {
     return false;
   }
+}
+
+/** Whether a media query matches now, following it as the screen turns or the window is resized. */
+function useMedia(query: string): boolean {
+  const [on, setOn] = useState(() => matches(query));
+  useEffect(() => {
+    let q: MediaQueryList;
+    try {
+      q = window.matchMedia(query);
+    } catch {
+      return;
+    }
+    const update = () => setOn(q.matches);
+    update();
+    q.addEventListener?.("change", update);
+    return () => q.removeEventListener?.("change", update);
+  }, [query]);
+  return on;
 }
 
 function summary(result: ToolResult): { say: string; status: string; count: number } {
@@ -105,8 +127,14 @@ function stepLine(step: AssistantStep): string {
 
 export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant, assistantProgress, onNewSet, speak, onClose }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-  useFocusTrap(ref, true, onClose);
+  // the page behind passes a new onClose on every render: a stable one keeps the trap from re-running and pulling focus
+  // (and the scroll) back to Close in the middle of a turn
+  const closeNow = useRef(onClose);
+  closeNow.current = onClose;
+  const close = useCallback(() => closeNow.current(), []);
+  useFocusTrap(ref, true, close);
   const frame = useRef<HTMLIFrameElement>(null);
+  const echoRef = useRef<HTMLDivElement>(null);
   const ready = useRef(false);
   const latest = useRef<ToolResult | null>(null);
   const [html, setHtml] = useState<string | null>(null);
@@ -115,7 +143,8 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [reply, setReply] = useState("Try “Alexa, van on”.");
-  const [wire, setWire] = useState(wideScreen);
+  const [wire, setWire] = useState(() => matches(WIDE));
+  const narrow = useMedia(NARROW);
   // who plays the assistant: the simple scripted host, or a real model (Amazon Nova 2 Sonic) when the hub offers it
   const [mode, setMode] = useState<"host" | "nova">("host");
   const [refused, setRefused] = useState(false);
@@ -131,6 +160,15 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
   // stops following a live turn's steps (the turn ended, or this view closed)
   const stopSteps = useRef<() => void>(() => undefined);
   useEffect(() => () => stopSteps.current(), []);
+  // the control that asked is disabled for the turn, which drops focus to the page: it gets focus back afterwards
+  // (without scrolling, so an Echo just brought into view stays in view)
+  const askedFrom = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const el = askedFrom.current;
+    if (busy || !el) return;
+    askedFrom.current = null;
+    if (!document.activeElement || document.activeElement === document.body) el.focus({ preventScroll: true });
+  }, [busy]);
 
   const post = useCallback((msg: unknown) => frame.current?.contentWindow?.postMessage(msg, "*"), []);
   const sendResult = useCallback(
@@ -216,8 +254,15 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
   const ask = async (utterance: string) => {
     const clean = utterance.trim();
     if (!clean || busy) return;
+    const from = document.activeElement;
+    askedFrom.current = from instanceof HTMLElement && ref.current?.contains(from) ? from : null;
     setBusy(true);
     setRefused(false);
+    // on a phone the Echo sits under the ask bar: bring it into view, so the answer and the cards are seen
+    if (narrow) {
+      const smooth = document.documentElement.dataset.calm !== "1" && !matches("(prefers-reduced-motion: reduce)");
+      echoRef.current?.scrollIntoView?.({ block: "nearest", behavior: smooth ? "smooth" : "auto" });
+    }
     setReply(mode === "nova" && assistant ? "Amazon Nova 2 Sonic is thinking…" : "…");
     log("·", `You: “Alexa, ${clean}”`);
     try {
@@ -305,6 +350,65 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
   const cards = phase.kind === "cards" && phase.answer !== "listening" ? phase.set : null;
   const final = cards && (cards.stage === "final" || cards.options.length === 1);
 
+  // The Echo, and what talks to it: who plays the assistant, the ask bar and the examples. On a phone the controls come
+  // first so a question can be asked without scrolling past the Echo. Both are keyed, so when the screen turns they swap
+  // places without losing what was typed.
+  const echoScreen = (
+    <div key="screen" className="echo__screen" ref={echoRef}>
+      <div className={`echo__bar${busy ? " echo__bar--busy" : ""}`} aria-hidden="true" />
+      <p className="echo__reply" role="status" aria-live="polite">
+        <span className="visually-hidden">Alexa: </span>
+        {reply}
+        {refused && <span className="echo__refused">{REFUSED_LINE}</span>}
+      </p>
+      {html ? (
+        <iframe
+          ref={frame}
+          className="echo__app"
+          title="SureSay cards (MCP App)"
+          sandbox="allow-scripts allow-forms"
+          srcDoc={html}
+          style={{ height }}
+        />
+      ) : (
+        <p className="echo__idle">Ask for something. SureSay's cards will appear here.</p>
+      )}
+    </div>
+  );
+  const echoControls = (
+    <Fragment key="controls">
+      {assistant && (
+        <fieldset className="echo__mode">
+          <legend>Who plays the assistant?</legend>
+          <label>
+            <input type="radio" name="alexa-mode" checked={mode === "host"} onChange={() => setMode("host")} disabled={busy} />
+            A simple scripted host
+          </label>
+          <label>
+            <input type="radio" name="alexa-mode" checked={mode === "nova"} onChange={() => setMode("nova")} disabled={busy} />
+            Amazon Nova 2 Sonic, a live AI
+          </label>
+        </fieldset>
+      )}
+      <form className="echo__ask" onSubmit={submit} aria-label="Talk to Alexa">
+        <label htmlFor="alexa-input" className="echo__wake">
+          Alexa,
+        </label>
+        <input id="alexa-input" className="input" value={text} onChange={(e) => setText(e.target.value)} placeholder="van on" autoComplete="off" disabled={busy} />
+        <button type="submit" className="btn btn--primary" disabled={busy}>
+          <Icon name="send" size={22} /> Ask
+        </button>
+      </form>
+      <div className="echo__chips" role="group" aria-label="Examples">
+        {ALEXA_EXAMPLES.map((x) => (
+          <button key={x} type="button" className="btn btn--secondary btn--chip" disabled={busy} onClick={() => void ask(x)}>
+            “{x}”
+          </button>
+        ))}
+      </div>
+    </Fragment>
+  );
+
   return (
     <div className="alexa" role="dialog" aria-modal="true" aria-labelledby="alexa-title" ref={ref}>
       <header className="alexa__head">
@@ -321,56 +425,8 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
       </header>
 
       <div className="alexa__stage">
-        <section className="echo" aria-label="Echo Show screen (simulated)">
-          <div className="echo__screen">
-            <div className={`echo__bar${busy ? " echo__bar--busy" : ""}`} aria-hidden="true" />
-            <p className="echo__reply" role="status" aria-live="polite">
-              <span className="visually-hidden">Alexa: </span>
-              {reply}
-              {refused && <span className="echo__refused">{REFUSED_LINE}</span>}
-            </p>
-            {html ? (
-              <iframe
-                ref={frame}
-                className="echo__app"
-                title="SureSay cards (MCP App)"
-                sandbox="allow-scripts allow-forms"
-                srcDoc={html}
-                style={{ height }}
-              />
-            ) : (
-              <p className="echo__idle">Ask for something. SureSay's cards will appear here.</p>
-            )}
-          </div>
-          {assistant && (
-            <fieldset className="echo__mode">
-              <legend>Who plays the assistant?</legend>
-              <label>
-                <input type="radio" name="alexa-mode" checked={mode === "host"} onChange={() => setMode("host")} disabled={busy} />
-                A simple scripted host
-              </label>
-              <label>
-                <input type="radio" name="alexa-mode" checked={mode === "nova"} onChange={() => setMode("nova")} disabled={busy} />
-                Amazon Nova 2 Sonic, a live AI
-              </label>
-            </fieldset>
-          )}
-          <form className="echo__ask" onSubmit={submit} aria-label="Talk to Alexa">
-            <label htmlFor="alexa-input" className="echo__wake">
-              Alexa,
-            </label>
-            <input id="alexa-input" className="input" value={text} onChange={(e) => setText(e.target.value)} placeholder="van on" autoComplete="off" disabled={busy} />
-            <button type="submit" className="btn btn--primary" disabled={busy}>
-              <Icon name="send" size={22} /> Ask
-            </button>
-          </form>
-          <div className="echo__chips" role="group" aria-label="Examples">
-            {ALEXA_EXAMPLES.map((x) => (
-              <button key={x} type="button" className="btn btn--secondary btn--chip" disabled={busy} onClick={() => void ask(x)}>
-                “{x}”
-              </button>
-            ))}
-          </div>
+        <section className={`echo${narrow ? " echo--ask-first" : ""}`} aria-label="Echo Show screen (simulated)">
+          {narrow ? [echoControls, echoScreen] : [echoScreen, echoControls]}
         </section>
 
         <aside className="alexa__side">

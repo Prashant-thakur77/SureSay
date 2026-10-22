@@ -1,7 +1,7 @@
 {
   "name": "confirm",
-  "generated_at": "2026-10-22T15:20:22+0530",
-  "git_sha": "4883775",
+  "generated_at": "2026-10-22T18:36:14+0530",
+  "git_sha": "1b1c78e",
   "python": "3.13.12",
   "claim": 1,
   "asr_engine": "nova-2-sonic",
@@ -11,6 +11,8 @@
     "controls"
   ],
   "suresay_bias": "none",
+  "b0_reject_threshold": null,
+  "b0_reject_status": "its cached transcripts carry no per-utterance confidence (0 of 86 dev clips)",
   "distractors_per_speaker": 30,
   "summary": {
     "b0": {

@@ -1,0 +1,33 @@
+{
+  "name": "tuning_whisper_small_en_b0_reject",
+  "generated_at": "2026-10-22T18:36:12+0530",
+  "git_sha": "1b1c78e",
+  "python": "3.13.12",
+  "asr_engine": "whisper-small.en",
+  "available": true,
+  "speakers": "dev only (F03, M05)",
+  "rule": "fewest dev false accepts among thresholds recovering at least as many genuine answers on dev as SureSay; ties to the lower threshold",
+  "suresay_dev": {
+    "recovered": 16,
+    "clips": 154,
+    "accuracy_pct": 89.6,
+    "false_accept_pct": 1.9,
+    "false_accepts": 3,
+    "refused_pct": 72.7,
+    "true_accepts_recovered_pct": 88.9
+  },
+  "threshold": 0.4531096504943465,
+  "constraint_met": true,
+  "min_recovered": 16,
+  "dev": {
+    "threshold": 0.4531096504943465,
+    "recovered": 16,
+    "clips": 154,
+    "accuracy_pct": 51.9,
+    "false_accept_pct": 29.9,
+    "false_accepts": 46,
+    "refused_pct": 33.1,
+    "true_accepts_recovered_pct": 88.9
+  },
+  "candidates_tried": 86
+}

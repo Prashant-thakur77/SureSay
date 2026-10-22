@@ -12,6 +12,10 @@ Two contexts, as on screen:
 Systems:
 * B0 — plain assistant: unbiased ASR, the transcript is forced to the nearest allowed word
   (spelling + sound similarity); it never refuses.
+* B0 + reject — the same plain transcript, but it asks again when the recogniser is unsure: nothing heard,
+  no confidence, or per-utterance confidence below a threshold chosen on dev speakers only
+  (eval/tune_b0_reject.py, rule stated there). Only for engines whose cached transcripts carry a confidence
+  (faster-whisper: exp of the mean token log-probability); Transcribe and Nova 2 Sonic transcripts have none.
 * SureSay — ASR with the bias chosen on dev (eval/tune_confirm.py), then ``confirm_gate.consent.decide``,
   which refuses anything unclear.
 
@@ -64,6 +68,22 @@ def b0_decide(text: str, context: str) -> tuple[str, int | None]:
     return ("choose", allowed.index(best) + 1)
 
 
+def b0_reject_decide(text: str, confidence: float | None, context: str, threshold: float) -> tuple[str, int | None]:
+    """B0 + reject: the same plain transcript, but ask again ("unclear") when the recogniser is unsure.
+
+    Unsure = it heard nothing, gave no confidence, or its per-utterance confidence is below ``threshold``
+    (chosen on dev speakers by eval/tune_b0_reject.py). Otherwise it is plain B0, forced to the nearest word.
+    """
+    if not (text or "").strip() or confidence is None or confidence < threshold:
+        return ("unclear", None)
+    return b0_decide(text, context)
+
+
+def has_confidence(heard: dict[str, dict[str, Any]]) -> bool:
+    """True when the cached transcripts carry a per-utterance confidence (Transcribe and Nova 2 Sonic do not)."""
+    return any(h.get("confidence") is not None for h in heard.values())
+
+
 def truth_for(word: str, context: str) -> tuple[str, int | None]:
     table = CHOOSE_TRUTH if context == "choose" else FINAL_TRUTH
     return table.get(word, ("unclear", None))
@@ -101,6 +121,15 @@ def main() -> None:
         raise SystemExit("run eval/tune_confirm.py first (dev speakers only)")
     chosen = tuning["candidates"][tuning["chosen"]]
     biased = transcribe_all(args.engine, chosen["cache_tag"], wavs, chosen["words"])
+    reject = read_result(tuning_name(args.engine) + "_b0_reject") or {}
+    threshold = reject.get("threshold") if reject.get("available") else None
+    if threshold is None:
+        reject_status = reject.get("reason") or "run eval/tune_b0_reject.py first (dev speakers only)"
+    elif not has_confidence(plain):
+        raise SystemExit(f"{args.engine}: a B0 + reject threshold exists but the transcripts carry no confidence")
+    else:
+        reject_status = f"threshold {threshold} chosen on dev speakers only"
+    systems = ("b0", "suresay") + (("b0_reject",) if threshold is not None else ())
     per: list[dict[str, Any]] = []
     for c in clips:
         for context in ("choose", "final"):
@@ -110,17 +139,22 @@ def main() -> None:
             h0 = plain[c["wav"]]["text"]
             h1 = biased[c["wav"]]["text"]
             d = decide(h1, 3 if context == "choose" else 1, stage="choose" if context == "choose" else "final")
-            per.append({"speaker": c["speaker"], "group": c["group"], "word": c["norm"], "confirm_word": c["is_confirm_word"],
-                        "context": context, "truth": list(t), "wav": c["wav"],
-                        "b0": {"heard": h0, "decision": list(b0_decide(h0, context))},
-                        "suresay": {"heard": h1, "decision": [d.kind, d.option]}})
+            row = {"speaker": c["speaker"], "group": c["group"], "word": c["norm"], "confirm_word": c["is_confirm_word"],
+                   "context": context, "truth": list(t), "wav": c["wav"],
+                   "b0": {"heard": h0, "decision": list(b0_decide(h0, context))},
+                   "suresay": {"heard": h1, "decision": [d.kind, d.option]}}
+            if threshold is not None:
+                conf = plain[c["wav"]].get("confidence")
+                row["b0_reject"] = {"heard": h0, "confidence": conf,
+                                    "decision": list(b0_reject_decide(h0, conf, context, threshold))}
+            per.append(row)
 
     def table(system: str, select: Any) -> dict[str, Any]:
         rows = [{"decision": tuple(r[system]["decision"]), "truth": tuple(r["truth"])} for r in per if select(r)]
         return score(rows)
 
     summary: dict[str, Any] = {}
-    for system in ("b0", "suresay"):
+    for system in systems:
         s: dict[str, Any] = {}
         for g in groups:
             s[g] = table(system, lambda r, g=g: r["group"] == g)
@@ -130,10 +164,12 @@ def main() -> None:
                             for g in groups for spk in SPLIT[g]}
         summary[system] = s
     path = write_result("confirm", {"claim": 1, "asr_engine": args.engine, "groups": groups,
-                                    "suresay_bias": tuning["chosen"],
+                                    "suresay_bias": tuning["chosen"], "b0_reject_threshold": threshold,
+                                    "b0_reject_status": reject_status,
                                     "distractors_per_speaker": DISTRACTORS_PER_SPEAKER, "summary": summary,
                                     "rows": per}, run=args.run)
-    for system in ("b0", "suresay"):
+    print("B0 + reject:", reject_status)
+    for system in systems:
         t = summary[system].get("test")
         if t:
             print(f"{system:8s} test: acc {t['accuracy_pct']}%  false-accept {t['false_accept_pct']}% "
