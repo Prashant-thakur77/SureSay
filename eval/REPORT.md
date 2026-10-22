@@ -344,7 +344,7 @@ The web client's own tests also run axe on every screen (`web/src/test`).
 
 ## The live server, checked as an MCP client
 
-`eval/run_live_checks.py` runs against the deployed hub (https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws) over HTTPS as an MCP client: **20 of 20 checks passed** (2026-10-22T17:35:24+0530).
+`eval/run_live_checks.py` runs against the deployed hub (https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws) over HTTPS as an MCP client: **20 of 20 checks passed** (2026-10-22T17:57:24+0530).
 
 | | Check | Detail |
 |---|---|---|
@@ -373,16 +373,16 @@ Round trips from the test machine (they include the network to us-east-1; `/heal
 
 | Request | p50 ms | p95 ms | p50 minus network, ms |
 |---|---|---|---|
-| healthz (network baseline) | 259.8 | 264.6 | — |
-| tools/list | 265.6 | 275.5 | 5.8 |
-| tools/call home_status | 269.6 | 274.3 | 9.8 |
-| tools/call understand (typed) | 291.1 | 295.5 | 31.3 |
+| healthz (network baseline) | 260.8 | 262.8 | — |
+| tools/list | 268.7 | 273.0 | 7.9 |
+| tools/call home_status | 271.9 | 284.2 | 11.1 |
+| tools/call understand (typed) | 292.3 | 297.2 | 31.5 |
 
 The server's own processing time for real requests in the last 48 hours, from the CloudWatch metric the hub emits (`UnderstandMs`; voice includes speech recognition):
 
 | Request | Requests | p50 ms | p95 ms |
 |---|---|---|---|
-| understand, typed | 330 | 9.6 | 668.4 |
+| understand, typed | 353 | 9.6 | 663.7 |
 | understand, voice | 62 | 1472.8 | 4890.1 |
 
 ## Claims 2 and 5 with a Bedrock model ranking
@@ -457,7 +457,7 @@ One run of each request at the model's default settings; the model's choices and
 | `results/cost.json` | 8182e5e | 2026-10-20T23:53:51+0530 |
 | `results/hinglish.json` | 3fbe62e | 2026-10-22T14:47:39+0530 |
 | `results/live_assistant.json` | 3d78cef | 2026-10-22T17:33:24+0530 |
-| `results/live_checks.json` | 498f7c4 | 2026-10-22T17:35:24+0530 |
+| `results/live_checks.json` | 5297ca0 | 2026-10-22T17:57:24+0530 |
 | `results/novasonic/run1/confirm.json` | 4883775 | 2026-10-22T15:20:22+0530 |
 | `results/novasonic/run1/intent.json` | 68d5e05 | 2026-10-22T16:23:54+0530 |
 | `results/novasonic/run1/latency_nova_sonic.json` | 085a5fc | 2026-10-21T14:44:46+0530 |
