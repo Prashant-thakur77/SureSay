@@ -113,7 +113,7 @@ The Nova 2 Lite ranker and the model-driven safety arms are built and tested aga
 
 | Service | What it does in SureSay |
 |---|---|
-| **Amazon Bedrock: Nova 2 Lite** (`us.amazon.nova-2-lite-v1:0`) | Ranks the three most likely meanings from noisy recognition, the user's phrasebook and the home's state; abstains when unsure; runs the Strands agent. Temperature 0, JSON output checked against the action catalog. |
+| **Amazon Bedrock: Nova 2 Lite** (`us.amazon.nova-2-lite-v1:0`) | Ranks the three most likely meanings from noisy recognition, the user's phrasebook and the home's state, and abstains when unsure; the Strands agent's model. Temperature 0, JSON output checked against the action catalog. Built and tested; it runs once this account's on-demand quota opens (requested). |
 | **Amazon Bedrock AgentCore Runtime** | Hosts the Strands agent (direct code deploy); the hub invokes it for each turn. |
 | **Amazon Bedrock AgentCore Memory** | Each user's phrasebook as blob events; the agent's session, with a SEMANTIC strategy for facts the user tells it. |
 | **Strands Agents** | The agent loop, talking to the SureSay MCP server over Streamable HTTP. |
@@ -133,7 +133,7 @@ Code pointers, permissions and a verify command for each service: [docs/AWS_INTE
 
 ```bash
 make setup        # Python 3.13 venv (uv) + web client packages
-make test         # 437 Python tests (plus 158 web tests): the gate, the hub end to end, account linking, the Alexa skill, the 50-case safety suite
+make test         # 506 Python tests (355 for the gate, 151 for the hub) plus 169 web tests: account linking, the Alexa skill, the 50-case safety suite
 make demo         # hub + web client (+ agent when Bedrock is reachable) on http://127.0.0.1:9000
 ```
 
@@ -186,7 +186,7 @@ Confirmations work in English, Hinglish and Devanagari ("doosra", "teen number",
 | `web/` | The web client (Vite + React + TypeScript) |
 | `eval/` | TORGO preparation, the four claim scripts, tuning, cost, the report |
 | `infra/` | deploy, teardown, smoke test, IAM |
-| `docs/` | Friction log, product feedback, Devpost write-up, video script |
+| `docs/` | Judges' guide, AWS integrations, friction log, product feedback, feature requests, the write-up, video script, images |
 
 ## Contributing and changes
 

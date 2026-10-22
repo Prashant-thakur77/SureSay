@@ -36,3 +36,9 @@ eval/results/scratch/
 infra/.state/
 video/node_modules
 eval/results/ci/
+
+# working notes and submission drafts: kept locally, not part of the project
+CLAUDE.md
+plan.md
+docs/BRIEF.md
+docs/SUBMISSION.md
