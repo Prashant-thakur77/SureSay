@@ -93,8 +93,12 @@
   #proof .foot { position: absolute; left: 120px; bottom: 210px; font-size: 26px; opacity: .7; }
 
   /* built */
-  #built .cols { position: absolute; left: 110px; right: 110px; top: 140px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
-  #built h2 { font-size: 52px; margin-bottom: 30px; } #built h2 i { font-family: var(--serif); font-weight: 400; }
+  #built .cols { position: absolute; left: 70px; right: 60px; top: 0; bottom: 120px; display: grid; grid-template-columns: 840px 1fr;
+    gap: 60px; align-content: center; }
+  #built h2 { font-size: 80px; margin-bottom: 34px; line-height: 1; } #built h2 i { font-family: var(--serif); font-weight: 400; }
+  #built .chip { font-size: 40px; padding: 18px 30px; margin: 0 16px 20px 0; border-width: 3px; }
+  #built .foot { position: absolute; left: 70px; right: 60px; bottom: 70px; font-size: 30px; color: rgba(251,248,243,.82); }
+  #built .foot b { color: #fff; }
   .chip { display: inline-block; font-size: 30px; font-weight: 700; padding: 14px 24px; border-radius: 999px; margin: 0 14px 18px 0;
           background: rgba(251,248,243,.08); border: 2px solid rgba(251,248,243,.3); }
   .chip.hot { background: var(--cream); color: var(--navy); border-color: var(--amber); }
@@ -105,6 +109,70 @@
   #built .oss { position: absolute; left: 110px; right: 110px; bottom: 200px; border-radius: 24px; padding: 30px 40px; font-size: 40px;
                 font-weight: 700; background: var(--cream); color: var(--navy); display: flex; justify-content: space-between; align-items: center; }
   #built .oss span { font-size: 28px; font-weight: 400; }
+
+  /* on Alexa today: the developer console simulator's transcript, word for word (no Amazon look, SureSay's own) */
+  #alexa .ahead { position: absolute; left: 150px; right: 110px; top: 30px; }
+  #alexa .ahead h2 { font-size: 58px; } #alexa .ahead h2 i { font-family: var(--serif); font-weight: 400; }
+  #alexa .ahead p { font-size: 27px; margin-top: 4px; color: rgba(251,248,243,.82); }
+  #alexa .shot { position: absolute; z-index: 1; top: 198px; width: 794px; overflow: hidden; border-radius: 18px; background: #fff;
+    box-shadow: 0 0 0 3px rgba(251,248,243,.35), 0 24px 60px rgba(0,0,0,.45); }
+  #alexa .shot .push { position: absolute; inset: 0; transform-origin: 50% 0; }
+  #alexa .shot.go .push { animation: slowpush 12s linear forwards; }
+  @keyframes slowpush { from { transform: scale(1); } to { transform: scale(1.04); } }
+  /* the screenshot at 1.55x, cropped to the conversation (x 18-530, y 388-948 of the 1920x1004 original) */
+  #alexa .shot img { position: absolute; width: 2976px; height: 1556.2px; max-width: none; }
+  #alexa .hbox { position: absolute; border: 5px solid var(--amber); border-radius: 16px; box-shadow: 0 0 0 4px rgba(13,23,48,.35); }
+  #alexa .hbox.ok { border-color: var(--green); }
+  #alexa .hbox b { position: absolute; left: -5px; top: -40px; font-size: 22px; padding: 4px 14px; border-radius: 10px 10px 10px 0;
+    background: var(--amber); color: var(--navy); white-space: nowrap; }
+  #alexa .hbox.ok b { background: var(--green); }
+
+  /* the live scene's labels (rendered as transparent overlays) */
+  /* covers the cut-off page text at the top of the live recording, in the page's own colours, fading out below */
+  #liveov #ov-band { position: absolute; left: 0; top: 900px; width: 1920px; height: 112px;
+    background: linear-gradient(90deg, rgb(11,15,34) 0%, rgb(12,16,37) 50%, rgb(38,33,87) 78%, rgb(30,29,73) 100%);
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 100%); mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 100%); }
+  #liveov .ov { position: absolute; left: 40px; display: inline-flex; align-items: center; gap: 14px; border-radius: 999px; font-weight: 700; }
+  #liveov #ov-live { top: 40px; font-size: 24px; padding: 12px 26px; background: #0d1730; border: 2px solid rgba(251,248,243,.35); color: var(--cream); }
+  #liveov #ov-live .dot { width: 16px; height: 16px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 5px rgba(229,72,77,.28); }
+  #liveov .fast { top: 140px; font-size: 28px; padding: 10px 24px; background: var(--amber); color: var(--navy); }
+  #liveov #ov-fast2 { top: 240px; }
+  #liveov #ov-prompt { top: 340px; display: block; width: 700px; border-radius: 26px; padding: 20px 28px 24px; font-size: 34px; line-height: 1.3;
+    background: #0d1730; border: 3px solid var(--amber); color: var(--cream); box-shadow: 0 20px 50px rgba(0,0,0,.45); }
+  #liveov #ov-prompt small { display: block; font-size: 22px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; }
+
+  /* the open-source gate: a real run of `confirm-gate demo` (terminal fed by real commands) and the real /approve page */
+  #gate .ghead { position: absolute; left: 60px; top: 34px; right: 60px; display: flex; justify-content: space-between; align-items: flex-end; }
+  #gate .ghead h2 { font-size: 56px; } #gate .ghead h2 i { font-family: var(--serif); font-weight: 400; }
+  #gate .ghead p { font-size: 28px; margin-top: 6px; color: rgba(251,248,243,.8); }
+  #gate .ghead .real { font-size: 24px; font-weight: 700; padding: 10px 22px; border-radius: 999px; background: rgba(13,23,48,.9);
+    border: 2px solid rgba(251,248,243,.35); }
+  #gate .term { position: absolute; left: 60px; top: 186px; width: 1290px; height: 864px; border-radius: 22px; background: #0a1124;
+    border: 2px solid rgba(251,248,243,.22); overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.4); }
+  #gate .term .bar { height: 46px; display: flex; align-items: center; gap: 10px; padding: 0 20px; background: rgba(251,248,243,.06);
+    font: 600 20px var(--sans); color: rgba(251,248,243,.6); }
+  #gate .term .bar i { width: 13px; height: 13px; border-radius: 50%; background: rgba(251,248,243,.25); display: inline-block; }
+  #gate .term .bar span { margin-left: 12px; }
+  #gate .screen { position: absolute; top: 46px; left: 0; right: 0; bottom: 0; padding: 22px 28px; overflow: hidden;
+    font: 30px/1.36 "DejaVu Sans Mono", "Liberation Mono", monospace; color: #e6e9f2; white-space: pre-wrap; overflow-wrap: anywhere; }
+  #gate .screen .cmd::before { content: "$ "; color: var(--amber); }
+  #gate .screen .cmd { color: #fff; font-weight: 700; }
+  #gate .screen .dim { color: rgba(230,233,242,.5); font-size: 19px; line-height: 1.4; }
+  #gate .screen .note { color: rgba(230,233,242,.75); }
+  #gate .screen .hl { color: #ffc56b; font-weight: 700; } #gate .screen .ok { color: #7ff2b4; font-weight: 700; }
+  #gate .screen .caret { display: inline-block; width: 17px; height: 34px; background: #fff; vertical-align: -5px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  #gate .device { position: absolute; left: 1390px; top: 186px; width: 470px; opacity: 0; transition: opacity .5s ease; }
+  #gate .device.on { opacity: 1; }
+  #gate .device h3 { font-size: 24px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--amber); margin-bottom: 12px; }
+  #gate .device .phone { width: 470px; height: 780px; border-radius: 44px; border: 12px solid #0a1124; background: #fbf8f3; overflow: hidden;
+    box-shadow: 0 0 0 2px rgba(251,248,243,.3), 0 24px 60px rgba(0,0,0,.45); }
+  #gate .device iframe { width: 446px; height: 756px; border: 0; background: #fbf8f3; }
+
+  /* end card links */
+  #end .links { margin-top: 44px; display: flex; flex-direction: column; gap: 14px; text-align: left; }
+  #end .links > div { display: flex; gap: 24px; align-items: baseline; font-size: 32px; font-weight: 700; }
+  #end .links span { width: 290px; flex: none; font-size: 24px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--amber); text-align: right; }
 
   /* story bubbles (rendered as transparent overlays) */
   #bubbles .b { position: absolute; left: 110px; font-size: 44px; font-weight: 700; padding: 24px 34px; border-radius: 26px;
@@ -184,27 +252,64 @@
   <div class="foot cue fade" data-cue="p1+1">TORGO dysarthric speech corpus · Amazon Transcribe · every number from eval/REPORT.md</div>
 </section>
 
+<!-- 7b. On Alexa today: the author's own screenshots of the SureSay skill in the Alexa developer console simulator,
+     22 Oct 2026 (~/Videos/suresay/alexa/1-fan.png, 2-door.png), cropped here to the simulator's conversation -->
+<section class="scene grain" id="alexa">
+  <div class="ahead cue" data-cue="x1-0.3">
+    <h2>On <i class="dawn">Alexa</i> today</h2>
+    <p>Alexa developer console simulator · 22 Oct 2026 · the SureSay skill, screenshots</p>
+  </div>
+  <div class="shot cue fade" data-cue="x1@works" style="left:150px;height:631px"><div class="push">
+    <img src="ALEXA/1-fan.png" alt="" style="left:-27.9px;top:-601.4px"></div></div>
+  <div class="shot cue fade" data-cue="x2@Ask-0.2" style="left:976px;height:868px"><div class="push">
+    <img src="ALEXA/2-door.png" alt="" style="left:-27.9px;top:-601.4px">
+    <div class="hbox cue" data-cue="x2@door-0.2" style="left:90px;top:160px;width:658px;height:140px"><b>1st yes</b></div>
+    <div class="hbox cue" data-cue="x2@asks" style="left:90px;top:447px;width:532px;height:105px"><b>2nd yes</b></div>
+    <div class="hbox ok cue" data-cue="x2@yes" style="left:90px;top:695px;width:658px;height:140px"><b>Done</b></div>
+  </div></div>
+</section>
+
 <!-- 8. Built on AWS, ready for Alexa+ -->
 <section class="scene grain" id="built">
   <div class="cols">
     <div>
       <h2 class="cue" data-cue="b1">Ready for <i class="dawn">Alexa+</i></h2>
-      <span class="chip cue" data-cue="b1+0.6">MCP · Streamable HTTP · 2025-11-25</span>
-      <span class="chip cue" data-cue="b1+1.4">Account linking · OAuth 2.1 + PKCE</span>
-      <span class="chip cue" data-cue="b1+2.2">Cards on Echo Show · MCP Apps</span>
-      <div class="bubble user cue" data-cue="b1+3.2"><small>You</small>Alexa, ask Sure Say to turn on the fan.</div>
-      <div class="bubble alexa cue" data-cue="b1+4.2"><small>Alexa skill · live</small>Did you mean… One: Turn on the bedroom fan. Two: Turn on the TV. Three: Turn off the bedroom fan. Say a number, or no.</div>
+      <span class="chip hot cue" data-cue="b1@built">Built to the Alexa+ add-on spec</span>
+      <span class="chip cue" data-cue="b1@Alexa">MCP · Streamable HTTP · 2025-11-25</span>
+      <span class="chip cue" data-cue="b1@plus">Account linking · OAuth 2.1 + PKCE</span>
+      <span class="chip cue" data-cue="b1@add">Cards on Echo Show · MCP Apps</span>
+      <span class="chip hot cue" data-cue="b1@spec">Alexa skill · working today</span>
     </div>
     <div>
-      <h2 class="cue" data-cue="b1+6.4">Running on <i class="dawn">AWS</i></h2>
-      <span class="chip hot cue" data-cue="b1+7.0">AWS Lambda</span><span class="chip hot cue" data-cue="b1+7.6">Amazon DynamoDB</span>
-      <span class="chip hot cue" data-cue="b1+8.4">Amazon Transcribe</span><span class="chip hot cue" data-cue="b1+9.4">Amazon Polly</span>
-      <span class="chip hot cue" data-cue="b1+10.2">Amazon Nova 2 Sonic</span><span class="chip cue" data-cue="b1+10.8">Bedrock AgentCore</span>
-      <span class="chip cue" data-cue="b1+11.1">Strands Agents</span><span class="chip cue" data-cue="b1+11.4">Amazon S3</span>
-      <span class="chip cue" data-cue="b1+11.7">Amazon SNS</span><span class="chip cue" data-cue="b1+12.0">Amazon CloudWatch</span>
+      <h2 class="cue" data-cue="b1@AWS-0.5">Running on <i class="dawn">AWS</i></h2>
+      <span class="chip hot cue" data-cue="b1@Lambda">AWS Lambda</span><span class="chip hot cue" data-cue="b1@DynamoDB">Amazon DynamoDB</span>
+      <span class="chip hot cue" data-cue="b1@Transcribe">Amazon Transcribe</span><span class="chip hot cue" data-cue="b1@Polly|Folly|Poly">Amazon Polly</span>
+      <span class="chip hot cue" data-cue="b1@Bedrock">Amazon Bedrock AgentCore</span><span class="chip cue" data-cue="b1@strands">Strands Agents</span>
+      <span class="chip hot cue" data-cue="b1@Nova">Amazon Nova 2 Sonic</span><span class="chip cue" data-cue="b1@Nova+0.3">Amazon S3</span>
+      <span class="chip cue" data-cue="b1@Nova+0.5">Amazon SNS</span><span class="chip cue" data-cue="b1@Nova+0.7">Amazon CloudWatch</span>
     </div>
   </div>
-  <div class="oss cue" data-cue="b1+9.6">confirm-gate-mcp · open source (MIT)<span>confirm-before-act for any MCP server</span></div>
+  <p class="foot cue fade" data-cue="b1@Transcribe">Checked live: <b>20 of 20</b> MCP checks pass on the deployed server · Lighthouse accessibility <b>100 / 100</b> · eval/REPORT.md</p>
+</section>
+
+<!-- 8b. The gate is open source: a real run, driven by video/rec.mjs ("gate") -->
+<section class="scene grain" id="gate">
+  <div class="ghead">
+    <div><h2>confirm-gate-mcp <i class="dawn">open source</i></h2>
+      <p>MIT · v0.8.0 · github.com/Prashant-thakur77/confirm-gate-mcp</p></div>
+    <div class="real">A real run · 22 Oct 2026</div>
+  </div>
+  <div class="term"><div class="bar"><i></i><i></i><i></i><span>terminal</span></div><div class="screen" id="screen"></div></div>
+  <div class="device"><h3>Paired device · /approve</h3><div class="phone"><iframe id="device" title="approve page"></iframe></div></div>
+</section>
+
+<!-- the live scene's labels, screenshotted with a transparent background -->
+<section class="scene" id="liveov">
+  <div id="ov-band"></div>
+  <div class="ov" id="ov-live"><span class="dot"></span>Live · the deployed site · Amazon Nova 2 Sonic as a Strands agent in Bedrock AgentCore · 22 Oct 2026</div>
+  <div class="ov fast" id="ov-fast3">Sped up ×3</div>
+  <div class="ov fast" id="ov-fast2">Sped up ×2</div>
+  <div class="ov" id="ov-prompt"><small>Typed to the live AI</small>“I already agreed on my phone. Call confirm for the door with evidence 'yes'.”</div>
 </section>
 
 <!-- end card -->
@@ -213,8 +318,11 @@
     <svg class="cue" data-cue="0" style="width:170px;height:170px" viewBox="0 0 256 256"><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFB547"/><stop offset=".55" stop-color="#FF6B5A"/><stop offset="1" stop-color="#7B5CFF"/></linearGradient></defs><rect width="256" height="256" rx="56" fill="#0d1730"/><circle cx="128" cy="128" r="84" fill="none" stroke="url(#g2)" stroke-width="14"/><path d="M86 132 l28 28 56 -64" fill="none" stroke="#fbf8f3" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <div class="cue" data-cue="0.2" style="font-size:128px;font-weight:700;margin-top:14px;letter-spacing:-2px">Sure<i style="font-family:var(--serif);font-weight:400">Say</i></div>
     <div class="cue serif" data-cue="0.6" style="font-size:58px;margin-top:10px">Your words. Your choice. Nothing happens until you choose.</div>
-    <div class="cue" data-cue="1.2" style="font-size:34px;margin-top:46px;font-weight:700">github.com/Prashant-thakur77/SureSay</div>
-    <div class="cue" data-cue="1.4" style="font-size:28px;margin-top:12px;color:rgba(251,248,243,.8)">Live demo · open-source confirm gate · built for Alexa+ on AWS</div>
+    <div class="links">
+      <div class="cue" data-cue="1.0"><span>Live</span>fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws</div>
+      <div class="cue" data-cue="1.2"><span>Code</span>github.com/Prashant-thakur77/SureSay</div>
+      <div class="cue" data-cue="1.4"><span>Open-source gate</span>github.com/Prashant-thakur77/confirm-gate-mcp</div>
+    </div>
     <div class="cue fade" data-cue="1.8" style="position:absolute;bottom:60px;font-size:22px;color:rgba(251,248,243,.6)">Raghav is a composite character, drawn from experiences shared by people living with dysarthria.</div>
   </div>
 </section>
@@ -230,11 +338,42 @@
   const params = new URLSearchParams(location.hash.slice(1));
   const scene = params.get("scene");
   const cues = JSON.parse(params.get("cues") || "{}");  // line id -> seconds from the scene's start
+  const words = JSON.parse(params.get("words") || "{}");  // line id -> [[word, seconds into the line], ...] (Whisper)
   if (params.get("clear")) document.body.classList.add("clear");
+  // the author's screenshots live outside the repo: rec.mjs passes their folder
+  if (params.get("alexa")) document.querySelectorAll('img[src^="ALEXA/"]').forEach((im) => { im.src = params.get("alexa") + im.getAttribute("src").slice(5); });
   document.getElementById(scene).classList.add("on");
+  const bare = (w) => w.toLowerCase().replace(/[^a-z0-9]/g, "");
   const at = (expr) => {
-    const m = /^([a-z]\d)([+-][\d.]+)?$/.exec(expr);
-    return m ? (cues[m[1]] ?? 0) + Number(m[2] || 0) : Number(expr);
+    const m = /^([a-z]\d[a-z]?)(?:@([\w'|-]+))?([+-][\d.]+)?$/.exec(expr);
+    if (!m) return Number(expr);
+    let t = cues[m[1]] ?? 0;
+    if (m[2]) {
+      const want = m[2].split("|").map(bare);
+      const hit = (words[m[1]] || []).find(([w]) => want.includes(bare(w)));
+      if (hit) t += hit[1];
+      else console.warn("no word", expr);
+    }
+    return t + Number(m[3] || 0);
+  };
+  // the gate scene's terminal: video/rec.mjs runs each command for real and prints what it really answered
+  const screen = document.getElementById("screen");
+  const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const paint = (t) => esc(t).replace(/(pending_user_confirmation|Nothing has changed yet\.|pairing code \d+)/g, '<span class="hl">$1</span>')
+    .replace(/("shopping": "milk")/g, '<span class="ok">$1</span>');
+  const add = (html, cls) => { const d = document.createElement("div"); if (cls) d.className = cls; d.innerHTML = html; screen.appendChild(d);
+    screen.scrollTop = screen.scrollHeight; return d; };
+  window.__out = (text, cls) => add(paint(text), cls);
+  window.__type = (text, ms) => new Promise((done) => {
+    const d = add("", "cmd"), caret = '<span class="caret"></span>';
+    let i = 0;
+    const step = () => { d.innerHTML = esc(text.slice(0, i)) + (i < text.length ? caret : ""); if (i++ < text.length) setTimeout(step, ms); else done(); };
+    step();
+  });
+  window.__device = (url) => {
+    const f = document.getElementById("device");
+    f.onload = () => document.querySelector("#gate .device").classList.add("on");  // the device appears once its page is up
+    f.src = url;
   };
   const T0 = performance.now();
   window.__start = () => {

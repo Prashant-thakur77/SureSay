@@ -15,9 +15,9 @@ from narration import CAPTION, LINES  # noqa: E402
 AUDIO = os.path.expanduser("~/Videos/suresay/audio")
 BUILD = os.path.expanduser("~/Videos/suresay/build")
 # scene: (lead-in before its first line, gap between its lines, hold after its last line)
-PACING = {"story": (2.2, 0.75, 2.7), "turn": (0.3, 0.5, 0.9), "demo": (0.4, 0.45, 0.6), "door": (0.2, 0.45, 0.8),
-          "agent": (0.2, 0.55, 1.0), "features": (0.2, 0.4, 0.6), "proof": (0.2, 0.5, 1.0),
-          "built": (0.2, 0.45, 1.4), "close": (0.6, 0.7, 3.4)}
+PACING = {"story": (2.2, 0.75, 2.7), "turn": (0.3, 0.5, 0.9), "demo": (0.4, 0.45, 0.6), "door": (0.2, 0.45, 1.8),
+          "agent": (0.2, 0.55, 1.0), "live": (0.3, 0.55, 2.7), "features": (0.2, 0.4, 0.6), "proof": (0.2, 0.5, 1.0),
+          "alexa": (0.4, 0.6, 1.5), "built": (0.2, 0.45, 1.1), "gate": (1.4, 0.5, 2.6), "close": (0.6, 0.7, 3.4)}
 # extra room after a line: after c2 the app itself says the sentence aloud, in SureSay's own voice
 EXTRA_AFTER = {"c2": 3.1}
 
