@@ -1,0 +1,4565 @@
+{
+  "name": "task",
+  "generated_at": "2026-10-22T15:17:40+0530",
+  "git_sha": "bcaf885",
+  "python": "3.13.12",
+  "claim": "task success within two tries",
+  "asr_engine": "whisper-small.en",
+  "groups": [
+    "test"
+  ],
+  "rule": {
+    "floor": 0.65,
+    "confident": 1.0,
+    "margin": 0.15,
+    "maybe_floor": 0.5
+  },
+  "maybe_floor": 0.5,
+  "max_tries": 2,
+  "second_recording_available": {
+    "the same take on the other microphone": 90,
+    "another take in the same session": 7,
+    "none": 6,
+    "another session": 5
+  },
+  "summary": {
+    "test": {
+      "tasks": 108,
+      "suresay": {
+        "done_first_try_pct": 97.2,
+        "done_within_two_pct": 100.0,
+        "not_done_within_two_pct": 0.0,
+        "done_first_try": 105,
+        "done_second_try": 3,
+        "not_done": 0,
+        "done_within_two_counting_only_new_takes_pct": 98.1,
+        "mean_tries_when_done": 1.03,
+        "first_try_outcomes": {
+          "shown": 97,
+          "shown_as_maybe": 8,
+          "asked_again_with_other_maybes": 1,
+          "asked_again": 2
+        },
+        "second_tries": 3,
+        "second_tries_by_source": {
+          "the same take on the other microphone": {
+            "attempts": 2,
+            "done": 2
+          },
+          "another session": {
+            "attempts": 1,
+            "done": 1
+          }
+        },
+        "needed_second_try_but_no_other_recording": 0,
+        "card_sets_declined": 1,
+        "acted_without_confirmation": 0
+      },
+      "b1": {
+        "success_pct": 98.1,
+        "wrong_action_pct": 1.9,
+        "wrong_actions": 2
+      },
+      "b0": {
+        "success_pct": 33.3,
+        "wrong_action_pct": 66.7,
+        "wrong_actions": 72
+      },
+      "per_speaker": {
+        "F01": {
+          "tasks": 8,
+          "suresay": {
+            "done_first_try_pct": 100.0,
+            "done_within_two_pct": 100.0,
+            "not_done_within_two_pct": 0.0,
+            "done_first_try": 8,
+            "done_second_try": 0,
+            "not_done": 0,
+            "done_within_two_counting_only_new_takes_pct": 100.0,
+            "mean_tries_when_done": 1.0,
+            "first_try_outcomes": {
+              "shown": 8
+            },
+            "second_tries": 0,
+            "second_tries_by_source": {},
+            "needed_second_try_but_no_other_recording": 0,
+            "card_sets_declined": 0,
+            "acted_without_confirmation": 0
+          },
+          "b1": {
+            "success_pct": 100.0,
+            "wrong_action_pct": 0.0,
+            "wrong_actions": 0
+          },
+          "b0": {
+            "success_pct": 0.0,
+            "wrong_action_pct": 100.0,
+            "wrong_actions": 8
+          }
+        },
+        "F04": {
+          "tasks": 20,
+          "suresay": {
+            "done_first_try_pct": 100.0,
+            "done_within_two_pct": 100.0,
+            "not_done_within_two_pct": 0.0,
+            "done_first_try": 20,
+            "done_second_try": 0,
+            "not_done": 0,
+            "done_within_two_counting_only_new_takes_pct": 100.0,
+            "mean_tries_when_done": 1.0,
+            "first_try_outcomes": {
+              "shown": 20
+            },
+            "second_tries": 0,
+            "second_tries_by_source": {},
+            "needed_second_try_but_no_other_recording": 0,
+            "card_sets_declined": 0,
+            "acted_without_confirmation": 0
+          },
+          "b1": {
+            "success_pct": 100.0,
+            "wrong_action_pct": 0.0,
+            "wrong_actions": 0
+          },
+          "b0": {
+            "success_pct": 80.0,
+            "wrong_action_pct": 20.0,
+            "wrong_actions": 4
+          }
+        },
+        "M01": {
+          "tasks": 20,
+          "suresay": {
+            "done_first_try_pct": 95.0,
+            "done_within_two_pct": 100.0,
+            "not_done_within_two_pct": 0.0,
+            "done_first_try": 19,
+            "done_second_try": 1,
+            "not_done": 0,
+            "done_within_two_counting_only_new_takes_pct": 95.0,
+            "mean_tries_when_done": 1.05,
+            "first_try_outcomes": {
+              "shown": 15,
+              "shown_as_maybe": 4,
+              "asked_again_with_other_maybes": 1
+            },
+            "second_tries": 1,
+            "second_tries_by_source": {
+              "the same take on the other microphone": {
+                "attempts": 1,
+                "done": 1
+              }
+            },
+            "needed_second_try_but_no_other_recording": 0,
+            "card_sets_declined": 1,
+            "acted_without_confirmation": 0
+          },
+          "b1": {
+            "success_pct": 100.0,
+            "wrong_action_pct": 0.0,
+            "wrong_actions": 0
+          },
+          "b0": {
+            "success_pct": 5.0,
+            "wrong_action_pct": 95.0,
+            "wrong_actions": 19
+          }
+        },
+        "M02": {
+          "tasks": 20,
+          "suresay": {
+            "done_first_try_pct": 95.0,
+            "done_within_two_pct": 100.0,
+            "not_done_within_two_pct": 0.0,
+            "done_first_try": 19,
+            "done_second_try": 1,
+            "not_done": 0,
+            "done_within_two_counting_only_new_takes_pct": 95.0,
+            "mean_tries_when_done": 1.05,
+            "first_try_outcomes": {
+              "shown": 19,
+              "asked_again": 1
+            },
+            "second_tries": 1,
+            "second_tries_by_source": {
+              "the same take on the other microphone": {
+                "attempts": 1,
+                "done": 1
+              }
+            },
+            "needed_second_try_but_no_other_recording": 0,
+            "card_sets_declined": 0,
+            "acted_without_confirmation": 0
+          },
+          "b1": {
+            "success_pct": 95.0,
+            "wrong_action_pct": 5.0,
+            "wrong_actions": 1
+          },
+          "b0": {
+            "success_pct": 10.0,
+            "wrong_action_pct": 90.0,
+            "wrong_actions": 18
+          }
+        },
+        "M03": {
+          "tasks": 20,
+          "suresay": {
+            "done_first_try_pct": 100.0,
+            "done_within_two_pct": 100.0,
+            "not_done_within_two_pct": 0.0,
+            "done_first_try": 20,
+            "done_second_try": 0,
+            "not_done": 0,
+            "done_within_two_counting_only_new_takes_pct": 100.0,
+            "mean_tries_when_done": 1.0,
+            "first_try_outcomes": {
+              "shown": 20
+            },
+            "second_tries": 0,
+            "second_tries_by_source": {},
+            "needed_second_try_but_no_other_recording": 0,
+            "card_sets_declined": 0,
+            "acted_without_confirmation": 0
+          },
+          "b1": {
+            "success_pct": 100.0,
+            "wrong_action_pct": 0.0,
+            "wrong_actions": 0
+          },
+          "b0": {
+            "success_pct": 85.0,
+            "wrong_action_pct": 15.0,
+            "wrong_actions": 3
+          }
+        },
+        "M04": {
+          "tasks": 20,
+          "suresay": {
+            "done_first_try_pct": 95.0,
+            "done_within_two_pct": 100.0,
+            "not_done_within_two_pct": 0.0,
+            "done_first_try": 19,
+            "done_second_try": 1,
+            "not_done": 0,
+            "done_within_two_counting_only_new_takes_pct": 100.0,
+            "mean_tries_when_done": 1.05,
+            "first_try_outcomes": {
+              "shown": 15,
+              "shown_as_maybe": 4,
+              "asked_again": 1
+            },
+            "second_tries": 1,
+            "second_tries_by_source": {
+              "another session": {
+                "attempts": 1,
+                "done": 1
+              }
+            },
+            "needed_second_try_but_no_other_recording": 0,
+            "card_sets_declined": 0,
+            "acted_without_confirmation": 0
+          },
+          "b1": {
+            "success_pct": 95.0,
+            "wrong_action_pct": 5.0,
+            "wrong_actions": 1
+          },
+          "b0": {
+            "success_pct": 0.0,
+            "wrong_action_pct": 100.0,
+            "wrong_actions": 20
+          }
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "speaker": "F01",
+      "group": "test",
+      "text": "Grandfather likes to be modern in his language.",
+      "truth": "ph_00",
+      "wav_1": "raw/F01/Session1/wav_headMic/0130.wav",
+      "wav_2": "raw/F01/Session1/wav_arrayMic/0130.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "man probably like to be modern in his language",
+          "abstain": false,
+          "top": [
+            "ph_00",
+            "ph_34",
+            "ph_04"
+          ],
+          "conf": [
+            0.8054,
+            0.452,
+            0.4518
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "man probably like to be modern in his language",
+        "top1": "ph_00",
+        "success": true
+      },
+      "b0": {
+        "heard": "Well, I'd probably like to be monitoring his language.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "F01",
+      "group": "test",
+      "text": "Twice each day he plays skillfully and with zest upon our small organ.",
+      "truth": "ph_01",
+      "wav_1": "raw/F01/Session1/wav_headMic/0116.wav",
+      "wav_2": "raw/F01/Session1/wav_arrayMic/0116.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "why can't he play skillfully and with zest upon our small organ",
+          "abstain": false,
+          "top": [
+            "ph_01",
+            "ph_07",
+            "ph_31"
+          ],
+          "conf": [
+            0.8949,
+            0.4654,
+            0.4622
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "why can't he play skillfully and with zest upon our small organ",
+        "top1": "ph_01",
+        "success": true
+      },
+      "b0": {
+        "heard": "When creating it, he plays skillful and wins the best upon a small organ.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "F01",
+      "group": "test",
+      "text": "yet he still thinks as swiftly as ever.",
+      "truth": "ph_02",
+      "wav_1": "raw/F01/Session1/wav_headMic/0104.wav",
+      "wav_2": "raw/F01/Session1/wav_headMic/0105.wav",
+      "second_source": "another take in the same session",
+      "suresay": {
+        "attempt_1": {
+          "heard": "yet he still thinks as swiftly as ever",
+          "abstain": false,
+          "top": [
+            "ph_02",
+            "ph_03",
+            "ph_31"
+          ],
+          "conf": [
+            1.0,
+            0.4879,
+            0.468
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "yet he still thinks as swiftly as ever",
+        "top1": "ph_02",
+        "success": true
+      },
+      "b0": {
+        "heard": "Yeah, he still thinks that's my plan ever.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "F01",
+      "group": "test",
+      "text": "he slowly takes a short walk in the open air each day.",
+      "truth": "ph_03",
+      "wav_1": "raw/F01/Session1/wav_headMic/0014.wav",
+      "wav_2": "raw/F01/Session1/wav_arrayMic/0014.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "he slowly kicks a slight walk in the open air each day",
+          "abstain": false,
+          "top": [
+            "ph_03",
+            "ph_02",
+            "ph_45"
+          ],
+          "conf": [
+            0.9069,
+            0.5007,
+            0.476
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "he slowly kicks a slight walk in the open air each day",
+        "top1": "ph_03",
+        "success": true
+      },
+      "b0": {
+        "heard": "He slowly kicks a slight walk in the open area again.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "F01",
+      "group": "test",
+      "text": "We have often urged him to walk more and smoke less,",
+      "truth": "ph_04",
+      "wav_1": "raw/F01/Session1/wav_headMic/0036.wav",
+      "wav_2": "raw/F01/Session1/wav_arrayMic/0036.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "we have often we can be one more slowly and smoke less",
+          "abstain": false,
+          "top": [
+            "ph_04",
+            "ph_03",
+            "ph_07"
+          ],
+          "conf": [
+            0.7268,
+            0.4902,
+            0.4868
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "we have often we can be one more slowly and smoke less",
+        "top1": "ph_04",
+        "success": true
+      },
+      "b0": {
+        "heard": "We have a lot of children who can walk more slowly and smoke less.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "F01",
+      "group": "test",
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "truth": "ph_05",
+      "wav_1": "raw/F01/Session1/wav_headMic/0030.wav",
+      "wav_2": "raw/F01/Session1/wav_headMic/0031.wav",
+      "second_source": "another take in the same session",
+      "suresay": {
+        "attempt_1": {
+          "heard": "the quick brown fox jumps over the lazy dog",
+          "abstain": false,
+          "top": [
+            "ph_05",
+            "ph_30",
+            "ph_39"
+          ],
+          "conf": [
+            1.0,
+            0.5257,
+            0.4952
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "the quick brown fox jumps over the lazy dog",
+        "top1": "ph_05",
+        "success": true
+      },
+      "b0": {
+        "heard": "The quick-bound fox comes over the lady dog.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "F01",
+      "group": "test",
+      "text": "You wished to know all about my grandfather.",
+      "truth": "ph_06",
+      "wav_1": "raw/F01/Session1/wav_headMic/0022.wav",
+      "wav_2": "raw/F01/Session1/wav_arrayMic/0022.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "you wish you all about my grandfather",
+          "abstain": false,
+          "top": [
+            "ph_06",
+            "ph_20",
+            "ph_18"
+          ],
+          "conf": [
+            0.8865,
+            0.4725,
+            0.4505
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "you wish you all about my grandfather",
+        "top1": "ph_06",
+        "success": true
+      },
+      "b0": {
+        "heard": "and with me all about my grandfather.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "F01",
+      "group": "test",
+      "text": "Except in the winter when the ooze or snow or ice prevents,",
+      "truth": "ph_07",
+      "wav_1": "raw/F01/Session1/wav_headMic/0008.wav",
+      "wav_2": "raw/F01/Session1/wav_arrayMic/0008.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "and stuff in the rain the ooze or snow or ice prevents",
+          "abstain": false,
+          "top": [
+            "ph_07",
+            "ph_41",
+            "ph_36"
+          ],
+          "conf": [
+            0.8054,
+            0.5198,
+            0.5053
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "and stuff in the rain the ooze or snow or ice prevents",
+        "top1": "ph_07",
+        "success": true
+      },
+      "b0": {
+        "heard": "and stuff in the way we use also our eyes to make.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "Just one side got wet.",
+      "truth": "ph_00",
+      "wav_1": "raw/F04/Session1/wav_arrayMic/0198.wav",
+      "wav_2": null,
+      "second_source": "none",
+      "suresay": {
+        "attempt_1": {
+          "heard": "just once I got wet",
+          "abstain": false,
+          "top": [
+            "ph_00",
+            "ph_39",
+            "ph_11"
+          ],
+          "conf": [
+            0.8833,
+            0.5694,
+            0.4973
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "just once I got wet",
+        "top1": "ph_00",
+        "success": true
+      },
+      "b0": {
+        "heard": "Just once I got wet.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "If you destroy confidence in banks, you do something to the economy, he said.",
+      "truth": "ph_01",
+      "wav_1": "raw/F04/Session1/wav_arrayMic/0159.wav",
+      "wav_2": null,
+      "second_source": "none",
+      "suresay": {
+        "attempt_1": {
+          "heard": "if you destroy confidence in banks you do something to the economy he said",
+          "abstain": false,
+          "top": [
+            "ph_01",
+            "ph_14",
+            "ph_24"
+          ],
+          "conf": [
+            1.0,
+            0.4544,
+            0.4468
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "if you destroy confidence in banks you do something to the economy he said",
+        "top1": "ph_01",
+        "success": true
+      },
+      "b0": {
+        "heard": "If you destroy confidence in banks, you do something to the economy,\" he said.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "This is not a program of socialized medicine.",
+      "truth": "ph_02",
+      "wav_1": "raw/F04/Session2/wav_headMic/0143.wav",
+      "wav_2": "raw/F04/Session2/wav_headMic/0144.wav",
+      "second_source": "another take in the same session",
+      "suresay": {
+        "attempt_1": {
+          "heard": "this is not a program of socialized medicine",
+          "abstain": false,
+          "top": [
+            "ph_02",
+            "ph_17",
+            "ph_43"
+          ],
+          "conf": [
+            1.0,
+            0.5198,
+            0.4702
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "this is not a program of socialized medicine",
+        "top1": "ph_02",
+        "success": true
+      },
+      "b0": {
+        "heard": "This is not a program of socialized medicine.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "Are your grades higher or lower than Nancy's?",
+      "truth": "ph_03",
+      "wav_1": "raw/F04/Session2/wav_headMic/0053.wav",
+      "wav_2": "raw/F04/Session2/wav_arrayMic/0053.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "are your grades higher or lower than nancy's",
+          "abstain": false,
+          "top": [
+            "ph_03",
+            "ph_15",
+            "ph_24"
+          ],
+          "conf": [
+            1.0,
+            0.5071,
+            0.5
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "are your grades higher or lower than nancy's",
+        "top1": "ph_03",
+        "success": true
+      },
+      "b0": {
+        "heard": "Are your grades higher or lower than Nancy's?",
+        "success": true
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "A roll of wire lay near the wall.",
+      "truth": "ph_04",
+      "wav_1": "raw/F04/Session2/wav_headMic/0193.wav",
+      "wav_2": "raw/F04/Session2/wav_arrayMic/0193.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "a roll of wire lay near the wall",
+          "abstain": false,
+          "top": [
+            "ph_04",
+            "ph_47",
+            "ph_07"
+          ],
+          "conf": [
+            1.0,
+            0.4686,
+            0.4648
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "a roll of wire lay near the wall",
+        "top1": "ph_04",
+        "success": true
+      },
+      "b0": {
+        "heard": "A roll of wire lay near the wall.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "This was easy for us.",
+      "truth": "ph_05",
+      "wav_1": "raw/F04/Session2/wav_headMic/0014.wav",
+      "wav_2": "raw/F04/Session2/wav_arrayMic/0014.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "this was easy for us",
+          "abstain": false,
+          "top": [
+            "ph_05",
+            "ph_11",
+            "ph_43"
+          ],
+          "conf": [
+            1.0,
+            0.6212,
+            0.5417
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "this was easy for us",
+        "top1": "ph_05",
+        "success": true
+      },
+      "b0": {
+        "heard": "This was easy for us.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "When he speaks, his voice is just a bit cracked and quivers a trifle.",
+      "truth": "ph_06",
+      "wav_1": "raw/F04/Session1/wav_arrayMic/0100.wav",
+      "wav_2": null,
+      "second_source": "none",
+      "suresay": {
+        "attempt_1": {
+          "heard": "when he speaks his voice is just a bit cracked and quivers a trifle",
+          "abstain": false,
+          "top": [
+            "ph_06",
+            "ph_32",
+            "ph_38"
+          ],
+          "conf": [
+            1.0,
+            0.4681,
+            0.4626
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "when he speaks his voice is just a bit cracked and quivers a trifle",
+        "top1": "ph_06",
+        "success": true
+      },
+      "b0": {
+        "heard": "When he speaks, his voice is just a bit cracked and quivers a trifle.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "People who value themselves are life's winners.",
+      "truth": "ph_07",
+      "wav_1": "raw/F04/Session2/wav_headMic/0227.wav",
+      "wav_2": "raw/F04/Session2/wav_arrayMic/0227.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "people who value themselves are life's winners",
+          "abstain": false,
+          "top": [
+            "ph_07",
+            "ph_43",
+            "ph_04"
+          ],
+          "conf": [
+            1.0,
+            0.4662,
+            0.4648
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "people who value themselves are life's winners",
+        "top1": "ph_07",
+        "success": true
+      },
+      "b0": {
+        "heard": "People who value themselves are life's winners.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "They carried me off on the stretcher.",
+      "truth": "ph_08",
+      "wav_1": "raw/F04/Session2/wav_headMic/0057.wav",
+      "wav_2": "raw/F04/Session2/wav_arrayMic/0057.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "they carried me off on the stretcher",
+          "abstain": false,
+          "top": [
+            "ph_08",
+            "ph_47",
+            "ph_24"
+          ],
+          "conf": [
+            1.0,
+            0.5485,
+            0.4924
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "they carried me off on the stretcher",
+        "top1": "ph_08",
+        "success": true
+      },
+      "b0": {
+        "heard": "They carried me off on the stretcher.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "Before Thursday's exam, review every formula.",
+      "truth": "ph_09",
+      "wav_1": "raw/F04/Session2/wav_headMic/0172.wav",
+      "wav_2": "raw/F04/Session2/wav_arrayMic/0172.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "before thursday's exam review every formula",
+          "abstain": false,
+          "top": [
+            "ph_09",
+            "ph_42",
+            "ph_05"
+          ],
+          "conf": [
+            1.0,
+            0.5009,
+            0.4722
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "before thursday's exam review every formula",
+        "top1": "ph_09",
+        "success": true
+      },
+      "b0": {
+        "heard": "Before Thursday's exam, review every formula.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "Each one volunteered to jump first.",
+      "truth": "ph_10",
+      "wav_1": "raw/F04/Session2/wav_headMic/0215.wav",
+      "wav_2": "raw/F04/Session2/wav_arrayMic/0215.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "each one volunteered to jump first",
+          "abstain": false,
+          "top": [
+            "ph_10",
+            "ph_17",
+            "ph_47"
+          ],
+          "conf": [
+            1.0,
+            0.5188,
+            0.4754
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "each one volunteered to jump first",
+        "top1": "ph_10",
+        "success": true
+      },
+      "b0": {
+        "heard": "Each one volunteered to jump first.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "It was a good win for us.",
+      "truth": "ph_11",
+      "wav_1": "raw/F04/Session2/wav_headMic/0118.wav",
+      "wav_2": "raw/F04/Session2/wav_arrayMic/0118.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "it was a good win for us",
+          "abstain": false,
+          "top": [
+            "ph_11",
+            "ph_05",
+            "ph_26"
+          ],
+          "conf": [
+            1.0,
+            0.6212,
+            0.4936
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "it was a good win for us",
+        "top1": "ph_11",
+        "success": true
+      },
+      "b0": {
+        "heard": "It was a good win for us.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "I scrubbed the floors thoroughly.",
+      "truth": "ph_12",
+      "wav_1": "raw/F04/Session2/wav_headMic/0019.wav",
+      "wav_2": "raw/F04/Session2/wav_arrayMic/0019.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "i scrubbed the floors thoroughly",
+          "abstain": false,
+          "top": [
+            "ph_12",
+            "ph_45",
+            "ph_47"
+          ],
+          "conf": [
+            1.0,
+            0.4941,
+            0.4877
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "i scrubbed the floors thoroughly",
+        "top1": "ph_12",
+        "success": true
+      },
+      "b0": {
+        "heard": "I scrub the floors thoroughly.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "Except in the winter when the ooze or snow or ice prevents,",
+      "truth": "ph_13",
+      "wav_1": "raw/F04/Session1/wav_arrayMic/0091.wav",
+      "wav_2": "raw/F04/Session1/wav_arrayMic/0092.wav",
+      "second_source": "another take in the same session",
+      "suresay": {
+        "attempt_1": {
+          "heard": "except in the winter when they owes or snow or ice prevents",
+          "abstain": false,
+          "top": [
+            "ph_13",
+            "ph_24",
+            "ph_34"
+          ],
+          "conf": [
+            0.967,
+            0.4898,
+            0.4869
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "except in the winter when they owes or snow or ice prevents",
+        "top1": "ph_13",
+        "success": true
+      },
+      "b0": {
+        "heard": "except in the winter when they owes or snow or ice prevents.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "giving those who observe him a pronounced feeling of the utmost respect.",
+      "truth": "ph_14",
+      "wav_1": "raw/F04/Session1/wav_arrayMic/0063.wav",
+      "wav_2": null,
+      "second_source": "none",
+      "suresay": {
+        "attempt_1": {
+          "heard": "giving those who observe him a pronounced feeling of the utmost respect",
+          "abstain": false,
+          "top": [
+            "ph_14",
+            "ph_35",
+            "ph_01"
+          ],
+          "conf": [
+            1.0,
+            0.4545,
+            0.4544
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "giving those who observe him a pronounced feeling of the utmost respect",
+        "top1": "ph_14",
+        "success": true
+      },
+      "b0": {
+        "heard": "giving those who observe him a pronounced feeling of the utmost respect.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "Both figures would go higher in later years.",
+      "truth": "ph_15",
+      "wav_1": "raw/F04/Session1/wav_arrayMic/0133.wav",
+      "wav_2": null,
+      "second_source": "none",
+      "suresay": {
+        "attempt_1": {
+          "heard": "both figures would go higher in the later years",
+          "abstain": false,
+          "top": [
+            "ph_15",
+            "ph_08",
+            "ph_29"
+          ],
+          "conf": [
+            0.9611,
+            0.5174,
+            0.5102
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "both figures would go higher in the later years",
+        "top1": "ph_15",
+        "success": true
+      },
+      "b0": {
+        "heard": "Both figures would go higher in the later years.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "The books are very expensive.",
+      "truth": "ph_16",
+      "wav_1": "raw/F04/Session2/wav_headMic/0206.wav",
+      "wav_2": "raw/F04/Session2/wav_arrayMic/0206.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "the books are very expensive",
+          "abstain": false,
+          "top": [
+            "ph_16",
+            "ph_33",
+            "ph_05"
+          ],
+          "conf": [
+            1.0,
+            0.5088,
+            0.4811
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "the books are very expensive",
+        "top1": "ph_16",
+        "success": true
+      },
+      "b0": {
+        "heard": "The books are very expensive.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "One validated acts of school districts.",
+      "truth": "ph_17",
+      "wav_1": "raw/F04/Session2/wav_headMic/0058.wav",
+      "wav_2": "raw/F04/Session2/wav_arrayMic/0058.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "one validated acts of school districts",
+          "abstain": false,
+          "top": [
+            "ph_17",
+            "ph_02",
+            "ph_10"
+          ],
+          "conf": [
+            1.0,
+            0.5198,
+            0.5188
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "one validated acts of school districts",
+        "top1": "ph_17",
+        "success": true
+      },
+      "b0": {
+        "heard": "One validated acts of school districts.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "Did dad do academic bidding?",
+      "truth": "ph_18",
+      "wav_1": "raw/F04/Session2/wav_headMic/0207.wav",
+      "wav_2": "raw/F04/Session2/wav_arrayMic/0207.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "did dad do academic bidding",
+          "abstain": false,
+          "top": [
+            "ph_18",
+            "ph_39",
+            "ph_17"
+          ],
+          "conf": [
+            1.0,
+            0.4412,
+            0.4237
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "did dad do academic bidding",
+        "top1": "ph_18",
+        "success": true
+      },
+      "b0": {
+        "heard": "Did Dad do academic bidding?",
+        "success": true
+      }
+    },
+    {
+      "speaker": "F04",
+      "group": "test",
+      "text": "he slowly takes a short walk in the open air each day.",
+      "truth": "ph_19",
+      "wav_1": "raw/F04/Session1/wav_arrayMic/0061.wav",
+      "wav_2": null,
+      "second_source": "none",
+      "suresay": {
+        "attempt_1": {
+          "heard": "he slow he slowly takes a short walk in the open air each day",
+          "abstain": false,
+          "top": [
+            "ph_19",
+            "ph_06",
+            "ph_13"
+          ],
+          "conf": [
+            0.9324,
+            0.4816,
+            0.4726
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "he slow he slowly takes a short walk in the open air each day",
+        "top1": "ph_19",
+        "success": true
+      },
+      "b0": {
+        "heard": "He slowly takes a short walk in the open air each day.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "A long, flowing beard clings to his chin,",
+      "truth": "ph_00",
+      "wav_1": "raw/M01/Session1/wav_headMic/0012.wav",
+      "wav_2": "raw/M01/Session1/wav_headMic/0013.wav",
+      "second_source": "another take in the same session",
+      "suresay": {
+        "attempt_1": {
+          "heard": "a long flowing beard clings to his chin",
+          "abstain": false,
+          "top": [
+            "ph_00",
+            "ph_20",
+            "ph_11"
+          ],
+          "conf": [
+            1.0,
+            0.4766,
+            0.4679
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "a long flowing beard clings to his chin",
+        "top1": "ph_00",
+        "success": true
+      },
+      "b0": {
+        "heard": "I'm trying to build things to each time.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "The islands are sparsely populated.",
+      "truth": "ph_01",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0042.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0042.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "the island are sparsely populated",
+          "abstain": false,
+          "top": [
+            "ph_01",
+            "ph_33",
+            "ph_21"
+          ],
+          "conf": [
+            0.9814,
+            0.5144,
+            0.5114
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "the island are sparsely populated",
+        "top1": "ph_01",
+        "success": true
+      },
+      "b0": {
+        "heard": "The island is... for the population.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "Except in the winter when the ooze or snow or ice prevents,",
+      "truth": "ph_02",
+      "wav_1": "raw/M01/Session1/wav_headMic/0011.wav",
+      "wav_2": "raw/M01/Session1/wav_arrayMic/0011.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "again in the winter when the ooze or snow ice prevent",
+          "abstain": false,
+          "top": [
+            "ph_02",
+            "ph_22",
+            "ph_21"
+          ],
+          "conf": [
+            0.861,
+            0.4808,
+            0.4792
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "again in the winter when the ooze or snow ice prevent",
+        "top1": "ph_02",
+        "success": true
+      },
+      "b0": {
+        "heard": "Again in the winter when the oooh are not alright for vent.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "The museum hires musicians every evening.",
+      "truth": "ph_03",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0235.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0235.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "the beauty of our music in every evening",
+          "abstain": false,
+          "top": [
+            "ph_03",
+            "ph_33",
+            "ph_14"
+          ],
+          "conf": [
+            0.7212,
+            0.5033,
+            0.4849
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "the beauty of our music in every evening",
+        "top1": "ph_03",
+        "success": true
+      },
+      "b0": {
+        "heard": "than beauty am I. Beauty did everything.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "Jane may earn more money by working hard.",
+      "truth": "ph_04",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0084.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0084.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "jane may earn more money by working hard",
+          "abstain": false,
+          "top": [
+            "ph_04",
+            "ph_08",
+            "ph_29"
+          ],
+          "conf": [
+            1.0,
+            0.4451,
+            0.4424
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "jane may earn more money by working hard",
+        "top1": "ph_04",
+        "success": true
+      },
+      "b0": {
+        "heard": "Jane may earn more money by working hard.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "Alfalfa is healthy for you.",
+      "truth": "ph_05",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0239.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0239.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "above is only for you",
+          "abstain": false,
+          "top": [
+            "ph_05",
+            "ph_31",
+            "ph_37"
+          ],
+          "conf": [
+            0.6941,
+            0.544,
+            0.5142
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "above is only for you",
+        "top1": "ph_05",
+        "success": true
+      },
+      "b0": {
+        "heard": "I'm over. It's all I need for you.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "Two other cases also were under advisement.",
+      "truth": "ph_06",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0066.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0066.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "to other cases also were under advisement",
+          "abstain": true,
+          "top": [
+            "ph_06",
+            "ph_36",
+            "ph_33"
+          ],
+          "conf": [
+            0.9855,
+            0.9347,
+            0.5895
+          ],
+          "maybe_cards": [
+            "ph_06",
+            "ph_36"
+          ],
+          "outcome": "shown_as_maybe",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "to other cases also were under advisement",
+        "top1": "ph_06",
+        "success": true
+      },
+      "b0": {
+        "heard": "to other cases all over under an advisement.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "The train approached the depot slowly.",
+      "truth": "ph_07",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0129.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0129.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "the drain abroad the boy",
+          "abstain": true,
+          "top": [
+            "ph_07",
+            "ph_15",
+            "ph_10"
+          ],
+          "conf": [
+            0.6871,
+            0.5863,
+            0.5142
+          ],
+          "maybe_cards": [
+            "ph_07",
+            "ph_15",
+            "ph_10"
+          ],
+          "outcome": "shown_as_maybe",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "the drain abroad the boy",
+        "top1": "ph_07",
+        "success": true
+      },
+      "b0": {
+        "heard": "than drink a brat. The boy dying.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "Everything went real smooth, the sheriff said.",
+      "truth": "ph_08",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0146.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0146.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "everything went real smooth deserve yet",
+          "abstain": false,
+          "top": [
+            "ph_08",
+            "ph_26",
+            "ph_02"
+          ],
+          "conf": [
+            0.829,
+            0.4752,
+            0.461
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "everything went real smooth deserve yet",
+        "top1": "ph_08",
+        "success": true
+      },
+      "b0": {
+        "heard": "Everything went real smooth the year of the end.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "Twice each day he plays skillfully and with zest upon our small organ.",
+      "truth": "ph_09",
+      "wav_1": "raw/M01/Session1/wav_headMic/0084.wav",
+      "wav_2": "raw/M01/Session1/wav_arrayMic/0084.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "it's right in day he's doing skillfully and with zest upon our small organ",
+          "abstain": false,
+          "top": [
+            "ph_09",
+            "ph_02",
+            "ph_20"
+          ],
+          "conf": [
+            0.817,
+            0.4702,
+            0.4697
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "it's right in day he's doing skillfully and with zest upon our small organ",
+        "top1": "ph_09",
+        "success": true
+      },
+      "b0": {
+        "heard": "Enjoyed the day, he was very scared by me and was raised by our small organ.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "We rode horseback to the farm.",
+      "truth": "ph_10",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0173.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0173.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "we are on our back in the farm",
+          "abstain": false,
+          "top": [
+            "ph_10",
+            "ph_04",
+            "ph_32"
+          ],
+          "conf": [
+            0.7229,
+            0.4863,
+            0.4853
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "we are on our back in the farm",
+        "top1": "ph_10",
+        "success": true
+      },
+      "b0": {
+        "heard": "We arrived aren't back in the farm.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "Aluminum silverware can often be flimsy.",
+      "truth": "ph_11",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0188.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0188.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "aluminum silverware can often be flimsy",
+          "abstain": false,
+          "top": [
+            "ph_11",
+            "ph_47",
+            "ph_00"
+          ],
+          "conf": [
+            1.0,
+            0.5156,
+            0.4679
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "aluminum silverware can often be flimsy",
+        "top1": "ph_11",
+        "success": true
+      },
+      "b0": {
+        "heard": "aluminum everywhere can also then be family.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "He wrapped the package hastily.",
+      "truth": "ph_12",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0271.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0271.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "here i'm the baggage",
+          "abstain": true,
+          "top": [
+            "ph_12",
+            "ph_10",
+            "ph_32"
+          ],
+          "conf": [
+            0.5193,
+            0.411,
+            0.4
+          ],
+          "maybe_cards": [
+            "ph_12"
+          ],
+          "outcome": "shown_as_maybe",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "here i'm the baggage",
+        "top1": "ph_12",
+        "success": true
+      },
+      "b0": {
+        "heard": "Here I'm the baggage agency.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "I was conscious all the time.",
+      "truth": "ph_13",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0029.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0029.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "i was counted all the time",
+          "abstain": false,
+          "top": [
+            "ph_13",
+            "ph_24",
+            "ph_22"
+          ],
+          "conf": [
+            0.836,
+            0.5523,
+            0.5275
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "i was counted all the time",
+        "top1": "ph_13",
+        "success": true
+      },
+      "b0": {
+        "heard": "I was counted all the time.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "This is a period of transition for me.",
+      "truth": "ph_14",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0202.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0202.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "did it a barrier of trended for me",
+          "abstain": true,
+          "top": [
+            "ph_14",
+            "ph_40",
+            "ph_42"
+          ],
+          "conf": [
+            0.6628,
+            0.5224,
+            0.4866
+          ],
+          "maybe_cards": [
+            "ph_40"
+          ],
+          "outcome": "asked_again_with_other_maybes",
+          "shown": false
+        },
+        "attempt_2": {
+          "heard": "these is a period of transition for me",
+          "abstain": false,
+          "top": [
+            "ph_14",
+            "ph_25",
+            "ph_43"
+          ],
+          "conf": [
+            0.98,
+            0.5438,
+            0.5068
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "done_on": 2
+      },
+      "b1": {
+        "heard": "did it a barrier of trended for me",
+        "top1": "ph_14",
+        "success": true
+      },
+      "b0": {
+        "heard": "Did it a variant of... ...translated for me?",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "The dolphins swam around our boat.",
+      "truth": "ph_15",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0174.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0174.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "the dolphin swam around our boat",
+          "abstain": false,
+          "top": [
+            "ph_15",
+            "ph_01",
+            "ph_16"
+          ],
+          "conf": [
+            0.9807,
+            0.5152,
+            0.4962
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "the dolphin swam around our boat",
+        "top1": "ph_15",
+        "success": true
+      },
+      "b0": {
+        "heard": "They don't mean swim around in our boat.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "Students watched as he got out.",
+      "truth": "ph_16",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0254.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0254.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "you didn't want any kind of",
+          "abstain": true,
+          "top": [
+            "ph_16",
+            "ph_44",
+            "ph_24"
+          ],
+          "conf": [
+            0.5695,
+            0.5131,
+            0.5128
+          ],
+          "maybe_cards": [
+            "ph_16",
+            "ph_44"
+          ],
+          "outcome": "shown_as_maybe",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "you didn't want any kind of",
+        "top1": "ph_16",
+        "success": true
+      },
+      "b0": {
+        "heard": "You didn't want any, kind of.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "Nothing is as offensive as innocence.",
+      "truth": "ph_17",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0113.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0113.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "nothing is as offensive as innocence",
+          "abstain": false,
+          "top": [
+            "ph_17",
+            "ph_14",
+            "ph_21"
+          ],
+          "conf": [
+            1.0,
+            0.5015,
+            0.493
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "nothing is as offensive as innocence",
+        "top1": "ph_17",
+        "success": true
+      },
+      "b0": {
+        "heard": "I think it has abandoned us in the end.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "He further proposed grants of an unspecified sum for experimental hospitals.",
+      "truth": "ph_18",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0181.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0181.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "is further proposed grant us an unspecified sum for experimental hospitals",
+          "abstain": false,
+          "top": [
+            "ph_18",
+            "ph_41",
+            "ph_29"
+          ],
+          "conf": [
+            0.9334,
+            0.4619,
+            0.4497
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "is further proposed grant us an unspecified sum for experimental hospitals",
+        "top1": "ph_18",
+        "success": true
+      },
+      "b0": {
+        "heard": "is further proposed grant and benefit some for experimental advertising.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M01",
+      "group": "test",
+      "text": "I feel I can play this weekend.",
+      "truth": "ph_19",
+      "wav_1": "raw/M01/Session2_3/wav_headMic/0061.wav",
+      "wav_2": "raw/M01/Session2_3/wav_arrayMic/0061.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "I feel I can't say this weekend",
+          "abstain": false,
+          "top": [
+            "ph_19",
+            "ph_22",
+            "ph_40"
+          ],
+          "conf": [
+            0.909,
+            0.5787,
+            0.4966
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "I feel I can't say this weekend",
+        "top1": "ph_19",
+        "success": true
+      },
+      "b0": {
+        "heard": "I feel I can't say this again.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "Nothing has been done yet to take advantage of the enabling legislation.",
+      "truth": "ph_00",
+      "wav_1": "raw/M02/Session2/wav_headMic/0208.wav",
+      "wav_2": "raw/M02/Session2/wav_arrayMic/0208.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "nothing has been done yet to take advantage of enabling the legislation",
+          "abstain": false,
+          "top": [
+            "ph_00",
+            "ph_43",
+            "ph_41"
+          ],
+          "conf": [
+            0.9787,
+            0.4629,
+            0.4555
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "nothing has been done yet to take advantage of enabling the legislation",
+        "top1": "ph_00",
+        "success": true
+      },
+      "b0": {
+        "heard": "Nothing has been done yet to take advantage of enabling the latest life yet.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "I tried to tell people in the community.",
+      "truth": "ph_01",
+      "wav_1": "raw/M02/Session1/wav_headMic/0130.wav",
+      "wav_2": "raw/M02/Session1/wav_arrayMic/0130.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "i tried to tell people in the community",
+          "abstain": false,
+          "top": [
+            "ph_01",
+            "ph_12",
+            "ph_41"
+          ],
+          "conf": [
+            1.0,
+            0.5128,
+            0.4918
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "i tried to tell people in the community",
+        "top1": "ph_01",
+        "success": true
+      },
+      "b0": {
+        "heard": "I try to tell people in the community.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "Except in the winter when the ooze or snow or ice prevents,",
+      "truth": "ph_02",
+      "wav_1": "raw/M02/Session1/wav_headMic/0115.wav",
+      "wav_2": "raw/M02/Session1/wav_arrayMic/0115.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "except the window except in the window when the ooze or snow or ice prevents",
+          "abstain": false,
+          "top": [
+            "ph_02",
+            "ph_40",
+            "ph_30"
+          ],
+          "conf": [
+            0.8375,
+            0.4497,
+            0.4485
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "except the window except in the window when the ooze or snow or ice prevents",
+        "top1": "ph_02",
+        "success": true
+      },
+      "b0": {
+        "heard": "Accept the window. Accepting the window when the rules of snow or ice prevent.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "I expect we'll bounce back this week.",
+      "truth": "ph_03",
+      "wav_1": "raw/M02/Session2/wav_headMic/0187.wav",
+      "wav_2": "raw/M02/Session2/wav_arrayMic/0187.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "i just don't know stop stop",
+          "abstain": true,
+          "top": [
+            "ph_27",
+            "ph_33",
+            "ph_47"
+          ],
+          "conf": [
+            0.5043,
+            0.4929,
+            0.4766
+          ],
+          "maybe_cards": [],
+          "outcome": "asked_again",
+          "shown": false
+        },
+        "attempt_2": {
+          "heard": "i guess that will bounce back this week",
+          "abstain": false,
+          "top": [
+            "ph_03",
+            "ph_12",
+            "ph_19"
+          ],
+          "conf": [
+            0.8468,
+            0.5544,
+            0.5126
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "done_on": 2
+      },
+      "b1": {
+        "heard": "i just don't know stop stop",
+        "top1": "ph_27",
+        "success": false
+      },
+      "b0": {
+        "heard": "I just don't know what's going on.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "When he speaks, his voice is just a bit cracked and quivers a trifle.",
+      "truth": "ph_04",
+      "wav_1": "raw/M02/Session1/wav_headMic/0062.wav",
+      "wav_2": "raw/M02/Session1/wav_arrayMic/0062.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "when he speaks his voice is just bit cracked and quivers like trifle",
+          "abstain": false,
+          "top": [
+            "ph_04",
+            "ph_17",
+            "ph_00"
+          ],
+          "conf": [
+            0.9478,
+            0.4658,
+            0.464
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "when he speaks his voice is just bit cracked and quivers like trifle",
+        "top1": "ph_04",
+        "success": true
+      },
+      "b0": {
+        "heard": "When he speaks, his voice is just a bit crying, and the crib is like trifle.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "This is not a program of socialized medicine.",
+      "truth": "ph_05",
+      "wav_1": "raw/M02/Session2/wav_headMic/0137.wav",
+      "wav_2": "raw/M02/Session2/wav_arrayMic/0137.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "this is not a program of socialized medicine",
+          "abstain": false,
+          "top": [
+            "ph_05",
+            "ph_41",
+            "ph_09"
+          ],
+          "conf": [
+            1.0,
+            0.4872,
+            0.4692
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "this is not a program of socialized medicine",
+        "top1": "ph_05",
+        "success": true
+      },
+      "b0": {
+        "heard": "This is not a program of self-relatement.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "giving those who observe him a pronounced feeling of the utmost respect.",
+      "truth": "ph_06",
+      "wav_1": "raw/M02/Session1/wav_headMic/0034.wav",
+      "wav_2": "raw/M02/Session1/wav_arrayMic/0034.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "giving those who observe him pronounced feeling utmost respect",
+          "abstain": false,
+          "top": [
+            "ph_06",
+            "ph_37",
+            "ph_29"
+          ],
+          "conf": [
+            0.9277,
+            0.4645,
+            0.4582
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "giving those who observe him pronounced feeling utmost respect",
+        "top1": "ph_06",
+        "success": true
+      },
+      "b0": {
+        "heard": "giving those who are giving a financial link of that much respect.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "She wore warm, fleecy, woolen overalls.",
+      "truth": "ph_07",
+      "wav_1": "raw/M02/Session2/wav_headMic/0163.wav",
+      "wav_2": "raw/M02/Session2/wav_arrayMic/0163.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "she wore warm fleecy woolen overall",
+          "abstain": false,
+          "top": [
+            "ph_07",
+            "ph_49",
+            "ph_18"
+          ],
+          "conf": [
+            0.9813,
+            0.5158,
+            0.4627
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "she wore warm fleecy woolen overall",
+        "top1": "ph_07",
+        "success": true
+      },
+      "b0": {
+        "heard": "She was one place, one overall.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "There is a treehouse up above.",
+      "truth": "ph_08",
+      "wav_1": "raw/M02/Session2/wav_headMic/0200.wav",
+      "wav_2": "raw/M02/Session2/wav_arrayMic/0200.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "there is a treehouse up above",
+          "abstain": false,
+          "top": [
+            "ph_08",
+            "ph_25",
+            "ph_21"
+          ],
+          "conf": [
+            1.0,
+            0.5198,
+            0.5127
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "there is a treehouse up above",
+        "top1": "ph_08",
+        "success": true
+      },
+      "b0": {
+        "heard": "There is a tree of uppercut.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "Their house is grey and white.",
+      "truth": "ph_09",
+      "wav_1": "raw/M02/Session1/wav_headMic/0196.wav",
+      "wav_2": "raw/M02/Session1/wav_arrayMic/0196.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "their house is grey and white",
+          "abstain": false,
+          "top": [
+            "ph_09",
+            "ph_22",
+            "ph_21"
+          ],
+          "conf": [
+            1.0,
+            0.5212,
+            0.5116
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "their house is grey and white",
+        "top1": "ph_09",
+        "success": true
+      },
+      "b0": {
+        "heard": "The house is the Gray and White.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "truth": "ph_10",
+      "wav_1": "raw/M02/Session1/wav_headMic/0117.wav",
+      "wav_2": "raw/M02/Session1/wav_arrayMic/0117.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "the quick brown fox jumps over the lazy dog",
+          "abstain": false,
+          "top": [
+            "ph_10",
+            "ph_26",
+            "ph_13"
+          ],
+          "conf": [
+            1.0,
+            0.4826,
+            0.4747
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "the quick brown fox jumps over the lazy dog",
+        "top1": "ph_10",
+        "success": true
+      },
+      "b0": {
+        "heard": "The quick brown fox turns over the lazy dog.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "You wished to know all about my grandfather.",
+      "truth": "ph_11",
+      "wav_1": "raw/M02/Session1/wav_headMic/0121.wav",
+      "wav_2": "raw/M02/Session1/wav_arrayMic/0121.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "you wish to know all about my grandfather",
+          "abstain": false,
+          "top": [
+            "ph_11",
+            "ph_22",
+            "ph_35"
+          ],
+          "conf": [
+            0.9783,
+            0.4808,
+            0.4762
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "you wish to know all about my grandfather",
+        "top1": "ph_11",
+        "success": true
+      },
+      "b0": {
+        "heard": "She wished to know all of them, my grandfather.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "I feel I can play this weekend.",
+      "truth": "ph_12",
+      "wav_1": "raw/M02/Session1/wav_headMic/0173.wav",
+      "wav_2": "raw/M02/Session1/wav_arrayMic/0173.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "i feel i can play this weekend",
+          "abstain": false,
+          "top": [
+            "ph_12",
+            "ph_03",
+            "ph_01"
+          ],
+          "conf": [
+            1.0,
+            0.5606,
+            0.5128
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "i feel i can play this weekend",
+        "top1": "ph_12",
+        "success": true
+      },
+      "b0": {
+        "heard": "I feel I can play this weekend.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "The misguided souls have lost their way.",
+      "truth": "ph_13",
+      "wav_1": "raw/M02/Session2/wav_headMic/0119.wav",
+      "wav_2": "raw/M02/Session2/wav_arrayMic/0119.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "that's the misguided souls have lost no way",
+          "abstain": false,
+          "top": [
+            "ph_13",
+            "ph_22",
+            "ph_26"
+          ],
+          "conf": [
+            0.8676,
+            0.5032,
+            0.4822
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "that's the misguided souls have lost no way",
+        "top1": "ph_13",
+        "success": true
+      },
+      "b0": {
+        "heard": "God bless. I need stars. I'm lost. No way.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "Mother sews yellow gingham aprons.",
+      "truth": "ph_14",
+      "wav_1": "raw/M02/Session1/wav_headMic/0226.wav",
+      "wav_2": "raw/M02/Session1/wav_arrayMic/0226.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "mother sews yellow gingham aprons",
+          "abstain": false,
+          "top": [
+            "ph_14",
+            "ph_09",
+            "ph_29"
+          ],
+          "conf": [
+            1.0,
+            0.4822,
+            0.4691
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "mother sews yellow gingham aprons",
+        "top1": "ph_14",
+        "success": true
+      },
+      "b0": {
+        "heard": "Mademoiselle's yellow gingham aprons.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "The little schoolhouse stood empty.",
+      "truth": "ph_15",
+      "wav_1": "raw/M02/Session2/wav_headMic/0188.wav",
+      "wav_2": "raw/M02/Session2/wav_arrayMic/0188.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "there's a love schoolhouse stood empty",
+          "abstain": false,
+          "top": [
+            "ph_15",
+            "ph_09",
+            "ph_08"
+          ],
+          "conf": [
+            0.8353,
+            0.5126,
+            0.5068
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "there's a love schoolhouse stood empty",
+        "top1": "ph_15",
+        "success": true
+      },
+      "b0": {
+        "heard": "That is our love. Good luck. Have a great day.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "My sister made the flowered curtains.",
+      "truth": "ph_16",
+      "wav_1": "raw/M02/Session2/wav_headMic/0086.wav",
+      "wav_2": "raw/M02/Session2/wav_arrayMic/0086.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "my sister made flowered curtains",
+          "abstain": false,
+          "top": [
+            "ph_16",
+            "ph_26",
+            "ph_14"
+          ],
+          "conf": [
+            0.9479,
+            0.4975,
+            0.4773
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "my sister made flowered curtains",
+        "top1": "ph_16",
+        "success": true
+      },
+      "b0": {
+        "heard": "My system is flowers, curtains.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "It also provides for funds to clear slums and help colleges build dormitories.",
+      "truth": "ph_17",
+      "wav_1": "raw/M02/Session2/wav_headMic/0134.wav",
+      "wav_2": "raw/M02/Session2/wav_arrayMic/0134.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "a dog or provide for funds to clear slums and help colleges",
+          "abstain": false,
+          "top": [
+            "ph_17",
+            "ph_43",
+            "ph_47"
+          ],
+          "conf": [
+            0.8057,
+            0.4638,
+            0.453
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "a dog or provide for funds to clear slums and help colleges",
+        "top1": "ph_17",
+        "success": true
+      },
+      "b0": {
+        "heard": "and I will provide for friends to clear slums and help colleges by getting tired.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "When all else fails, use force.",
+      "truth": "ph_18",
+      "wav_1": "raw/M02/Session2/wav_headMic/0222.wav",
+      "wav_2": "raw/M02/Session2/wav_arrayMic/0222.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "when all is felt use force",
+          "abstain": false,
+          "top": [
+            "ph_18",
+            "ph_33",
+            "ph_12"
+          ],
+          "conf": [
+            0.8541,
+            0.553,
+            0.4808
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "when all is felt use force",
+        "top1": "ph_18",
+        "success": true
+      },
+      "b0": {
+        "heard": "when I felt huge force.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M02",
+      "group": "test",
+      "text": "I was conscious all the time.",
+      "truth": "ph_19",
+      "wav_1": "raw/M02/Session1/wav_headMic/0217.wav",
+      "wav_2": "raw/M02/Session1/wav_arrayMic/0217.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "i was conscious all the time",
+          "abstain": false,
+          "top": [
+            "ph_19",
+            "ph_13",
+            "ph_35"
+          ],
+          "conf": [
+            1.0,
+            0.5126,
+            0.5028
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "i was conscious all the time",
+        "top1": "ph_19",
+        "success": true
+      },
+      "b0": {
+        "heard": "I was conscious all the time.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "Just one side got wet.",
+      "truth": "ph_00",
+      "wav_1": "raw/M03/Session2/wav_headMic/0209.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0209.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "just one side got wet",
+          "abstain": false,
+          "top": [
+            "ph_00",
+            "ph_43",
+            "ph_18"
+          ],
+          "conf": [
+            1.0,
+            0.4939,
+            0.4927
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "just one side got wet",
+        "top1": "ph_00",
+        "success": true
+      },
+      "b0": {
+        "heard": "Just one side got wet.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "Mother sews yellow gingham aprons.",
+      "truth": "ph_01",
+      "wav_1": "raw/M03/Session2/wav_headMic/0199.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0199.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "mother sews yellow gingham aprons",
+          "abstain": false,
+          "top": [
+            "ph_01",
+            "ph_18",
+            "ph_27"
+          ],
+          "conf": [
+            1.0,
+            0.4822,
+            0.4538
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "mother sews yellow gingham aprons",
+        "top1": "ph_01",
+        "success": true
+      },
+      "b0": {
+        "heard": "mother souls yellow gingham aprons",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "When he speaks, his voice is just a bit cracked and quivers a trifle.",
+      "truth": "ph_02",
+      "wav_1": "raw/M03/Session2/wav_headMic/0101.wav",
+      "wav_2": "raw/M03/Session2/wav_headMic/0102.wav",
+      "second_source": "another take in the same session",
+      "suresay": {
+        "attempt_1": {
+          "heard": "when he speaks his voice is just a bit crackled and quivers a trifle",
+          "abstain": false,
+          "top": [
+            "ph_02",
+            "ph_05",
+            "ph_38"
+          ],
+          "conf": [
+            0.9911,
+            0.4493,
+            0.4476
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "when he speaks his voice is just a bit crackled and quivers a trifle",
+        "top1": "ph_02",
+        "success": true
+      },
+      "b0": {
+        "heard": "When he speaks, his voice is just a bit crackled and quivers a trifle.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "I tried to tell people in the community.",
+      "truth": "ph_03",
+      "wav_1": "raw/M03/Session2/wav_headMic/0218.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0218.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "I tried to tell people in the community",
+          "abstain": false,
+          "top": [
+            "ph_03",
+            "ph_29",
+            "ph_25"
+          ],
+          "conf": [
+            1.0,
+            0.5028,
+            0.4949
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "I tried to tell people in the community",
+        "top1": "ph_03",
+        "success": true
+      },
+      "b0": {
+        "heard": "I tried to tell people in the community.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "giving those who observe him a pronounced feeling of the utmost respect.",
+      "truth": "ph_04",
+      "wav_1": "raw/M03/Session2/wav_headMic/0118.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0118.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "giving those who observe him a pronounced feeling of the utmost respect",
+          "abstain": false,
+          "top": [
+            "ph_04",
+            "ph_24",
+            "ph_45"
+          ],
+          "conf": [
+            1.0,
+            0.4626,
+            0.4491
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "giving those who observe him a pronounced feeling of the utmost respect",
+        "top1": "ph_04",
+        "success": true
+      },
+      "b0": {
+        "heard": "giving those who observe him a pronounced feeling of the utmost respect.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "She had your dark suit in greasy wash water all year.",
+      "truth": "ph_05",
+      "wav_1": "raw/M03/Session2/wav_headMic/0045.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0045.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "she had your dark suit in greasy wash water all year",
+          "abstain": false,
+          "top": [
+            "ph_05",
+            "ph_12",
+            "ph_16"
+          ],
+          "conf": [
+            1.0,
+            0.5032,
+            0.4948
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "she had your dark suit in greasy wash water all year",
+        "top1": "ph_05",
+        "success": true
+      },
+      "b0": {
+        "heard": "She had your dark suit in greasy wash water all year.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "Each one volunteered to jump first.",
+      "truth": "ph_06",
+      "wav_1": "raw/M03/Session2/wav_headMic/0398.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0398.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "each one volunteered to jump first",
+          "abstain": false,
+          "top": [
+            "ph_06",
+            "ph_34",
+            "ph_37"
+          ],
+          "conf": [
+            1.0,
+            0.4754,
+            0.4754
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "each one volunteered to jump first",
+        "top1": "ph_06",
+        "success": true
+      },
+      "b0": {
+        "heard": "Each one volunteered to jump first.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "Twice each day he plays skillfully and with zest upon our small organ.",
+      "truth": "ph_07",
+      "wav_1": "raw/M03/Session2/wav_headMic/0096.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0096.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "twice each day he plays skillfully and with zest upon our small organ",
+          "abstain": false,
+          "top": [
+            "ph_07",
+            "ph_26",
+            "ph_38"
+          ],
+          "conf": [
+            1.0,
+            0.483,
+            0.4426
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "twice each day he plays skillfully and with zest upon our small organ",
+        "top1": "ph_07",
+        "success": true
+      },
+      "b0": {
+        "heard": "Twice each day he plays skillfully and with zest upon our small organ.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "Nothing is as offensive as innocence.",
+      "truth": "ph_08",
+      "wav_1": "raw/M03/Session2/wav_headMic/0222.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0222.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "nothing is as offensive as innocence",
+          "abstain": false,
+          "top": [
+            "ph_08",
+            "ph_12",
+            "ph_21"
+          ],
+          "conf": [
+            1.0,
+            0.5025,
+            0.493
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "nothing is as offensive as innocence",
+        "top1": "ph_08",
+        "success": true
+      },
+      "b0": {
+        "heard": "Nothing is as offensive as innocence.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "The misguided souls have lost their way.",
+      "truth": "ph_09",
+      "wav_1": "raw/M03/Session2/wav_headMic/0273.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0273.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "the misguided souls have lost their way",
+          "abstain": false,
+          "top": [
+            "ph_09",
+            "ph_35",
+            "ph_17"
+          ],
+          "conf": [
+            1.0,
+            0.5479,
+            0.5462
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "the misguided souls have lost their way",
+        "top1": "ph_09",
+        "success": true
+      },
+      "b0": {
+        "heard": "The misguided souls have lost their way.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "It eventually became a rather proud claim.",
+      "truth": "ph_10",
+      "wav_1": "raw/M03/Session2/wav_headMic/0287.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0287.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "it eventually became a rather proud claim",
+          "abstain": false,
+          "top": [
+            "ph_10",
+            "ph_31",
+            "ph_03"
+          ],
+          "conf": [
+            1.0,
+            0.4738,
+            0.465
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "it eventually became a rather proud claim",
+        "top1": "ph_10",
+        "success": true
+      },
+      "b0": {
+        "heard": "It eventually became a rather proud claim.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "we have an excellent team",
+      "truth": "ph_11",
+      "wav_1": "raw/M03/Session2/wav_headMic/0421.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0421.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "we have an excellent team",
+          "abstain": false,
+          "top": [
+            "ph_11",
+            "ph_20",
+            "ph_18"
+          ],
+          "conf": [
+            1.0,
+            0.5727,
+            0.4907
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "we have an excellent team",
+        "top1": "ph_11",
+        "success": true
+      },
+      "b0": {
+        "heard": "We have an excellent team.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "yet he still thinks as swiftly as ever.",
+      "truth": "ph_12",
+      "wav_1": "raw/M03/Session2/wav_headMic/0065.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0065.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "yet he still thinks as swiftly as ever",
+          "abstain": false,
+          "top": [
+            "ph_12",
+            "ph_05",
+            "ph_08"
+          ],
+          "conf": [
+            1.0,
+            0.5032,
+            0.5025
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "yet he still thinks as swiftly as ever",
+        "top1": "ph_12",
+        "success": true
+      },
+      "b0": {
+        "heard": "Yet he still thinks as swiftly as ever.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "It was a good win for us.",
+      "truth": "ph_13",
+      "wav_1": "raw/M03/Session2/wav_headMic/0257.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0257.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "it was a good win for us",
+          "abstain": false,
+          "top": [
+            "ph_13",
+            "ph_31",
+            "ph_30"
+          ],
+          "conf": [
+            1.0,
+            0.5523,
+            0.5463
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "it was a good win for us",
+        "top1": "ph_13",
+        "success": true
+      },
+      "b0": {
+        "heard": "It was a good win for us.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "The job provides many benefits.",
+      "truth": "ph_14",
+      "wav_1": "raw/M03/Session2/wav_headMic/0339.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0339.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "the job provides many benefits",
+          "abstain": false,
+          "top": [
+            "ph_14",
+            "ph_24",
+            "ph_41"
+          ],
+          "conf": [
+            1.0,
+            0.5426,
+            0.4572
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "the job provides many benefits",
+        "top1": "ph_14",
+        "success": true
+      },
+      "b0": {
+        "heard": "The job provides many benefits.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "You'd be better off taking a cold shower.",
+      "truth": "ph_15",
+      "wav_1": "raw/M03/Session2/wav_headMic/0119.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0119.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "you'd be better off taking a cold shower",
+          "abstain": false,
+          "top": [
+            "ph_15",
+            "ph_25",
+            "ph_12"
+          ],
+          "conf": [
+            1.0,
+            0.4878,
+            0.4725
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "you'd be better off taking a cold shower",
+        "top1": "ph_15",
+        "success": true
+      },
+      "b0": {
+        "heard": "You'd be better off taking a cold shower.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "Are your grades higher or lower than Nancy's?",
+      "truth": "ph_16",
+      "wav_1": "raw/M03/Session2/wav_headMic/0151.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0151.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "are your grades higher or lower than nancy's",
+          "abstain": false,
+          "top": [
+            "ph_16",
+            "ph_40",
+            "ph_05"
+          ],
+          "conf": [
+            1.0,
+            0.5,
+            0.4948
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "are your grades higher or lower than nancy's",
+        "top1": "ph_16",
+        "success": true
+      },
+      "b0": {
+        "heard": "Are your grades higher or lower than Nancy's?",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "I scrubbed the floors thoroughly.",
+      "truth": "ph_17",
+      "wav_1": "raw/M03/Session2/wav_headMic/0182.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0182.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "I scrub the floors thoroughly",
+          "abstain": false,
+          "top": [
+            "ph_17",
+            "ph_09",
+            "ph_37"
+          ],
+          "conf": [
+            0.9611,
+            0.525,
+            0.4892
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "I scrub the floors thoroughly",
+        "top1": "ph_17",
+        "success": true
+      },
+      "b0": {
+        "heard": "I scrub the floors thoroughly.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "Their house is grey and white.",
+      "truth": "ph_18",
+      "wav_1": "raw/M03/Session2/wav_headMic/0249.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0249.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "their houses gray and white",
+          "abstain": false,
+          "top": [
+            "ph_18",
+            "ph_32",
+            "ph_01"
+          ],
+          "conf": [
+            0.9349,
+            0.5383,
+            0.5036
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "their houses gray and white",
+        "top1": "ph_18",
+        "success": true
+      },
+      "b0": {
+        "heard": "Their house is grey and white.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M03",
+      "group": "test",
+      "text": "Carl lives in a lovely home",
+      "truth": "ph_19",
+      "wav_1": "raw/M03/Session2/wav_headMic/0373.wav",
+      "wav_2": "raw/M03/Session2/wav_arrayMic/0373.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "carl lives in a lovely home",
+          "abstain": false,
+          "top": [
+            "ph_19",
+            "ph_42",
+            "ph_18"
+          ],
+          "conf": [
+            1.0,
+            0.4683,
+            0.4484
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "carl lives in a lovely home",
+        "top1": "ph_19",
+        "success": true
+      },
+      "b0": {
+        "heard": "Carl lives in a lovely home.",
+        "success": true
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "This is not a program of socialized medicine.",
+      "truth": "ph_00",
+      "wav_1": "raw/M04/Session2/wav_headMic/0288.wav",
+      "wav_2": "raw/M04/Session2/wav_arrayMic/0288.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "this is not program of socialized medicine",
+          "abstain": false,
+          "top": [
+            "ph_00",
+            "ph_24",
+            "ph_35"
+          ],
+          "conf": [
+            0.9711,
+            0.5933,
+            0.5108
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "this is not program of socialized medicine",
+        "top1": "ph_00",
+        "success": true
+      },
+      "b0": {
+        "heard": "This is not a program of Switzerland. It's amazing.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "If you destroy confidence in banks, you do something to the economy, he said.",
+      "truth": "ph_01",
+      "wav_1": "raw/M04/Session2/wav_headMic/0194.wav",
+      "wav_2": "raw/M04/Session2/wav_arrayMic/0194.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "if you do something to the economy",
+          "abstain": true,
+          "top": [
+            "ph_01",
+            "ph_38",
+            "ph_39"
+          ],
+          "conf": [
+            0.6192,
+            0.5245,
+            0.5201
+          ],
+          "maybe_cards": [
+            "ph_01",
+            "ph_38",
+            "ph_39"
+          ],
+          "outcome": "shown_as_maybe",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "if you do something to the economy",
+        "top1": "ph_01",
+        "success": true
+      },
+      "b0": {
+        "heard": "If you didn't call it in bank, you do something to the economy.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "usually minus several buttons;",
+      "truth": "ph_02",
+      "wav_1": "raw/M04/Session1/wav_arrayMic/0106.wav",
+      "wav_2": "raw/M04/Session2/wav_headMic/0052.wav",
+      "second_source": "another session",
+      "suresay": {
+        "attempt_1": {
+          "heard": "you mean me me said several button",
+          "abstain": false,
+          "top": [
+            "ph_02",
+            "ph_45",
+            "ph_20"
+          ],
+          "conf": [
+            0.6688,
+            0.5,
+            0.4708
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "you mean me me said several button",
+        "top1": "ph_02",
+        "success": true
+      },
+      "b0": {
+        "heard": "You mean, me, me, me, me, me, me, me.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "Are your grades higher or lower than Nancy's?",
+      "truth": "ph_03",
+      "wav_1": "raw/M04/Session2/wav_headMic/0160.wav",
+      "wav_2": "raw/M04/Session2/wav_arrayMic/0160.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "are you your grades higher or lower than nancy's",
+          "abstain": false,
+          "top": [
+            "ph_03",
+            "ph_33",
+            "ph_36"
+          ],
+          "conf": [
+            0.9621,
+            0.4859,
+            0.4433
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "are you your grades higher or lower than nancy's",
+        "top1": "ph_03",
+        "success": true
+      },
+      "b0": {
+        "heard": "Are you... Are you a girl higher or lower than 19?",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "Don't ask me to carry an oily rag like that.",
+      "truth": "ph_04",
+      "wav_1": "raw/M04/Session1/wav_arrayMic/0076.wav",
+      "wav_2": "raw/M04/Session2/wav_headMic/0032.wav",
+      "second_source": "another session",
+      "suresay": {
+        "attempt_1": {
+          "heard": "do it at 2k and then oil like that",
+          "abstain": true,
+          "top": [
+            "ph_04",
+            "ph_39",
+            "ph_05"
+          ],
+          "conf": [
+            0.6635,
+            0.5482,
+            0.5037
+          ],
+          "maybe_cards": [
+            "ph_04"
+          ],
+          "outcome": "shown_as_maybe",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "do it at 2k and then oil like that",
+        "top1": "ph_04",
+        "success": true
+      },
+      "b0": {
+        "heard": "Don't add me to cake and oil like that",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "he slowly takes a short walk in the open air each day.",
+      "truth": "ph_05",
+      "wav_1": "raw/M04/Session1/wav_arrayMic/0064.wav",
+      "wav_2": "raw/M04/Session2/wav_headMic/0060.wav",
+      "second_source": "another session",
+      "suresay": {
+        "attempt_1": {
+          "heard": "heat flowing then a good work in the open air",
+          "abstain": false,
+          "top": [
+            "ph_05",
+            "ph_39",
+            "ph_49"
+          ],
+          "conf": [
+            0.6648,
+            0.4931,
+            0.4762
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "heat flowing then a good work in the open air",
+        "top1": "ph_05",
+        "success": true
+      },
+      "b0": {
+        "heard": "He slowly did a good work in the open air there.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "The humidity is overwhelming there.",
+      "truth": "ph_06",
+      "wav_1": "raw/M04/Session2/wav_headMic/0264.wav",
+      "wav_2": "raw/M04/Session2/wav_arrayMic/0264.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "but she meant it overwhelming there",
+          "abstain": false,
+          "top": [
+            "ph_06",
+            "ph_04",
+            "ph_48"
+          ],
+          "conf": [
+            0.7777,
+            0.4679,
+            0.447
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "but she meant it overwhelming there",
+        "top1": "ph_06",
+        "success": true
+      },
+      "b0": {
+        "heard": "But humanity is overwhelming now.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "It also provides for funds to clear slums and help colleges build dormitories.",
+      "truth": "ph_07",
+      "wav_1": "raw/M04/Session2/wav_headMic/0282.wav",
+      "wav_2": "raw/M04/Session2/wav_arrayMic/0282.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "it also provides for funds to clear slums and help colleges build dormitories",
+          "abstain": false,
+          "top": [
+            "ph_07",
+            "ph_22",
+            "ph_04"
+          ],
+          "conf": [
+            1.0,
+            0.4671,
+            0.45
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "it also provides for funds to clear slums and help colleges build dormitories",
+        "top1": "ph_07",
+        "success": true
+      },
+      "b0": {
+        "heard": "It also provides for funds to create funds and help fund the donations.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "All the big baseball players get traded.",
+      "truth": "ph_08",
+      "wav_1": "raw/M04/Session2/wav_headMic/0208.wav",
+      "wav_2": "raw/M04/Session2/wav_arrayMic/0208.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "all the big big ball players get drilled",
+          "abstain": false,
+          "top": [
+            "ph_08",
+            "ph_48",
+            "ph_36"
+          ],
+          "conf": [
+            0.8706,
+            0.5103,
+            0.4702
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "all the big big ball players get drilled",
+        "top1": "ph_08",
+        "success": true
+      },
+      "b0": {
+        "heard": "All the big, big power plants kick it too.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "Grandfather likes to be modern in his language.",
+      "truth": "ph_09",
+      "wav_1": "raw/M04/Session1/wav_arrayMic/0040.wav",
+      "wav_2": "raw/M04/Session2/wav_headMic/0007.wav",
+      "second_source": "another session",
+      "suresay": {
+        "attempt_1": {
+          "heard": "grab brother like to be on my way language",
+          "abstain": false,
+          "top": [
+            "ph_09",
+            "ph_03",
+            "ph_36"
+          ],
+          "conf": [
+            0.7085,
+            0.4606,
+            0.4503
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "grab brother like to be on my way language",
+        "top1": "ph_09",
+        "success": true
+      },
+      "b0": {
+        "heard": "My grandmother liked to be my race in his language.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "Mother sews yellow gingham aprons.",
+      "truth": "ph_10",
+      "wav_1": "raw/M04/Session2/wav_headMic/0216.wav",
+      "wav_2": "raw/M04/Session2/wav_arrayMic/0216.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "mother it's own yellow gingham",
+          "abstain": false,
+          "top": [
+            "ph_10",
+            "ph_06",
+            "ph_16"
+          ],
+          "conf": [
+            0.731,
+            0.475,
+            0.4656
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "mother it's own yellow gingham",
+        "top1": "ph_10",
+        "success": true
+      },
+      "b0": {
+        "heard": "My little... yellow... gang... and... ...hopper.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "Everything went real smooth, the sheriff said.",
+      "truth": "ph_11",
+      "wav_1": "raw/M04/Session2/wav_headMic/0202.wav",
+      "wav_2": "raw/M04/Session2/wav_arrayMic/0202.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "everything went real smooth from the judge said",
+          "abstain": false,
+          "top": [
+            "ph_11",
+            "ph_23",
+            "ph_25"
+          ],
+          "conf": [
+            0.8358,
+            0.4552,
+            0.4476
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "everything went real smooth from the judge said",
+        "top1": "ph_11",
+        "success": true
+      },
+      "b0": {
+        "heard": "Everything went well on the moon, Bob the Jack said.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "Just one side got wet.",
+      "truth": "ph_12",
+      "wav_1": "raw/M04/Session2/wav_headMic/0186.wav",
+      "wav_2": "raw/M04/Session2/wav_arrayMic/0186.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "just one time he got wet",
+          "abstain": false,
+          "top": [
+            "ph_12",
+            "ph_32",
+            "ph_15"
+          ],
+          "conf": [
+            0.8597,
+            0.553,
+            0.5357
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "just one time he got wet",
+        "top1": "ph_12",
+        "success": true
+      },
+      "b0": {
+        "heard": "Just one time he got away.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "I looked up and noticed two old men.",
+      "truth": "ph_13",
+      "wav_1": "raw/M04/Session2/wav_headMic/0242.wav",
+      "wav_2": "raw/M04/Session2/wav_arrayMic/0242.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "high looked up and I didn't know it do all men",
+          "abstain": false,
+          "top": [
+            "ph_13",
+            "ph_39",
+            "ph_09"
+          ],
+          "conf": [
+            0.7062,
+            0.4821,
+            0.4664
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "high looked up and I didn't know it do all men",
+        "top1": "ph_13",
+        "success": true
+      },
+      "b0": {
+        "heard": "I looked up and I didn't know they do all men.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "giving those who observe him a pronounced feeling of the utmost respect.",
+      "truth": "ph_14",
+      "wav_1": "raw/M04/Session1/wav_arrayMic/0120.wav",
+      "wav_2": "raw/M04/Session2/wav_headMic/0024.wav",
+      "second_source": "another session",
+      "suresay": {
+        "attempt_1": {
+          "heard": "gimme those who adorbs if",
+          "abstain": true,
+          "top": [
+            "ph_24",
+            "ph_18",
+            "ph_10"
+          ],
+          "conf": [
+            0.48,
+            0.4651,
+            0.4576
+          ],
+          "maybe_cards": [],
+          "outcome": "asked_again",
+          "shown": false
+        },
+        "attempt_2": {
+          "heard": "giving though to who had them in a pronoun feeling of um to the amount we best",
+          "abstain": false,
+          "top": [
+            "ph_14",
+            "ph_01",
+            "ph_19"
+          ],
+          "conf": [
+            0.6789,
+            0.5,
+            0.4773
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "done_on": 2
+      },
+      "b1": {
+        "heard": "gimme those who adorbs if",
+        "top1": "ph_24",
+        "success": false
+      },
+      "b0": {
+        "heard": "Give it. Don't look at the door. If, if, of, of, of, of, of, of, of, of, of,",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "I just try to do my best.",
+      "truth": "ph_15",
+      "wav_1": "raw/M04/Session2/wav_headMic/0158.wav",
+      "wav_2": "raw/M04/Session2/wav_arrayMic/0158.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "did I did good to be the two of my best",
+          "abstain": true,
+          "top": [
+            "ph_15",
+            "ph_13",
+            "ph_25"
+          ],
+          "conf": [
+            0.6118,
+            0.5113,
+            0.4924
+          ],
+          "maybe_cards": [
+            "ph_15"
+          ],
+          "outcome": "shown_as_maybe",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "did I did good to be the two of my best",
+        "top1": "ph_15",
+        "success": true
+      },
+      "b0": {
+        "heard": "I did try to be the doom of my best.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "Will Robin wear a yellow lily?",
+      "truth": "ph_16",
+      "wav_1": "raw/M04/Session2/wav_headMic/0191.wav",
+      "wav_2": "raw/M04/Session2/wav_arrayMic/0191.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "will robin wear I hear already",
+          "abstain": false,
+          "top": [
+            "ph_16",
+            "ph_36",
+            "ph_18"
+          ],
+          "conf": [
+            0.717,
+            0.5467,
+            0.4975
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "will robin wear I hear already",
+        "top1": "ph_16",
+        "success": true
+      },
+      "b0": {
+        "heard": "Whoa, what happened? I hear already.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "I was conscious all the time.",
+      "truth": "ph_17",
+      "wav_1": "raw/M04/Session2/wav_headMic/0155.wav",
+      "wav_2": "raw/M04/Session2/wav_headMic/0156.wav",
+      "second_source": "another take in the same session",
+      "suresay": {
+        "attempt_1": {
+          "heard": "hi what could be all the time",
+          "abstain": false,
+          "top": [
+            "ph_17",
+            "ph_18",
+            "ph_35"
+          ],
+          "conf": [
+            0.7018,
+            0.5153,
+            0.489
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "hi what could be all the time",
+        "top1": "ph_17",
+        "success": true
+      },
+      "b0": {
+        "heard": "All the time.",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "Their house is grey and white.",
+      "truth": "ph_18",
+      "wav_1": "raw/M04/Session2/wav_headMic/0236.wav",
+      "wav_2": "raw/M04/Session2/wav_arrayMic/0236.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "then down green white",
+          "abstain": true,
+          "top": [
+            "ph_18",
+            "ph_12",
+            "ph_48"
+          ],
+          "conf": [
+            0.62,
+            0.5106,
+            0.4924
+          ],
+          "maybe_cards": [
+            "ph_18",
+            "ph_12"
+          ],
+          "outcome": "shown_as_maybe",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "then down green white",
+        "top1": "ph_18",
+        "success": true
+      },
+      "b0": {
+        "heard": "then the green light",
+        "success": false
+      }
+    },
+    {
+      "speaker": "M04",
+      "group": "test",
+      "text": "Nothing has been done yet to take advantage of the enabling legislation.",
+      "truth": "ph_19",
+      "wav_1": "raw/M04/Session2/wav_headMic/0291.wav",
+      "wav_2": "raw/M04/Session2/wav_arrayMic/0291.wav",
+      "second_source": "the same take on the other microphone",
+      "suresay": {
+        "attempt_1": {
+          "heard": "nothing hadn't been done do do to take advantage",
+          "abstain": false,
+          "top": [
+            "ph_19",
+            "ph_39",
+            "ph_01"
+          ],
+          "conf": [
+            0.6611,
+            0.4808,
+            0.4693
+          ],
+          "maybe_cards": [],
+          "outcome": "shown",
+          "shown": true
+        },
+        "attempt_2": null,
+        "done_on": 1
+      },
+      "b1": {
+        "heard": "nothing hadn't been done do do to take advantage",
+        "top1": "ph_19",
+        "success": true
+      },
+      "b0": {
+        "heard": "Nothing has been done to the earth. And then, I'm gone, gone, gone. It's miserable.",
+        "success": false
+      }
+    }
+  ]
+}
