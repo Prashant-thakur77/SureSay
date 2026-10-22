@@ -1,7 +1,7 @@
 {
   "name": "live_checks",
-  "generated_at": "2026-10-22T17:57:24+0530",
-  "git_sha": "5297ca0",
+  "generated_at": "2026-10-22T19:23:13+0530",
+  "git_sha": "91ffade",
   "python": "3.13.12",
   "url": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws",
   "checks": [
@@ -93,7 +93,7 @@
     {
       "check": "nothing changed",
       "passed": true,
-      "detail": "front door locked"
+      "detail": "front door unlocked"
     },
     {
       "check": "pending_status tells the agent it is still waiting",
@@ -110,34 +110,34 @@
   "total": 20,
   "round_trip_from_test_machine": {
     "healthz (network baseline)": {
-      "p50_ms": 260.8,
-      "p95_ms": 262.8,
+      "p50_ms": 263.5,
+      "p95_ms": 269.3,
       "n": 15
     },
     "tools/list": {
-      "p50_ms": 268.7,
-      "p95_ms": 273.0,
+      "p50_ms": 273.1,
+      "p95_ms": 277.4,
       "n": 15,
-      "minus_network_p50_ms": 7.9
+      "minus_network_p50_ms": 9.6
     },
     "tools/call home_status": {
-      "p50_ms": 271.9,
-      "p95_ms": 284.2,
+      "p50_ms": 273.3,
+      "p95_ms": 277.0,
       "n": 15,
-      "minus_network_p50_ms": 11.1
+      "minus_network_p50_ms": 9.8
     },
     "tools/call understand (typed)": {
-      "p50_ms": 292.3,
-      "p95_ms": 297.2,
+      "p50_ms": 295.0,
+      "p95_ms": 299.6,
       "n": 15,
       "minus_network_p50_ms": 31.5
     }
   },
   "server_side_understand": {
     "typed": {
-      "requests": 353,
+      "requests": 394,
       "p50_ms": 9.6,
-      "p95_ms": 663.7
+      "p95_ms": 555.1
     },
     "voice": {
       "requests": 62,
