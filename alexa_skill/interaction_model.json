@@ -346,9 +346,7 @@
           ],
           "samples": [
             "what {utterance}",
-            "please what {utterance}",
-            "to what {utterance}",
-            "can you what {utterance}"
+            "tell me what {utterance}"
           ]
         },
         {
@@ -361,9 +359,7 @@
           ],
           "samples": [
             "is {utterance}",
-            "please is {utterance}",
-            "to is {utterance}",
-            "can you is {utterance}"
+            "tell me if {utterance}"
           ]
         },
         {

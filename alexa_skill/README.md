@@ -13,4 +13,6 @@ Alexa becomes one more of the user's paired devices. Alexa recognises the user's
    4. Back in this folder: `ALEXA_SKILL_ID=<that skill ID> SKIP_AGENT=1 bash infra/deploy.sh`. It adds the Alexa Skills Kit trigger, restricted to your skill ID, and tells the function to refuse every other skill.
 4. **Try it in the Test tab:** set the dropdown to **Development**, then type or say "ask sure say to turn on the fan" → "the first one". Then "ask sure say to open the door" → "no": nothing changes. The same works on any Echo, or in the Alexa app, signed in to the same Amazon account.
 
+Each first word of a command (turn, open, unlock, lock, call, add, set, say, …) is its own intent, because in "ask sure say **to** turn on the fan" Alexa keeps "to" for itself and hands over only "turn on the fan"; the handler puts the word back (`VERB_INTENTS`).
+
 `tests/test_alexa_skill.py` drives this handler with simulated Alexa requests against a real hub.

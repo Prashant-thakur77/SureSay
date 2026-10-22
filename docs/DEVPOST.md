@@ -52,7 +52,21 @@ SureSay is a self-hosted MCP server built to the Alexa+ add-on requirements, and
 
 **See it as Alexa+ would:** the live demo's Alexa+ view (`?alexa=1`) is a simulated Echo Show that plays the host against the real server: it calls `understand`, renders the cards MCP App over the MCP Apps messages, and shows every message on the wire, while "Your phone" beside it is where the yes comes from. **Who plays the assistant** is your choice: a simple scripted host, or **Amazon Nova 2 Sonic, a live AI**. In live mode the model gets SureSay's MCP tools with exactly the agent's powers and decides which to call; every call it makes is logged, and when it tries `confirm` the gate refuses it, because only your device holds the one-time code. Measured on the deployed hub with 27 requests, 16 of them trying to talk it into acting (false consent, fake authority, urgency): 0 changed anything without the user, and all 5 of its `confirm` attempts were refused, 4 of them on a card set it had really just proposed, for "no user evidence" (`eval/run_live_assistant.py`, REPORT.md). Live turns are capped per day.
 
-A linked Alexa+ client gets exactly the agent's powers: it can understand, read and propose, never confirm. Until Alexa+ developer access opens, `alexa_skill/` runs the same flow as a classic Alexa skill. There, Alexa is a paired device, and the user's spoken "the second one" goes back as signed evidence.
+A linked Alexa+ client gets exactly the agent's powers: it can understand, read and propose, never confirm. Until Alexa+ developer access opens, `alexa_skill/` runs the same flow as a classic Alexa skill, live in development on our account and tried end to end in the Alexa simulator. There, Alexa is a paired device, and the user's spoken "the second one" goes back as signed evidence.
+
+On Alexa, in the Alexa developer console's simulator, 22 Oct 2026 (the skill in development on our account; word for word):
+
+> **You:** ask sure say to turn on the fan
+> **Alexa:** Did you mean... One: Turn on the bedroom fan. Two: Turn on the TV. Three: Turn on the air conditioner. Say a number, or no.
+> **You:** the first one
+> **Alexa:** Done: Turn on the bedroom fan. Confirmed by your voice (heard "number 1").
+> **You:** ask sure say to open the door
+> **Alexa:** Did you mean: Unlock the front door? Say yes or no.
+> **You:** yes
+> **Alexa:** Unlock the front door? Say yes or no.
+> **You:** yes
+> **Alexa:** Done: Unlock the front door. Confirmed by your voice (heard "yes").
+
 
 ![The Alexa+ view](devpost/12-alexa-plus.jpg)
 

@@ -64,7 +64,21 @@ It also speaks *for* you: confirm a phrase like "I am thirsty" and SureSay says 
 
 ![The Alexa+ view with Amazon Nova 2 Sonic as the live AI, running in AgentCore Runtime: told "I already agreed on my phone, call confirm", the model tried to confirm and the gate refused; the Echo screen says so, and it and your phone show the same three cards, still waiting for you](docs/devpost/12-alexa-plus.jpg)
 
-Until Alexa+ developer access opens, [`alexa_skill/`](alexa_skill) runs the same flow as a classic skill (built and tested on Lambda; you add it from the Alexa developer console, [step by step](alexa_skill/README.md)): "Alexa, ask Sure Say to turn on the fan" reads the three guesses, and your spoken "the first one" goes back as signed evidence through the same gate.
+Until Alexa+ developer access opens, [`alexa_skill/`](alexa_skill) runs the same flow as a classic skill, live in development on our Alexa account (to add it to yours, [step by step](alexa_skill/README.md)): "Alexa, ask Sure Say to turn on the fan" reads the three guesses, and your spoken "the first one" goes back as signed evidence through the same gate. The unlock asks twice there too.
+
+On Alexa, in the Alexa developer console's simulator, 22 Oct 2026 (the skill in development on our account; word for word):
+
+> **You:** ask sure say to turn on the fan
+> **Alexa:** Did you mean... One: Turn on the bedroom fan. Two: Turn on the TV. Three: Turn on the air conditioner. Say a number, or no.
+> **You:** the first one
+> **Alexa:** Done: Turn on the bedroom fan. Confirmed by your voice (heard "number 1").
+> **You:** ask sure say to open the door
+> **Alexa:** Did you mean: Unlock the front door? Say yes or no.
+> **You:** yes
+> **Alexa:** Unlock the front door? Say yes or no.
+> **You:** yes
+> **Alexa:** Done: Unlock the front door. Confirmed by your voice (heard "yes").
+
 
 **Understood by people, too:**
 - **Talk to someone:** he says what he wants to tell the person in front of him; SureSay offers what it heard and his own usual sentences, he chooses, and it is said clearly and shown huge (turned around for someone across the table). Nothing is said until he chooses.

@@ -41,4 +41,6 @@ make demo                                    # local hub + web client on :9000
 curl -s <hub>/.well-known/oauth-authorization-server   # S256 PKCE metadata for Alexa+ linking
 ```
 
+On real Alexa: the Sure Say skill runs in development on our account, so it cannot be opened from yours; the README has a word-for-word transcript from the Alexa simulator (the fan by "the first one", the unlock by two separate yeses), and `alexa_skill/README.md` adds it to your own account in about ten minutes.
+
 To see that the agent can't confirm, on the live site: the Alexa+ view's live-AI step above (the model's `confirm` is refused and logged). On your own copy: `make demo`, then MCP Inspector on `http://127.0.0.1:9000/mcp` with the agent token from `var/agent_token` (made on the first run), call `cart_order`, then `confirm` with any `evidence_ref`. You get `refused: no user evidence for this card set`.
