@@ -315,7 +315,9 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
             <div className="guest-note" role="region" aria-label="About this demo">
               <Icon name="spark" size={22} />
               <p>
-                <strong>Demo home:</strong> the devices, contacts and shop are simulated. Try “van on”, the doorbell, or Speak for me.
+                <strong>Demo home:</strong>
+                <span className="guest-note__long"> the devices, contacts and shop are simulated. Try “van on”, the doorbell, or Speak for me.</span>
+                <span className="guest-note__short"> everything here is simulated.</span>
               </p>
               <button type="button" className="linkish" onClick={() => void startOver()}>
                 Start over

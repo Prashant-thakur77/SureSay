@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { Icon } from "./Icon";
 import { useScanMark } from "./scan";
 
@@ -8,11 +8,16 @@ import { useScanMark } from "./scan";
  */
 export function TalkPanel({ onSpeak, onType, busy }: { onSpeak: () => void; onType: (text: string) => void; busy: boolean }) {
   const [text, setText] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
   const mark = useScanMark("talk-say");
   const submit = (e: FormEvent) => {
     e.preventDefault();
     const clean = text.trim();
-    if (!clean || busy) return;
+    if (busy) return;
+    if (!clean) {
+      inputRef.current?.focus();
+      return;
+    }
     onType(clean);
     setText("");
   };
@@ -34,9 +39,9 @@ export function TalkPanel({ onSpeak, onType, busy }: { onSpeak: () => void; onTy
           <Icon name="keyboard" size={24} /> Or type it
         </label>
         <div className="typebox__row">
-          <input id="say-input" className="input" type="text" value={text} onChange={(e) => setText(e.target.value)}
+          <input ref={inputRef} id="say-input" className="input" type="text" value={text} onChange={(e) => setText(e.target.value)}
                  autoComplete="off" placeholder="For example: I'm proud of you" disabled={busy} />
-          <button type="submit" className="btn btn--primary" disabled={busy || !text.trim()}>
+          <button type="submit" className="btn btn--primary" disabled={busy}>
             <Icon name="send" size={22} /> Offer it
           </button>
         </div>

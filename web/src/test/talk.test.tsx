@@ -24,6 +24,18 @@ describe("Talk to someone", () => {
     await screen.findByText(/I'm proud of you\./);
   });
 
+  it("an empty Offer it puts him in the text box instead of looking broken", () => {
+    const hub = fakeHub([]);
+    render(<MainScreen hub={hub} gate={fakeGate()} speaker={new Speaker(hub)} settings={QUIET} bigScreen={false}
+                       onSettingsChange={() => undefined} onUnpair={() => undefined} pollMs={60000} />);
+    fireEvent.click(screen.getByRole("tab", { name: "Talk to someone" }));
+    const offer = screen.getByRole("button", { name: /offer it/i }) as HTMLButtonElement;
+    expect(offer.disabled).toBe(false);
+    fireEvent.click(offer);
+    expect(document.activeElement).toBe(screen.getByLabelText(/or type it/i));
+    expect(hub.turn).not.toHaveBeenCalled();
+  });
+
   it("has no axe violations", async () => {
     const hub = fakeHub([]);
     render(<MainScreen hub={hub} gate={fakeGate()} speaker={new Speaker(hub)} settings={QUIET} bigScreen={false}

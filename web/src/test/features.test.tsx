@@ -60,6 +60,13 @@ describe("tabs", () => {
 });
 
 describe("try-it chips", () => {
+  it("come after the microphone, so the main action is near the top on a phone", () => {
+    renderMain();
+    const mic = screen.getByRole("button", { name: /speak/i });
+    const chips = screen.getByText("Try one, or say your own");
+    expect(mic.compareDocumentPosition(chips) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("send the example as a typed turn", async () => {
     const { hub } = renderMain();
     hub.turn.mockResolvedValue({ reply: "", mode: "direct", result: { status: "choose", heard: "van on", asr: "typed", ranker: "fuzzy", timing: {}, say: "", pending_id: "p_test0001" }, pending: [cardSet()], ms: 3 });

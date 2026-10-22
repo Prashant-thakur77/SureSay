@@ -2711,10 +2711,11 @@ code {
 
 /* --- tabs ---------------------------------------------------------------- */
 
+/* one row, always: it scrolls sideways on a phone instead of stacking into a menu */
 .tabs {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
+  flex-wrap: nowrap;
+  gap: 0.25rem;
   width: fit-content;
   max-width: 100%;
   margin: 0 0 1.4rem;
@@ -2722,14 +2723,25 @@ code {
   border: 1px solid var(--hair);
   border-radius: 22px;
   background: var(--surface2);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
   min-height: 52px;
-  padding: 0.35rem 1.05rem;
+  padding: 0.35rem 0.85rem;
+  white-space: nowrap;
+  scroll-snap-align: start;
   border: 0;
   border-radius: 18px;
   background: transparent;
@@ -4159,4 +4171,96 @@ code {
 
 @media (prefers-reduced-motion: reduce) {
   .fan-card { animation: none; }
+}
+
+/* --- first screen on a phone: the microphone near the top -------------- */
+
+.guest-note__short {
+  display: none;
+}
+
+.intro__after {
+  margin-top: 1.5rem;
+}
+
+/* the tab row fits the panel it sits in: icons go first, and only then does it scroll, with a fade at the edge */
+.stage {
+  container: stage / inline-size;
+}
+
+@container stage (max-width: 58rem) {
+  .tab > svg {
+    display: none;
+  }
+  .tab {
+    padding-inline: 0.8rem;
+  }
+}
+
+@container stage (max-width: 40rem) {
+  .tabs {
+    width: auto;
+    margin-inline: -12px;
+    border-radius: 18px;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  }
+  .tab {
+    min-height: 48px;
+    padding-inline: 0.7rem;
+  }
+}
+
+@media (max-width: 48em) {
+  /* the connection and demo chips live in Under the hood and the demo note on a phone */
+  .topbar__meta {
+    display: none;
+  }
+  .topbar .wordmark {
+    margin-right: auto;
+  }
+  .guest-note {
+    flex-wrap: nowrap;
+  }
+  .guest-note p {
+    flex: 1 1 0;
+  }
+  .guest-note > svg,
+  .guest-note__long {
+    display: none;
+  }
+  .guest-note__short {
+    display: inline;
+  }
+  /* the jump chips repeat the panel headings that sit right below them on a phone */
+  .side__nav {
+    display: none;
+  }
+  .stage .hero {
+    margin-top: 0.25rem;
+  }
+}
+
+@media (max-width: 30em) {
+  .topbar__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .topbar {
+    flex-wrap: nowrap;
+  }
+  .topbar .wordmark {
+    font-size: 1.35rem;
+    min-width: 0;
+  }
+  .topbar__settings {
+    min-width: 52px;
+    margin-left: 0;
+    padding-inline: 0.7rem;
+    justify-content: center;
+  }
 }

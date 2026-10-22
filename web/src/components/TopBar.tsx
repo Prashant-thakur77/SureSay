@@ -85,7 +85,7 @@ export const TopBar = forwardRef<HTMLButtonElement, Props>(function TopBar({ use
       )}
       <button ref={ref} type="button" className="btn btn--secondary topbar__settings" onClick={onSettings} aria-haspopup="dialog">
         <Icon name="gear" size={26} />
-        Settings
+        <span className="topbar__label">Settings</span>
       </button>
     </header>
   );

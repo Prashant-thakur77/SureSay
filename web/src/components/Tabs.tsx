@@ -1,4 +1,4 @@
-import { useRef, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
 import { Icon, type AnyIcon } from "./Icon";
 
 export interface TabDef<T extends string> {
@@ -13,6 +13,11 @@ export interface TabDef<T extends string> {
  */
 export function TabList<T extends string>({ tabs, active, onChange, label }: { tabs: TabDef<T>[]; active: T; onChange: (id: T) => void; label: string }) {
   const refs = useRef<Array<HTMLButtonElement | null>>([]);
+  // on a phone the tabs are one scrolling row: bring the selected one into view
+  const at = tabs.findIndex((t) => t.id === active);
+  useEffect(() => {
+    refs.current[at]?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+  }, [at]);
   const onKey = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
     let next = -1;
     if (e.key === "ArrowRight") next = (i + 1) % tabs.length;

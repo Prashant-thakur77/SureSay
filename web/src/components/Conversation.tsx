@@ -121,8 +121,6 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
             Say it your way. <em>Nothing happens until you choose.</em>
           </h2>
           <p className="stage__lead">Tap the microphone and speak, or type below.</p>
-          <TryChips onTry={actions.sendText} />
-          {!history && <Steps />}
         </div>
       );
       break;
@@ -365,6 +363,12 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
         />
         <TypeBox ref={typeRef} onSend={actions.sendText} onFocus={actions.stopListening} />
       </div>
+      {phase.kind === "idle" && (
+        <div className="intro__after">
+          <TryChips onTry={actions.sendText} />
+          {!history && <Steps />}
+        </div>
+      )}
     </div>
   );
 }
