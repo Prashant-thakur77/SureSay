@@ -1,36 +1,36 @@
 {
   "name": "site_audit",
-  "generated_at": "2026-10-22T14:49:37+0530",
-  "git_sha": "3fbe62e",
+  "generated_at": "2026-10-22T15:09:24+0530",
+  "git_sha": "8e8856e",
   "python": "3.13.12",
   "url": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/",
   "runs_per_form_factor": 3,
   "phone": {
     "median_scores": {
-      "performance": 74,
+      "performance": 88,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
     },
     "median_metrics": {
-      "lcp_ms": 4685.06,
-      "cls": 0.085,
+      "lcp_ms": 3026.892,
+      "cls": 0,
       "tbt_ms": 0,
-      "fcp_ms": 2711.04
+      "fcp_ms": 2419.312
     },
     "runs": [
       {
         "scores": {
-          "performance": 74,
+          "performance": 92,
           "accessibility": 100,
           "best-practices": 100,
           "seo": 100
         },
         "metrics": {
-          "lcp_ms": 4737.269,
-          "cls": 0.08541672640600709,
+          "lcp_ms": 3026.892,
+          "cls": 0,
           "tbt_ms": 0,
-          "fcp_ms": 2720.554
+          "fcp_ms": 1376.8919999999998
         },
         "failed_accessibility_audits": [
           "label-content-name-mismatch"
@@ -39,16 +39,16 @@
       },
       {
         "scores": {
-          "performance": 74,
+          "performance": 88,
           "accessibility": 100,
           "best-practices": 100,
           "seo": 100
         },
         "metrics": {
-          "lcp_ms": 4685.0599999999995,
-          "cls": 0.07627697328421101,
-          "tbt_ms": 7.5,
-          "fcp_ms": 2711.04
+          "lcp_ms": 3019.312,
+          "cls": 0,
+          "tbt_ms": 2.5,
+          "fcp_ms": 2419.312
         },
         "failed_accessibility_audits": [
           "label-content-name-mismatch"
@@ -57,16 +57,16 @@
       },
       {
         "scores": {
-          "performance": 75,
+          "performance": 88,
           "accessibility": 100,
           "best-practices": 100,
           "seo": 100
         },
         "metrics": {
-          "lcp_ms": 4652.0650000000005,
-          "cls": 0.08925024803308287,
+          "lcp_ms": 3039.124,
+          "cls": 0,
           "tbt_ms": 0,
-          "fcp_ms": 2692.47
+          "fcp_ms": 2589.124
         },
         "failed_accessibility_audits": [
           "label-content-name-mismatch"
@@ -77,30 +77,30 @@
   },
   "desktop": {
     "median_scores": {
-      "performance": 71,
+      "performance": 97,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
     },
     "median_metrics": {
-      "lcp_ms": 2922.59,
-      "cls": 0.031,
+      "lcp_ms": 668.402,
+      "cls": 0.0,
       "tbt_ms": 0,
-      "fcp_ms": 1809.662
+      "fcp_ms": 353.176
     },
     "runs": [
       {
         "scores": {
-          "performance": 68,
+          "performance": 97,
           "accessibility": 100,
           "best-practices": 100,
           "seo": 100
         },
         "metrics": {
-          "lcp_ms": 2922.590000000001,
-          "cls": 0.03877896848473832,
+          "lcp_ms": 668.4019999999999,
+          "cls": 6.381865111235865e-05,
           "tbt_ms": 0,
-          "fcp_ms": 1809.6620000000003
+          "fcp_ms": 348.40199999999993
         },
         "failed_accessibility_audits": [
           "label-content-name-mismatch"
@@ -109,16 +109,16 @@
       },
       {
         "scores": {
-          "performance": 72,
+          "performance": 95,
           "accessibility": 100,
           "best-practices": 100,
           "seo": 100
         },
         "metrics": {
-          "lcp_ms": 2907.786,
-          "cls": 0.03116936462997634,
+          "lcp_ms": 644.176,
+          "cls": 6.381865111235865e-05,
           "tbt_ms": 0,
-          "fcp_ms": 1796.746
+          "fcp_ms": 353.17600000000004
         },
         "failed_accessibility_audits": [
           "label-content-name-mismatch"
@@ -127,16 +127,16 @@
       },
       {
         "scores": {
-          "performance": 71,
+          "performance": 97,
           "accessibility": 100,
           "best-practices": 100,
           "seo": 100
         },
         "metrics": {
-          "lcp_ms": 3011.088,
-          "cls": 0.02339709568827275,
+          "lcp_ms": 675.6679999999999,
+          "cls": 6.381865111235865e-05,
           "tbt_ms": 0,
-          "fcp_ms": 1852.1680000000001
+          "fcp_ms": 355.66799999999995
         },
         "failed_accessibility_audits": [
           "label-content-name-mismatch"

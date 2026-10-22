@@ -15,6 +15,7 @@ import base64
 import hmac
 import json
 import logging
+import mimetypes
 import os
 import time
 import uuid
@@ -31,6 +32,8 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
+
+mimetypes.add_type("font/woff2", ".woff2")  # the self-hosted typefaces
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from .app import SureSay, current_caller, current_user

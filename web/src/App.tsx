@@ -1,12 +1,15 @@
-import { useMemo, useState } from "react";
-import { MainScreen } from "./components/MainScreen";
-import { PairScreen } from "./components/PairScreen";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { HomePage } from "./components/HomePage";
 import type { StartChoice } from "./components/StartGate";
 import { useSettings } from "./hooks/useSettings";
 import { HubClient } from "./lib/api";
 import { hubBaseUrl } from "./lib/config";
 import { McpGate } from "./lib/mcp";
+
+// the home page loads first and alone; the app, pairing and the MCP client come when they are needed
+const MainScreen = lazy(() => import("./components/MainScreen").then((m) => ({ default: m.MainScreen })));
+const PairScreen = lazy(() => import("./components/PairScreen").then((m) => ({ default: m.PairScreen })));
+const loading = <p className="visually-hidden" role="status">Loading SureSay…</p>;
 import { Speaker } from "./lib/speech";
 import { KEYS, readJson, remove, writeJson } from "./lib/storage";
 import type { DeviceCreds } from "./lib/types";
@@ -82,6 +85,7 @@ export function App() {
 
   if (!creds || !services) {
     return (
+      <Suspense fallback={loading}>
       <PairScreen
         base={base}
         onPaired={(c) => {
@@ -89,10 +93,12 @@ export function App() {
           setCreds(c);
         }}
       />
+      </Suspense>
     );
   }
 
   return (
+    <Suspense fallback={loading}>
     <MainScreen
       key={creds.device_id}
       {...services}
@@ -105,5 +111,6 @@ export function App() {
         setCreds(null);
       }}
     />
+    </Suspense>
   );
 }

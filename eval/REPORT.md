@@ -307,8 +307,8 @@ Lighthouse 12.8.2 on the live home page (https://fig5s4lcztnov5vd3us22pnmoi0srph
 
 | Form factor | Performance | Accessibility | Best practices | SEO | First paint | Largest paint | Layout shift |
 |---|---|---|---|---|---|---|---|
-| Phone | 74 | **100** | 100 | 100 | 2.7 s | 4.7 s | 0.085 |
-| Desktop | 71 | **100** | 100 | 100 | 1.8 s | 2.9 s | 0.031 |
+| Phone | 88 | **100** | 100 | 100 | 2.4 s | 3.0 s | 0.000 |
+| Desktop | 97 | **100** | 100 | 100 | 0.4 s | 0.7 s | 0.000 |
 
 The web client's own tests also run axe on every screen (`web/src/test`).
 

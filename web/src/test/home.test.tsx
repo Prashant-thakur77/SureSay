@@ -29,20 +29,20 @@ describe("the home page", () => {
     expect(screen.getByRole("article", { name: /Attacks that changed anything: 0 \/ 50/ })).toBeTruthy();
   });
 
-  it("“Open the Alexa+ view” starts quietly and goes on to pairing, remembering where to go", () => {
+  it("“Open the Alexa+ view” starts quietly and goes on to pairing, remembering where to go", async () => {
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: /Open the Alexa\+ view/ }));
     expect(new URLSearchParams(window.location.search).get("alexa")).toBe("1");
-    expect(screen.getByLabelText(PAIR_LABEL)).toBeTruthy();
+    expect(await screen.findByLabelText(PAIR_LABEL)).toBeTruthy();
   });
 
-  it("comes back with ?home after the first run, and a start choice moves on again", () => {
+  it("comes back with ?home after the first run, and a start choice moves on again", async () => {
     window.localStorage.setItem("suresay.start", JSON.stringify("quiet"));
     window.history.replaceState(null, "", "/?home");
     render(<App />);
     expect(screen.getByRole("heading", { level: 1, name: "Say it your way. Nothing happens until you choose." })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Start quietly" }));
     expect(window.location.search).toBe("");
-    expect(screen.getByLabelText(PAIR_LABEL)).toBeTruthy();
+    expect(await screen.findByLabelText(PAIR_LABEL)).toBeTruthy();
   });
 });

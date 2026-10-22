@@ -27,12 +27,12 @@ describe("first-run gate", () => {
     expect(result.violations.map((v) => v.id)).toEqual([]);
   });
 
-  it("“Start quietly” turns read-aloud and auto-listen off, remembers it, and moves on to pairing", () => {
+  it("“Start quietly” turns read-aloud and auto-listen off, remembers it, and moves on to pairing", async () => {
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Start quietly" }));
     expect(stored("suresay.start")).toBe("quiet");
     expect(stored("suresay.settings")).toMatchObject({ readAloud: false, autoVoice: false });
-    expect(screen.getByLabelText(PAIR_LABEL)).toBeTruthy();
+    expect(await screen.findByLabelText(PAIR_LABEL)).toBeTruthy();
   });
 
   it("“Start with voice” turns both on and unlocks audio with the click", () => {
@@ -46,11 +46,11 @@ describe("first-run gate", () => {
     play.mockRestore();
   });
 
-  it("is skipped once a choice is saved", () => {
+  it("is skipped once a choice is saved", async () => {
     window.localStorage.setItem("suresay.start", JSON.stringify("quiet"));
     render(<App />);
     expect(screen.queryByRole("button", { name: "Start with voice" })).toBeNull();
-    expect(screen.getByLabelText(PAIR_LABEL)).toBeTruthy();
+    expect(await screen.findByLabelText(PAIR_LABEL)).toBeTruthy();
   });
 
   it("Calm mode from saved settings is applied to the page", () => {
