@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Phase } from "../hooks/useConversation";
 import { ASK_AGAIN_TEXT } from "../hooks/useConversation";
 import type { MicState } from "../hooks/useRecorder";
-import type { HomeDevice, Phrase } from "../lib/types";
+import type { HomeDevice, Phrase, TapInput } from "../lib/types";
 import { isDoorbell, isUnsure } from "../lib/words";
 import { DoorbellHeader } from "./Doorbell";
 import { CardSet } from "./CardSet";
@@ -21,9 +21,9 @@ export interface ConversationActions {
   toggleMic: () => void;
   startRequest: () => void;
   sendText: (text: string) => void;
-  choose: (n: number) => void;
-  yes: () => void;
-  none: () => void;
+  choose: (n: number, input?: TapInput) => void;
+  yes: (input?: TapInput) => void;
+  none: (input?: TapInput) => void;
   stopListening: () => void;
   expire: (pendingId: string) => void;
   openPhrases: (open: boolean) => void;
@@ -186,7 +186,7 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
           )}
           <div className="actions">
             {(!single || unsure) && (
-              <ScanButton id="none" onClick={actions.none} aria-keyshortcuts="Escape N">
+              <ScanButton id="none" onClick={() => actions.none()} aria-keyshortcuts="Escape N">
                 <Icon name="close" size={24} /> None of these <span className="kbd" aria-hidden="true">Esc</span>
               </ScanButton>
             )}

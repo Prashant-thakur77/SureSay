@@ -114,7 +114,9 @@ def intent_section(i: dict[str, Any], i2: dict[str, Any] | None) -> tuple[list[s
         "the test speakers. B0 has a single hypothesis, so it has no top-3. SureSay never acts without a confirmation, "
         "so its \"acted wrongly\" is 0 by construction; what it can do is show wrong cards, which the user declines. "
         "When it is unsure it asks again *and* offers its best guesses as \"maybe\" cards (only guesses scoring at "
-        "least 0.50, a floor fixed before measuring); a maybe card needs the same confirmation as any other.",
+        "least 0.50, a floor fixed before measuring, and since 22 Oct only guesses that share a content word with what "
+        "was heard, allowing for mishearing: `suresay.rank.relevant`, the same rule the product uses); a maybe card "
+        "needs the same confirmation as any other.",
         "",
         "Per test speaker (top-1 / correct abstain):",
         "",
@@ -434,6 +436,47 @@ def filler_finding(c: dict[str, Any]) -> str | None:
             "to tune it honestly, so it is reported here and not changed.")
 
 
+
+def consent_stress_section(cs: dict[str, Any]) -> list[str]:
+    s, b = cs["suresay"], cs["baseline"]
+    rows = [f"| {fam} | {v['cases']} | {v['baseline_false_accepts']} | **{v['suresay_false_accepts']}** |"
+            for fam, v in sorted(cs["families"].items(), key=lambda kv: -kv[1]["cases"])]
+    return ["## Consent stress test: thousands of ways of not saying yes", "",
+            f"`eval/run_consent_stress.py` generates {cs['negatives']:,} utterances that must never count as consent "
+            "(hedges, negations, questions with and without a question mark, sound-alikes, two answers at once, "
+            "out-of-range numbers, long sentences that merely contain a yes, numbers on the yes/no card, extra words on "
+            "the high-risk card; English, Hinglish and Devanagari; each with casing and punctuation variants) and "
+            f"{cs['positives']} genuine answers that must be understood. It runs the gate's consent parser on the text, "
+            "so it tests the decision itself; Claim 1 tests it on real dysarthric audio through a recogniser. Baseline: "
+            f"{b['what']}.", "",
+            "| | Non-answers taken as consent | Genuine answers understood |", "|---|---|---|",
+            f"| Keyword baseline | {b['false_accepts']:,} / {cs['negatives']:,} ({f(b['false_accept_rate'] * 100)}) | "
+            f"{b['answers_understood']} / {cs['positives']} ({f(b['answer_rate'] * 100)}) |",
+            f"| SureSay | **{s['false_accepts']} / {cs['negatives']:,} ({f(s['false_accept_rate'] * 100)})** | "
+            f"**{s['answers_understood']} / {cs['positives']} ({f(s['answer_rate'] * 100)})** |", "",
+            "| Family | Cases | Baseline false accepts | SureSay false accepts |", "|---|---|---|---|", *rows, "",
+            "Not a held-out result: the first run of this test found real gaps, and the parser was fixed before this "
+            "run (with a failing test for each, in `packages/confirm-gate-mcp/tests/test_consent.py`): a question "
+            "without a question mark (\"is two the fan\") chose option 2, and \"the to one\" (a misheard \"the two "
+            "one\") chose option 1, together 8 false accepts out of 7,045 at the time; \"go ahead\" was refused as a yes "
+            "and now counts. Eight further first-run \"false accepts\" were the test's own mislabels: \"doosra one\" is "
+            "\"the second one\", a genuine answer, and was moved to the genuine set. Claim 1 was recomputed after the "
+            "fixes from the same cached transcripts and did not change."]
+
+
+def site_audit_section(sa: dict[str, Any]) -> list[str]:
+    def row(ff: str, label: str) -> str:
+        m, x = sa[ff]["median_scores"], sa[ff]["median_metrics"]
+        return (f"| {label} | {m['performance']} | **{m['accessibility']}** | {m['best-practices']} | {m['seo']} | "
+                f"{x['fcp_ms'] / 1000:.1f} s | {x['lcp_ms'] / 1000:.1f} s | {x['cls']:.3f} |")
+    lh = sa["phone"]["runs"][0].get("lighthouse", "")
+    return ["## The live site, audited", "",
+            f"Lighthouse {lh} on the live home page ({sa['url']}), median of {sa['runs_per_form_factor']} runs per form "
+            "factor: the phone run emulates a mid-range phone on throttled 4G (`eval/run_site_audit.py`).", "",
+            "| Form factor | Performance | Accessibility | Best practices | SEO | First paint | Largest paint | Layout shift |",
+            "|---|---|---|---|---|---|---|---|", row("phone", "Phone"), row("desktop", "Desktop"), "",
+            "The web client's own tests also run axe on every screen (`web/src/test`)."]
+
 def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] | None = None,
                      tuning: dict[str, Any] | None = None) -> list[str]:
     spk, ss_t1, b1_t1, fab, ss_maybe = ik["worst"]
@@ -499,7 +542,11 @@ def main() -> None:
         "",
         "**Revisions:** on 21 Oct an independent security review hardened the consent parser (hesitations, questions and "
         "qualifiers such as \"ok hang on\" or \"okay, who is it\" are never a yes; unreadable Hindi words count as unknown). "
-        "Claim 1 was recomputed from the same cached transcripts and did not change.",
+        "Claim 1 was recomputed from the same cached transcripts and did not change. On 22 Oct the consent stress test "
+        "found two gaps in the parser (below); after the fixes Claim 1 was recomputed again and did not change. Also on "
+        "22 Oct maybe cards started requiring a shared content word with what was heard (the product and this "
+        "evaluation use the same rule): on the six test speakers, irrelevant maybe cards on out-of-book requests fell "
+        "from 47.2% to the figure below, and the intended phrase in the cards when unsure from 93.5% to the figure below.",
         "",
         "**Baselines, one change at a time:** B0 = plain assistant (recogniser, top transcript acts); "
         "B1 = + the user's phrasebook (biased recognition, nearest phrase acts); SureSay = + ranked candidates, "
@@ -523,6 +570,13 @@ def main() -> None:
         f"| Gate overhead | p50 / p95 | — | — | {lk.get('c50', lk['g50'])} / {lk.get('c95', lk['g95'])} ms | "
         f"{'Lambda + DynamoDB' if 'c50' in lk else 'SQLite'} |",
         f"| No regression | top-1, controls | {f(ik['ctrl_b0'])} | — | {f(ik['ctrl_ss'])} | control speakers |",
+        *([f"| Never mistakes a non-answer for consent | non-answers taken as consent | "
+           f"{f(cs0['baseline']['false_accept_rate'] * 100)} (keyword spotting) | — | **{f(cs0['suresay']['false_accept_rate'] * 100)}** | "
+           f"{cs0['negatives']:,} generated non-answers, {f(cs0['suresay']['answer_rate'] * 100)} of {cs0['positives']} genuine answers understood |"]
+          if (cs0 := read_result("consent_stress")) else []),
+        *([f"| Accessible | Lighthouse accessibility, phone / desktop | — | — | **{sa0['phone']['median_scores']['accessibility']} / "
+           f"{sa0['desktop']['median_scores']['accessibility']}** | the live site |"]
+          if (sa0 := read_result("site_audit")) else []),
         "",
         f"SureSay column: {ik['ss_name']}; the Nova 2 Lite ranker is pending Bedrock access. B1 recovers more phrases at "
         "top-1 because it never abstains, and pays for it by acting on a wrong phrase without asking.",
@@ -543,6 +597,11 @@ def main() -> None:
         body += cost_section(cost) + [""]
     if tuning:
         body += tuning_section(tuning) + [""]
+    cs, sa = read_result("consent_stress"), read_result("site_audit")
+    if cs:
+        body += consent_stress_section(cs) + [""]
+    if sa:
+        body += site_audit_section(sa) + [""]
     body += negative_section(ck, ik, c, tuning) + [""]
     (EVAL / "REPORT.md").write_text("\n".join(body))
     block = "\n".join(head[head.index("## Headline") + 2: -1])

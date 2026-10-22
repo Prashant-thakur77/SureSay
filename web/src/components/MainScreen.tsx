@@ -61,19 +61,19 @@ function scanItems(phase: Phase, a: ConversationActions, phrasebook: Phrase[]): 
       if (phase.set.context?.unsure) {
         return [
           { id: "again", label: "Say it again", activate: a.startRequest },
-          ...phase.set.options.map((o) => ({ id: `card-${o.n}`, label: `Maybe ${o.n}: ${o.text}`, activate: () => a.choose(o.n) })),
-          { id: "none", label: "None of these", activate: a.none },
+          ...phase.set.options.map((o) => ({ id: `card-${o.n}`, label: `Maybe ${o.n}: ${o.text}`, activate: () => a.choose(o.n, "switch") })),
+          { id: "none", label: "None of these", activate: () => a.none("switch") },
         ];
       }
       if (phase.set.stage === "final" || phase.set.options.length === 1) {
         return [
-          { id: "yes", label: `Yes: ${phase.set.options[0]?.text ?? ""}`, activate: a.yes },
-          { id: "no", label: "No", activate: a.none },
+          { id: "yes", label: `Yes: ${phase.set.options[0]?.text ?? ""}`, activate: () => a.yes("switch") },
+          { id: "no", label: "No", activate: () => a.none("switch") },
         ];
       }
       return [
-        ...phase.set.options.map((o) => ({ id: `card-${o.n}`, label: `${o.n}: ${o.text}`, activate: () => a.choose(o.n) })),
-        { id: "none", label: "None of these", activate: a.none },
+        ...phase.set.options.map((o) => ({ id: `card-${o.n}`, label: `${o.n}: ${o.text}`, activate: () => a.choose(o.n, "switch") })),
+        { id: "none", label: "None of these", activate: () => a.none("switch") },
         { id: "again", label: "Say it again", activate: a.startRequest },
       ];
     case "ask_again":
@@ -256,18 +256,18 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
         const n = Number(e.key);
         if (n <= p.set.options.length) {
           e.preventDefault();
-          a.choose(n);
+          a.choose(n, "key");
         }
         return;
       }
       if (e.key === "Escape" || key === "n") {
         e.preventDefault();
-        a.none();
+        a.none("key");
         return;
       }
       if ((p.set.stage === "final" || p.set.options.length === 1) && key === "y") {
         e.preventDefault();
-        a.yes();
+        a.yes("key");
       }
     };
     window.addEventListener("keydown", onKey);

@@ -1,7 +1,7 @@
 {
   "name": "intent",
-  "generated_at": "2026-10-21T08:59:57+0530",
-  "git_sha": "210bff6",
+  "generated_at": "2026-10-22T14:56:52+0530",
+  "git_sha": "3fbe62e",
   "python": "3.13.12",
   "claim": "2, 2b, 5",
   "asr_engine": "transcribe-streaming",
@@ -65,8 +65,8 @@
         "top3_pct": 73.1,
         "false_abstain_pct": 26.9,
         "correct_abstain_pct": 100.0,
-        "in_cards_with_maybe_pct": 93.5,
-        "maybe_cards_on_out_of_book_pct": 47.2,
+        "in_cards_with_maybe_pct": 91.7,
+        "maybe_cards_on_out_of_book_pct": 27.8,
         "acted_without_asking_wrong_pct": 0.0
       },
       "per_speaker": {
@@ -101,7 +101,7 @@
             "false_abstain_pct": 25.0,
             "correct_abstain_pct": 100.0,
             "in_cards_with_maybe_pct": 87.5,
-            "maybe_cards_on_out_of_book_pct": 37.5,
+            "maybe_cards_on_out_of_book_pct": 12.5,
             "acted_without_asking_wrong_pct": 0.0
           }
         },
@@ -136,7 +136,7 @@
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 100.0,
             "in_cards_with_maybe_pct": 100.0,
-            "maybe_cards_on_out_of_book_pct": 45.0,
+            "maybe_cards_on_out_of_book_pct": 40.0,
             "acted_without_asking_wrong_pct": 0.0
           }
         },
@@ -170,8 +170,8 @@
             "top3_pct": 45.0,
             "false_abstain_pct": 55.0,
             "correct_abstain_pct": 100.0,
-            "in_cards_with_maybe_pct": 90.0,
-            "maybe_cards_on_out_of_book_pct": 25.0,
+            "in_cards_with_maybe_pct": 80.0,
+            "maybe_cards_on_out_of_book_pct": 10.0,
             "acted_without_asking_wrong_pct": 0.0
           }
         },
@@ -206,7 +206,7 @@
             "false_abstain_pct": 20.0,
             "correct_abstain_pct": 100.0,
             "in_cards_with_maybe_pct": 95.0,
-            "maybe_cards_on_out_of_book_pct": 55.0,
+            "maybe_cards_on_out_of_book_pct": 25.0,
             "acted_without_asking_wrong_pct": 0.0
           }
         },
@@ -241,7 +241,7 @@
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 100.0,
             "in_cards_with_maybe_pct": 100.0,
-            "maybe_cards_on_out_of_book_pct": 50.0,
+            "maybe_cards_on_out_of_book_pct": 35.0,
             "acted_without_asking_wrong_pct": 0.0
           }
         },
@@ -276,7 +276,7 @@
             "false_abstain_pct": 60.0,
             "correct_abstain_pct": 100.0,
             "in_cards_with_maybe_pct": 85.0,
-            "maybe_cards_on_out_of_book_pct": 65.0,
+            "maybe_cards_on_out_of_book_pct": 35.0,
             "acted_without_asking_wrong_pct": 0.0
           }
         }
@@ -313,7 +313,7 @@
         "false_abstain_pct": 0.0,
         "correct_abstain_pct": 96.2,
         "in_cards_with_maybe_pct": 100.0,
-        "maybe_cards_on_out_of_book_pct": 38.5,
+        "maybe_cards_on_out_of_book_pct": 25.0,
         "acted_without_asking_wrong_pct": 0.0
       },
       "per_speaker": {
@@ -348,7 +348,7 @@
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 100.0,
             "in_cards_with_maybe_pct": 100.0,
-            "maybe_cards_on_out_of_book_pct": 58.3,
+            "maybe_cards_on_out_of_book_pct": 25.0,
             "acted_without_asking_wrong_pct": 0.0
           }
         },
@@ -383,7 +383,7 @@
             "false_abstain_pct": 0.0,
             "correct_abstain_pct": 100.0,
             "in_cards_with_maybe_pct": 100.0,
-            "maybe_cards_on_out_of_book_pct": 45.0,
+            "maybe_cards_on_out_of_book_pct": 30.0,
             "acted_without_asking_wrong_pct": 0.0
           }
         },
@@ -520,7 +520,12 @@
           0.4679,
           0.4601
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -561,7 +566,12 @@
           0.4939,
           0.4892
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -602,7 +612,12 @@
           0.4741,
           0.46
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -643,7 +658,12 @@
           0.5109,
           0.4732
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -684,7 +704,12 @@
           0.4918,
           0.4849
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -725,7 +750,12 @@
           0.4822,
           0.4553
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -766,7 +796,12 @@
           0.4609,
           0.4483
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -807,7 +842,12 @@
           0.525,
           0.5146
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -848,7 +888,12 @@
           0.4833,
           0.4747
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -889,7 +934,12 @@
           0.5045,
           0.4797
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -930,7 +980,12 @@
           0.4753,
           0.4683
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -971,7 +1026,12 @@
           0.4669,
           0.4615
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -1012,7 +1072,12 @@
           0.4531,
           0.4516
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          true
+        ]
       }
     },
     {
@@ -1053,7 +1118,12 @@
           0.4698,
           0.4633
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -1094,7 +1164,12 @@
           0.4657,
           0.4538
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -1135,7 +1210,12 @@
           0.45,
           0.4343
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          true
+        ]
       }
     },
     {
@@ -1178,7 +1258,12 @@
           0.5892,
           0.4575
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -1221,7 +1306,12 @@
           0.4544,
           0.4468
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -1264,7 +1354,12 @@
           0.5198,
           0.4702
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -1307,7 +1402,12 @@
           0.5071,
           0.5
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -1350,7 +1450,12 @@
           0.4686,
           0.4648
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -1393,7 +1498,12 @@
           0.6212,
           0.5417
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -1436,7 +1546,12 @@
           0.4681,
           0.4626
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -1479,7 +1594,12 @@
           0.4662,
           0.4648
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -1520,7 +1640,12 @@
           0.5643,
           0.5032
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -1563,7 +1688,12 @@
           0.5009,
           0.4722
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -1606,7 +1736,12 @@
           0.5188,
           0.4754
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -1649,7 +1784,12 @@
           0.6212,
           0.4936
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -1692,7 +1832,12 @@
           0.4941,
           0.4877
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -1733,7 +1878,12 @@
           0.5003,
           0.4875
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -1776,7 +1926,12 @@
           0.4545,
           0.4544
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -1817,7 +1972,12 @@
           0.5174,
           0.5102
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -1860,7 +2020,12 @@
           0.5088,
           0.4811
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -1903,7 +2068,12 @@
           0.5198,
           0.5188
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -1946,7 +2116,12 @@
           0.4412,
           0.4237
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -1987,7 +2162,12 @@
           0.4816,
           0.4726
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -2028,7 +2208,12 @@
           0.5454,
           0.5132
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -2069,7 +2254,12 @@
           0.5036,
           0.4885
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          true
+        ]
       }
     },
     {
@@ -2110,7 +2300,12 @@
           0.4807,
           0.4447
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -2151,7 +2346,12 @@
           0.5287,
           0.5096
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -2192,7 +2392,12 @@
           0.4512,
           0.4472
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -2233,7 +2438,12 @@
           0.4753,
           0.4739
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -2274,7 +2484,12 @@
           0.5123,
           0.4873
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -2315,7 +2530,12 @@
           0.4618,
           0.4532
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -2356,7 +2576,12 @@
           0.4875,
           0.4736
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -2397,7 +2622,12 @@
           0.4511,
           0.4446
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          true
+        ]
       }
     },
     {
@@ -2438,7 +2668,12 @@
           0.474,
           0.4583
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -2479,7 +2714,12 @@
           0.4892,
           0.4879
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -2520,7 +2760,12 @@
           0.4817,
           0.4816
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -2561,7 +2806,12 @@
           0.5081,
           0.502
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -2602,7 +2852,12 @@
           0.4795,
           0.4769
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -2643,7 +2898,12 @@
           0.5462,
           0.5033
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -2684,7 +2944,12 @@
           0.4703,
           0.469
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -2725,7 +2990,12 @@
           0.4474,
           0.4461
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -2766,7 +3036,12 @@
           0.4698,
           0.4648
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -2807,7 +3082,12 @@
           0.4599,
           0.4575
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -2848,7 +3128,12 @@
           0.5454,
           0.5071
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -2889,7 +3174,12 @@
           0.528,
           0.5157
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -2930,7 +3220,12 @@
           0.503,
           0.4973
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -2971,7 +3266,12 @@
           0.5234,
           0.4512
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -3012,7 +3312,12 @@
           0.5321,
           0.4706
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -3053,7 +3358,12 @@
           0.4826,
           0.4606
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -3094,7 +3404,12 @@
           0.5558,
           0.4734
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -3135,7 +3450,12 @@
           0.5058,
           0.4773
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -3176,7 +3496,12 @@
           0.5029,
           0.4946
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -3217,7 +3542,12 @@
           0.4569,
           0.4519
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -3258,7 +3588,12 @@
           0.5352,
           0.502
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -3299,7 +3634,12 @@
           0.4614,
           0.4548
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -3340,7 +3680,12 @@
           0.4381,
           0.4226
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -3381,7 +3726,12 @@
           0.5099,
           0.4939
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -3422,7 +3772,12 @@
           0.5417,
           0.5139
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -3463,7 +3818,12 @@
           0.5091,
           0.4911
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -3504,7 +3864,12 @@
           0.5682,
           0.5442
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -3545,7 +3910,12 @@
           0.4953,
           0.4788
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -3586,7 +3956,12 @@
           0.451,
           0.4459
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -3627,7 +4002,12 @@
           0.5479,
           0.5147
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -3668,7 +4048,12 @@
           0.0,
           0.0
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -3709,7 +4094,12 @@
           0.434,
           0.4152
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -3750,7 +4140,12 @@
           0.467,
           0.4564
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -3791,7 +4186,12 @@
           0.448,
           0.4428
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -3832,7 +4232,12 @@
           0.4408,
           0.4354
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          true
+        ]
       }
     },
     {
@@ -3873,7 +4278,12 @@
           0.4952,
           0.4897
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -3914,7 +4324,12 @@
           0.5104,
           0.4883
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -3955,7 +4370,12 @@
           0.5091,
           0.4804
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -3996,7 +4416,12 @@
           0.4531,
           0.435
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -4037,7 +4462,12 @@
           0.4508,
           0.4507
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -4078,7 +4508,12 @@
           0.4722,
           0.4697
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -4119,7 +4554,12 @@
           0.4924,
           0.4785
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -4160,7 +4600,12 @@
           0.4702,
           0.4682
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -4201,7 +4646,12 @@
           0.5454,
           0.5452
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -4242,7 +4692,12 @@
           0.4912,
           0.4722
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -4283,7 +4738,12 @@
           0.4786,
           0.4696
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -4324,7 +4784,12 @@
           0.4813,
           0.4714
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -4365,7 +4830,12 @@
           0.492,
           0.4846
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          true
+        ]
       }
     },
     {
@@ -4406,7 +4876,12 @@
           0.4911,
           0.4895
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -4447,7 +4922,12 @@
           0.3841,
           0.3333
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -4488,7 +4968,12 @@
           0.4809,
           0.457
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -4531,7 +5016,12 @@
           0.5128,
           0.4918
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -4572,7 +5062,12 @@
           0.4697,
           0.4606
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -4613,7 +5108,12 @@
           0.5354,
           0.5233
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          true
+        ]
       }
     },
     {
@@ -4654,7 +5154,12 @@
           0.5114,
           0.4754
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -4695,7 +5200,12 @@
           0.4866,
           0.4825
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -4736,7 +5246,12 @@
           0.4812,
           0.4607
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -4777,7 +5292,12 @@
           0.4847,
           0.4836
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -4818,7 +5338,12 @@
           0.5419,
           0.5344
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -4859,7 +5384,12 @@
           0.536,
           0.5278
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -4902,7 +5432,12 @@
           0.4826,
           0.4747
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -4943,7 +5478,12 @@
           0.5,
           0.4936
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -4986,7 +5526,12 @@
           0.5606,
           0.5128
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -5027,7 +5572,12 @@
           0.5202,
           0.4951
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -5068,7 +5618,12 @@
           0.4503,
           0.4444
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -5109,7 +5664,12 @@
           0.508,
           0.5064
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -5150,7 +5710,12 @@
           0.5492,
           0.5146
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -5191,7 +5756,12 @@
           0.4662,
           0.4544
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -5232,7 +5802,12 @@
           0.5187,
           0.474
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -5273,7 +5848,12 @@
           0.5614,
           0.5487
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -5314,7 +5894,12 @@
           0.4424,
           0.4423
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -5355,7 +5940,12 @@
           0.4745,
           0.4677
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -5396,7 +5986,12 @@
           0.499,
           0.4745
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -5437,7 +6032,12 @@
           0.4462,
           0.4409
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -5478,7 +6078,12 @@
           0.4952,
           0.4915
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          true
+        ]
       }
     },
     {
@@ -5519,7 +6124,12 @@
           0.4552,
           0.4545
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -5560,7 +6170,12 @@
           0.5165,
           0.5131
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -5601,7 +6216,12 @@
           0.5079,
           0.4881
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -5642,7 +6262,12 @@
           0.4697,
           0.4615
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -5683,7 +6308,12 @@
           0.4653,
           0.4631
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -5724,7 +6354,12 @@
           0.513,
           0.5061
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -5765,7 +6400,12 @@
           0.4792,
           0.4542
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -5806,7 +6446,12 @@
           0.4879,
           0.4682
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -5847,7 +6492,12 @@
           0.4821,
           0.4763
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -5888,7 +6538,12 @@
           0.4718,
           0.4629
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -5929,7 +6584,12 @@
           0.4815,
           0.4635
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -5970,7 +6630,12 @@
           0.5313,
           0.4889
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -6011,7 +6676,12 @@
           0.5185,
           0.5061
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          true
+        ]
       }
     },
     {
@@ -6052,7 +6722,12 @@
           0.4773,
           0.4728
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -6093,7 +6768,12 @@
           0.5346,
           0.5147
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -6136,7 +6816,12 @@
           0.4939,
           0.4927
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -6179,7 +6864,12 @@
           0.4822,
           0.4538
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -6220,7 +6910,12 @@
           0.4493,
           0.4476
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -6263,7 +6958,12 @@
           0.5028,
           0.4949
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -6306,7 +7006,12 @@
           0.4626,
           0.4491
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -6349,7 +7054,12 @@
           0.5032,
           0.4948
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -6392,7 +7102,12 @@
           0.4754,
           0.4754
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -6433,7 +7148,12 @@
           0.4851,
           0.4444
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -6476,7 +7196,12 @@
           0.5025,
           0.493
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -6519,7 +7244,12 @@
           0.5479,
           0.5462
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -6562,7 +7292,12 @@
           0.4738,
           0.465
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -6605,7 +7340,12 @@
           0.5727,
           0.4907
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -6648,7 +7388,12 @@
           0.5032,
           0.5025
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -6691,7 +7436,12 @@
           0.5523,
           0.5463
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -6734,7 +7484,12 @@
           0.5426,
           0.4572
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -6777,7 +7532,12 @@
           0.4878,
           0.4725
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -6820,7 +7580,12 @@
           0.5,
           0.4948
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -6861,7 +7626,12 @@
           0.5256,
           0.4698
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -6902,7 +7672,12 @@
           0.5121,
           0.5116
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -6943,7 +7718,12 @@
           0.4683,
           0.4432
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -6984,7 +7764,12 @@
           0.5126,
           0.4933
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -7025,7 +7810,12 @@
           0.481,
           0.4795
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          true
+        ]
       }
     },
     {
@@ -7066,7 +7856,12 @@
           0.5071,
           0.4885
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -7107,7 +7902,12 @@
           0.462,
           0.4534
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          true
+        ]
       }
     },
     {
@@ -7148,7 +7948,12 @@
           0.4889,
           0.4794
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          true
+        ]
       }
     },
     {
@@ -7189,7 +7994,12 @@
           0.4716,
           0.4654
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -7230,7 +8040,12 @@
           0.4966,
           0.4954
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -7271,7 +8086,12 @@
           0.4642,
           0.4597
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -7312,7 +8132,12 @@
           0.4536,
           0.4355
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -7353,7 +8178,12 @@
           0.4808,
           0.4795
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -7394,7 +8224,12 @@
           0.4632,
           0.4603
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -7435,7 +8270,12 @@
           0.4377,
           0.4352
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -7476,7 +8316,12 @@
           0.4675,
           0.459
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -7517,7 +8362,12 @@
           0.4892,
           0.4699
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -7558,7 +8408,12 @@
           0.4762,
           0.4746
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          true
+        ]
       }
     },
     {
@@ -7599,7 +8454,12 @@
           0.5008,
           0.4961
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -7640,7 +8500,12 @@
           0.4583,
           0.4461
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -7681,7 +8546,12 @@
           0.5485,
           0.5173
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -7722,7 +8592,12 @@
           0.503,
           0.4664
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          true
+        ]
       }
     },
     {
@@ -7763,7 +8638,12 @@
           0.4718,
           0.4692
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -7804,7 +8684,12 @@
           0.5018,
           0.4983
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -7845,7 +8730,12 @@
           0.4427,
           0.4179
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -7886,7 +8776,12 @@
           0.4541,
           0.4427
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -7927,7 +8822,12 @@
           0.5212,
           0.4948
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -7968,7 +8868,12 @@
           0.5167,
           0.4559
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -8009,7 +8914,12 @@
           0.5085,
           0.4931
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -8050,7 +8960,12 @@
           0.5119,
           0.4632
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -8091,7 +9006,12 @@
           0.5022,
           0.4896
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -8132,7 +9052,12 @@
           0.5099,
           0.4645
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -8173,7 +9098,12 @@
           0.4903,
           0.4735
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -8214,7 +9144,12 @@
           0.47,
           0.4298
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -8255,7 +9190,12 @@
           0.4476,
           0.4412
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -8296,7 +9236,12 @@
           0.4946,
           0.4885
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -8337,7 +9282,12 @@
           0.5203,
           0.4826
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -8378,7 +9328,12 @@
           0.4287,
           0.4252
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -8419,7 +9374,12 @@
           0.4734,
           0.4725
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -8460,7 +9420,12 @@
           0.4474,
           0.4343
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -8501,7 +9466,12 @@
           0.5109,
           0.4826
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -8542,7 +9512,12 @@
           0.5357,
           0.4792
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -8583,7 +9558,12 @@
           0.4952,
           0.4543
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -8624,7 +9604,12 @@
           0.4891,
           0.4869
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -8665,7 +9650,12 @@
           0.5109,
           0.4991
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -8706,7 +9696,12 @@
           0.4464,
           0.4278
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -8747,7 +9742,12 @@
           0.4594,
           0.4563
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -8788,7 +9788,12 @@
           0.5016,
           0.5014
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -8829,7 +9834,12 @@
           0.472,
           0.467
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -8870,7 +9880,12 @@
           0.4915,
           0.4854
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -8911,7 +9926,12 @@
           0.5521,
           0.5042
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -8952,7 +9972,12 @@
           0.4853,
           0.4669
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -8993,7 +10018,12 @@
           0.4609,
           0.4501
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -9034,7 +10064,12 @@
           0.5033,
           0.449
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -9075,7 +10110,12 @@
           0.4512,
           0.4423
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -9116,7 +10156,12 @@
           0.4885,
           0.4623
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -9157,7 +10202,12 @@
           0.4872,
           0.4404
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -9198,7 +10248,12 @@
           0.5153,
           0.4947
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -9239,7 +10294,12 @@
           0.4776,
           0.4524
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -9280,7 +10340,12 @@
           0.4717,
           0.4678
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -9321,7 +10386,12 @@
           0.4217,
           0.4198
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -9362,7 +10432,12 @@
           0.4681,
           0.4422
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -9403,7 +10478,12 @@
           0.4972,
           0.484
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -9446,7 +10526,12 @@
           0.4916,
           0.4721
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -9487,7 +10572,12 @@
           0.482,
           0.4523
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -9530,7 +10620,12 @@
           0.4854,
           0.4741
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -9573,7 +10668,12 @@
           0.5039,
           0.4689
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -9616,7 +10716,12 @@
           0.4826,
           0.4702
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -9657,7 +10762,12 @@
           0.4829,
           0.4562
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -9700,7 +10810,12 @@
           0.468,
           0.4671
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -9743,7 +10858,12 @@
           0.5244,
           0.4802
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -9786,7 +10906,12 @@
           0.52,
           0.4949
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -9827,7 +10952,12 @@
           0.4703,
           0.4703
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -9868,7 +10998,12 @@
           0.5169,
           0.5121
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -9911,7 +11046,12 @@
           0.5039,
           0.4782
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -9952,7 +11092,12 @@
           0.4351,
           0.4338
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -9993,7 +11138,12 @@
           0.493,
           0.4796
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -10034,7 +11184,12 @@
           0.4952,
           0.4778
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          true
+        ]
       }
     },
     {
@@ -10075,7 +11230,12 @@
           0.4618,
           0.4365
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -10116,7 +11276,12 @@
           0.499,
           0.4854
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -10157,7 +11322,12 @@
           0.4972,
           0.4788
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          true
+        ]
       }
     },
     {
@@ -10198,7 +11368,12 @@
           0.4876,
           0.4874
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          true
+        ]
       }
     },
     {
@@ -10239,7 +11414,12 @@
           0.4753,
           0.4558
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -10280,7 +11460,12 @@
           0.491,
           0.4879
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -10321,7 +11506,12 @@
           0.4381,
           0.4357
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -10362,7 +11552,12 @@
           0.4707,
           0.4688
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -10403,7 +11598,12 @@
           0.4683,
           0.4682
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -10446,7 +11646,12 @@
           0.4866,
           0.4264
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -10489,7 +11694,12 @@
           0.5119,
           0.511
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -10532,7 +11742,12 @@
           0.5321,
           0.4811
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -10575,7 +11790,12 @@
           0.4811,
           0.4429
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -10618,7 +11838,12 @@
           0.5321,
           0.5222
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -10661,7 +11886,12 @@
           0.4357,
           0.426
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -10704,7 +11934,12 @@
           0.5012,
           0.4982
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -10747,7 +11982,12 @@
           0.4924,
           0.4781
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -10790,7 +12030,12 @@
           0.4892,
           0.4715
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -10833,7 +12078,12 @@
           0.4968,
           0.4558
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -10876,7 +12126,12 @@
           0.4458,
           0.4416
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -10919,7 +12174,12 @@
           0.5119,
           0.4715
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -10962,7 +12222,12 @@
           0.511,
           0.4651
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -11005,7 +12270,12 @@
           0.4683,
           0.4612
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -11046,7 +12316,12 @@
           0.5222,
           0.5012
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -11089,7 +12364,12 @@
           0.4245,
           0.4079
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -11130,7 +12410,12 @@
           0.5008,
           0.4978
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -11173,7 +12458,12 @@
           0.4924,
           0.4651
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -11216,7 +12506,12 @@
           0.5027,
           0.4889
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -11259,7 +12554,12 @@
           0.4334,
           0.4234
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -11300,7 +12600,12 @@
           0.4377,
           0.4241
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -11341,7 +12646,12 @@
           0.3947,
           0.394
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -11382,7 +12692,12 @@
           0.4392,
           0.4279
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -11423,7 +12738,12 @@
           0.4943,
           0.4803
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          true
+        ]
       }
     },
     {
@@ -11464,7 +12784,12 @@
           0.4479,
           0.4425
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          true
+        ]
       }
     },
     {
@@ -11505,7 +12830,12 @@
           0.4606,
           0.4532
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -11546,7 +12876,12 @@
           0.5156,
           0.4583
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -11587,7 +12922,12 @@
           0.5463,
           0.4786
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -11628,7 +12968,12 @@
           0.511,
           0.5067
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -11669,7 +13014,12 @@
           0.4556,
           0.4404
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -11710,7 +13060,12 @@
           0.445,
           0.4387
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          true
+        ]
       }
     },
     {
@@ -11751,7 +13106,12 @@
           0.4657,
           0.4655
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -11792,7 +13152,12 @@
           0.4702,
           0.4572
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -11833,7 +13198,12 @@
           0.4991,
           0.4942
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -11874,7 +13244,12 @@
           0.4319,
           0.4311
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -11915,7 +13290,12 @@
           0.4714,
           0.4654
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -11956,7 +13336,12 @@
           0.4737,
           0.4503
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -11997,7 +13382,12 @@
           0.4321,
           0.4262
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          true
+        ]
       }
     },
     {
@@ -12038,7 +13428,12 @@
           0.4986,
           0.4982
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     },
     {
@@ -12079,7 +13474,12 @@
           0.4644,
           0.4243
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -12122,7 +13522,12 @@
           0.44,
           0.4323
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -12165,7 +13570,12 @@
           0.4428,
           0.4361
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -12208,7 +13618,12 @@
           0.4866,
           0.4688
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -12251,7 +13666,12 @@
           0.4485,
           0.4192
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -12294,7 +13714,12 @@
           0.471,
           0.4515
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -12337,7 +13762,12 @@
           0.4312,
           0.4223
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -12380,7 +13810,12 @@
           0.4843,
           0.4774
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -12423,7 +13858,12 @@
           0.4867,
           0.4542
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -12464,7 +13904,12 @@
           0.4732,
           0.4693
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -12507,7 +13952,12 @@
           0.4676,
           0.4258
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -12550,7 +14000,12 @@
           0.4853,
           0.4431
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -12593,7 +14048,12 @@
           0.4264,
           0.4196
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -12634,7 +14094,12 @@
           0.5043,
           0.4833
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -12675,7 +14140,12 @@
           0.4441,
           0.4341
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -12718,7 +14188,12 @@
           0.4867,
           0.4519
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -12761,7 +14236,12 @@
           0.4666,
           0.4607
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -12802,7 +14282,12 @@
           0.4907,
           0.4401
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -12845,7 +14330,12 @@
           0.5154,
           0.462
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -12888,7 +14378,12 @@
           0.4542,
           0.4459
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -12931,7 +14426,12 @@
           0.5154,
           0.4911
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -12972,7 +14472,12 @@
           0.4545,
           0.4485
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -13013,7 +14518,12 @@
           0.3702,
           0.369
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -13054,7 +14564,12 @@
           0.4644,
           0.4594
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -13095,7 +14610,12 @@
           0.4618,
           0.4415
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -13136,7 +14656,12 @@
           0.4815,
           0.4724
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -13177,7 +14702,12 @@
           0.467,
           0.4196
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -13218,7 +14748,12 @@
           0.4738,
           0.4663
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -13259,7 +14794,12 @@
           0.4744,
           0.4728
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          true
+        ]
       }
     },
     {
@@ -13300,7 +14840,12 @@
           0.4474,
           0.4299
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -13341,7 +14886,12 @@
           0.4206,
           0.4085
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -13382,7 +14932,12 @@
           0.4833,
           0.4706
         ],
-        "abstain": false
+        "abstain": false,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -13423,7 +14978,12 @@
           0.429,
           0.4231
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          false,
+          false
+        ]
       }
     },
     {
@@ -13464,7 +15024,12 @@
           0.446,
           0.4456
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -13505,7 +15070,12 @@
           0.4877,
           0.4544
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -13546,7 +15116,12 @@
           0.4511,
           0.4458
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -13587,7 +15162,12 @@
           0.4351,
           0.4295
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          true
+        ]
       }
     },
     {
@@ -13628,7 +15208,12 @@
           0.49,
           0.46
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          false
+        ]
       }
     },
     {
@@ -13669,7 +15254,12 @@
           0.4752,
           0.4534
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          true,
+          false
+        ]
       }
     },
     {
@@ -13710,7 +15300,12 @@
           0.4592,
           0.4574
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          true,
+          true,
+          true
+        ]
       }
     },
     {
@@ -13751,7 +15346,12 @@
           0.4465,
           0.4456
         ],
-        "abstain": true
+        "abstain": true,
+        "rel": [
+          false,
+          false,
+          false
+        ]
       }
     }
   ]

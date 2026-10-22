@@ -1,7 +1,7 @@
 {
   "name": "hinglish",
-  "generated_at": "2026-10-21T14:06:01+0530",
-  "git_sha": "167c157",
+  "generated_at": "2026-10-22T14:47:39+0530",
+  "git_sha": "3fbe62e",
   "python": "3.13.12",
   "what": "Polly Kajal (synthetic) -> Transcribe streaming -> consent parser",
   "summary": {

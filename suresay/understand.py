@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any
 from . import catalog
 from .asr import Heard
 from .phrasebook import vocabulary
-from .rank import Ranked
+from .rank import Ranked, relevant
 
 if TYPE_CHECKING:
     from .app import SureSay
@@ -75,9 +75,15 @@ def understand(app: SureSay, user_id: str, *, transcript: str | None = None, aud
     if negated:
         return {**base, "status": "ask_again", "reason": "negation", "maybe": [], "say": NEGATED.format(word=negated)}
 
+    # Never offer to place an order from an empty cart.
+    cart_empty = isinstance(home, dict) and home.get("cart_items") == 0
+    ranked.candidates = [c for c in ranked.candidates
+                         if not (cart_empty and c.action == "cart_order" and not c.args.get("product_id"))]
+
     if ranked.abstain or not ranked.candidates:
         maybe_floor = getattr(getattr(app.ranker, "rule", None), "maybe_floor", 0.5)
-        weak = [c for c in ranked.candidates if c.action in catalog.WRITE_ACTIONS and c.confidence >= maybe_floor][:3]
+        weak = [c for c in ranked.candidates if c.action in catalog.WRITE_ACTIONS and c.confidence >= maybe_floor
+                and relevant(heard.text, c.phrase or c.text)][:3]
         maybe = [{"text": c.text, "phrase": c.phrase, "confidence": c.confidence} for c in ranked.candidates]
         out = {**base, "status": "ask_again", "reason": ranked.reason, "maybe": maybe, "say": ASK_AGAIN}
         if weak:

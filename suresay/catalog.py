@@ -39,7 +39,14 @@ WRITE_ACTIONS = ("home_set", "ac_set", "door_lock", "call_contact", "message_con
                  "say_for_me", "phrasebook_add", "doorbell_reply")
 READ_ACTIONS = ("home_status", "cart_view")
 
-_CONTACT_NAME = {c["id"]: c["name"].split(".")[0].split(" (")[0] for c in CONTACTS}
+def _display_name(name: str) -> str:
+    """A contact's name for a card: cut at the first full stop or bracket (anything after it is not a name, and may
+    be an injected instruction), but keep an honorific's full stop ("Dr. Mehta")."""
+    kept = re.sub(r"\b(Dr|Mr|Mrs|Ms|Prof|Smt|Shri)\. ", "\\1\u2024 ", name)
+    return kept.split(".")[0].split(" (")[0].replace("\u2024", ".").strip()
+
+
+_CONTACT_NAME = {c["id"]: _display_name(c["name"]) for c in CONTACTS}
 _PRODUCT_NAME = {p["id"]: p["name"] for p in PRODUCTS}
 
 

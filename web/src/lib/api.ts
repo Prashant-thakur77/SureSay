@@ -12,6 +12,7 @@ import type {
   PracticeResult,
   PracticeState,
   SpeakResponse,
+  TapInput,
   TurnResponse,
 } from "./types";
 
@@ -32,7 +33,7 @@ export interface HubApi {
   pending(): Promise<PendingSet[]>;
   /** One turn. purpose "say": sentences to say aloud to someone (Talk to someone), never an action on the home. */
   turn(input: { text?: string; audio_b64?: string; session_id: string; purpose?: "say" }): Promise<TurnResponse>;
-  evidenceTap(set: PendingSet, answer: { option: number } | { answer: "yes" | "no" }): Promise<EvidenceResponse>;
+  evidenceTap(set: PendingSet, answer: { option: number } | { answer: "yes" | "no" }, input?: TapInput): Promise<EvidenceResponse>;
   evidenceVoice(set: PendingSet, audio_b64: string): Promise<EvidenceResponse>;
   confirmRest(pending_id: string, evidence_ref: string): Promise<ConfirmResult>;
   speak(text: string): Promise<SpeakResponse>;
@@ -174,11 +175,12 @@ export class HubClient implements HubApi {
     return this.call<TurnResponse>("POST", "/device/turn", input, 60000);
   }
 
-  evidenceTap(set: PendingSet, answer: { option: number } | { answer: "yes" | "no" }): Promise<EvidenceResponse> {
+  evidenceTap(set: PendingSet, answer: { option: number } | { answer: "yes" | "no" }, input: TapInput = "touch"): Promise<EvidenceResponse> {
     return this.call<EvidenceResponse>("POST", "/device/evidence", {
       pending_id: set.pending_id,
       nonce: set.nonce,
       kind: "tap",
+      input,
       ...answer,
     });
   }

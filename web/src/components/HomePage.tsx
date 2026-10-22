@@ -414,7 +414,7 @@ function Alexa({ onAlexa }: { onAlexa: () => void }) {
             <li>The three cards as an MCP App, rendered on an Echo Show or Fire TV.</li>
             <li>Account linking with OAuth 2.1, and one tap to unlink.</li>
             <li>Amazon's own add-on rules (“explicit confirmation before any high-consequence action”, “prevent duplicate transactions”) enforced in code.</li>
-            <li>An Agent Skill, and a classic Alexa skill that works today.</li>
+            <li>An Agent Skill, and a classic Alexa skill (built and tested on AWS Lambda) that pairs as the user's voice device.</li>
           </ul>
           <button type="button" className="btn btn--dawn" onClick={onAlexa}>
             <Icon name="speech" size={24} /> Open the Alexa+ view
@@ -467,7 +467,7 @@ function Developers() {
       </div>
       <p className="built-label">Built on AWS</p>
       <ul className="chips" aria-label="AWS services used">
-        {["Amazon Bedrock AgentCore", "Strands Agents", "Amazon Nova 2 Sonic", "Amazon Nova 2 Lite", "Amazon Transcribe", "Amazon Polly", "Amazon DynamoDB", "Amazon S3", "AWS Lambda", "Amazon SNS", "Amazon CloudWatch"].map((c) => (
+        {["Amazon Bedrock AgentCore", "Strands Agents", "Amazon Nova 2 Sonic", "Amazon Nova 2 Lite (awaiting quota)", "Amazon Transcribe", "Amazon Polly", "Amazon DynamoDB", "Amazon S3", "AWS Lambda", "Amazon SNS", "Amazon CloudWatch"].map((c) => (
           <li key={c}>{c}</li>
         ))}
       </ul>
@@ -478,7 +478,7 @@ function Developers() {
 const FAQ: Array<[string, string]> = [
   ["Is SureSay a speech therapy app?", "No. It helps people use technology and talk to others safely as they speak today. Practice gives an honest clarity score, but it is a practice signal, not a medical test."],
   ["Can the AI ever do something on its own?", "No. It can understand, read and ask. Every change needs your own tap or voice on a device you paired, and the code that releases it never reaches the model."],
-  ["Does it work with Alexa today?", "Yes, as a classic Alexa skill that pairs as your voice device. It is also built as an Alexa+ add-on, ready for when Alexa+ opens to developers."],
+  ["Does it work with Alexa today?", "SureSay comes with a classic Alexa skill that pairs as your voice device: its code runs on AWS Lambda and is tested, and it is added to an Alexa account from the Alexa developer console. SureSay is also built as an Alexa+ add-on, ready for when Alexa+ opens to developers."],
   ["What happens to my voice?", "Recordings are private, encrypted, and deleted after 30 days. A receipt keeps only a fingerprint of the recording, to prove which one was used."],
   ["Which languages does it understand?", "English, with Hinglish and Hindi confirmations such as “haan”, “doosra” or “do number”. A bare “do” is never read as “two”."],
   ["Is it free?", "The code is open source under the MIT licence. The live demo is free to try, with no sign-up."],

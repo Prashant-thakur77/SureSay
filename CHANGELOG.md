@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.4.0 (22 Oct 2026)
+
+- **Consent stress test** (`eval/run_consent_stress.py`): 7,093 generated non-answers and 190 genuine answers. It found two real gaps, now fixed with a failing test each: a question without a question mark ("is two the fan") chose a card, and "the to one" (a misheard "the two one") chose option one. "Go ahead" now counts as a yes. Result: 0 non-answers taken as consent (keyword spotting: 95.5%), 100% of genuine answers understood. Claim 1 recomputed: unchanged.
+- **Receipts say exactly how you answered:** tap evidence records its input (`touch`, `key` or `switch`), and the receipt and its sentence name it ("Confirmed by your key press"). confirm-gate-mcp 0.5.0.
+- **Maybe cards must be about what you said** (a shared content word, allowing for mishearing; the same rule in the product and the evaluation), and an order is never offered from an empty cart. Irrelevant maybe cards on out-of-scope requests fell from 47.2% to 27.8%; the intended phrase is in the cards when unsure 91.7% of the time (was 93.5%).
+- "Call Dr. Mehta", not "Call Dr": honorifics keep their full stop; anything after a name is still cut.
+- **Live site audit** (`eval/run_site_audit.py`): Lighthouse accessibility 100 on phone and desktop, best practices 100, SEO 100.
+- Honest wording: the classic Alexa skill is built and tested on Lambda and added from the Alexa developer console; Nova 2 Lite is marked as awaiting quota.
+
 ## 1.3.0 (22 Oct 2026)
 
 - **The site.** The home page is now the whole story in chapters, from night (misheard) to dawn (heard): the start choices first, as before, then the problem, how it works (an animated three-card demo), safety (a technical drawing of who holds the one-time code, and a step-by-step version on phones), understood by people, proof (every number counted up from the evaluation report), Alexa+, developers and the open-source gate, questions, and a closing call. A floating pill navigation, a footer, reduced-motion and Calm mode respected everywhere, axe-clean.

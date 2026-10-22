@@ -12,7 +12,7 @@ import { HubError, type HubApi } from "../lib/api";
 import { MicError, micSupported } from "../lib/audio";
 import type { ConfirmChannel } from "../lib/mcp";
 import type { Speaker } from "../lib/speech";
-import type { ConfirmResult, HubState, PendingSet, Receipt, Timing } from "../lib/types";
+import type { ConfirmResult, HubState, PendingSet, Receipt, TapInput, Timing } from "../lib/types";
 import { playChime } from "../lib/sfx";
 import { TICK_MS } from "../lib/checks";
 import { announceChoices, isDoorbell, isUnsure, plainEvidenceError, plainReason, spokenChoices, spokenDoorbell, spokenUnsure } from "../lib/words";
@@ -471,14 +471,14 @@ export function useConversation(deps: ConversationDeps) {
   // -- answering by tap ----------------------------------------------------------------
 
   const tap = useCallback(
-    async (answer: { option: number } | { answer: "yes" | "no" }) => {
+    async (answer: { option: number } | { answer: "yes" | "no" }, input: TapInput = "touch") => {
       const p = phaseRef.current;
       if (p.kind !== "cards" || p.answer === "sending") return;
       const set = p.set;
       const id = begin();
       patchCards(id, set.pending_id, { answer: "sending", note: undefined });
       try {
-        const ev = await depsRef.current.hub.evidenceTap(set, answer);
+        const ev = await depsRef.current.hub.evidenceTap(set, answer, input);
         if (!live(id)) return;
         await handleEvidence(id, set, ev, "tap");
       } catch (err) {
@@ -488,13 +488,13 @@ export function useConversation(deps: ConversationDeps) {
     [begin, patchCards],
   );
 
-  const choose = useCallback((n: number) => void tap({ option: n }), [tap]);
+  const choose = useCallback((n: number, input?: TapInput) => void tap({ option: n }, input), [tap]);
   // a one-card "choose" set (a tapped tile) takes option 1 as its yes
-  const yes = useCallback(() => {
+  const yes = useCallback((input?: TapInput) => {
     const p = phaseRef.current;
-    void tap(p.kind === "cards" && p.set.stage === "choose" ? { option: 1 } : { answer: "yes" });
+    void tap(p.kind === "cards" && p.set.stage === "choose" ? { option: 1 } : { answer: "yes" }, input);
   }, [tap]);
-  const none = useCallback(() => void tap({ answer: "no" }), [tap]);
+  const none = useCallback((input?: TapInput) => void tap({ answer: "no" }, input), [tap]);
 
   const answerByVoice = useCallback(() => {
     const p = phaseRef.current;

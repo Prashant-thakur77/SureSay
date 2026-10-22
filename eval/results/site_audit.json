@@ -1,0 +1,148 @@
+{
+  "name": "site_audit",
+  "generated_at": "2026-10-22T14:49:37+0530",
+  "git_sha": "3fbe62e",
+  "python": "3.13.12",
+  "url": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/",
+  "runs_per_form_factor": 3,
+  "phone": {
+    "median_scores": {
+      "performance": 74,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "median_metrics": {
+      "lcp_ms": 4685.06,
+      "cls": 0.085,
+      "tbt_ms": 0,
+      "fcp_ms": 2711.04
+    },
+    "runs": [
+      {
+        "scores": {
+          "performance": 74,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "metrics": {
+          "lcp_ms": 4737.269,
+          "cls": 0.08541672640600709,
+          "tbt_ms": 0,
+          "fcp_ms": 2720.554
+        },
+        "failed_accessibility_audits": [
+          "label-content-name-mismatch"
+        ],
+        "lighthouse": "12.8.2"
+      },
+      {
+        "scores": {
+          "performance": 74,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "metrics": {
+          "lcp_ms": 4685.0599999999995,
+          "cls": 0.07627697328421101,
+          "tbt_ms": 7.5,
+          "fcp_ms": 2711.04
+        },
+        "failed_accessibility_audits": [
+          "label-content-name-mismatch"
+        ],
+        "lighthouse": "12.8.2"
+      },
+      {
+        "scores": {
+          "performance": 75,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "metrics": {
+          "lcp_ms": 4652.0650000000005,
+          "cls": 0.08925024803308287,
+          "tbt_ms": 0,
+          "fcp_ms": 2692.47
+        },
+        "failed_accessibility_audits": [
+          "label-content-name-mismatch"
+        ],
+        "lighthouse": "12.8.2"
+      }
+    ]
+  },
+  "desktop": {
+    "median_scores": {
+      "performance": 71,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "median_metrics": {
+      "lcp_ms": 2922.59,
+      "cls": 0.031,
+      "tbt_ms": 0,
+      "fcp_ms": 1809.662
+    },
+    "runs": [
+      {
+        "scores": {
+          "performance": 68,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "metrics": {
+          "lcp_ms": 2922.590000000001,
+          "cls": 0.03877896848473832,
+          "tbt_ms": 0,
+          "fcp_ms": 1809.6620000000003
+        },
+        "failed_accessibility_audits": [
+          "label-content-name-mismatch"
+        ],
+        "lighthouse": "12.8.2"
+      },
+      {
+        "scores": {
+          "performance": 72,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "metrics": {
+          "lcp_ms": 2907.786,
+          "cls": 0.03116936462997634,
+          "tbt_ms": 0,
+          "fcp_ms": 1796.746
+        },
+        "failed_accessibility_audits": [
+          "label-content-name-mismatch"
+        ],
+        "lighthouse": "12.8.2"
+      },
+      {
+        "scores": {
+          "performance": 71,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "metrics": {
+          "lcp_ms": 3011.088,
+          "cls": 0.02339709568827275,
+          "tbt_ms": 0,
+          "fcp_ms": 1852.1680000000001
+        },
+        "failed_accessibility_audits": [
+          "label-content-name-mismatch"
+        ],
+        "lighthouse": "12.8.2"
+      }
+    ]
+  }
+}

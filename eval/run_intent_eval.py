@@ -35,7 +35,7 @@ NOVA_MODEL = os.environ.get("NOVA_MODEL_ID", "us.amazon.nova-2-lite-v1:0")
 from eval.asr_cache import prepare_vocabularies, transcribe_all  # noqa: E402
 from eval.common import EVAL, SPLIT, pct, read_result, tuning_name, write_result  # noqa: E402
 from suresay.phrasebook import entry, vocabulary  # noqa: E402
-from suresay.rank import AbstainRule, FuzzyRanker, NovaRanker, bedrock_available, norm  # noqa: E402
+from suresay.rank import AbstainRule, FuzzyRanker, NovaRanker, bedrock_available, norm, relevant  # noqa: E402
 
 BOOK_SIZE = 50
 MAX_IN = 20
@@ -102,7 +102,10 @@ def run_rankers(task: dict[str, Any], heard_b0: dict[str, Any], heard_b1: dict[s
                          "abstain": False}
             rk = ssf.rank(hyps, book, use_catalog=False)
             row["ss_fuzzy"] = {"top": [c.phrase_id for c in rk.candidates],
-                               "conf": [c.confidence for c in rk.candidates], "abstain": rk.abstain}
+                               "conf": [c.confidence for c in rk.candidates], "abstain": rk.abstain,
+                               # whether each guess shares a content word with what was heard: a "maybe" card
+                               # is offered only if so (suresay.rank.relevant, the same rule the product uses)
+                               "rel": [relevant(h1["text"], c.phrase or c.text) for c in rk.candidates]}
             if nova is not None:
                 rk = nova.rank(hyps, book, use_catalog=False)
                 row["ss_nova"] = {"top": [c.phrase_id for c in rk.candidates],
@@ -130,12 +133,16 @@ def metrics(rows: list[dict[str, Any]], system: str) -> dict[str, Any]:
         if not sres["abstain"]:
             return r["truth"] in sres["top"][:3]
         conf = sres.get("conf") or []
-        return any(t == r["truth"] and c >= MAYBE_FLOOR for t, c in zip(sres["top"][:3], conf, strict=False))
+        rel = sres.get("rel") or [True] * len(conf)
+        return any(t == r["truth"] and c >= MAYBE_FLOOR and ok
+                   for t, c, ok in zip(sres["top"][:3], conf, rel, strict=False))
 
     top1 = sum(hit(r, 1) for r in ins)
     with_maybe = sum(in_cards(r) for r in ins)
-    maybe_on_out = sum(r[system]["abstain"] and any(c >= MAYBE_FLOOR for c in (r[system].get("conf") or [])[:1])
-                       for r in outs) if system.startswith("ss") else 0
+    maybe_on_out = sum(r[system]["abstain"] and any(
+        c >= MAYBE_FLOOR and ok for c, ok in zip((r[system].get("conf") or [])[:3],
+                                                 r[system].get("rel") or [True] * 3, strict=False))
+        for r in outs) if system.startswith("ss") else 0
     top3 = sum(hit(r, 3) for r in ins) if system != "b0" else None
     false_abstain = sum(r[system]["abstain"] for r in ins)
     correct_abstain = sum(r[system]["abstain"] for r in outs)

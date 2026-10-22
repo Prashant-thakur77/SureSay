@@ -137,7 +137,7 @@ export interface Receipt {
   };
   who: { user_id: string; device_id: string };
   when: { proposed_at: string | null; evidence_at: string | null; confirmed_at: string | null; executed_at: string | null };
-  how: { channel: "voice" | "tap" | "transcript"; pending_id: string; nonce_sha256?: string };
+  how: { channel: "voice" | "tap" | "transcript"; input?: TapInput | "voice"; pending_id: string; nonce_sha256?: string };
   evidence: {
     transcript?: string | null;
     decision: { kind: DecisionKind; option: number | null; heard: string };
@@ -234,3 +234,6 @@ export interface HubState {
   pending: PendingSet[];
   spoken: string[];
 }
+
+/** How a choice was made on the device; the receipt records it. */
+export type TapInput = "touch" | "key" | "switch";

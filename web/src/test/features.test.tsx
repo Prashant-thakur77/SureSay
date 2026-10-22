@@ -111,7 +111,7 @@ describe("speak for me", () => {
     expect(screen.getByText("Say out loud: “I need help.”?")).toBeTruthy();
     expect(document.documentElement.outerHTML).not.toContain(NONCE);
     fireEvent.click(screen.getByRole("button", { name: /Yes/ }));
-    await waitFor(() => expect(hub.evidenceTap).toHaveBeenCalledWith(expect.objectContaining({ pending_id: "p_proposed", nonce: NONCE }), { option: 1 }));
+    await waitFor(() => expect(hub.evidenceTap).toHaveBeenCalledWith(expect.objectContaining({ pending_id: "p_proposed", nonce: NONCE }), { option: 1 }, "touch"));
     expect(gate.confirm).toHaveBeenCalledWith("p_proposed", "ev_test");
     const spoken = await screen.findByRole("region", { name: "Said out loud for you" });
     expect(within(spoken).getByText("I need help.")).toBeTruthy();
@@ -231,7 +231,7 @@ describe("maybe cards (not sure)", () => {
     act(() => {
       fireEvent.keyDown(document.body, { key: "2" });
     });
-    await waitFor(() => expect(hub.evidenceTap).toHaveBeenCalledWith(expect.objectContaining({ pending_id: "p_unsure" }), { option: 2 }));
+    await waitFor(() => expect(hub.evidenceTap).toHaveBeenCalledWith(expect.objectContaining({ pending_id: "p_unsure" }), { option: 2 }, "key"));
   });
 });
 
@@ -269,7 +269,7 @@ describe("doorbell (simulated)", () => {
     act(() => {
       fireEvent.keyDown(document.body, { key: "2" });
     });
-    await waitFor(() => expect(hub.evidenceTap).toHaveBeenCalledWith(expect.objectContaining({ pending_id: "p_door", nonce: NONCE }), { option: 2 }));
+    await waitFor(() => expect(hub.evidenceTap).toHaveBeenCalledWith(expect.objectContaining({ pending_id: "p_door", nonce: NONCE }), { option: 2 }, "key"));
     const said = await screen.findByRole("region", { name: "Said at the door" });
     expect(said.textContent).toContain("“I'm coming, please wait.”");
     expect(say).toHaveBeenCalledWith("I'm coming, please wait.");

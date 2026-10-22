@@ -224,7 +224,7 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onC
                     </li>
                   ))}
                 </ol>
-                <button type="button" className="btn btn--secondary" onClick={none}>
+                <button type="button" className="btn btn--secondary" onClick={() => none()}>
                   <Icon name="close" size={22} /> {final ? "No" : "None of these"}
                 </button>
               </>

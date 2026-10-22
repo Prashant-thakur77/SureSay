@@ -108,6 +108,32 @@ def similarity(a: str, b: str) -> float:
     return 0.5 * spell + 0.5 * sound
 
 
+# Words that say nothing about *what* someone wants; two phrases sharing only these are not about the same thing.
+_FUNCTION_WORDS = {
+    "the", "and", "for", "you", "your", "are", "was", "were", "with", "this", "that", "these", "those", "there",
+    "here", "have", "has", "had", "what", "whats", "what's", "its", "it's", "not", "but", "all", "can", "could",
+    "would", "will", "please", "some", "any", "too", "very", "just", "now", "then", "from", "into", "out", "off",
+    "turn", "make", "put", "get", "set", "let", "lets", "let's", "want", "need", "like", "him", "her", "his", "they",
+    "them", "she", "our", "one", "two", "three", "who", "how", "why", "when", "where", "about", "again", "also",
+    "good", "okay", "yes", "kar", "karo", "mujhe", "hai",
+}
+
+
+RELEVANT = 0.55  # fixed before measuring: unrelated words score under 0.4, one misheard sound ("wan"/"fan") about 0.58
+
+
+def _content(text: str) -> list[str]:
+    return [w for w in norm(text).split() if len(w) >= 3 and w not in _FUNCTION_WORDS]
+
+
+def relevant(heard: str, phrase: str) -> bool:
+    """Whether *phrase* is plausibly about what was *heard*: they share a content word, allowing for mishearing
+    ("lice" for "lights"). Used for "maybe" cards, which are offered only when SureSay is unsure: an unrelated
+    guess there only costs the user a decline, but it makes the assistant look like it guessed at random."""
+    hw, pw = _content(heard), _content(phrase)
+    return any(similarity(a, b) >= RELEVANT for a in hw for b in pw)
+
+
 def _dedupe(cands: list[Candidate]) -> list[Candidate]:
     seen: set[str] = set()
     out: list[Candidate] = []

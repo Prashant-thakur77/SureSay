@@ -154,7 +154,7 @@ export const ReceiptCard = forwardRef<HTMLHeadingElement, Props>(function Receip
             </div>
             <div>
               <dt>Channel</dt>
-              <dd>{receipt.how.channel === "voice" ? "Voice" : "Tap"}</dd>
+              <dd>{receipt.how.channel !== "tap" ? "Voice" : receipt.how.input === "key" ? "Key" : receipt.how.input === "switch" ? "Switch" : "Tap"}</dd>
             </div>
             <div>
               <dt>Card</dt>

@@ -124,7 +124,7 @@ export function channelWords(r: Receipt): string {
     const heard = r.evidence.transcript || r.evidence.decision?.heard;
     return heard ? `your voice (heard “${heard}”)` : "your voice";
   }
-  return "your tap";
+  return r.how.input === "key" ? "your key press" : r.how.input === "switch" ? "your switch" : "your tap";
 }
 
 export type Tone = "warn" | "ok" | "info";

@@ -1,0 +1,85 @@
+{
+  "name": "consent_stress",
+  "generated_at": "2026-10-22T14:47:03+0530",
+  "git_sha": "3fbe62e",
+  "python": "3.13.12",
+  "negatives": 7093,
+  "positives": 190,
+  "suresay": {
+    "false_accepts": 0,
+    "false_accept_rate": 0.0,
+    "answers_understood": 190,
+    "answer_rate": 1.0
+  },
+  "baseline": {
+    "false_accepts": 6777,
+    "false_accept_rate": 0.9554,
+    "answers_understood": 186,
+    "answer_rate": 0.9789,
+    "what": "keyword spotter: a no-word means no, else the first number word or sound-alike picks, else a yes-word means yes"
+  },
+  "families": {
+    "hedge": {
+      "cases": 5460,
+      "suresay_false_accepts": 0,
+      "baseline_false_accepts": 5460
+    },
+    "negated": {
+      "cases": 104,
+      "suresay_false_accepts": 0,
+      "baseline_false_accepts": 52
+    },
+    "two answers": {
+      "cases": 834,
+      "suresay_false_accepts": 0,
+      "baseline_false_accepts": 834
+    },
+    "yes and no": {
+      "cases": 168,
+      "suresay_false_accepts": 0,
+      "baseline_false_accepts": 0
+    },
+    "question": {
+      "cases": 144,
+      "suresay_false_accepts": 0,
+      "baseline_false_accepts": 128
+    },
+    "sound-alike": {
+      "cases": 48,
+      "suresay_false_accepts": 0,
+      "baseline_false_accepts": 32
+    },
+    "bare do": {
+      "cases": 20,
+      "suresay_false_accepts": 0,
+      "baseline_false_accepts": 20
+    },
+    "out of range": {
+      "cases": 20,
+      "suresay_false_accepts": 0,
+      "baseline_false_accepts": 4
+    },
+    "filler": {
+      "cases": 48,
+      "suresay_false_accepts": 0,
+      "baseline_false_accepts": 0
+    },
+    "long sentence": {
+      "cases": 56,
+      "suresay_false_accepts": 0,
+      "baseline_false_accepts": 56
+    },
+    "number on the yes/no card": {
+      "cases": 51,
+      "suresay_false_accepts": 0,
+      "baseline_false_accepts": 51
+    },
+    "other words on the final card": {
+      "cases": 140,
+      "suresay_false_accepts": 0,
+      "baseline_false_accepts": 140
+    }
+  },
+  "suresay_false_accept_examples": [],
+  "suresay_refused_answers": []
+}

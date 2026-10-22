@@ -95,7 +95,7 @@ Held-out speakers from TORGO, a public dysarthric speech corpus. Thresholds were
 |---|---|---|---|---|---|
 | Confirm heard right | false accepts | 62.8% | — | **2.3%** | 430 decisions, 6 test speakers |
 | Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers |
-| In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **93.5%** | same |
+| In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **91.7%** | same |
 | Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances |
 | Never acts on a guess | acted on a wrong phrase without asking | 84.3% | 53.7% | **0.0%** | in-book + out-of-book |
 | Nothing without consent | unconfirmed changes | 35 / 35 (no gate) | — | **0 / 50** | adversarial suite |
@@ -103,6 +103,8 @@ Held-out speakers from TORGO, a public dysarthric speech corpus. Thresholds were
 | Speed | understand p50 / p95 | — | — | 869.6 / 2434.6 ms | 100 dev clips, Lambda + Transcribe |
 | Gate overhead | p50 / p95 | — | — | 48.9 / 58.1 ms | Lambda + DynamoDB |
 | No regression | top-1, controls | 80.8% | — | 100.0% | control speakers |
+| Never mistakes a non-answer for consent | non-answers taken as consent | 95.54% (keyword spotting) | — | **0.0%** | 7,093 generated non-answers, 100.0% of 190 genuine answers understood |
+| Accessible | Lighthouse accessibility, phone / desktop | — | — | **100 / 100** | the live site |
 
 SureSay column: SureSay (offline ranker); the Nova 2 Lite ranker is pending Bedrock access. B1 recovers more phrases at top-1 because it never abstains, and pays for it by acting on a wrong phrase without asking.
 <!-- results:end -->
@@ -110,7 +112,7 @@ SureSay column: SureSay (offline ranker); the Nova 2 Lite ranker is pending Bedr
 **What doesn't work yet, published on purpose** (full list in `eval/REPORT.md`):
 
 <!-- negatives:start -->
-1. **The most severe speakers lose recall to the abstain rule, and maybe cards only partly win it back.** Worst test speaker: M04. SureSay's confident cards hold their phrase 40.0% of the time at top-1, against 90.0% for B1, because it asks again on 60.0% of them. Offering its best guesses as maybe cards while asking again brings that speaker to 85.0% in the cards (93.5% over all test speakers), but maybe cards also appear on 47.2% of out-of-book utterances, where the user has to decline them. B1 never asks and acted on a wrong phrase 53.7% of the time; SureSay acted wrongly 0.0% of the time. Per-user thresholds are the next step.
+1. **The most severe speakers lose recall to the abstain rule, and maybe cards only partly win it back.** Worst test speaker: M04. SureSay's confident cards hold their phrase 40.0% of the time at top-1, against 90.0% for B1, because it asks again on 60.0% of them. Offering its best guesses as maybe cards while asking again brings that speaker to 85.0% in the cards (91.7% over all test speakers), but maybe cards also appear on 27.8% of out-of-book utterances, where the user has to decline them. B1 never asks and acted on a wrong phrase 53.7% of the time; SureSay acted wrongly 0.0% of the time. Per-user thresholds are the next step.
 2. **Strict confirmation costs retries.** On genuine yes/no/number answers from dysarthric speakers, SureSay recovered 80.6% (B0: 94.4%) and asked 10.0% of them to repeat. That is the price of the false-accept rate above; tap, keyboard and switch confirmation exist so a repeat is never a dead end.
 3. **Recogniser biasing did not help confirmations.** On dev speakers (none: 1 false accepts, 77.8% recovered, core: 1 false accepts, 77.8% recovered, full: 2 false accepts, 77.8% recovered), no setting beat leaving the recogniser unbiased, so SureSay transcribes confirmations without bias. Biasing that raises recall without false accepts is open.
 4. **The model arms are pending.** Nova 2 Lite is authorized on this account but every on-demand quota is 0 (increase requests filed; docs/FRICTION_LOG.md). The Strands agent is deployed on AgentCore Runtime and phrasebooks live in AgentCore Memory, but the agent cannot reason until Nova has quota, so turns fall back to direct answers. The Nova ranker and the Nova-agent safety arms are implemented and tested against stubs; no Nova 2 Lite number is reported until they run. (Amazon Nova 2 Sonic, the speech model, does run on this account and is measured above as a recogniser.)
@@ -122,7 +124,7 @@ SureSay column: SureSay (offline ranker); the Nova 2 Lite ranker is pending Bedr
 
 Everything user-facing is new:
 
-- **The confirm gate:** the consent parser, stores, device pairing and signing, evidence, receipts and an MCP proxy. Two independent adversarial reviews were run; every confirmed finding was fixed with a failing test first, including a pairing brute force through the public demo, an Alexa answer landing on a card set the user never heard, and "ek second" (one moment) read as "option 2".
+- **The confirm gate:** the consent parser, stores, device pairing and signing, evidence, receipts and an MCP proxy. Three independent adversarial reviews were run; every confirmed finding was fixed with a failing test first, including a pairing brute force through the public demo, an Alexa answer landing on a card set the user never heard, and "ek second" (one moment) read as "option 2".
 - **The hub:**
   - an MCP server with MCP Apps;
   - a signed device channel;
@@ -136,7 +138,7 @@ Everything user-facing is new:
 - **The Alexa skill**, deployed and flow-tested on AWS.
 - **The web client:** WCAG 2.2 AA, voice, tap, keys or one switch, three themes, TV mode.
 - **The evaluation:** TORGO on Amazon Transcribe with two runs, repeated with Amazon Nova 2 Sonic and a local recogniser, a 50-case safety suite with a linked-client arm, latency measured in region, per-user calibration and a Hinglish check.
-- **One-command deploy and teardown**, and more than 450 tests.
+- **One-command deploy and teardown**, and more than 700 tests (382 for the gate, 161 for the hub, 174 for the web client).
 
 ## Open source
 

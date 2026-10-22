@@ -65,7 +65,7 @@ describe("main screen", () => {
       fireEvent.keyDown(document.body, { key: "2" });
     });
     await screen.findByRole("heading", { name: /Done: Turn on the TV/ });
-    expect(hub.evidenceTap).toHaveBeenCalledWith(expect.objectContaining({ pending_id: "p_test0001", nonce: NONCE }), { option: 2 });
+    expect(hub.evidenceTap).toHaveBeenCalledWith(expect.objectContaining({ pending_id: "p_test0001", nonce: NONCE }), { option: 2 }, "key");
     expect(gate.confirm).toHaveBeenCalledWith("p_test0001", "ev_test");
     expect(screen.getByText(/Confirmed by your tap/)).toBeTruthy();
 
@@ -102,7 +102,7 @@ describe("main screen", () => {
       fireEvent.keyDown(document.body, { key: "Escape" });
     });
     await screen.findByRole("heading", { name: "Cancelled. Nothing was changed." });
-    expect(hub.evidenceTap).toHaveBeenCalledWith(expect.anything(), { answer: "no" });
+    expect(hub.evidenceTap).toHaveBeenCalledWith(expect.anything(), { answer: "no" }, "key");
   });
 
   it("asks a second yes for risky actions", async () => {
