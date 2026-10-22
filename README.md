@@ -12,6 +12,14 @@
 
 [![Watch the 3-minute film](docs/img/video-poster.jpg)](https://github.com/Prashant-thakur77/SureSay/releases/latest/download/SureSay.mp4)
 
+<p align="center">
+<a href="https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws"><b>Try it live</b></a> (no sign-up) ·
+<a href="https://github.com/Prashant-thakur77/SureSay/releases/latest/download/SureSay.mp4"><b>Watch the film</b></a> (2:58) ·
+<a href="docs/JUDGES.md"><b>Judges' guide</b></a> (5 minutes) ·
+<a href="eval/REPORT.md"><b>Evaluation report</b></a> ·
+<a href="https://github.com/Prashant-thakur77/confirm-gate-mcp"><b>Open-source gate</b></a>
+</p>
+
 People with dysarthria (after a stroke, or living with Parkinson's, ALS or cerebral palsy) are the people voice assistants fail most often. A misheard command that *acts* is worse than no command at all: the wrong light, the wrong person called, the door unlocked instead of locked. SureSay turns every request into three big, numbered, read-aloud cards. You say "two", "the second one", "haan" or "do number", or you tap, press a key or hit one switch. Only that confirmation, made on your own device, can release the action, and every change leaves a consent receipt.
 
 **Contents:** [One turn](#one-turn) · [Why the agent can't confirm](#why-the-agent-cant-confirm-for-you) · [Results](#results) · [AWS](#aws-services-used-and-how) · [Run it](#run-it) · [Security](#security) · [Accessibility](#accessibility) · [Open source](#the-open-source-part) · [Repository](#repository)
@@ -22,12 +30,16 @@ People with dysarthria (after a stroke, or living with Parkinson's, ALS or cereb
 
 ![SureSay: "van on" becomes three cards; the user picks one; the consent trail checks it; the fan turns on](docs/img/demo.gif)
 
-![Three cards after "van on" was heard](docs/img/cards.png)
+![Measured, not promised: false yeses on real dysarthric speech fell from 62.8% to 2.3%; it never acted on a wrong phrase; a real agent made 11 unconfirmed changes without the gate and 0 with it; 0 of 50 attacks changed anything](docs/devpost/09-results.jpg)
 
 | | | |
 |---|---|---|
-| ![First run: say it your way, nothing happens until you choose](docs/img/landing.png) | ![Talk to someone: his sentence, huge, for the person listening](docs/img/talk-to-someone.png) | ![Practice: an honest clarity score, missed words marked](docs/img/practice.png) |
-| ![Speak for me](docs/img/speak-board.png) | ![Timeline](docs/img/timeline.png) | ![TV mode](docs/img/tv.png) |
+| ![Three guesses after "van on" was heard](docs/devpost/01-three-guesses.jpg) | ![Confirmed by his tap: the fan turns on, with a consent receipt](docs/devpost/02-confirmed-receipt.jpg) | ![Anything risky asks twice: unlock the front door, yes or no](docs/devpost/03-asks-twice.jpg) |
+| **Three guesses**, never a guess acted on | **His tap** releases it, with a receipt | **Risky actions** ask twice |
+| ![Don't unlock the door: nothing changes](docs/devpost/04-dont-never-becomes-do.jpg) | ![Talk to someone: his sentence, huge, for the person listening](docs/devpost/05-talk-to-someone.jpg) | ![Speak for me: everyday sentences in English and Hindi](docs/devpost/06-speak-for-me.jpg) |
+| **"Don't"** never becomes "do" | **Talk to someone**: said clearly, shown huge | **Speak for me**, in English and Hindi |
+| ![Practice: an honest clarity score, missed words marked](docs/devpost/07-practice.jpg) | ![Timeline: every confirmation, and changes without you: 0](docs/devpost/08-timeline.jpg) | ![First run: say it your way, nothing happens until you choose](docs/devpost/00-thumbnail.jpg) |
+| **Practice**, scored honestly | **Timeline** for family | **First run** |
 
 ## One turn
 
