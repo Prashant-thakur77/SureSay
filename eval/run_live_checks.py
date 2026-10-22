@@ -16,7 +16,6 @@ from the CloudWatch metrics the hub emits (Embedded Metric Format).
 from __future__ import annotations
 
 import json
-import statistics
 import sys
 import time
 from pathlib import Path
