@@ -39,7 +39,7 @@ export const MicButton = forwardRef<HTMLButtonElement, Props>(function MicButton
   const label = LABELS[mode];
   const listening = mode === "listening";
   let hint = mode === "answer" && answerKind === "yesno" ? "Tap, then say yes or no." : label.hint;
-  if (speaking && !listening) hint = "Reading aloud. Tap to answer now.";
+  if (speaking && !listening) hint = mode === "answer" ? "Reading aloud. Tap to answer now." : mode === "busy" ? "Reading aloud." : "Reading aloud. Tap to speak now.";
   // a gentle curve so quiet voices still move the meter
   const meter = Math.min(1, Math.sqrt(level * 12));
   const orbState = listening ? "listening" : speaking ? "speaking" : mode === "busy" ? "busy" : "idle";

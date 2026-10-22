@@ -988,6 +988,7 @@ code {
 }
 
 .final__card .card__icon {
+  flex: 0 0 auto;
   width: min(3.5rem, 13vw);
   height: min(3.5rem, 13vw);
 }
@@ -4238,6 +4239,13 @@ code {
   .topbar .wordmark {
     margin-right: auto;
   }
+  /* wordmark, Alexa+ view, Help and Settings on one row down to a small tablet */
+  .topbar {
+    column-gap: 0.75rem;
+  }
+  .topbar__home {
+    margin-right: auto;
+  }
   .guest-note {
     flex-wrap: nowrap;
   }
@@ -4281,6 +4289,46 @@ code {
     margin-left: 0;
     padding-inline: 0.7rem;
     justify-content: center;
+  }
+  /* four things on one row at 390 px: the buttons keep their size (Help never clips), the wordmark gives way */
+  .topbar {
+    column-gap: 0.5rem;
+  }
+  .topbar > .btn {
+    flex-shrink: 0;
+  }
+  .topbar__home {
+    min-width: 0;
+    margin-right: auto;
+  }
+  .topbar .wordmark {
+    font-size: 1.15rem;
+    gap: 0.45rem;
+  }
+  .topbar__help {
+    gap: 0.35rem;
+    padding-inline: 0.6rem;
+  }
+  .topbar__help > svg {
+    width: 20px;
+    height: 20px;
+  }
+  .topbar__settings,
+  .topbar__alexa {
+    min-width: 48px;
+    padding-inline: 0.55rem;
+  }
+}
+
+/* the narrowest phones: the wordmark's tile stays, its words go to screen readers only */
+@media (max-width: 24em) {
+  .topbar .wordmark > span:last-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 }
 
@@ -4434,6 +4482,16 @@ code {
   margin-top: 0.8rem;
 }
 
+.alexa .btn--primary {
+  background: #ffb070;
+  color: #14213d;
+  border-color: #ffb070;
+}
+
+.alexa .btn--primary:hover {
+  background: #ffc690;
+}
+
 .alexa .btn--secondary {
   background: rgba(255, 255, 255, 0.08);
   color: #f4f1ea;
@@ -4475,6 +4533,7 @@ code {
   gap: 0.5rem;
   margin: 0 0 0.8rem;
   font-size: 1.05rem;
+  font-weight: 700;
 }
 
 .phone__cards {
@@ -4485,13 +4544,15 @@ code {
   list-style: none;
 }
 
+/* big touch targets: this is where the yes comes from */
 .phone__card {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.8rem;
   width: 100%;
-  min-height: 56px;
-  padding: 0.6rem 0.9rem;
+  min-height: 72px;
+  padding: 0.75rem 1rem;
+  font-size: 1.15rem;
   border: 2px solid rgba(244, 241, 234, 0.35);
   border-radius: 14px;
   background: #fbf8f3;
@@ -4522,25 +4583,133 @@ code {
   color: #fbf8f3;
 }
 
-.phone__idle,
-.phone__pair {
-  margin: 0;
-  color: rgba(244, 241, 234, 0.8);
+.phone__card--yes {
+  min-height: 88px;
+  border-color: #ffb070;
+  font-size: 1.3rem;
 }
 
-.phone__pair {
-  margin-top: 0.8rem;
-  font-size: 0.95rem;
+.phone__card--yes .phone__n {
+  width: 2.4rem;
+  height: 2.4rem;
+  background: #1f6f43;
+}
+
+.phone__none {
+  width: 100%;
+  min-height: 64px;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.phone__idle {
+  margin: 0;
+  color: rgba(244, 241, 234, 0.8);
 }
 
 .alexa .linkish {
   color: #ffd08a;
 }
 
-.phone__code {
-  font-family: var(--mono);
-  letter-spacing: 0.15em;
+/* pairing the Echo screen: the code big enough to read across the room */
+.pairbox {
+  margin-top: 1.1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(244, 241, 234, 0.2);
+}
+
+.pairbox__title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.pairbox__steps {
+  margin: 0 0 0.6rem;
+  padding-left: 1.4rem;
+  color: rgba(244, 241, 234, 0.88);
+}
+
+.pairbox__code {
+  margin: 0 0 0.8rem;
+  padding: 0.5rem 0.75rem;
+  border: 2px dashed rgba(255, 208, 138, 0.6);
+  border-radius: 14px;
+  font: 700 clamp(2rem, 9vw, 2.75rem) / 1.1 var(--mono);
+  letter-spacing: 0.2em;
+  text-align: center;
   color: #ffd08a;
+  user-select: all;
+}
+
+.pairbox__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.7rem;
+}
+
+.pairbox__actions .btn {
+  flex: 1 1 9rem;
+  justify-content: center;
+}
+
+.pairbox__note {
+  margin: 0 0 0.7rem;
+  font-size: 0.95rem;
+  color: rgba(244, 241, 234, 0.8);
+}
+
+.pairbox__error {
+  margin: 0.6rem 0 0;
+  color: #ffd08a;
+  font-weight: 700;
+}
+
+/* the MCP log folds away (closed on a phone, so the screen and the phone panel come first) */
+.wire > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3rem 0.8rem;
+  min-height: 44px;
+  margin: 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.wire > summary::-webkit-details-marker {
+  display: none;
+}
+
+.wire > summary::after {
+  content: "";
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-left: auto;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.wire[open] > summary {
+  margin-bottom: 0.8rem;
+}
+
+.wire[open] > summary::after {
+  transform: rotate(-135deg);
+}
+
+.wire > summary:focus-visible {
+  outline: 4px solid #ffb070;
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+.wire__count {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: rgba(207, 227, 255, 0.75);
 }
 
 .wire__log {
@@ -4572,8 +4741,8 @@ code {
 
 @media (max-width: 30em) {
   .topbar__alexa {
-    min-width: 52px;
-    padding-inline: 0.7rem;
+    min-width: 48px;
+    padding-inline: 0.55rem;
     justify-content: center;
   }
 }

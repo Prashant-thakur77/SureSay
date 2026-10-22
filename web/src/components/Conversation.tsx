@@ -199,7 +199,7 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
               <Icon name="keyboard" size={24} /> Type it
             </ScanButton>
             <ScanButton id="read" onClick={actions.replay}>
-              <Icon name="volume" size={24} /> Read them again
+              <Icon name="volume" size={24} /> {single && !unsure ? "Read it again" : "Read them again"}
             </ScanButton>
           </div>
         </>

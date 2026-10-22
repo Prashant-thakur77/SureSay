@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { MainScreen } from "../components/MainScreen";
 import { PairScreen } from "../components/PairScreen";
 import { McpChip } from "../components/TopBar";
+import { MicButton } from "../components/MicButton";
 import { DEFAULT_SETTINGS, type Settings } from "../hooks/useSettings";
 import { Speaker } from "../lib/speech";
 import { cardSet, fakeGate, fakeHub, NONCE, receipt } from "./fixtures";
@@ -53,6 +54,15 @@ describe("main screen", () => {
     expect(screen.getByTestId("mcp-chip").textContent).toBe("MCP connected · protocol 2025-11-25");
     rerender(<McpChip mcp={{ status: "failed", protocol: null, receipts: null }} />);
     expect(screen.getByTestId("mcp-chip").textContent).toBe("MCP offline · using fallback");
+  });
+
+  it("while reading aloud, the microphone hint says what a tap does now", () => {
+    const { rerender } = render(<MicButton mode="request" level={0} onToggle={() => undefined} speaking />);
+    expect(screen.getByText(/Reading aloud\. Tap to speak now\./)).toBeTruthy();
+    rerender(<MicButton mode="answer" level={0} onToggle={() => undefined} speaking />);
+    expect(screen.getByText(/Reading aloud\. Tap to answer now\./)).toBeTruthy();
+    rerender(<MicButton mode="busy" level={0} onToggle={() => undefined} speaking />);
+    expect(screen.queryByText(/Tap to/)).toBeNull();
   });
 
   it("labels assistant suggestions and stays accessible", async () => {

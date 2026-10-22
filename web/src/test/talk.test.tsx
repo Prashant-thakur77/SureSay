@@ -44,7 +44,10 @@ describe("Talk to someone", () => {
     fireEvent.click(screen.getByRole("tab", { name: "Talk to someone" }));
     fireEvent.change(screen.getByLabelText(/or type it/i), { target: { value: "i'm proud of you" } });
     fireEvent.click(screen.getByRole("button", { name: /offer it/i }));
-    fireEvent.click(await screen.findByRole("button", { name: /^Yes/ }));
+    const yesButton = await screen.findByRole("button", { name: /^Yes/ });
+    // one sentence on the card: "it", not "them"
+    expect(screen.getByRole("button", { name: /Read it again/ })).toBeTruthy();
+    fireEvent.click(yesButton);
     const spoken = await screen.findByRole("region", { name: "Said out loud for you" });
     expect(within(spoken).queryByRole("button", { name: /Speak for me/ })).toBeNull();
     fireEvent.click(within(spoken).getByRole("button", { name: "Back to Talk to someone" }));

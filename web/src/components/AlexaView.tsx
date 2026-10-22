@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 import type { Phase } from "../hooks/useConversation";
+import { copyText } from "../lib/clipboard";
 import type { McpHost } from "../lib/mcp";
 import { Icon } from "./Icon";
 
@@ -30,6 +31,15 @@ interface Props {
 }
 
 type ToolResult = Awaited<ReturnType<McpHost["callToolRaw"]>>;
+
+/** Wide enough for the side-by-side layout: the MCP log starts open there, folded on a phone. */
+function wideScreen(): boolean {
+  try {
+    return window.matchMedia("(min-width: 60em)").matches;
+  } catch {
+    return false;
+  }
+}
 
 function summary(result: ToolResult): { say: string; status: string; count: number } {
   const sc = (result.structuredContent ?? {}) as { say?: unknown; status?: unknown; candidates?: unknown };
@@ -62,7 +72,7 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onC
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [reply, setReply] = useState("Try “Alexa, van on”.");
-  const [code, setCode] = useState<string | null>(null);
+  const [wire, setWire] = useState(wideScreen);
   const log = useCallback((dir: Line["dir"], t: string) => setLines((l) => [...l.slice(-11), { dir, text: t }]), []);
 
   const post = useCallback((msg: unknown) => frame.current?.contentWindow?.postMessage(msg, "*"), []);
@@ -217,15 +227,15 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onC
                 <ol className="phone__cards">
                   {cards.options.map((o) => (
                     <li key={o.n}>
-                      <button type="button" className="phone__card" onClick={() => (final ? yes() : choose(o.n))}>
-                        <span className="phone__n" aria-hidden="true">{o.n}</span>
+                      <button type="button" className={`phone__card${final ? " phone__card--yes" : ""}`} onClick={() => (final ? yes() : choose(o.n))}>
+                        <span className="phone__n" aria-hidden="true">{final ? <Icon name="check" size={22} /> : o.n}</span>
                         <span>{final ? `Yes: ${o.text}` : o.text}</span>
                       </button>
                     </li>
                   ))}
                 </ol>
-                <button type="button" className="btn btn--secondary" onClick={() => none()}>
-                  <Icon name="close" size={22} /> {final ? "No" : "None of these"}
+                <button type="button" className="btn btn--secondary phone__none" onClick={() => none()}>
+                  <Icon name="close" size={24} /> {final ? "No" : "None of these"}
                 </button>
               </>
             ) : (
@@ -233,25 +243,14 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onC
                 {phase.kind === "done" ? "Done, confirmed by you. The receipt is in your timeline." : phase.kind === "thinking" ? "Checking…" : "Nothing is waiting for you."}
               </p>
             )}
-            {pairCode && (
-              <p className="phone__pair">
-                {code ? (
-                  <>
-                    Type <strong className="phone__code">{code}</strong> into the screen to pair it as one of your devices; then a tap there counts too.
-                  </>
-                ) : (
-                  <button type="button" className="linkish" onClick={() => void pairCode().then(setCode).catch(() => setCode(null))}>
-                    Pair this screen as one of my devices
-                  </button>
-                )}
-              </p>
-            )}
+            {pairCode && <PairThisScreen pairCode={pairCode} />}
           </section>
 
-          <section className="wire" aria-labelledby="wire-title">
-            <h3 id="wire-title" className="wire__title">
-              What Alexa+ and SureSay say to each other (MCP)
-            </h3>
+          <details className="wire" open={wire} onToggle={(e) => setWire(e.currentTarget.open)}>
+            <summary className="wire__title">
+              <span>What Alexa+ and SureSay say to each other (MCP)</span>
+              <span className="wire__count">{lines.length === 1 ? "1 message" : `${lines.length} messages`}</span>
+            </summary>
             <ol className="wire__log" aria-live="off">
               {lines.length === 0 && <li className="wire__empty">Nothing yet.</li>}
               {lines.map((l, i) => (
@@ -261,9 +260,73 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onC
               ))}
             </ol>
             <p className="wire__foot">The one-time code that releases a card set never appears here: it goes only to your devices.</p>
-          </section>
+          </details>
         </aside>
       </div>
     </div>
+  );
+}
+
+/**
+ * Pairing the Echo screen as one of his devices: a big code to read across the room, a copy button, and the three
+ * steps. The code is a pairing code (it lasts ten minutes), not the one-time code that releases a card set.
+ */
+function PairThisScreen({ pairCode }: { pairCode: () => Promise<string> }) {
+  const [code, setCode] = useState<string | null>(null);
+  const [state, setState] = useState<"idle" | "busy" | "failed">("idle");
+  const [copied, setCopied] = useState(false);
+  const get = () => {
+    setState("busy");
+    setCopied(false);
+    pairCode()
+      .then((c) => {
+        setCode(c);
+        setState("idle");
+      })
+      .catch(() => setState("failed"));
+  };
+  const copy = async () => setCopied(code ? await copyText(code) : false);
+  return (
+    <section className="pairbox" aria-labelledby="pairbox-title">
+      <h4 id="pairbox-title" className="pairbox__title">
+        Pair this screen
+      </h4>
+      {code ? (
+        <>
+          <ol className="pairbox__steps">
+            <li>On the Echo screen, open SureSay.</li>
+            <li>Choose “I have a pairing code”.</li>
+            <li>Type this code:</li>
+          </ol>
+          <p className="pairbox__code" aria-label={`Pairing code: ${code.split("").join(" ")}`}>
+            {code}
+          </p>
+          <div className="pairbox__actions">
+            <button type="button" className="btn btn--primary" onClick={() => void copy()}>
+              <Icon name={copied ? "check" : "copy"} size={22} /> {copied ? "Copied" : "Copy code"}
+            </button>
+            <button type="button" className="btn btn--secondary" onClick={get} disabled={state === "busy"}>
+              <Icon name="refresh" size={22} /> New code
+            </button>
+          </div>
+          <p className="pairbox__note">It lasts ten minutes. Once paired, a tap on that screen counts as yours too.</p>
+        </>
+      ) : (
+        <>
+          <p className="pairbox__note">Make the Echo screen one of your devices, so you can say yes there too.</p>
+          <button type="button" className="btn btn--secondary" onClick={get} disabled={state === "busy"}>
+            <Icon name="phone" size={22} /> {state === "busy" ? "Getting a code…" : "Get a pairing code"}
+          </button>
+        </>
+      )}
+      <p className="visually-hidden" aria-live="polite">
+        {copied ? "Code copied." : ""}
+      </p>
+      {state === "failed" && (
+        <p className="pairbox__error" role="alert">
+          I couldn't get a code just now. Please try again.
+        </p>
+      )}
+    </section>
   );
 }
