@@ -41,6 +41,7 @@ from .config import ROOT
 from .net import client_ip
 from .understand import understand, understand_say
 
+mimetypes.add_type("font/woff2", ".woff2")  # the self-hosted typefaces
 logger = logging.getLogger("suresay.hub")
 
 # Evidence audio is transcribed WITHOUT vocabulary biasing. Chosen on dev speakers only
