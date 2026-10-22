@@ -147,7 +147,7 @@ if [ -z "${SKIP_AGENT:-}" ]; then
   BUILD="$ROOT/infra/.build/agent"
   rm -rf "$BUILD" && mkdir -p "$BUILD/strands_agent"
   cp strands_agent/__init__.py strands_agent/core.py strands_agent/agentcore_app.py strands_agent/live.py \
-     strands_agent/sonic.py strands_agent/prompts.py "$BUILD/strands_agent/"
+     strands_agent/sonic.py strands_agent/sonic_model.py strands_agent/prompts.py "$BUILD/strands_agent/"
   cp infra/agent-requirements.txt "$BUILD/requirements.txt"
   printf 'from strands_agent.agentcore_app import app\n\nif __name__ == "__main__":\n    app.run()\n' > "$BUILD/main.py"
   (

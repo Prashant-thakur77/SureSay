@@ -153,8 +153,9 @@ def test_the_runtime_entrypoint_runs_an_assistant_turn(monkeypatch: Any) -> None
     monkeypatch.setenv("SURESAY_MCP_URL", "https://hub.example/mcp")
     monkeypatch.setenv("SURESAY_AGENT_TOKEN", "tok")
     out = appmod.invoke({"mode": "assistant", "prompt": "van on", "user_id": "guest-1"})
-    assert out == {"reply": "ok", "tool_calls": [], "runs_on": "AgentCore Runtime"}
-    assert seen == {"text": "van on", "user_id": "guest-1", "mcp_url": "https://hub.example/mcp", "token": "tok"}
+    assert out == {"reply": "ok", "tool_calls": [], "agent": "Strands Agents", "runs_on": "AgentCore Runtime"}
+    assert seen == {"text": "van on", "user_id": "guest-1", "mcp_url": "https://hub.example/mcp", "token": "tok",
+                    "engine": "strands"}
     appmod.invoke({"mode": "assistant", "prompt": "van on", "user_id": "guest-1", "turn_id": "ab" * 16})
     assert seen["turn_id"] == "ab" * 16  # so the hub can show each step as it happens
     seen.clear()
@@ -181,3 +182,88 @@ def test_a_later_unsure_set_does_not_replace_a_real_one(live: Hub) -> None:
     out = live.signed(live.pair(), "POST", "/device/assistant", {"text": "unlock the door"}).json()
     assert out["tool_calls"][1]["result"]["status"] == "ask_again"
     assert out["latest"]["pending_id"] == out["tool_calls"][0]["result"]["pending_id"]
+
+
+TURN = "0123456789abcdef0123456789abcdef"
+
+
+def strands_on_fake_sonic(monkeypatch: Any, fake: Any) -> Any:
+    """Route the hub's turn through the Strands path, with Nova 2 Sonic played by *fake*; returns its connector."""
+    from strands_agent import live as livemod
+    from strands_agent.sonic_model import SonicModel
+
+    from .test_sonic_model import Connector
+
+    connect = Connector(fake)
+    own = livemod.assistant_turn
+    monkeypatch.setattr(livemod, "assistant_turn", lambda *a, **kw: own(
+        *a, **{**kw, "engine": "strands", "strands_model": SonicModel(connect=connect)}))
+    return connect
+
+
+def test_the_strands_agent_loop_runs_the_turn_with_the_agents_powers(live: Hub, monkeypatch: Any) -> None:
+    from .test_sonic_model import FakeSonic, final, tool_use
+
+    fake = FakeSonic(tool_use("u1", "understand", {"user_id": "", "transcript": "van on"}),
+                     tool_use("u2", "door_lock", {"user_id": "", "locked": False}),
+                     final("Please confirm on your device."))
+    connect = strands_on_fake_sonic(monkeypatch, fake)
+    device = live.pair()
+    r = live.signed(device, "POST", "/device/assistant", {"text": "unlock the door", "turn_id": TURN})
+    assert r.status_code == 200, r.text
+    out = r.json()
+    assert out["agent"] == "Strands Agents" and out["reply"] == "Please confirm on your device."
+    assert out["model"] == "amazon.nova-2-sonic-v1:0" and isinstance(out["ms"], int)
+    assert connect.calls == 1 and [tid for tid, _ in fake.tool_results()] == ["u1", "u2"]  # one Sonic session
+    assert [(c["name"], c["args"]) for c in out["tool_calls"]] == [
+        ("understand", {"user_id": "", "transcript": "van on"}), ("door_lock", {"user_id": "", "locked": False})]
+    assert out["understand"]["status"] == "choose" and out["tool_calls"][0]["result"] == out["understand"]
+    door = out["tool_calls"][1]["result"]
+    assert door.get("pending_id") and out["latest"]["pending_id"] == door["pending_id"]
+    assert [c["text"] for c in out["latest"]["candidates"]] == ["Unlock the front door"]
+    assert out["latest"]["stage"] == "choose" and "nonce" not in json.dumps(out)
+    steps = live.signed(device, "GET", f"/device/assistant/progress?turn_id={TURN}").json()["steps"]
+    assert [s["tool"] for s in steps] == ["understand", "door_lock"]  # tagged; the card lookup is not
+
+
+def test_on_the_strands_path_a_later_unsure_set_does_not_replace_a_real_one(live: Hub, monkeypatch: Any) -> None:
+    from .test_sonic_model import FakeSonic, final, tool_use
+
+    strands_on_fake_sonic(monkeypatch, FakeSonic(tool_use("u1", "door_lock", {"user_id": "", "locked": False}),
+                                                 tool_use("u2", "understand", {"user_id": "", "transcript": "lights"}),
+                                                 final("Please confirm on your device.")))
+    out = live.signed(live.pair(), "POST", "/device/assistant", {"text": "unlock the door"}).json()
+    assert out["tool_calls"][1]["result"]["status"] == "ask_again"
+    assert out["latest"]["pending_id"] == out["tool_calls"][0]["result"]["pending_id"]
+
+
+def test_the_strands_path_keeps_memory_only_for_a_named_session(monkeypatch: Any) -> None:
+    import strands_agent.core as core
+    from strands_agent.live import memory_for
+
+    asked: list[tuple[str, str]] = []
+    monkeypatch.setattr(core, "session_manager", lambda u, s: asked.append((u, s)) or "manager")
+    monkeypatch.delenv("AGENTCORE_MEMORY_ID", raising=False)
+    assert memory_for("demo", "s" * 40) is None
+    monkeypatch.setenv("AGENTCORE_MEMORY_ID", "mem-1")
+    assert memory_for("demo", None) is None and asked == []
+    assert memory_for("demo", "s" * 40) == "manager" and asked == [("demo", "s" * 40)]
+
+
+def test_the_runtime_falls_back_to_its_own_loop_if_the_strands_turn_fails(monkeypatch: Any) -> None:
+    import strands_agent.agentcore_app as appmod
+
+    engines: list[str] = []
+
+    def turn(text: str, user_id: str, **kw: Any) -> dict[str, Any]:
+        engines.append(kw.get("engine", "own"))
+        if kw.get("engine") == "strands":
+            raise RuntimeError("no Strands today")
+        return {"reply": "ok", "tool_calls": []}
+
+    monkeypatch.setattr(appmod, "assistant_turn", turn)
+    monkeypatch.setenv("SURESAY_MCP_URL", "https://hub.example/mcp")
+    monkeypatch.setenv("SURESAY_AGENT_TOKEN", "tok")
+    out = appmod.invoke({"mode": "assistant", "prompt": "van on", "user_id": "guest-1"})
+    assert engines == ["strands", "own"]
+    assert out == {"reply": "ok", "tool_calls": [], "agent": "SureSay's own loop", "runs_on": "AgentCore Runtime"}

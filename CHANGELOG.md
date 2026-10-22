@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.0 (22 Oct 2026)
+
+- **The Strands agent loop runs, on Nova 2 Sonic.** `strands_agent/sonic_model.py` is a Strands Agents model provider for Amazon Nova 2 Sonic: it keeps one Sonic session open across the agent loop's tool cycles, sending each tool result back into the same session. In AgentCore Runtime, the live assistant is now a `strands.Agent` with SureSay's MCP tools (Strands' `MCPClient`, the agent token) on that provider; SureSay's own loop is the fallback. Tried on real Sonic against the live MCP server: five tool calls in one turn, its own `confirm` refused.
+
 ## 1.7.4 (22 Oct 2026)
 
 - **The Alexa skill, connected and tried on Alexa:** in "Alexa, ask sure say to turn on the fan" Alexa keeps "to" for itself and passes on "turn on the fan", which matched no sample, so commands fell through to the number intent. Each first word of a command (turn, open, unlock, lock, call, add, set, say, …) is now its own intent, and the skill puts the word back before asking SureSay. Tried end to end in the Alexa simulator: the fan by "the first one", and the unlock by two separate yeses.

@@ -5,7 +5,8 @@ the same contract AgentCore Runtime uses. The hub calls it for each user turn.
 
 Payload: ``{"prompt": "...", "user_id": "demo", "session_id": "..."}``. Returns ``{"response": "..."}``.
 With ``"mode": "assistant"`` it runs one live assistant turn on Amazon Nova 2 Sonic (``strands_agent.live``) and
-returns the reply with every MCP tool call the model made.
+returns the reply with every MCP tool call the model made. The Strands Agents loop runs the turn; if it fails,
+SureSay's own loop runs it, and ``"agent"`` says which did.
 """
 
 from __future__ import annotations
@@ -38,8 +39,17 @@ def invoke(payload: dict, context: object = None) -> dict:
     if payload.get("mode") == "assistant":
         turn = str(payload.get("turn_id") or "")
         extra = {"turn_id": turn} if re.fullmatch(r"[0-9a-f]{16,64}", turn) else {}  # lets the hub show each step
-        out = assistant_turn(prompt[:300], user_id, mcp_url=os.environ["SURESAY_MCP_URL"],
-                             token=os.environ["SURESAY_AGENT_TOKEN"], **extra)
+        if payload.get("session_id"):  # a named conversation: remembered when the runtime has a memory
+            sid = _clean(payload["session_id"], "assistant")
+            extra["session_id"] = sid if len(sid) >= 33 else (sid + "-" + "0" * 40)[:40]
+        args = (prompt[:300], user_id)
+        where = {"mcp_url": os.environ["SURESAY_MCP_URL"], "token": os.environ["SURESAY_AGENT_TOKEN"], **extra}
+        try:
+            out = {**assistant_turn(*args, **where, engine="strands"), "agent": "Strands Agents"}
+        except Exception:  # the Strands loop failed: the same turn on SureSay's own loop
+            logger.exception("Strands assistant turn failed; running SureSay's own loop")
+            where.pop("session_id", None)
+            out = {**assistant_turn(*args, **where), "agent": "SureSay's own loop"}
         return {**out, "runs_on": "AgentCore Runtime"}
     from strands_agent.core import run_turn  # Strands on Nova 2 Lite, for the hub's agent mode
     session_id = _clean(payload.get("session_id") or getattr(context, "session_id", None), "default-session-0000000000000000")

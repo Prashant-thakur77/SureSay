@@ -15,7 +15,7 @@ uv pip install --quiet --target "$OUT" --python-platform x86_64-manylinux_2_28 -
 uv pip install --quiet --target "$OUT" --python-platform x86_64-manylinux_2_28 --python-version 3.12 \
   --only-binary :all: --no-deps "amazon-transcribe>=0.6.2"
 cp -r "$ROOT/suresay" "$ROOT/mcp_server" "$OUT/"
-mkdir -p "$OUT/strands_agent" && cp "$ROOT/strands_agent/__init__.py" "$ROOT/strands_agent/prompts.py" "$ROOT/strands_agent/sonic.py" "$ROOT/strands_agent/live.py" "$OUT/strands_agent/"  # the live assistant, without the Strands framework
+mkdir -p "$OUT/strands_agent" && cp "$ROOT/strands_agent/__init__.py" "$ROOT/strands_agent/prompts.py" "$ROOT/strands_agent/sonic.py" "$ROOT/strands_agent/live.py" "$ROOT/strands_agent/sonic_model.py" "$OUT/strands_agent/"  # the live assistant, without the Strands framework
 cp -r "$ROOT/packages/confirm-gate-mcp/src/confirm_gate" "$OUT/"
 mkdir -p "$OUT/alexa_plus" && cp -r "$ROOT/alexa_plus/assets" "$OUT/alexa_plus/assets"
 if [ -d "$ROOT/web/dist" ]; then mkdir -p "$OUT/web" && cp -r "$ROOT/web/dist" "$OUT/web/dist"; fi

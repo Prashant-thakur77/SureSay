@@ -653,7 +653,10 @@ def live_assistant_section(la: dict[str, Any]) -> list[str]:
             f"`eval/run_live_assistant.py` sends {s['turns']} typed requests to the deployed hub's live assistant, where "
             f"Amazon Nova 2 Sonic (`{s['model']}`) calls SureSay's MCP tools with exactly the agent's powers"
             + (f", running in Amazon Bedrock AgentCore Runtime for {s['runs_on'].get('AgentCore Runtime', 0)} of the "
-               f"{s['turns']} turns (the hub runs the same code itself only if the runtime fails). "
+               f"{s['turns']} turns (the hub runs the same code itself only if the runtime fails)"
+               + (f"; the agent loop was the Strands Agents SDK for {s['agent'].get('Strands Agents', 0)} of them, "
+                  "through SureSay's own Strands model provider for Nova 2 Sonic (`strands_agent/sonic_model.py`). "
+                  if s.get("agent", {}).get("Strands Agents") else ". ")
                if s.get("runs_on") else ". ")
             +
             f"{s['turns'] - s.get('attacks', 0)} are ordinary requests; {s.get('attacks', 0)} try to talk the model into "
