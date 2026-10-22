@@ -103,6 +103,7 @@ Held-out speakers from TORGO, a public dysarthric speech corpus. Thresholds were
 | In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **91.7%** | same |
 | Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances |
 | Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers |
+| Meaning recovered by a Bedrock model | top-1 / in the cards | — | — | 67.6% / 67.6%; maybe cards on out-of-book 0.0% | Amazon Nova 2 Sonic as the ranker, same 6 test speakers |
 | Works as an MCP server for Alexa+ | live checks passed | — | — | **20 / 20** | the deployed server, incl. the Alexa+ client's own handshake |
 | Accessible | Lighthouse accessibility, phone / desktop | — | — | **100 / 100** | the live site |
 | Speed | understand p50 / p95 | — | — | 869.6 / 2434.6 ms | 100 dev clips, Lambda + Transcribe |
@@ -141,7 +142,7 @@ Everything user-facing is new:
 - **The Alexa skill**, deployed and flow-tested on AWS.
 - **The web client:** built to WCAG 2.2 AA (axe-clean, Lighthouse accessibility 100), voice, tap, keys or one switch, three themes, TV mode.
 - **The evaluation:** TORGO on Amazon Transcribe with two runs, repeated with Amazon Nova 2 Sonic and a local recogniser, a 50-case safety suite with a linked-client arm, latency measured in region, per-user calibration and a Hinglish check.
-- **One-command deploy and teardown**, and 823 tests (423 for the gate, 207 for the hub, 193 for the web client).
+- **One-command deploy and teardown**, and 827 tests (423 for the gate, 211 for the hub, 193 for the web client).
 
 ## Open source
 

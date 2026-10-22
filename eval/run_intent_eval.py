@@ -80,7 +80,7 @@ def tuned_rule(name: str, engine: str) -> AbstainRule:
 
 
 def run_rankers(task: dict[str, Any], heard_b0: dict[str, Any], heard_b1: dict[str, Any], *, nova: Any | None,
-                fuzzy_rule: AbstainRule) -> list[dict[str, Any]]:
+                fuzzy_rule: AbstainRule, nova_system: str = "ss_nova") -> list[dict[str, Any]]:
     book = task["book"]
     by_text = {norm(e["phrase"]): e["id"] for e in book}
     b1 = FuzzyRanker(AbstainRule(floor=-1, confident=-1, margin=0))
@@ -108,8 +108,9 @@ def run_rankers(task: dict[str, Any], heard_b0: dict[str, Any], heard_b1: dict[s
                                "rel": [relevant(h1["text"], c.phrase or c.text) for c in rk.candidates]}
             if nova is not None:
                 rk = nova.rank(hyps, book, use_catalog=False)
-                row["ss_nova"] = {"top": [c.phrase_id for c in rk.candidates],
+                row[nova_system] = {"top": [c.phrase_id for c in rk.candidates],
                                   "conf": [c.confidence for c in rk.candidates], "abstain": rk.abstain,
+                                  "rel": [relevant(h1["text"], c.phrase or c.text) for c in rk.candidates],
                                   "usage": rk.usage, "ms": round(rk.ms)}
             rows.append(row)
     return rows
@@ -165,11 +166,18 @@ def main() -> None:
     ap.add_argument("--nova", choices=["auto", "on", "off"], default="auto")
     ap.add_argument("--run", default=None)
     ap.add_argument("--name", default="intent")
+    ap.add_argument("--model", choices=["lite", "sonic"], default="lite",
+                    help="the Bedrock ranker: Nova 2 Lite (Converse) or Nova 2 Sonic (a tool call, while Lite has no quota)")
     args = ap.parse_args()
     groups = args.groups.split(",")
     tasks = build_tasks(groups)
     nova = None
-    if args.nova == "on" or (args.nova == "auto" and bedrock_available(NOVA_MODEL)):
+    key, system = ("sonic", "ss_sonic") if args.model == "sonic" else ("nova", "ss_nova")
+    if args.model == "sonic" and args.nova != "off":
+        from eval.sonic_rank import CachedSonicRanker
+
+        nova = CachedSonicRanker(rule=tuned_rule("sonic", args.engine))
+    elif args.nova == "on" or (args.nova == "auto" and bedrock_available(NOVA_MODEL)):
         nova = NovaRanker(rule=tuned_rule("nova", args.engine))
     rows: list[dict[str, Any]] = []
     prepare_vocabularies(args.engine, [vocabulary(t["book"]) for t in tasks])
@@ -177,8 +185,9 @@ def main() -> None:
         wavs = [r["wav"] for r in task["in_book"] + task["out_book"]]
         heard_b0 = transcribe_all(args.engine, "none", wavs, [])
         heard_b1 = transcribe_all(args.engine, f"book:{task['speaker']}", wavs, vocabulary(task["book"]))
-        rows += run_rankers(task, heard_b0, heard_b1, nova=nova, fuzzy_rule=tuned_rule("fuzzy", args.engine))
-    systems = ["b0", "b1", "ss_fuzzy"] + (["ss_nova"] if nova else [])
+        rows += run_rankers(task, heard_b0, heard_b1, nova=nova, fuzzy_rule=tuned_rule("fuzzy", args.engine),
+                            nova_system=system)
+    systems = ["b0", "b1", "ss_fuzzy"] + ([system] if nova else [])
     summary: dict[str, Any] = {}
     for g in groups:
         g_rows = [r for r in rows if r["group"] == g]
@@ -186,11 +195,12 @@ def main() -> None:
         summary[g]["per_speaker"] = {
             spk: {s: metrics([r for r in g_rows if r["speaker"] == spk], s) for s in systems}
             for spk in SPLIT[g] if any(r["speaker"] == spk for r in g_rows)}
-    tokens = {"input": sum(r.get("ss_nova", {}).get("usage", {}).get("input_tokens", 0) for r in rows),
-              "output": sum(r.get("ss_nova", {}).get("usage", {}).get("output_tokens", 0) for r in rows)}
+    tokens = {k: sum(r.get(system, {}).get("usage", {}).get(k, 0) for r in rows)
+              for k in ({x for r in rows for x in r.get(system, {}).get("usage", {})} or ("input_tokens", "output_tokens"))}
     payload = {"claim": "2, 2b, 5", "asr_engine": args.engine, "groups": groups, "book_size": BOOK_SIZE,
                "systems": systems, "nova": "run" if nova else "pending: Bedrock access not available; not estimated",
-               "rules": {"fuzzy": tuned_rule("fuzzy", args.engine).__dict__, "nova": tuned_rule("nova", args.engine).__dict__},
+               "ranker_model": nova.model_id if nova else None,
+               "rules": {"fuzzy": tuned_rule("fuzzy", args.engine).__dict__, key: tuned_rule(key, args.engine).__dict__},
                "tokens": tokens, "summary": summary,
                "tasks": [{"speaker": t["speaker"], "group": t["group"], "in_book": len(t["in_book"]),
                           "out_of_book": len(t["out_book"])} for t in tasks],

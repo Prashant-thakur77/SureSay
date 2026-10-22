@@ -30,10 +30,17 @@ GRID = {"floor": [x / 100 for x in range(30, 91, 5)], "confident": [x / 100 for 
         "margin": [0.0, 0.02, 0.05, 0.08, 0.1, 0.15, 0.2]}
 
 
-def collect(engine: str, use_nova: bool) -> dict[str, list[dict[str, Any]]]:
-    out: dict[str, list[dict[str, Any]]] = {"fuzzy": [], "nova": []}
+def collect(engine: str, use_nova: bool, model: str = "lite") -> dict[str, list[dict[str, Any]]]:
+    key = "sonic" if model == "sonic" else "nova"
+    out: dict[str, list[dict[str, Any]]] = {"fuzzy": [], key: []}
     fuzzy = FuzzyRanker(AbstainRule(floor=-1, confident=-1, margin=0))
-    nova = NovaRanker(rule=AbstainRule(floor=-1, confident=-1, margin=0)) if use_nova else None
+    nova: Any = None
+    if model == "sonic":
+        from eval.sonic_rank import CachedSonicRanker
+
+        nova = CachedSonicRanker(rule=AbstainRule(floor=-1, confident=-1, margin=0))
+    elif use_nova:
+        nova = NovaRanker(rule=AbstainRule(floor=-1, confident=-1, margin=0))
     tasks = build_tasks(["dev"])
     prepare_vocabularies(engine, [vocabulary(t["book"]) for t in tasks])
     for task in tasks:
@@ -45,13 +52,13 @@ def collect(engine: str, use_nova: bool) -> dict[str, list[dict[str, Any]]]:
                 h = heard[r["wav"]]
                 hyps = [h["text"], *h.get("alternatives", [])]
                 truth = by_text.get(r["norm"]) if split == "in" else None
-                for name, ranker in (("fuzzy", fuzzy), ("nova", nova)):
+                for name, ranker in (("fuzzy", fuzzy), (key, nova)):
                     if ranker is None:
                         continue
                     rk = ranker.rank(hyps, task["book"], use_catalog=False)
                     out[name].append({"split": split, "truth": truth, "top": [c.phrase_id for c in rk.candidates],
                                       "conf": [c.confidence for c in rk.candidates],
-                                      "model_abstain": rk.abstain if name == "nova" else False})
+                                      "model_abstain": rk.abstain if name == key else False})
     return out
 
 
@@ -69,9 +76,10 @@ def objective(items: list[dict[str, Any]], rule: AbstainRule) -> int:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--engine", default="whisper-small.en")
+    ap.add_argument("--model", choices=["lite", "sonic"], default="lite")
     args = ap.parse_args()
-    use_nova = bedrock_available(NOVA_MODEL)
-    data = collect(args.engine, use_nova)
+    use_nova = args.model == "lite" and bedrock_available(NOVA_MODEL)
+    data = collect(args.engine, use_nova, args.model)
     result: dict[str, Any] = {}
     for name, items in data.items():
         if not items:
@@ -87,10 +95,12 @@ def main() -> None:
         assert best is not None
         result[name] = {"rule": best[1].__dict__, "dev_objective": best[0][0], "dev_utterances": len(items)}
         print(f"{name}: {best[1]} -> {best[0][0]}/{len(items)} dev utterances handled right")
-    if not use_nova:
+    if not use_nova and args.model == "lite":
         result["nova_status"] = "pending: Bedrock access not available; nova rule not tuned"
     existing = read_result(tuning_name(args.engine)) or {}
-    write_result(tuning_name(args.engine), {**{k: v for k, v in existing.items() if k in ("nova", "confirm_bias")}, **result,
+    keep = ("nova", "nova_status", "sonic", "confirm_bias", "fuzzy") if args.model == "sonic" else ("nova", "sonic", "confirm_bias")
+    result = {**{k: v for k, v in existing.items() if k in keep}, **result}
+    write_result(tuning_name(args.engine), {**result,
                             "speakers": "dev only (F03, M05)", "asr_engine": args.engine})
 
 

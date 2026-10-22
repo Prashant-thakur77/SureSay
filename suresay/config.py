@@ -25,7 +25,7 @@ class Settings:
     bucket: str = field(default_factory=lambda: _env("SURESAY_BUCKET"))
     asr: str = field(default_factory=lambda: _env("SURESAY_ASR", "auto"))  # auto | transcribe | nova-sonic | whisper | text
     whisper_model: str = field(default_factory=lambda: _env("SURESAY_WHISPER_MODEL", "small.en"))
-    ranker: str = field(default_factory=lambda: _env("SURESAY_RANKER", "auto"))  # auto | nova | fuzzy
+    ranker: str = field(default_factory=lambda: _env("SURESAY_RANKER", "auto"))  # auto | nova | sonic | fuzzy
     nova_model_id: str = field(default_factory=lambda: _env("NOVA_MODEL_ID", "us.amazon.nova-2-lite-v1:0"))
     memory_id: str = field(default_factory=lambda: _env("AGENTCORE_MEMORY_ID"))
     agent_mode: str = field(default_factory=lambda: _env("SURESAY_AGENT_MODE", "auto"))  # auto | agent | direct

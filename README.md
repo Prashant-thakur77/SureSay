@@ -110,6 +110,7 @@ Held-out TORGO dysarthric speakers (dev F03 and M05 for tuning; test F01, F04, M
 | In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **91.7%** | same |
 | Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances |
 | Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers |
+| Meaning recovered by a Bedrock model | top-1 / in the cards | — | — | 67.6% / 67.6%; maybe cards on out-of-book 0.0% | Amazon Nova 2 Sonic as the ranker, same 6 test speakers |
 | Works as an MCP server for Alexa+ | live checks passed | — | — | **20 / 20** | the deployed server, incl. the Alexa+ client's own handshake |
 | Accessible | Lighthouse accessibility, phone / desktop | — | — | **100 / 100** | the live site |
 | Speed | understand p50 / p95 | — | — | 869.6 / 2434.6 ms | 100 dev clips, Lambda + Transcribe |
@@ -119,7 +120,7 @@ Held-out TORGO dysarthric speakers (dev F03 and M05 for tuning; test F01, F04, M
 SureSay column: SureSay (offline ranker); the Nova 2 Lite ranker is pending Bedrock access. B1 recovers more phrases at top-1 because it never abstains, and pays for it by acting on a wrong phrase without asking.
 <!-- results:end -->
 
-The Nova 2 Lite ranker and the model-driven safety arms are built and tested against stubs, and are waiting on Bedrock access for this AWS account (see [the friction log](docs/FRICTION_LOG.md)). The SureSay column above uses the offline ranker until then, and no Nova number is reported before it runs.
+The Nova 2 Lite ranker and the model-driven safety arms are built and tested against stubs, and are waiting on Bedrock access for this AWS account (see [the friction log](docs/FRICTION_LOG.md)). The SureSay column above uses the offline ranker until then, and no Nova 2 Lite number is reported before it runs. Meanwhile Amazon Nova 2 Sonic ranks in its place (the same prompt, the answer as a tool call): 67.6% top-1 against the offline ranker's 73.1%, and when unsure it offers nothing rather than unrelated guesses (the "Bedrock model" row; REPORT.md has the full table).
 
 **Not yet tested with people.** Every figure here comes from recorded speech (TORGO) and automated suites; nobody with dysarthria has used SureSay yet. The next step is a supervised session with a speech-language therapist, people with dysarthria and their carers, doing the same home tasks with SureSay and with a plain assistant (the plan is in [docs/DEVPOST.md](docs/DEVPOST.md#whats-next)).
 
@@ -147,7 +148,7 @@ Code pointers, permissions and a verify command for each service: [docs/AWS_INTE
 
 ```bash
 make setup        # Python 3.13 venv (uv) + web client packages
-make test         # 630 Python tests (423 for the gate, 207 for the hub) plus 193 web tests: account linking, the Alexa skill, the 50-case safety suite
+make test         # 634 Python tests (423 for the gate, 211 for the hub) plus 193 web tests: account linking, the Alexa skill, the 50-case safety suite
 make demo         # hub + web client (+ agent when Bedrock is reachable) on http://127.0.0.1:9000
 ```
 

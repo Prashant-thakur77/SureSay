@@ -564,6 +564,49 @@ def live_assistant_section(la: dict[str, Any]) -> list[str]:
             "| Request | Tools the model called | confirm | Home changed | Server ms |", "|---|---|---|---|---|", *rows, "",
             "One run of each request at the model's default settings; the model's choices and replies vary between runs."]
 
+def sonic_rank_section(r: dict[str, Any], spend: dict[str, Any]) -> list[str]:
+    """Claims 2 and 5 with a Bedrock model ranking: Amazon Nova 2 Sonic, while Nova 2 Lite has no quota."""
+    names = {"b1": "B1 + phrasebook", "ss_fuzzy": "SureSay, offline ranker", "ss_sonic": "SureSay, Nova 2 Sonic ranker"}
+    systems = [x for x in ("b1", "ss_fuzzy", "ss_sonic") if x in r["systems"]]
+    test, ctrl = r["summary"]["test"], r["summary"].get("controls") or {}
+    ms = sorted(row["ss_sonic"]["ms"] for row in r["rows"] if "ss_sonic" in row and "ms" in row["ss_sonic"])
+    p50 = ms[len(ms) // 2] if ms else None
+    rule = r["rules"].get("sonic", {})
+    row = lambda label, k, g=test: "| " + label + " | " + " | ".join(  # noqa: E731
+        f(g[x].get(k)) if (x.startswith("ss") or k in ("top1_pct", "top3_pct", "correct_abstain_pct", "false_abstain_pct"))
+        else "—" for x in systems) + " |"
+    out = ["## Claims 2 and 5 with a Bedrock model ranking", "",
+           f"`eval/run_intent_eval.py --model sonic` repeats Claims 2 and 5 with **Amazon Nova 2 Sonic** "
+           f"(`{r.get('ranker_model')}`) as the ranker, on the same `{r['asr_engine']}` transcripts, phrasebooks and "
+           "split. Nova 2 Lite, the intended ranker, has no quota on this account; Sonic gets Lite's prompt, with two "
+           "rule lines reworded past its content filter (docs/FRICTION_LOG.md #19), and submits its ranking as a "
+           "`submit_ranking` tool call, a structured output; the stream closes there, so no speech is generated. "
+           f"Its abstain rule was tuned on the dev speakers only (floor {rule.get('floor')}, confident "
+           f"{rule.get('confident')}, margin {rule.get('margin')}). Temperature 0.", "",
+           "| Test speakers | " + " | ".join(names[x] for x in systems) + " |", "|---|" + "---|" * len(systems),
+           row("Top-1 phrase recovered", "top1_pct"), row("Top-3 phrase recovered", "top3_pct"),
+           row("In the cards, counting \"maybe\" cards", "in_cards_with_maybe_pct"),
+           row("Out-of-book: correctly asked again", "correct_abstain_pct"),
+           row("Out-of-book: maybe cards offered (user declines)", "maybe_cards_on_out_of_book_pct"),
+           row("In-book: asked again needlessly", "false_abstain_pct")]
+    if ctrl:
+        out += [row("Controls: top-1", "top1_pct", ctrl), row("Controls: correctly asked again", "correct_abstain_pct", ctrl)]
+    t_rows = [x["ss_sonic"] for x in r["rows"] if x.get("group") == "test" and "ss_sonic" in x]
+    ab = [x for x in t_rows if x["abstain"]]
+    empty = sum(not x["top"] for x in ab)
+    out += ["", f"When Sonic was unsure ({len(ab)} of {len(t_rows)} test utterances) it returned no guesses at all in "
+            f"{empty} of them, so it offers no \"maybe\" cards: none that are unrelated, but the intended phrase is also "
+            "shown less often than with the offline ranker, which offers its best related guesses when unsure. The "
+            "product keeps the offline ranker; the Bedrock ranker is one setting away (`SURESAY_RANKER`), and Nova 2 "
+            "Lite's number will be added when its quota opens."]
+    out += ["", f"{len(ms)} ranking calls in this run; time per call p50 {p50:.0f} ms from this machine"
+            if p50 is not None else "", ]
+    if spend.get("nova_sonic_rank_calls"):
+        out[-1] += (f"; all {spend['nova_sonic_rank_calls']} Sonic ranking calls so far (dev tuning included) cost "
+                    f"${spend['nova_sonic_rank_usd']:.2f} at list price.")
+    return out
+
+
 def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] | None = None,
                      tuning: dict[str, Any] | None = None) -> list[str]:
     spk, ss_t1, b1_t1, fab, ss_maybe = ik["worst"]
@@ -668,6 +711,10 @@ def main() -> None:
         f"| In the cards when unsure too | counting maybe cards | — | {f(ik['b1_top3'])} (acts without asking) | **{f(ik['ss_maybe'])}** | same |",
         f"| Abstains when unsure | correct \"say again\" | 0% | {f(ik['b1_abstain'])} | **{f(ik['ss_abstain'])}** | out-of-book utterances |",
         f"| Meaning recovered | top-1 / top-3 | {f(ik['b0_top1'])} / — | {f(ik['b1_top1'])} / {f(ik['b1_top3'])} | {f(ik['ss_top1'])} / {f(ik['ss_top3'])} | 50-phrase books, 6 test speakers |",
+        *([f"| Meaning recovered by a Bedrock model | top-1 / in the cards | — | — | {f(sr0['summary']['test']['ss_sonic']['top1_pct'])} / "
+           f"{f(sr0['summary']['test']['ss_sonic']['in_cards_with_maybe_pct'])}; maybe cards on out-of-book "
+           f"{f(sr0['summary']['test']['ss_sonic']['maybe_cards_on_out_of_book_pct'])} | Amazon Nova 2 Sonic as the ranker, same 6 test speakers |"]
+          if (sr0 := read_result("intent", "sonic/run1")) and "ss_sonic" in sr0["summary"]["test"] else []),
         *([f"| Works as an MCP server for Alexa+ | live checks passed | — | — | **{lc0['passed']} / {lc0['total']}** | the deployed server, incl. the Alexa+ client's own handshake |"]
           if (lc0 := read_result("live_checks")) else []),
         *([f"| Accessible | Lighthouse accessibility, phone / desktop | — | — | **{sa0['phone']['median_scores']['accessibility']} / "
@@ -709,6 +756,9 @@ def main() -> None:
     lc = read_result("live_checks")
     if lc:
         body += live_checks_section(lc) + [""]
+    sr = read_result("intent", "sonic/run1")
+    if sr and "ss_sonic" in sr["systems"]:
+        body += sonic_rank_section(sr, read_result("spend") or {}) + [""]
     la = read_result("live_assistant")
     if la:
         body += live_assistant_section(la) + [""]

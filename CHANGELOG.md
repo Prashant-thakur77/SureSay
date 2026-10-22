@@ -12,6 +12,7 @@ From a third strict judge's review (17/20):
 - **No random third card:** beside a real guess, a card below the noise floor (the same 0.50 as maybe cards, fixed before measuring) is no longer shown; "unlock the front door, my carer is here" no longer offers brown bread. Re-scored offline: every reported figure unchanged.
 - **Unsure card sets carry their cards:** an ask-again set now includes its numbered `candidates`, so the MCP App draws them; it never says "one of these?" over no cards.
 - "what's on in the house" and "is anything on" are answered, not refused.
+- **A Bedrock model ranks** (`SonicRanker`, `SURESAY_RANKER=sonic`): Amazon Nova 2 Sonic gets Nova 2 Lite's prompt and returns its ranking as a `submit_ranking` tool call, closing the stream before any speech. Tuned on dev speakers only; on the test speakers 67.6% top-1 (offline ranker 73.1%), 100% correct "say again" on out-of-book, and no unrelated maybe cards (offline 25.9%). 400 calls, $0.59. Two harmless prompt lines had to be reworded past Sonic's content filter (friction log #19).
 - `?alexa=1` opens the Alexa+ view for a first-time visitor (a quiet demo home is made for them); `/api/info` lists only the protocol versions the server answers; the home page calls B0 "a forced-choice baseline"; the task-success headline bolds the stricter 98.1%; "built to WCAG 2.2 AA", since no formal audit was done; doc counts and figures current.
 
 ## 1.6.0 (22 Oct 2026)

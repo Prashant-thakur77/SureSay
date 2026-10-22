@@ -1,13 +1,14 @@
 {
   "name": "tuning_transcribe_streaming",
-  "generated_at": "2026-10-21T14:06:01+0530",
-  "git_sha": "167c157",
+  "generated_at": "2026-10-22T16:49:48+0530",
+  "git_sha": "aebd39e",
   "python": "3.13.12",
   "fuzzy": {
     "rule": {
       "floor": 0.65,
       "confident": 1.0,
-      "margin": 0.15
+      "margin": 0.15,
+      "maybe_floor": 0.5
     },
     "dev_objective": 78,
     "dev_utterances": 80
@@ -72,5 +73,17 @@
     },
     "speakers": "dev only (F03, M05)",
     "asr_engine": "transcribe-streaming"
-  }
+  },
+  "sonic": {
+    "rule": {
+      "floor": 0.7,
+      "confident": 1.0,
+      "margin": 0.2,
+      "maybe_floor": 0.5
+    },
+    "dev_objective": 78,
+    "dev_utterances": 80
+  },
+  "speakers": "dev only (F03, M05)",
+  "asr_engine": "transcribe-streaming"
 }

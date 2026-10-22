@@ -6,5 +6,11 @@
  "nova_sonic_speech_tokens": 218604,
  "nova_sonic_text_tokens": 301177,
  "nova_sonic_usd": 0.7552,
- "nova_sonic_cloud_clips": 71
+ "nova_sonic_cloud_clips": 71,
+ "nova_sonic_rank_calls": 400,
+ "nova_sonic_rank_speech_tokens": 60000,
+ "nova_sonic_rank_text_tokens": 925909,
+ "nova_sonic_rank_output_speech_tokens": 0,
+ "nova_sonic_rank_output_text_tokens": 36500,
+ "nova_sonic_rank_usd": 0.5859
 }

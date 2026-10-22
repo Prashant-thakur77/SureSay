@@ -35,14 +35,17 @@ def tool_specs(tools: list[Any]) -> list[dict[str, Any]]:
 
 class SonicToolAgent:
     def __init__(self, *, system_prompt: str, tools: list[dict[str, Any]], call: Callable[[str, dict[str, Any]], Any],
-                 connect: Any = None, timeout: float = 45.0, max_tool_calls: int = 8) -> None:
+                 connect: Any = None, timeout: float = 45.0, max_tool_calls: int = 8, stop_after_tool: bool = False
+                 ) -> None:
         self.system_prompt = system_prompt
         self.tools = tools
         self.call = call
         self._connect = connect
         self.timeout = timeout
         self.max_tool_calls = max_tool_calls
+        self.stop_after_tool = stop_after_tool  # the tool call is the answer (a structured output): end the turn there
         self.tool_calls: list[dict[str, Any]] = []
+        self.usage: dict[str, int] = {}
 
     def __call__(self, text: str) -> str:
         from suresay.asr import _run
@@ -96,7 +99,13 @@ class SonicToolAgent:
                     event = json.loads(raw).get("event", {})
                     kind = next(iter(event), "")
                     body = event.get(kind) or {}
-                    if kind == "contentStart" and body.get("type") == "TEXT":
+                    if kind == "usageEvent":
+                        total = (body.get("details") or {}).get("total", {})
+                        i, o = total.get("input", {}), total.get("output", {})
+                        self.usage = {"speech_tokens": int(i.get("speechTokens", 0)), "text_tokens": int(i.get("textTokens", 0)),
+                                      "output_speech_tokens": int(o.get("speechTokens", 0)),
+                                      "output_text_tokens": int(o.get("textTokens", 0))}
+                    elif kind == "contentStart" and body.get("type") == "TEXT":
                         extra = json.loads(body.get("additionalModelFields") or "{}")
                         stage[body.get("contentId", "")] = extra.get("generationStage", "FINAL")
                     elif kind == "textOutput" and body.get("role") == "ASSISTANT":
@@ -104,6 +113,8 @@ class SonicToolAgent:
                             final.append(str(body.get("content", "")))
                     elif kind == "toolUse":
                         await self._answer_tool(s, prompt, body)
+                        if self.stop_after_tool:
+                            break
                     elif kind == "contentEnd" and body.get("type") == "TEXT" and body.get("stopReason") == "END_TURN":
                         break
         except TimeoutError:
@@ -136,6 +147,8 @@ class SonicToolAgent:
                 result = await asyncio.to_thread(self.call, name, args)
             except Exception as exc:  # a tool error goes back to the model, like any agent loop
                 result = {"error": str(exc)}
+        if self.stop_after_tool:
+            return
         content = uuid.uuid4().hex
         await s.send({"contentStart": {"promptName": prompt, "contentName": content, "interactive": False, "type": "TOOL",
                                        "role": "TOOL", "toolResultInputConfiguration": {
