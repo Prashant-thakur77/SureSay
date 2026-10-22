@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8.2 (22 Oct 2026)
+
+From AWS Builder and open-source reviews:
+- **The hub reads by index, as it claimed.** Its IAM policy covered the table but not its indexes, and the store took the "not authorized … index" refusal for a missing index, so every lookup fell back to a full-table scan. The policy now covers `table/suresay-gate/index/*`, and the store raises an IAM refusal instead of scanning (confirm-gate-mcp).
+- **Guards on AWS:** point-in-time recovery and deletion protection on the consent ledger; CloudWatch alarms on hub errors and slow spoken requests, to the SNS topic `suresay-ops`; every log group kept 14 days. Teardown undoes each.
+- `DELETE /mcp` (a client ending its session) is answered with 405, as the spec allows for a stateless server; the SDK had sent no response at all.
+- The AWS answers say what is live: the Strands model provider for Nova 2 Sonic, the 0 / 27 live result, Sonic as a stand-in ranker, the keep-warm schedule, the guards, latency and spend; AgentCore Memory holds the phrasebooks (its facts strategy waits for the Nova 2 Lite agent).
+
 ## 1.8.1 (22 Oct 2026)
 
 - **On a phone, the outcome comes first** after you confirm: "Done: …" and the receipt sit above the consent trail, which folds into "How it was checked" once it has ticked through.

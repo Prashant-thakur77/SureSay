@@ -3,9 +3,11 @@
 #
 #   DynamoDB  suresay-gate            gate ledger, devices, home state, events (on-demand, TTL)
 #   S3        suresay-<acct>-<region> utterance + evidence audio (private, SSE, 30-day expiry) + deploy bundle
-#   AgentCore Memory  suresay_memory  phrasebooks (blob events) + SEMANTIC facts strategy
+#   AgentCore Memory  suresay_memory  phrasebooks (blob events); a SEMANTIC facts strategy, used once the Lite agent runs
 #   Lambda    suresay-hub + URL       the hub: /mcp (MCP Streamable HTTP), /device/*, web client
-#   AgentCore Runtime suresay_agent   the Strands agent (Nova 2 Lite), calling the hub's /mcp
+#   AgentCore Runtime suresay_agent   the live assistant: a Strands agent on Nova 2 Sonic (our own model provider),
+#                                     calling the hub's /mcp; also the Nova 2 Lite agent for ordinary turns (awaits quota)
+#   EventBridge suresay-keep-warm     pings the hub every 5 minutes; CloudWatch alarms -> SNS suresay-ops
 #
 # Options (env): REGION=us-east-1  SKIP_AGENT=1 (hub only)  SKIP_WEB=1 (reuse web/dist)
 set -euo pipefail
@@ -113,7 +115,7 @@ VARS=(AWS_LAMBDA_EXEC_WRAPPER=/opt/bootstrap PORT=8080 AWS_LWA_READINESS_CHECK_P
       SURESAY_BACKEND=aws SURESAY_GATE_TABLE="$TABLE" SURESAY_BUCKET="$BUCKET" SURESAY_DATA_DIR=/tmp/suresay
       AGENTCORE_MEMORY_ID="$MEMORY_ID" SURESAY_AGENT_TOKEN="$AGENT_TOKEN" SURESAY_ASR="${SURESAY_ASR:-auto}" SURESAY_EVIDENCE_ASR="${SURESAY_EVIDENCE_ASR:-}" SURESAY_RANKER=auto
       SURESAY_AGENT_MODE="$MODE" AGENTCORE_RUNTIME_ARN="$RUNTIME_ARN" SURESAY_ALLOWED_ORIGINS="*"
-      SURESAY_CARER_TOPIC_ARN="$CARER_TOPIC" SURESAY_PUBLIC_DEMO="${SURESAY_PUBLIC_DEMO:-1}" SURESAY_LIVE_AGENT="${SURESAY_LIVE_AGENT:-nova-sonic}" SURESAY_LIVE_AGENT="${SURESAY_LIVE_AGENT:-nova-sonic}" SURESAY_EVIDENCE_LANGUAGE="${SURESAY_EVIDENCE_LANGUAGE:-en-US}" SURESAY_OAUTH_CLIENTS="${SURESAY_OAUTH_CLIENTS:-}"
+      SURESAY_CARER_TOPIC_ARN="$CARER_TOPIC" SURESAY_PUBLIC_DEMO="${SURESAY_PUBLIC_DEMO:-1}" SURESAY_LIVE_AGENT="${SURESAY_LIVE_AGENT:-nova-sonic}" SURESAY_EVIDENCE_LANGUAGE="${SURESAY_EVIDENCE_LANGUAGE:-en-US}" SURESAY_OAUTH_CLIENTS="${SURESAY_OAUTH_CLIENTS:-}"
       SURESAY_PUBLIC_URL="$(aws lambda get-function-url-config --function-name "$FUNCTION" --query FunctionUrl --output text 2>/dev/null | sed 's:/*$::' || true)")
 
 say "Lambda $FUNCTION"
@@ -231,6 +233,25 @@ PYEOF
   echo "skill test: $("$PY" -c "import json,sys; print(json.load(open(sys.argv[1]))['response']['outputSpeech']['ssml'][:140])" "$STATE/alexa_test.json")"
   echo "Alexa skill endpoint ARN: $(aws lambda get-function --function-name suresay-alexa-skill --query Configuration.FunctionArn --output text)"
 fi
+
+say "Guards: log retention, point-in-time recovery for the consent ledger, alarms"
+for LG in "/aws/lambda/$FUNCTION" /aws/lambda/suresay-alexa-skill \
+          $(aws logs describe-log-groups --log-group-name-prefix "/aws/bedrock-agentcore/runtimes/$AGENT" \
+              --query 'logGroups[].logGroupName' --output text 2>/dev/null); do
+  aws logs put-retention-policy --log-group-name "$LG" --retention-in-days 14 2>/dev/null || true
+done
+# the receipts and card sets are the record of what the user agreed to: recoverable, and not deletable by accident
+aws dynamodb update-continuous-backups --table-name "$TABLE" \
+  --point-in-time-recovery-specification PointInTimeRecoveryEnabled=true >/dev/null
+aws dynamodb update-table --table-name "$TABLE" --deletion-protection-enabled >/dev/null 2>&1 || true
+OPS_TOPIC="$(aws sns create-topic --name suresay-ops --tags Key=project,Value=suresay --query TopicArn --output text)"
+aws cloudwatch put-metric-alarm --alarm-name suresay-hub-errors --namespace AWS/Lambda --metric-name Errors \
+  --dimensions Name=FunctionName,Value="$FUNCTION" --statistic Sum --period 300 --evaluation-periods 1 --threshold 5 \
+  --comparison-operator GreaterThanOrEqualToThreshold --treat-missing-data notBreaching --alarm-actions "$OPS_TOPIC"
+aws cloudwatch put-metric-alarm --alarm-name suresay-understand-slow --namespace SureSay --metric-name UnderstandMs \
+  --dimensions Name=Input,Value=voice --extended-statistic p95 --period 900 --evaluation-periods 1 --threshold 6000 \
+  --comparison-operator GreaterThanThreshold --treat-missing-data notBreaching --alarm-actions "$OPS_TOPIC"
+echo "alarms -> $OPS_TOPIC (subscribe an email to it to be told)"
 
 say "Keep warm: EventBridge pings the hub every 5 minutes (a first visit should not wait for a cold start)"
 WARM_RULE_ARN="$(aws events put-rule --name suresay-keep-warm --schedule-expression "rate(5 minutes)" --state ENABLED --query RuleArn --output text)"

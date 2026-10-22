@@ -133,7 +133,7 @@ The demo's [Alexa+ view](https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-
 | **Bedrock: Nova 2 Sonic** (`amazon.nova-2-sonic-v1:0`) | The live AI in the Alexa+ view, driving SureSay's MCP tools without the power to confirm. Also a second recogniser: as safe as Transcribe on the held-out speakers at a third of the cost per clip, but slower in Lambda, so it is offered for spoken answers (`SURESAY_EVIDENCE_ASR=nova-sonic`). |
 | **Strands Agents** | The live assistant's agent loop: a `strands.Agent` over SureSay's MCP tools, on Nova 2 Sonic through our own model provider (`strands_agent/sonic_model.py`). |
 | **Bedrock AgentCore Memory** | Each user's phrasebook as blob events; the agent's session, with a SEMANTIC strategy for facts the user tells it. |
-| **Amazon Transcribe** | Streaming recognition primed with a per-user custom vocabulary from the phrasebook; server-side transcription of the user's confirmation audio; batch jobs for eval. |
+| **Amazon Transcribe** | Streaming recognition primed with a per-user custom vocabulary from the phrasebook; server-side transcription of the user's confirmation audio; the evaluation's recognition too, cached per clip. |
 | **Amazon Polly** (neural, Kajal en-IN) | Reads the cards aloud and speaks confirmed sentences for the user. |
 | **Amazon DynamoDB** | The gate ledger (card sets, evidence, receipts, paired devices, replay cache) with conditional writes for one-time use, plus home state. One on-demand table with a kind index and TTL. |
 | **Amazon S3** | Request and confirmation audio: content-addressed, private, encrypted, deleted after 30 days. Receipts carry the audio's fingerprint. |
@@ -149,7 +149,7 @@ Code pointers, permissions and a verify command for each service: [docs/AWS_INTE
 
 ```bash
 make setup        # Python 3.13 venv (uv) + web client packages
-make test         # 799 Python tests (522 for the gate, 277 for the hub) plus 222 web tests: account linking, the Alexa skill, the 50-case safety suite
+make test         # 808 Python tests (530 for the gate, 278 for the hub) plus 222 web tests: account linking, the Alexa skill, the 50-case safety suite
 make demo         # hub + web client (+ agent when Bedrock is reachable) on http://127.0.0.1:9000
 ```
 

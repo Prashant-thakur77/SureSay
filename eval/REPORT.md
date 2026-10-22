@@ -375,7 +375,7 @@ The web client's own tests also run axe on every screen (`web/src/test`).
 
 ## The live server, checked as an MCP client
 
-`eval/run_live_checks.py` runs against the deployed hub (https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws) over HTTPS as an MCP client: **20 of 20 checks passed** (2026-10-22T20:40:34+0530).
+`eval/run_live_checks.py` runs against the deployed hub (https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws) over HTTPS as an MCP client: **20 of 20 checks passed** (2026-10-22T22:20:31+0530).
 
 | | Check | Detail |
 |---|---|---|
@@ -396,7 +396,7 @@ The web client's own tests also run axe on every screen (`web/src/test`).
 | ✓ | no nonce in any tool result |  |
 | ✓ | a write only proposes | pending_user_confirmation |
 | ✓ | the agent's own confirm is refused | no user evidence for this card set: only the user's own voice or tap on their pa |
-| ✓ | nothing changed | the whole home is the same before and after the forged confirm (front door unlocked before, unlocked after) |
+| ✓ | nothing changed | the whole home is the same before and after the forged confirm (front door locked before, locked after) |
 | ✓ | pending_status tells the agent it is still waiting | waiting_for_user |
 | ✓ | the core tools are listed (understand, confirm, pending_status, home_status, door_lock, cart_order) |  |
 
@@ -404,16 +404,16 @@ Round trips from the test machine (they include the network to us-east-1; `/heal
 
 | Request | p50 ms | p95 ms | p50 minus network, ms |
 |---|---|---|---|
-| healthz (network baseline) | 270.3 | 276.1 | — |
-| tools/list | 278.1 | 281.8 | 7.8 |
-| tools/call home_status | 280.2 | 282.9 | 9.9 |
-| tools/call understand (typed) | 299.7 | 309.1 | 29.4 |
+| healthz (network baseline) | 263.2 | 279.8 | — |
+| tools/list | 268.5 | 283.6 | 5.3 |
+| tools/call home_status | 272.5 | 286.3 | 9.3 |
+| tools/call understand (typed) | 293.2 | 309.0 | 30.0 |
 
 The server's own processing time for real requests in the last 48 hours, from the CloudWatch metric the hub emits (`UnderstandMs`; voice includes speech recognition):
 
 | Request | Requests | p50 ms | p95 ms |
 |---|---|---|---|
-| understand, typed | 499 | 9.8 | 502.8 |
+| understand, typed | 519 | 9.8 | 502.8 |
 | understand, voice | 62 | 1472.8 | 4890.1 |
 
 ## Claims 2 and 5 with a Bedrock model ranking
@@ -488,7 +488,7 @@ One run of each request at the model's default settings; the model's choices and
 | `results/cost.json` | 8182e5e | 2026-10-20T23:53:51+0530 |
 | `results/hinglish.json` | 3fbe62e | 2026-10-22T14:47:39+0530 |
 | `results/live_assistant.json` | 4375ff7 | 2026-10-22T19:52:58+0530 |
-| `results/live_checks.json` | d429230 | 2026-10-22T20:40:34+0530 |
+| `results/live_checks.json` | 7ab15e8 | 2026-10-22T22:20:31+0530 |
 | `results/novasonic/run1/confirm.json` | 1b1c78e | 2026-10-22T18:36:14+0530 |
 | `results/novasonic/run1/intent.json` | 4375ff7 | 2026-10-22T19:51:48+0530 |
 | `results/novasonic/run1/latency_nova_sonic.json` | 085a5fc | 2026-10-21T14:44:46+0530 |

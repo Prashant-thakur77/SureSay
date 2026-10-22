@@ -21,7 +21,10 @@
         "dynamodb:Scan",
         "dynamodb:Query"
       ],
-      "Resource": "arn:aws:dynamodb:${REGION}:${ACCOUNT}:table/${TABLE}"
+      "Resource": [
+        "arn:aws:dynamodb:${REGION}:${ACCOUNT}:table/${TABLE}",
+        "arn:aws:dynamodb:${REGION}:${ACCOUNT}:table/${TABLE}/index/*"
+      ]
     },
     {
       "Sid": "EvidenceAudio",

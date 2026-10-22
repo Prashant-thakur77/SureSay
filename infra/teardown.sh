@@ -44,7 +44,10 @@ aws iam delete-role-policy --role-name "$ROLE" --policy-name suresay-hub 2>/dev/
 aws iam delete-role --role-name "$ROLE" 2>/dev/null || true
 
 step "DynamoDB"
+aws dynamodb update-table --table-name "$TABLE" --no-deletion-protection-enabled >/dev/null 2>&1 || true
 aws dynamodb delete-table --table-name "$TABLE" >/dev/null 2>&1 || true
+aws cloudwatch delete-alarms --alarm-names suresay-hub-errors suresay-understand-slow 2>/dev/null || true
+aws sns delete-topic --topic-arn "arn:aws:sns:$REGION:$ACCOUNT:suresay-ops" 2>/dev/null || true
 
 step "S3"
 if aws s3api head-bucket --bucket "$BUCKET" 2>/dev/null; then

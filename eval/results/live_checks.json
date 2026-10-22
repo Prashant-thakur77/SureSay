@@ -1,7 +1,7 @@
 {
   "name": "live_checks",
-  "generated_at": "2026-10-22T20:40:34+0530",
-  "git_sha": "d429230",
+  "generated_at": "2026-10-22T22:20:31+0530",
+  "git_sha": "7ab15e8",
   "python": "3.13.12",
   "url": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws",
   "checks": [
@@ -93,7 +93,7 @@
     {
       "check": "nothing changed",
       "passed": true,
-      "detail": "the whole home is the same before and after the forged confirm (front door unlocked before, unlocked after)"
+      "detail": "the whole home is the same before and after the forged confirm (front door locked before, locked after)"
     },
     {
       "check": "pending_status tells the agent it is still waiting",
@@ -110,32 +110,32 @@
   "total": 20,
   "round_trip_from_test_machine": {
     "healthz (network baseline)": {
-      "p50_ms": 270.3,
-      "p95_ms": 276.1,
+      "p50_ms": 263.2,
+      "p95_ms": 279.8,
       "n": 15
     },
     "tools/list": {
-      "p50_ms": 278.1,
-      "p95_ms": 281.8,
+      "p50_ms": 268.5,
+      "p95_ms": 283.6,
       "n": 15,
-      "minus_network_p50_ms": 7.8
+      "minus_network_p50_ms": 5.3
     },
     "tools/call home_status": {
-      "p50_ms": 280.2,
-      "p95_ms": 282.9,
+      "p50_ms": 272.5,
+      "p95_ms": 286.3,
       "n": 15,
-      "minus_network_p50_ms": 9.9
+      "minus_network_p50_ms": 9.3
     },
     "tools/call understand (typed)": {
-      "p50_ms": 299.7,
-      "p95_ms": 309.1,
+      "p50_ms": 293.2,
+      "p95_ms": 309.0,
       "n": 15,
-      "minus_network_p50_ms": 29.4
+      "minus_network_p50_ms": 30.0
     }
   },
   "server_side_understand": {
     "typed": {
-      "requests": 499,
+      "requests": 519,
       "p50_ms": 9.8,
       "p95_ms": 502.8
     },
