@@ -17,6 +17,7 @@ import json
 import logging
 import mimetypes
 import os
+import re
 import time
 import uuid
 from typing import Any
@@ -91,6 +92,12 @@ TRY_PER_DAY = 60
 ADDRESS_VOICE_PER_DAY = 80
 ADDRESS_SPEAK_PER_DAY = 100
 ADDRESS_TURNS_PER_DAY = 600
+# A live assistant turn's id, made by the user's screen so it can follow the turn's tool calls as they run.
+TURN_ID = re.compile(r"[0-9a-f]{16,64}")
+TURN_PROGRESS_SECONDS = 300  # how long a turn's steps can be read: a turn takes seconds, its screen polls a minute at most
+TURN_MAX_STEPS = 24  # the model makes at most 6 calls a turn; this bounds the reads a poll can cost
+TOOL_NAME = re.compile(r"[a-z][a-z0-9_]{0,63}")
+STEP_STATUS = re.compile(r"[a-z][a-z_]{0,39}")
 MAX_AUDIO_BYTES = 2_000_000  # about a minute of 16 kHz mono speech: far more than any turn or answer
 MAX_BODY_BYTES = 4_000_000
 
@@ -198,6 +205,151 @@ class McpAuth:
         finally:
             current_user.reset(tu)
             current_caller.reset(tc)
+
+
+class TurnProgress:
+    """The steps of a live assistant turn, for its user's screen: each tool the model called, then its result's status.
+
+    Never an argument and never a nonce: only a tool's name and a short status word. The turn is registered to one
+    user (``assistant_turn``, first writer wins); each call is its own doc ``assistant_step`` ``<turn>:<n>``, with *n*
+    from an atomic counter, so calls running at once never overwrite each other, and only the request that made a
+    step's doc rewrites it (with the status).
+    """
+
+    def __init__(self, store: Any) -> None:
+        self.store = store
+
+    def register(self, turn_id: str, user_id: str) -> bool:
+        return self.store.put_if_absent("assistant_turn", turn_id, {
+            "user_id": user_id, "expires_at": time.time() + TURN_PROGRESS_SECONDS})
+
+    def _owner(self, turn_id: str, user_id: str) -> dict[str, Any] | None:
+        doc = self.store.get("assistant_turn", turn_id)
+        if not doc or doc.get("user_id") != user_id or float(doc.get("expires_at") or 0) < time.time():
+            return None
+        return doc
+
+    def begin(self, turn_id: str, user_id: str, tool: str) -> int | None:
+        """The model is calling *tool* for this user's turn: its step number, or None if it is not theirs."""
+        owner = self._owner(turn_id, user_id)
+        if owner is None:
+            return None
+        n = self.store.add("assistant_steps", turn_id, 1, expires_at=float(owner["expires_at"]))
+        if n > TURN_MAX_STEPS:
+            return None
+        self.store.put("assistant_step", f"{turn_id}:{n:03d}", {"turn_id": turn_id, "user_id": user_id, "n": n,
+                                                                "tool": tool, "status": None,
+                                                                "expires_at": owner["expires_at"]})
+        return n
+
+    def end(self, turn_id: str, user_id: str, n: int, tool: str, status: str) -> None:
+        self.store.put("assistant_step", f"{turn_id}:{n:03d}", {"turn_id": turn_id, "user_id": user_id, "n": n,
+                                                                "tool": tool, "status": status,
+                                                                "expires_at": time.time() + TURN_PROGRESS_SECONDS})
+
+    def steps(self, turn_id: str, user_id: str) -> list[dict[str, Any]]:
+        """The turn's steps so far, in order, if the turn is this user's; else none."""
+        if self._owner(turn_id, user_id) is None:
+            return []
+        out = []
+        for n in range(1, TURN_MAX_STEPS + 1):  # up to the first step not written yet
+            doc = self.store.get("assistant_step", f"{turn_id}:{n:03d}")
+            if doc is None or doc.get("user_id") != user_id:
+                break
+            out.append({"n": n, "tool": doc.get("tool"), "status": doc.get("status")})
+        return out
+
+
+def _step_status(code: int, raw: bytes) -> str:
+    """One short word for a tool's result (its own "status", e.g. choose or refused), never anything else from it."""
+    try:
+        res = json.loads(raw).get("result")
+    except (ValueError, AttributeError):
+        res = None
+    if not isinstance(res, dict):
+        return "error"
+    sc = res.get("structuredContent")
+    if not isinstance(sc, dict) or "status" not in sc:
+        try:
+            sc = json.loads(res["content"][0]["text"])
+        except (KeyError, IndexError, TypeError, ValueError):
+            sc = {}
+    status = sc.get("status") if isinstance(sc, dict) else None
+    if isinstance(status, str) and STEP_STATUS.fullmatch(status):
+        return status
+    return "error" if res.get("isError") or code >= 400 else "ok"
+
+
+class AssistantProgress:
+    """Records the steps of a live assistant turn: an agent ``tools/call`` on ``/mcp`` tagged ``x-suresay-turn``.
+
+    Sits inside ``McpAuth``, so the caller is already known; a device's call, or one with no turn, passes untouched.
+    Recording is best effort: it never fails or changes the call.
+    """
+
+    def __init__(self, app: ASGIApp, progress: TurnProgress) -> None:
+        self.app = app
+        self.progress = progress
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        turn = dict(scope.get("headers") or []).get(b"x-suresay-turn", b"").decode("latin-1")
+        if (scope["type"] != "http" or not scope["path"].startswith("/mcp") or scope["method"] != "POST"
+                or current_caller.get() != "agent" or not TURN_ID.fullmatch(turn)):
+            await self.app(scope, receive, send)
+            return
+        chunks = []
+        more = True
+        while more:
+            msg = await receive()
+            chunks.append(msg.get("body", b""))
+            more = msg.get("more_body", False)
+        body = b"".join(chunks)
+        sent = False
+
+        async def replay() -> Message:
+            nonlocal sent
+            if not sent:
+                sent = True
+                return {"type": "http.request", "body": body, "more_body": False}
+            return await receive()
+
+        try:
+            rpc = json.loads(body)
+            name = rpc["params"]["name"] if rpc.get("method") == "tools/call" else None
+        except (ValueError, KeyError, TypeError, AttributeError):
+            name = None
+        if name is None:
+            await self.app(scope, replay, send)
+            return
+        tool = name if isinstance(name, str) and TOOL_NAME.fullmatch(name) else "unknown"
+        user = current_user.get()
+        try:
+            n = await anyio.to_thread.run_sync(self.progress.begin, turn, user, tool)
+        except Exception:
+            logger.exception("could not record an assistant step")
+            n = None
+        if n is None:
+            await self.app(scope, replay, send)
+            return
+        code = 500
+        out: list[bytes] = []
+
+        async def capture(msg: Message) -> None:
+            nonlocal code
+            if msg["type"] == "http.response.start":
+                code = int(msg["status"])
+            elif msg["type"] == "http.response.body":
+                out.append(msg.get("body", b""))
+            await send(msg)
+
+        try:
+            await self.app(scope, replay, capture)
+        finally:
+            try:
+                await anyio.to_thread.run_sync(self.progress.end, turn, user, n, tool,
+                                               _step_status(code, b"".join(out)))
+            except Exception:
+                logger.exception("could not record an assistant step's result")
 
 
 class DeviceCallerTag:
@@ -384,6 +536,7 @@ DEMO_FULL = "the public demo has reached today's limit; please try again tomorro
 def build_app(s: SureSay | None = None) -> Starlette:
     s = s or SureSay()
     bridge = AgentBridge(s)
+    progress = TurnProgress(s.store)
     security = TransportSecuritySettings(enable_dns_rebinding_protection=False)
     app = s.mcp.streamable_http_app(stateless_http=True, json_response=True, transport_security=security)
 
@@ -444,6 +597,8 @@ def build_app(s: SureSay | None = None) -> Starlette:
         s.gate, s.devices, transcribe=evidence_transcribe, transcriber=None,
         media_sink=evidence_sink, max_audio_bytes=MAX_AUDIO_BYTES, client_ip=client_ip,
     )
+    # the hub's own /device/more-time (below) names the device in the activity log; drop the package's twin
+    routes = [r for r in routes if getattr(r, "path", "") != "/device/more-time"]
 
     async def turn(request: Request, device: Any, data: dict[str, Any]) -> Response:
         """One user turn from the device: typed text or recorded audio."""
@@ -661,6 +816,9 @@ def build_app(s: SureSay | None = None) -> Starlette:
         text = " ".join(str(data.get("text") or "").split())[:300]
         if not text:
             return JSONResponse({"error": "say or type something"}, status_code=400)
+        turn_id = data.get("turn_id")
+        if turn_id is not None and not (isinstance(turn_id, str) and TURN_ID.fullmatch(turn_id)):
+            return JSONResponse({"error": "turn_id must be 16 to 64 lowercase hex characters"}, status_code=400)
         u = device.user_id
         guest = u.startswith("guest-")
         allowed = await anyio.to_thread.run_sync(
@@ -669,18 +827,21 @@ def build_app(s: SureSay | None = None) -> Starlette:
         if not allowed:
             return JSONResponse({"error": "the live assistant has done enough for today here; the simple host still works"},
                                 status_code=429)
+        if turn_id and not await anyio.to_thread.run_sync(progress.register, turn_id, u):
+            return JSONResponse({"error": "that turn_id is already used"}, status_code=409)
         base = (s.cfg.public_url or str(request.base_url)).rstrip("/")
 
         def turn() -> dict[str, Any]:
             if s.cfg.agent_runtime_arn:  # the same turn, run by the agent deployed on AgentCore Runtime
                 try:
-                    return {**invoke_assistant_runtime(s.cfg, {"mode": "assistant", "prompt": text, "user_id": u}),
-                            "runs_on": "AgentCore Runtime"}
+                    payload = {"mode": "assistant", "prompt": text, "user_id": u, **({"turn_id": turn_id} if turn_id else {})}
+                    return {**invoke_assistant_runtime(s.cfg, payload), "runs_on": "AgentCore Runtime"}
                 except Exception as exc:  # noqa: BLE001
                     logger.warning("AgentCore Runtime turn failed, running it here: %s", exc)
-            from strands_agent.live import assistant_turn
+            from strands_agent import live
 
-            out = assistant_turn(text, u, mcp_url=f"{base}/mcp", token=s.cfg.agent_token, agent_factory=make_live_agent)
+            out = live.assistant_turn(text, u, mcp_url=f"{base}/mcp", token=s.cfg.agent_token,
+                                      agent_factory=make_live_agent, turn_id=turn_id)
             return {**out, "runs_on": "the hub"}
 
         try:
@@ -693,6 +854,16 @@ def build_app(s: SureSay | None = None) -> Starlette:
 
         metrics.emit("AssistantMs", out["ms"], "Milliseconds", Model="nova-2-sonic")
         return JSONResponse(out)
+
+    async def assistant_progress(request: Request, device: Any, data: dict[str, Any]) -> Response:
+        """The steps so far of one of this user's live assistant turns, for the screen to show while it waits.
+
+        Polled every second or so during a turn: no quota is spent here (a poll is a few reads, never a model call).
+        """
+        turn_id = request.query_params.get("turn_id", "")
+        if not TURN_ID.fullmatch(turn_id):
+            return JSONResponse({"error": "turn_id must be 16 to 64 lowercase hex characters"}, status_code=400)
+        return JSONResponse({"steps": await anyio.to_thread.run_sync(progress.steps, turn_id, device.user_id)})
 
     async def pair_code(request: Request, device: Any, data: dict[str, Any]) -> Response:
         """A one-time code that pairs another screen (an assistant's display, a second phone) for this same user."""
@@ -718,6 +889,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
         Route("/device/more-time", _signed(more_time, s), methods=["POST"]),
         Route("/device/pair-code", _signed(pair_code, s), methods=["POST"]),
         Route("/device/assistant", _signed(assistant, s), methods=["POST"]),
+        Route("/device/assistant/progress", _signed(assistant_progress, s), methods=["GET"]),
         Route("/device/devices", _signed(devices, s), methods=["GET"]),
         Route("/device/practice", _signed(practice, s), methods=["GET", "POST"]),
         Route("/device/unpair", _signed(unpair, s), methods=["POST"]),
@@ -784,6 +956,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
     if dist.exists():
         routes.append(Mount("/", app=StaticFiles(directory=dist, html=True), name="web"))
     app.router.routes.extend(routes)
+    app.add_middleware(AssistantProgress, progress=progress)  # inside McpAuth: it knows the caller by then
     app.add_middleware(McpAuth, suresay=s)
     app.add_middleware(DeviceCallerTag)
     app.add_middleware(BodyLimit)

@@ -18,6 +18,11 @@ export function useAnnouncer() {
     const set = level === "assertive" ? setAssertive : setPolite;
     set("");
     clearTimeout(timers.current[level]);
+    if (level === "assertive") {
+      // an outcome supersedes any progress note ("Working it out.") still sitting in the polite region
+      clearTimeout(timers.current.polite);
+      setPolite("");
+    }
     timers.current[level] = setTimeout(() => set(message), 60);
   }, []);
 

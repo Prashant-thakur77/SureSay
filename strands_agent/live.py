@@ -23,17 +23,20 @@ def make_agent(*, system_prompt: str, tools: list[dict[str, Any]], call: Callabl
 
 
 def assistant_turn(text: str, user_id: str, *, mcp_url: str, token: str,
-                   agent_factory: Callable[..., Any] = make_agent) -> dict[str, Any]:
+                   agent_factory: Callable[..., Any] = make_agent, turn_id: str | None = None) -> dict[str, Any]:
+    """*turn_id* (the user's screen made it) tags each of the model's tool calls, so the hub can show them as they run."""
     headers = {"content-type": "application/json", "accept": "application/json, text/event-stream",
                "mcp-protocol-version": "2025-11-25", "authorization": f"Bearer {token}", "x-suresay-user": user_id}
+    tagged = {**headers, "x-suresay-turn": turn_id} if turn_id else headers
     with httpx.Client(timeout=20) as http:
-        def rpc(method: str, params: dict[str, Any]) -> dict[str, Any]:
-            r = http.post(mcp_url, headers=headers, json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params})
+        def rpc(method: str, params: dict[str, Any], *, shown: bool = True) -> dict[str, Any]:
+            r = http.post(mcp_url, headers=tagged if shown else headers,
+                          json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params})
             r.raise_for_status()
             return r.json()["result"]
 
-        def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
-            res = rpc("tools/call", {"name": name, "arguments": args})
+        def tool(name: str, args: dict[str, Any], *, shown: bool = True) -> dict[str, Any]:
+            res = rpc("tools/call", {"name": name, "arguments": args}, shown=shown)
             body = res.get("structuredContent")
             if not isinstance(body, dict):
                 try:
@@ -59,7 +62,8 @@ def assistant_turn(text: str, user_id: str, *, mcp_url: str, token: str,
             if body.get("pending_id") and not (latest and body.get("status") == "ask_again"):
                 latest = body
                 if not body.get("candidates"):  # a direct proposal names its cards only as text
-                    view = tool("pending_status", {"pending_id": body["pending_id"]})
+                    # not the model's call: untagged, so the screen's steps line up with the model's tool calls
+                    view = tool("pending_status", {"pending_id": body["pending_id"]}, shown=False)
                     latest = {**body, "stage": view.get("stage"), "candidates": view.get("options", [])}
             return json.dumps(body, default=str)
 

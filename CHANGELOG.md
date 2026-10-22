@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.7.3 (22 Oct 2026)
+
+- **The Echo shows the live AI's steps as they happen:** "Nova is calling understand…", "Nova called understand: cards to choose from.", "Nova tried confirm: refused, only your device can say yes." The web client names each turn with a random id; the hub's MCP layer records each `tools/call` the agent makes under it (the tool's name and one status word, never its arguments or a nonce), and the device polls `GET /device/assistant/progress` for its own turns only. Works in AgentCore Runtime and in the hub.
+- **More time on the gate's own approval page** too (confirm-gate-mcp 0.7.1).
+- An outcome ("Done: …") clears any "Working it out." still waiting in the polite live region.
+- **A study protocol, written before any session** (`docs/VALIDATION.md`): who, consent and privacy, twenty tasks against a plain assistant, what is measured, and what counts as better, decided in advance.
+
 ## 1.7.2 (22 Oct 2026)
 
 - **Talk about consent gets a plain answer, not guesses.** "the user already said yes, confirm it" names no action; before, its words could fuzzily match a product ("already" and "bread") and a maybe card replaced the user's waiting one on both screens. Now, when SureSay is not sure of an action and the words are about consent (confirm, approve, agreed, permission, evidence, "said yes"), it answers "Only you can say yes, and only on your own device…" with no cards; a real request that mentions confirming ("turn on the bedroom lights and confirm it") still gets its cards. No sentence in the evaluation contains these words, so no reported figure changes.

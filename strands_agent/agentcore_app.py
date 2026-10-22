@@ -36,8 +36,10 @@ def invoke(payload: dict, context: object = None) -> dict:
         return {"response": "I didn't get anything to work with. Please say it again."}
     user_id = _clean(payload.get("user_id"), os.environ.get("SURESAY_DEFAULT_USER", "demo"))
     if payload.get("mode") == "assistant":
+        turn = str(payload.get("turn_id") or "")
+        extra = {"turn_id": turn} if re.fullmatch(r"[0-9a-f]{16,64}", turn) else {}  # lets the hub show each step
         out = assistant_turn(prompt[:300], user_id, mcp_url=os.environ["SURESAY_MCP_URL"],
-                             token=os.environ["SURESAY_AGENT_TOKEN"])
+                             token=os.environ["SURESAY_AGENT_TOKEN"], **extra)
         return {**out, "runs_on": "AgentCore Runtime"}
     from strands_agent.core import run_turn  # Strands on Nova 2 Lite, for the hub's agent mode
     session_id = _clean(payload.get("session_id") or getattr(context, "session_id", None), "default-session-0000000000000000")

@@ -476,7 +476,8 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
             yes={conv.yes}
             none={conv.none}
             pairCode={hub.pairCode ? () => hub.pairCode!() : undefined}
-            assistant={hub.assistant ? (t) => hub.assistant!(t) : undefined}
+            assistant={hub.assistant ? (t, id) => hub.assistant!(t, id) : undefined}
+            assistantProgress={hub.assistantProgress ? (id) => hub.assistantProgress!(id) : undefined}
             onNewSet={(pid) => void conv.focusPending(pid)}
             speak={settings.readAloud ? (t) => void speaker.say(t) : undefined}
             onClose={() => setAlexaOpen(false)}

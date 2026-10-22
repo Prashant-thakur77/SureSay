@@ -13,6 +13,7 @@ import type {
   PracticeResult,
   PracticeState,
   SpeakResponse,
+  AssistantStep,
   AssistantTurn,
   TapInput,
   TurnResponse,
@@ -56,8 +57,11 @@ export interface HubApi {
   unpairDevice?(deviceId: string): Promise<void>;
   /** A one-time code that pairs another screen (e.g. an assistant's display) for this same user. */
   pairCode?(): Promise<string>;
-  /** One live AI assistant turn (Amazon Nova 2 Sonic driving SureSay over MCP), when the hub offers it. */
-  assistant?(text: string): Promise<AssistantTurn>;
+  /** One live AI assistant turn (Amazon Nova 2 Sonic driving SureSay over MCP), when the hub offers it. A turn id
+   * (from newTurnId) lets the screen follow its tool calls with assistantProgress while it runs. */
+  assistant?(text: string, turnId?: string): Promise<AssistantTurn>;
+  /** The steps so far of one of this user's live assistant turns. Cheap: polled about once a second during a turn. */
+  assistantProgress?(turnId: string): Promise<AssistantStep[]>;
   /** More time for one of this user's waiting card sets (WCAG 2.2.1). Device channel only: never the agent's. */
   moreTime?(pendingId: string): Promise<MoreTimeResponse>;
   /** The signing fetch, for the MCP transport. */
@@ -115,6 +119,13 @@ export async function tryDemo(base: string): Promise<DeviceCreds> {
   return { device_id: data.device_id, user_id: data.user_id, key: data.key, name: data.name };
 }
 
+/** A fresh id for one live assistant turn: 32 random hex characters. */
+export function newTurnId(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 export function isGuest(userId: string | undefined): boolean {
   return !!userId && userId.startsWith("guest-");
 }
@@ -169,8 +180,13 @@ export class HubClient implements HubApi {
     await this.call<{ ok: boolean }>("POST", "/device/unpair", { device_id: deviceId });
   }
 
-  assistant(text: string): Promise<AssistantTurn> {
-    return this.call<AssistantTurn>("POST", "/device/assistant", { text }, 60000);
+  assistant(text: string, turnId?: string): Promise<AssistantTurn> {
+    return this.call<AssistantTurn>("POST", "/device/assistant", turnId ? { text, turn_id: turnId } : { text }, 60000);
+  }
+
+  async assistantProgress(turnId: string): Promise<AssistantStep[]> {
+    const out = await this.call<{ steps?: unknown }>("GET", `/device/assistant/progress?turn_id=${encodeURIComponent(turnId)}`, undefined, 5000);
+    return Array.isArray(out.steps) ? (out.steps as AssistantStep[]) : [];
   }
 
   async pairCode(): Promise<string> {

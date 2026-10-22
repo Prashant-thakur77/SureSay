@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 import type { Phase } from "../hooks/useConversation";
+import { newTurnId } from "../lib/api";
 import { copyText } from "../lib/clipboard";
 import type { McpHost } from "../lib/mcp";
-import type { AssistantTurn, PendingSet } from "../lib/types";
+import type { AssistantStep, AssistantTurn, PendingSet } from "../lib/types";
 import { Icon } from "./Icon";
 
 /**
@@ -28,7 +29,9 @@ interface Props {
   none: () => void;
   pairCode?: () => Promise<string>;
   /** One live AI assistant turn on the hub (Amazon Nova 2 Sonic driving SureSay's MCP tools). */
-  assistant?: (text: string) => Promise<AssistantTurn>;
+  assistant?: (text: string, turnId?: string) => Promise<AssistantTurn>;
+  /** The steps so far of a live turn, by its id: the Echo shows each tool call while the model works. */
+  assistantProgress?: (turnId: string) => Promise<AssistantStep[]>;
   /** A request made a new card set: the phone should show that one. */
   onNewSet?: (pendingId: string) => void;
   speak?: (text: string) => void;
@@ -81,7 +84,26 @@ function waitingSet(set: PendingSet): ToolResult {
 /** The model may try to confirm; the gate refuses it, and the Echo says so in one line. */
 const REFUSED_LINE = "The assistant tried to confirm. Refused: only your device can say yes.";
 
-export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant, onNewSet, speak, onClose }: Props) {
+/** How often the Echo asks for a live turn's steps, and for how long at most. */
+const STEP_POLL_MS = 700;
+const STEP_POLL_FOR_MS = 60_000;
+
+const STEP_WORDS: Record<string, string> = {
+  choose: "cards to choose from",
+  ask_again: "not sure, asking again",
+  pending_user_confirmation: "waiting for your yes",
+  ok: "done",
+  error: "it failed",
+};
+
+/** The Echo's line for one step of a live turn: the tool's name and, once it answered, its result in plain words. */
+function stepLine(step: AssistantStep): string {
+  if (!step.status) return `Nova is calling ${step.tool}…`;
+  if (step.tool === "confirm" && step.status !== "done") return `Nova tried confirm: ${step.status.replace(/_/g, " ")}, only your device can say yes.`;
+  return `Nova called ${step.tool}: ${STEP_WORDS[step.status] ?? step.status.replace(/_/g, " ")}.`;
+}
+
+export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant, assistantProgress, onNewSet, speak, onClose }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   useFocusTrap(ref, true, onClose);
   const frame = useRef<HTMLIFrameElement>(null);
@@ -106,6 +128,9 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
     if (phase.kind === "done") setShowDone(true);
   }, [phase.kind]);
   const log = useCallback((dir: Line["dir"], t: string) => setLines((l) => [...l.slice(-11), { dir, text: t }]), []);
+  // stops following a live turn's steps (the turn ended, or this view closed)
+  const stopSteps = useRef<() => void>(() => undefined);
+  useEffect(() => () => stopSteps.current(), []);
 
   const post = useCallback((msg: unknown) => frame.current?.contentWindow?.postMessage(msg, "*"), []);
   const sendResult = useCallback(
@@ -198,12 +223,53 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant,
     try {
       if (mode === "nova" && assistant) {
         log("→", "Amazon Nova 2 Sonic (Bedrock) takes the turn, with SureSay's MCP tools and the agent's powers");
-        const out = await assistant(clean);
-        for (const c of out.tool_calls) {
-          const status = (c.result as { status?: unknown } | null)?.status;
-          log("→", `Nova: tools/call ${c.name} ${JSON.stringify(c.args)}`);
-          log("←", `${typeof status === "string" ? status : "ok"}${c.name === "confirm" ? " (only your device can confirm)" : ""}`);
+        // the tool calls already logged as they ran (by number), so the final list adds only the rest
+        let called = 0;
+        let answered = 0;
+        const logStep = (n: number, name: string, status: string | null, args?: Record<string, unknown>) => {
+          if (n > called) {
+            log("→", `Nova: tools/call ${name}${args ? ` ${JSON.stringify(args)}` : ""}`);
+            called = n;
+          }
+          if (status && n > answered) {
+            log("←", `${status}${name === "confirm" ? " (only your device can confirm)" : ""}`);
+            answered = n;
+          }
+        };
+        const turnId = assistantProgress ? newTurnId() : undefined;
+        if (turnId && assistantProgress) {
+          let stopped = false;
+          let timer: ReturnType<typeof setTimeout> | undefined;
+          let shown = "";
+          const until = Date.now() + STEP_POLL_FOR_MS;
+          const next = () => {
+            timer = setTimeout(async () => {
+              try {
+                const steps = await assistantProgress(turnId);
+                if (stopped) return;
+                for (const st of steps) logStep(st.n, st.tool, st.status);
+                const line = steps.length ? stepLine(steps[steps.length - 1]) : "";
+                if (line && line !== shown) {
+                  shown = line; // the Echo's polite live line changes, and is announced, once per new step
+                  setReply(line);
+                }
+              } catch {
+                /* a missed poll: the next one catches up */
+              }
+              if (!stopped && Date.now() < until) next();
+            }, STEP_POLL_MS);
+          };
+          stopSteps.current = () => {
+            stopped = true;
+            clearTimeout(timer);
+          };
+          next();
         }
+        const out = await (turnId ? assistant(clean, turnId) : assistant(clean)).finally(() => stopSteps.current());
+        out.tool_calls.forEach((c, i) => {
+          const status = (c.result as { status?: unknown } | null)?.status;
+          logStep(i + 1, c.name, typeof status === "string" ? status : "ok", c.args);
+        });
         // the newest card set, whichever tool made it (a door_lock after an ask-again understand is the door card)
         const shown = out.latest ?? out.understand;
         await presentTurn(shown ? { content: [{ type: "text", text: JSON.stringify(shown) }], structuredContent: shown } : null);

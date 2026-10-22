@@ -122,7 +122,7 @@ SureSay column: SureSay (offline ranker); the Nova 2 Lite ranker is pending Bedr
 
 The Nova 2 Lite ranker and the model-driven safety arms are built and tested against stubs, and are waiting on Bedrock access for this AWS account (see [the friction log](docs/FRICTION_LOG.md)). The SureSay column above uses the offline ranker until then, and no Nova 2 Lite number is reported before it runs. Meanwhile Amazon Nova 2 Sonic ranks in its place (the same prompt, the answer as a tool call): 67.6% top-1 against the offline ranker's 73.1%, and when unsure it offers nothing rather than unrelated guesses (the "Bedrock model" row; REPORT.md has the full table).
 
-**Not yet tested with people.** Every figure here comes from recorded speech (TORGO) and automated suites; nobody with dysarthria has used SureSay yet. The next step is a supervised session with a speech-language therapist, people with dysarthria and their carers, doing the same home tasks with SureSay and with a plain assistant (the plan is in [docs/DEVPOST.md](docs/DEVPOST.md#whats-next)).
+**Not yet tested with people.** Every figure here comes from recorded speech (TORGO) and automated suites; nobody with dysarthria has used SureSay yet. The next step is a supervised session with a speech-language therapist, people with dysarthria and their carers, doing the same home tasks with SureSay and with a plain assistant (the protocol, written before any session: [docs/VALIDATION.md](docs/VALIDATION.md)).
 
 ## AWS services used, and how
 
@@ -148,7 +148,7 @@ Code pointers, permissions and a verify command for each service: [docs/AWS_INTE
 
 ```bash
 make setup        # Python 3.13 venv (uv) + web client packages
-make test         # 721 Python tests (487 for the gate, 234 for the hub) plus 204 web tests: account linking, the Alexa skill, the 50-case safety suite
+make test         # 769 Python tests (520 for the gate, 249 for the hub) plus 207 web tests: account linking, the Alexa skill, the 50-case safety suite
 make demo         # hub + web client (+ agent when Bedrock is reachable) on http://127.0.0.1:9000
 ```
 

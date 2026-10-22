@@ -142,17 +142,17 @@ Everything user-facing is new:
 - **The Alexa skill**, deployed and flow-tested on AWS.
 - **The web client:** built to WCAG 2.2 AA (axe-clean, Lighthouse accessibility 100), voice, tap, keys or one switch, three themes, TV mode.
 - **The evaluation:** TORGO on Amazon Transcribe with two runs, repeated with Amazon Nova 2 Sonic and a local recogniser, a 50-case safety suite with a linked-client arm, latency measured in region, per-user calibration and a Hinglish check.
-- **One-command deploy and teardown**, and 925 tests (487 for the gate, 234 for the hub, 204 for the web client).
+- **One-command deploy and teardown**, and 976 tests (520 for the gate, 249 for the hub, 207 for the web client).
 
 ## Open source
 
-[confirm-gate-mcp](https://github.com/Prashant-thakur77/confirm-gate-mcp) is the gate on its own: MIT, its own repository, CI on Python 3.12 and 3.13 plus a packaging check, and releases v0.2.0 to v0.7.0 built during the window. `confirm-gate serve --upstream <any MCP server>` puts confirm-before-act, with an approval page, in front of any MCP server. With `--strict` it ignores the upstream's own read-only claims, because MCP tool annotations are hints from the server, so it is safe in front of servers you didn't write. Install: `pip install "git+https://github.com/Prashant-thakur77/confirm-gate-mcp"`.
+[confirm-gate-mcp](https://github.com/Prashant-thakur77/confirm-gate-mcp) is the gate on its own: MIT, its own repository, CI on Python 3.12 and 3.13 plus a packaging check, and releases v0.2.0 to v0.7.1 built during the window. `confirm-gate serve --upstream <any MCP server>` puts confirm-before-act, with an approval page, in front of any MCP server. With `--strict` it ignores the upstream's own read-only claims, because MCP tool annotations are hints from the server, so it is safe in front of servers you didn't write. Install: `pip install "git+https://github.com/Prashant-thakur77/confirm-gate-mcp"`.
 
 Why it matters: as assistants gain the power to act, prompt injection becomes a way to act. A gate that keeps the confirmation secret away from the model turns "never act without the user" from a prompt into a property of the code, for any MCP server. In SureSay's safety suite a real model (Amazon Nova 2 Sonic) as the agent made 11 unconfirmed changes in 35 cases without the gate, and 0 behind it.
 
 ## What's next
 
-**Validation with real users comes first.** Every number above is from recorded speech; nobody with dysarthria has used SureSay yet. The plan: a supervised session with a speech-language therapist and five to ten people with dysarthria and their carers, each doing the same twenty home tasks by voice with SureSay and with a plain assistant. We would measure tasks done within two tries, wrong actions, time per task and how often they had to fall back to touch, then ask each person whether they would keep using it. Results would go in the evaluation report, failures included.
+**Validation with real users comes first.** Every number above is from recorded speech; nobody with dysarthria has used SureSay yet. The plan: a supervised session with a speech-language therapist and five to ten people with dysarthria and their carers, each doing the same twenty home tasks by voice with SureSay and with a plain assistant. We would measure tasks done within two tries, wrong actions, time per task and how often they had to fall back to touch, then ask each person whether they would keep using it. Results would go in the evaluation report, failures included. The full protocol, with what counts as success decided in advance, is in `docs/VALIDATION.md`.
 
 - A real Alexa+ integration once access opens.
 - Per-user thresholds and recognition adapted from each user's own confirmations.

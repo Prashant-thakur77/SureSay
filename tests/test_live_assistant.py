@@ -155,6 +155,11 @@ def test_the_runtime_entrypoint_runs_an_assistant_turn(monkeypatch: Any) -> None
     out = appmod.invoke({"mode": "assistant", "prompt": "van on", "user_id": "guest-1"})
     assert out == {"reply": "ok", "tool_calls": [], "runs_on": "AgentCore Runtime"}
     assert seen == {"text": "van on", "user_id": "guest-1", "mcp_url": "https://hub.example/mcp", "token": "tok"}
+    appmod.invoke({"mode": "assistant", "prompt": "van on", "user_id": "guest-1", "turn_id": "ab" * 16})
+    assert seen["turn_id"] == "ab" * 16  # so the hub can show each step as it happens
+    seen.clear()
+    appmod.invoke({"mode": "assistant", "prompt": "van on", "user_id": "guest-1", "turn_id": "not a turn id"})
+    assert "turn_id" not in seen
 
 
 def test_info_says_where_the_live_assistant_runs(live: Hub) -> None:

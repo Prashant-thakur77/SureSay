@@ -1,10 +1,10 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import axe from "axe-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AlexaView } from "../components/AlexaView";
 import type { Phase } from "../hooks/useConversation";
 import type { McpHost } from "../lib/mcp";
-import type { AssistantTurn } from "../lib/types";
+import type { AssistantStep, AssistantTurn } from "../lib/types";
 import { cardSet, NONCE, receipt } from "./fixtures";
 
 async function axeViolations(): Promise<string[]> {
@@ -23,7 +23,8 @@ function fakeHost(): McpHost & { callToolRaw: ReturnType<typeof vi.fn> } {
 const CARDS: Phase = { kind: "cards", set: cardSet(), deadline: Date.now() + 60_000, answer: "idle" };
 const FINAL: Phase = { kind: "cards", set: cardSet({ stage: "final", options: [cardSet().options[2]] }), deadline: Date.now() + 60_000, answer: "idle" };
 
-function renderAlexa(phase: Phase, extra: { pairCode?: () => Promise<string>; assistant?: (t: string) => Promise<AssistantTurn>; onNewSet?: (pid: string) => void } = {}) {
+function renderAlexa(phase: Phase, extra: { pairCode?: () => Promise<string>; assistant?: (t: string, turnId?: string) => Promise<AssistantTurn>;
+  assistantProgress?: (turnId: string) => Promise<AssistantStep[]>; onNewSet?: (pid: string) => void } = {}) {
   const host = fakeHost();
   const fns = { choose: vi.fn(), yes: vi.fn(), none: vi.fn(), onClose: vi.fn() };
   const utils = render(<AlexaView host={host} phase={phase} {...fns} {...extra} />);
@@ -35,7 +36,10 @@ function mockWide(wide: boolean) {
     removeListener: () => undefined, addEventListener: () => undefined, removeEventListener: () => undefined, dispatchEvent: () => false }) as MediaQueryList);
 }
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+});
 
 describe("the Alexa+ view", () => {
   it("has no axe violations, idle, with cards, and on the second check", async () => {
@@ -230,6 +234,57 @@ describe("the Alexa+ view with a live AI", () => {
     await screen.findByText("I can't confirm that for you.", { selector: ".echo__reply *, .echo__reply" });
     expect(screen.queryByText(/is thinking/)).toBeNull();
     expect(screen.getByText("The assistant tried to confirm. Refused: only your device can say yes.")).toBeTruthy();
+    expect(await axeViolations()).toEqual([]);
+  });
+
+  it("shows each step of the live AI's turn as it happens, in order, and stops asking when the turn ends", async () => {
+    vi.useFakeTimers();
+    let finish: (t: AssistantTurn) => void = () => undefined;
+    const assistant = vi.fn((_text: string, _turnId?: string) => new Promise<AssistantTurn>((r) => { finish = r; }));
+    const polls: AssistantStep[][] = [
+      [],
+      [{ n: 1, tool: "understand", status: null }],
+      [{ n: 1, tool: "understand", status: "choose" }, { n: 2, tool: "confirm", status: null }],
+      [{ n: 1, tool: "understand", status: "choose" }, { n: 2, tool: "confirm", status: "refused" }],
+    ];
+    const assistantProgress = vi.fn(async (_turnId: string) => polls[Math.min(assistantProgress.mock.calls.length, polls.length) - 1]);
+    renderAlexa({ kind: "idle" }, { assistant, assistantProgress });
+    fireEvent.click(screen.getByRole("radio", { name: /Amazon Nova 2 Sonic/ }));
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "van on" } });
+    fireEvent.submit(screen.getByRole("textbox").closest("form")!);
+    const reply = () => document.querySelector(".echo__reply")!.textContent!;
+    expect(reply()).toContain("Amazon Nova 2 Sonic is thinking…");
+    const turnId = assistant.mock.calls[0][1]!;
+    expect(assistant.mock.calls[0][0]).toBe("van on");
+    expect(turnId).toMatch(/^[0-9a-f]{32}$/);
+    await act(() => vi.advanceTimersByTimeAsync(700));
+    expect(assistantProgress).toHaveBeenCalledWith(turnId);
+    expect(reply()).toContain("is thinking…"); // nothing called yet
+    await act(() => vi.advanceTimersByTimeAsync(700));
+    expect(reply()).toContain("Nova is calling understand…");
+    expect(document.querySelector(".echo__reply")!.getAttribute("aria-live")).toBe("polite");
+    await act(() => vi.advanceTimersByTimeAsync(700));
+    expect(reply()).toContain("Nova is calling confirm…");
+    await act(() => vi.advanceTimersByTimeAsync(700));
+    expect(reply()).toContain("Nova tried confirm: refused, only your device can say yes.");
+    const wire = () => document.querySelector(".wire__log")!.textContent!;
+    expect(wire().indexOf("Nova: tools/call understand")).toBeLessThan(wire().indexOf("Nova: tools/call confirm"));
+    await act(async () => {
+      finish({ reply: "I can't confirm that for you.", model: "amazon.nova-2-sonic-v1:0", ms: 11000, understand: null,
+        tool_calls: [
+          { name: "understand", args: { transcript: "van on" }, result: { status: "choose" } },
+          { name: "confirm", args: { pending_id: "p_1", evidence_ref: "yes" }, result: { status: "refused" } },
+        ] });
+    });
+    expect(reply()).toContain("I can't confirm that for you.");
+    const asked = assistantProgress.mock.calls.length;
+    await act(() => vi.advanceTimersByTimeAsync(5000));
+    expect(assistantProgress.mock.calls.length).toBe(asked); // the turn is over: no more polling
+    expect(reply()).not.toContain("Nova tried confirm"); // a late step never replaces the answer
+    expect(wire().split("Nova: tools/call understand").length - 1).toBe(1); // each call logged once
+    expect(wire().split("Nova: tools/call confirm").length - 1).toBe(1);
+    expect(wire()).not.toContain(NONCE);
+    vi.useRealTimers();
     expect(await axeViolations()).toEqual([]);
   });
 

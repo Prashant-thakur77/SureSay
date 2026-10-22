@@ -252,3 +252,11 @@ export interface AssistantTurn {
   latest?: Record<string, unknown> | null;
   ms: number;
 }
+
+/** One tool call of a live assistant turn, while it runs: the tool's name, then its result's status (never its arguments). */
+export interface AssistantStep {
+  n: number;
+  tool: string;
+  /** null while the call is still running; then a short word such as "choose" or "refused". */
+  status: string | null;
+}
