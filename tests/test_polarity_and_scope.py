@@ -81,3 +81,15 @@ def test_a_typed_sentence_never_offers_an_unrelated_phrase(hub: Hub) -> None:
     assert texts and "proud" in texts[0] and not any("thirsty" in t for t in texts), texts
     r = hub.signed(d, "POST", "/device/turn", {"text": "I am proud of you"}).json()["result"]
     assert not any("thirsty" in c["text"] for c in r.get("candidates") or []), r
+
+
+def test_typed_text_it_cannot_place_is_never_called_mishearing(hub: Hub) -> None:
+    r = _say(hub, "you did it i am so proud of you")["result"]
+    assert r["status"] == "ask_again" and "didn't catch" not in r["say"], r
+    assert r["reason"] in ("typed_unsure", "out_of_scope") and "I read" in r["say"]
+
+
+def test_typed_text_with_ideas_but_no_guess_says_what_it_read(hub: Hub) -> None:
+    r = _say(hub, "door")["result"]
+    assert r["status"] == "ask_again" and r["reason"] == "typed_unsure" and "I read “door”" in r["say"], r
+    assert [m["text"] for m in r["maybe"]]  # the ideas are still offered

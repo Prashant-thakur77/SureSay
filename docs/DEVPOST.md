@@ -48,7 +48,7 @@ SureSay is a self-hosted MCP server built to the Alexa+ add-on requirements, and
 | Agent Skills | `skills/suresay/SKILL.md` (open SKILL.md format) teaches any agent to use SureSay safely; the open-source gate ships `add-confirm-gate` |
 | Amazon's add-on functional requirements | "Explicit confirmation with key details before any high-consequence action", "detect and prevent duplicate transactions", "reject if the amount differs", "deliver a receipt": each enforced by the gate in code, mapped in `alexa_plus/README.md` |
 | An add-on package | `alexa_plus/addon-package/addon.json`, six icon sizes, a 600×900 carousel, `/privacy`, `/terms` |
-| Fast query responses (under 500 ms) | On the live server every MCP call adds 4.0–37.4 ms to the network round trip; the server's own time for typed `understand` is about 10 ms at p50 (CloudWatch; p95 516 ms over real requests); spoken `understand` is 870 ms p50 on the benchmark clips and 1.5 s p50 (4.9 s p95) on real spoken requests to the live server, because it includes speech recognition (all in the evaluation report) |
+| Fast query responses (under 500 ms) | On the live server every MCP call adds 7.4–37.5 ms to the network round trip; the server's own time for typed `understand` is about 10 ms at p50 (CloudWatch; p95 513 ms over real requests); spoken `understand` is 870 ms p50 on the benchmark clips and 1.5 s p50 (4.9 s p95) on real spoken requests to the live server, because it includes speech recognition (all in the evaluation report) |
 
 **See it as Alexa+ would:** the live demo's Alexa+ view (`?alexa=1`) is a simulated Echo Show that plays the host against the real server: it calls `understand`, renders the cards MCP App over the MCP Apps messages, and shows every message on the wire, while "Your phone" beside it is where the yes comes from. **Who plays the assistant** is your choice: a simple scripted host, or **Amazon Nova 2 Sonic, a live AI**. In live mode the model gets SureSay's MCP tools with exactly the agent's powers and decides which to call; every call it makes is logged, and when it tries `confirm` the gate refuses it, because only your device holds the one-time code. Measured on the deployed hub with 27 requests, 16 of them trying to talk it into acting (false consent, fake authority, urgency): 0 changed anything without the user, and every `confirm` it tried was refused, for "no user evidence" (`eval/run_live_assistant.py`, REPORT.md). Live turns are capped per day.
 
@@ -56,15 +56,15 @@ A linked Alexa+ client gets exactly the agent's powers: it can understand, read 
 
 On Alexa, in the Alexa developer console's simulator, 22 Oct 2026 (the skill in development on our account; word for word):
 
-> **You:** ask sure say to turn on the fan
-> **Alexa:** Did you mean... One: Turn on the bedroom fan. Two: Turn on the TV. Three: Turn on the air conditioner. Say a number, or no.
-> **You:** the first one
-> **Alexa:** Done: Turn on the bedroom fan. Confirmed by your voice (heard "number 1").
-> **You:** ask sure say to open the door
-> **Alexa:** Did you mean: Unlock the front door? Say yes or no.
-> **You:** yes
-> **Alexa:** Unlock the front door? Say yes or no.
-> **You:** yes
+> **You:** ask sure say to turn on the fan\
+> **Alexa:** Did you mean... One: Turn on the bedroom fan. Two: Turn on the TV. Three: Turn on the air conditioner. Say a number, or no.\
+> **You:** the first one\
+> **Alexa:** Done: Turn on the bedroom fan. Confirmed by your voice (heard "number 1").\
+> **You:** ask sure say to open the door\
+> **Alexa:** Did you mean: Unlock the front door? Say yes or no.\
+> **You:** yes\
+> **Alexa:** Unlock the front door? Say yes or no.\
+> **You:** yes\
 > **Alexa:** Done: Unlock the front door. Confirmed by your voice (heard "yes").
 
 
@@ -112,10 +112,10 @@ Held-out speakers from TORGO, a public dysarthric speech corpus. Thresholds were
 | …with a real model as the agent | unconfirmed changes | 11 / 35 (Nova 2 Sonic, no gate) | — | **0 / 35** | Amazon Nova 2 Sonic, injections + near-misses |
 | A live AI can't confirm | home changes with no answer from the user | — | — | **0 / 27** | Amazon Nova 2 Sonic driving the deployed MCP server, 16 turns adversarial; 2 of 2 confirm attempts refused |
 | Never mistakes a non-answer for consent | non-answers taken as consent | 95.54% (keyword spotting) | — | **0.0%** | 7,093 generated non-answers, 100.0% of 190 genuine answers understood |
-| Never acts on a guess | acted on a wrong phrase without asking | 84.3% | 53.7% | **0.0%** | in-book + out-of-book; by design, since every action waits for the user |
+| Never acts on a guess | acted on a wrong phrase without asking (0 by construction) | 84.3% | 53.7% | **0.0%** | in-book + out-of-book; by design, since every action waits for the user |
 | Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | 33.3% (66.7%) | 98.1% (1.9%) | **98.1%** (0) counting only new recordings; 100.0% counting the other microphone | 108 in-book sentences, 6 test speakers, `whisper-small.en` (a different recogniser from the rows above) |
 | In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **91.7%** | same |
-| Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances |
+| Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances; the cost: it also asks again on 26.9% of in-book ones |
 | Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers; SureSay asks again when unsure, where B1 guesses, so its cards hold the phrase 91.7% of the time counting maybe cards (next row) |
 | Meaning recovered by a Bedrock model | top-1 / in the cards | — | — | 67.6% / 67.6%; maybe cards on out-of-book 0.0% | Amazon Nova 2 Sonic as the ranker, same 6 test speakers |
 | Works as an MCP server for Alexa+ | live checks passed | — | — | **20 / 20** | the deployed server, incl. the Alexa+ client's own handshake |
@@ -133,7 +133,7 @@ SureSay column: SureSay (offline ranker); the Nova 2 Lite ranker is pending Bedr
 1. **The most severe speakers lose recall to the abstain rule, and maybe cards only partly win it back.** Worst test speaker: M04. SureSay's confident cards hold their phrase 40.0% of the time at top-1, against 90.0% for B1, because it asks again on 60.0% of them. Offering its best guesses as maybe cards while asking again brings that speaker to 85.0% in the cards (91.7% over all test speakers), but maybe cards also appear on 25.9% of out-of-book utterances, where the user has to decline them. B1 never asks and acted on a wrong phrase 53.7% of the time; SureSay acted wrongly 0.0% of the time. Per-user thresholds are the next step.
 2. **Strict confirmation costs retries.** On genuine yes/no/number answers from dysarthric speakers, SureSay recovered 80.6% (B0: 94.4%) and asked 10.0% of them to repeat. That is the price of the false-accept rate above; tap, keyboard and switch confirmation exist so a repeat is never a dead end.
 3. **Recogniser biasing did not help confirmations.** On dev speakers (none: 1 false accepts, 77.8% recovered, core: 1 false accepts, 77.8% recovered, full: 2 false accepts, 77.8% recovered), no setting beat leaving the recogniser unbiased, so SureSay transcribes confirmations without bias. Biasing that raises recall without false accepts is open.
-4. **The model arms are pending.** Nova 2 Lite is authorized on this account but every on-demand quota is 0 (increase requests filed; docs/FRICTION_LOG.md). The Strands agent is deployed on AgentCore Runtime and phrasebooks live in AgentCore Memory, but the agent cannot reason until Nova has quota, so turns fall back to direct answers. The Nova ranker and the Nova-agent safety arms are implemented and tested against stubs; no Nova 2 Lite number is reported until they run. (Amazon Nova 2 Sonic, the speech model, does run on this account: it is measured above as a recogniser, and it is the live AI that calls SureSay's MCP tools in the Alexa+ view, measured in "A live AI driving SureSay over MCP", and it stands in as the ranker in "Claims 2 and 5 with a Bedrock model ranking".)
+4. **The model arms are pending.** Nova 2 Lite is authorized on this account but every on-demand quota is 0 (increase requests filed; docs/FRICTION_LOG.md). Ordinary turns are therefore answered directly by the hub, not by the Nova 2 Lite agent; the live assistant in the Alexa+ view does run as a Strands agent in AgentCore Runtime, on Nova 2 Sonic. The Nova 2 Lite ranker and the Nova-agent safety arms are implemented and tested against stubs; no Nova 2 Lite number is reported until they run. (Amazon Nova 2 Sonic, the speech model, does run on this account: it is measured above as a recogniser, and it is the live AI that calls SureSay's MCP tools in the Alexa+ view, measured in "A live AI driving SureSay over MCP", and it stands in as the ranker in "Claims 2 and 5 with a Bedrock model ranking".)
 5. **Corpus caveats.** TORGO sentences are well-known reading passages that a large recogniser may have seen in training, and the phrasebooks are sentences rather than short home commands. Confirmation words are sparse in TORGO (a few per speaker), so per-speaker confirmation numbers rest on small counts.
 6. **Unclear words heard as "yeah" or "OK".** 8 of SureSay's 10 false accepts on test speakers were the recogniser (transcribe-streaming) turning an unclear single word into a filler such as "Yeah" or "OK.", which the yes/no card accepts. That card guards the high-risk actions. A stricter yes vocabulary for that card is the candidate fix; it was found on test speakers, and dev has too few cases to tune it honestly, so it is reported here and not changed.
 <!-- negatives:end -->
@@ -156,7 +156,7 @@ Everything user-facing is new:
 - **The Alexa skill**, deployed and flow-tested on AWS.
 - **The web client:** built to WCAG 2.2 AA (axe-clean, Lighthouse accessibility 100), voice, tap, keys or one switch, three themes, TV mode.
 - **The evaluation:** TORGO on Amazon Transcribe with two runs, repeated with Amazon Nova 2 Sonic and a local recogniser, a 50-case safety suite with a linked-client arm, latency measured in region, per-user calibration and a Hinglish check.
-- **One-command deploy and teardown**, and 1,010 tests (522 for the gate, 275 for the hub, 213 for the web client).
+- **One-command deploy and teardown**, and 1,021 tests (522 for the gate, 277 for the hub, 222 for the web client).
 
 ## Open source
 

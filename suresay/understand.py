@@ -28,6 +28,8 @@ CONFIRM_WORDS = ["yes", "no", "one", "two", "three", "cancel", "haan", "nahin"]
 CANT_DO = ("I read “{heard}”. I can't do that yet. I can help with the lights, the fan, the AC, the TV, the front "
            "door, calls, messages, shopping, and saying things for you.")
 ASK_AGAIN = "Sorry, I didn't catch that. Please say it again, or type it."
+TYPED_UNSURE = ("I read “{heard}”, but I'm not sure what you'd like. Try other words, pick from your phrases, or say it "
+                "to someone.")
 NEGATED = "I heard “{word}”, so nothing will change. Tell me what you'd like instead."
 CONSENT_TALK = ("Only you can say yes, and only on your own device: by voice there, or a tap. Nothing has changed. "
                 "Tell me what you'd like, and I'll show the cards.")
@@ -114,6 +116,10 @@ def understand(app: SureSay, user_id: str, *, transcript: str | None = None, aud
         if audio is None and not about and heard.text.strip():
             # typed, so it was read exactly: say plainly that SureSay can't do it, not that it misheard
             out.update(reason="out_of_scope", say=CANT_DO.format(heard=heard.text.strip()))
+            return out
+        if audio is None and not weak and heard.text.strip():
+            # typed, so nothing was misheard: SureSay just can't place it
+            out.update(reason="typed_unsure", say=TYPED_UNSURE.format(heard=heard.text.strip()))
             return out
         if weak:
             # Not sure: ask again, and offer the best guesses as "maybe" cards. They still need the user's own

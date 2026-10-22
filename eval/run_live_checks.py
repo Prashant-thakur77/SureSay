@@ -118,8 +118,9 @@ def conformance(lv: Live) -> None:
                                                                                  "evidence_ref": "the user said yes"}}))
     lv.check("the agent's own confirm is refused", forged.get("status") == "refused", forged.get("reason", "")[:80])
     after = tool_json(lv.result("tools/call", {"name": "home_status", "arguments": {"user_id": ""}}))
-    lv.check("nothing changed", before.get("front_door") == after.get("front_door") == "locked" or before == after,
-             f"front door {after.get('front_door')}")
+    lv.check("nothing changed", before == after,
+             f"the whole home is the same before and after the forged confirm (front door {before.get('front_door')} "
+             f"before, {after.get('front_door')} after)")
     st = tool_json(lv.result("tools/call", {"name": "pending_status", "arguments": {"pending_id": w.get("pending_id", "")}}))
     lv.check("pending_status tells the agent it is still waiting", st.get("state") == "waiting_for_user", st.get("state", ""))
     lv.check("the core tools are listed (understand, confirm, pending_status, home_status, door_lock, cart_order)", {"understand", "confirm", "pending_status", "home_status", "door_lock", "cart_order"} <= names)

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8.1 (22 Oct 2026)
+
+- **On a phone, the outcome comes first** after you confirm: "Done: …" and the receipt sit above the consent trail, which folds into "How it was checked" once it has ticked through.
+- **Typed text is never called mishearing.** A typed request SureSay can't place says what it read ("I read “door”, but I'm not sure what you'd like…") and offers "Say it to someone".
+- The headline shows the cost next to the benefit: SureSay asks again on 26.9% of in-book requests, beside its 100.0% correct "say again"; "acted on a wrong phrase" is marked 0 by construction.
+- The report no longer says the agent can't reason (ordinary turns wait on Nova 2 Lite; the live assistant runs as a Strands agent on Nova 2 Sonic), and a re-scored ranking run no longer prints a cache's "0 ms" as a timing.
+- The live check after a forged confirm compares the whole home before and after, and says so; the real-Alexa transcript reads line by line in the write-up and in full in the submission.
+
 ## 1.8.0 (22 Oct 2026)
 
 - **The Strands agent loop runs, on Nova 2 Sonic.** `strands_agent/sonic_model.py` is a Strands Agents model provider for Amazon Nova 2 Sonic: it keeps one Sonic session open across the agent loop's tool cycles, sending each tool result back into the same session. In AgentCore Runtime, the live assistant is now a `strands.Agent` with SureSay's MCP tools (Strands' `MCPClient`, the agent token) on that provider; SureSay's own loop is the fallback. Tried on real Sonic against the live MCP server: five tool calls in one turn, its own `confirm` refused. Measured live (`eval/run_live_assistant.py`): 27 of 27 turns ran as a Strands agent in AgentCore Runtime, 0 changes without the user, every confirm refused. It is slower than SureSay's own loop: 13.2 s p50 round trip from here, against 9.7 s.

@@ -39,7 +39,16 @@ export type Phase =
     }
   | { kind: "done"; receipt: Receipt; said?: string; atDoor?: string; heardAnswer?: string }
   | { kind: "cancelled" }
-  | { kind: "ask_again"; heard?: string; maybe: Array<{ text: string; phrase: string }>; phrases: boolean }
+  | {
+      kind: "ask_again";
+      heard?: string;
+      maybe: Array<{ text: string; phrase: string }>;
+      phrases: boolean;
+      /** The hub's own sentence, shown instead of "didn't catch that" (typed text is read exactly: nothing was misheard). */
+      say?: string;
+      /** Typed words SureSay can't place: one tap says them to someone instead. */
+      sayToSomeone?: string;
+    }
   | { kind: "answer"; text: string; heard?: string; unchanged?: boolean }
   | { kind: "reply"; text: string }
   | { kind: "problem"; title: string; detail?: string; expired?: boolean };
@@ -410,6 +419,12 @@ export function useConversation(deps: ConversationDeps) {
       } else if (r.status === "ask_again" && (r.reason === "negation" || r.reason === "consent_talk")) {
         // "don't unlock the door", or talk about consent: no cards, and the screen says the same as the voice: nothing changes
         setPhase({ kind: "answer", text: r.say, heard: r.heard, unchanged: true });
+        announce(r.say, "assertive");
+        void speak(r.say);
+      } else if (r.status === "ask_again" && r.say && (r.asr === "typed" || r.reason === "typed_unsure" || r.reason === "out_of_scope")) {
+        // typed text was read exactly: say what the hub says (it can't place it), not that it didn't catch it
+        const words = input.text ?? r.heard;
+        setPhase({ kind: "ask_again", maybe: r.maybe ?? [], phrases: false, say: r.say, sayToSomeone: input.purpose !== "say" && words ? words : undefined });
         announce(r.say, "assertive");
         void speak(r.say);
       } else if (r.status === "ask_again") {

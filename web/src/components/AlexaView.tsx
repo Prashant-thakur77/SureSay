@@ -1,5 +1,6 @@
 import { Fragment, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useFocusTrap } from "../hooks/useFocusTrap";
+import { matches, NARROW, useMedia } from "../hooks/useMedia";
 import type { Phase } from "../hooks/useConversation";
 import { newTurnId } from "../lib/api";
 import { copyText } from "../lib/clipboard";
@@ -42,35 +43,6 @@ type ToolResult = Awaited<ReturnType<McpHost["callToolRaw"]>>;
 
 /** Wide enough for the side-by-side layout: the MCP log starts open there, folded on a phone. */
 const WIDE = "(min-width: 60em)";
-/** A phone (the 480 px breakpoint of the other phone rules): the ask bar comes before the Echo, so it is on the first screen. */
-const NARROW = "(max-width: 30em)";
-
-function matches(query: string): boolean {
-  try {
-    return window.matchMedia(query).matches;
-  } catch {
-    return false;
-  }
-}
-
-/** Whether a media query matches now, following it as the screen turns or the window is resized. */
-function useMedia(query: string): boolean {
-  const [on, setOn] = useState(() => matches(query));
-  useEffect(() => {
-    let q: MediaQueryList;
-    try {
-      q = window.matchMedia(query);
-    } catch {
-      return;
-    }
-    const update = () => setOn(q.matches);
-    update();
-    q.addEventListener?.("change", update);
-    return () => q.removeEventListener?.("change", update);
-  }, [query]);
-  return on;
-}
-
 function summary(result: ToolResult): { say: string; status: string; count: number } {
   const sc = (result.structuredContent ?? {}) as { say?: unknown; status?: unknown; candidates?: unknown };
   let data = sc;

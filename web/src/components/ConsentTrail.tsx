@@ -5,11 +5,19 @@
  * shows (TICK_MS apart). With reduced motion or Calm mode the animation is
  * off and everything is simply there. Screen readers hear one outcome
  * announcement elsewhere, never a tick.
+ *
+ * Once it has ticked (at once without motion) it folds into "How it was
+ * checked": closed on a phone, so the outcome above it fits the first screen,
+ * and open on a wider one.
  */
 
-import type { CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
+import { NARROW, useMedia } from "../hooks/useMedia";
 import { checkFailure, checkLabel, TICK_MS, trailNumber } from "../lib/checks";
 import type { Check } from "../lib/types";
+
+/** The foot fades in after the last tick (see .trail__foot in styles.css). */
+const FOOT_MS = 400;
 
 export function TrailLines({ checks, animate = false }: { checks: Check[]; animate?: boolean }) {
   return (
@@ -32,8 +40,41 @@ export function TrailLines({ checks, animate = false }: { checks: Check[]; anima
   );
 }
 
-export function ConsentTrail({ checks, pendingId }: { checks: Check[]; pendingId: string }) {
+export function ConsentTrail({ checks, pendingId, motion = true }: { checks: Check[]; pendingId: string; motion?: boolean }) {
   const passed = checks.filter((c) => c.ok).length;
+  const narrow = useMedia(NARROW);
+  const [folded, setFolded] = useState(!motion);
+  const [open, setOpen] = useState(!narrow);
+  useEffect(() => {
+    if (!motion) {
+      setFolded(true);
+      return;
+    }
+    const t = window.setTimeout(() => setFolded(true), checks.length * TICK_MS + FOOT_MS);
+    return () => window.clearTimeout(t);
+  }, [motion, checks.length]);
+  // the screen turned or the window was resized: follow it
+  useEffect(() => setOpen(!narrow), [narrow]);
+
+  const foot = (
+    <p className="trail__foot">
+      {passed} of {checks.length} passed <span aria-hidden="true">→</span> released
+    </p>
+  );
+  if (folded) {
+    return (
+      <details className="trail trail--folded" open={open} onToggle={(e) => setOpen(e.currentTarget.open)}>
+        <summary className="trail__summary">
+          How it was checked ({passed} of {checks.length})
+        </summary>
+        <p className="trail__meta trail__id">
+          Consent trail · {pendingId} · {checks.length} checks
+        </p>
+        <TrailLines checks={checks} />
+        {foot}
+      </details>
+    );
+  }
   return (
     <section className="trail" aria-labelledby="trail-title" style={{ "--n": checks.length, "--tick": `${TICK_MS}ms` } as CSSProperties}>
       <h2 id="trail-title" className="trail__head">
@@ -43,9 +84,7 @@ export function ConsentTrail({ checks, pendingId }: { checks: Check[]; pendingId
         </span>
       </h2>
       <TrailLines checks={checks} animate />
-      <p className="trail__foot">
-        {passed} of {checks.length} passed <span aria-hidden="true">→</span> released
-      </p>
+      {foot}
     </section>
   );
 }

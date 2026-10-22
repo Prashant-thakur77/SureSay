@@ -29,6 +29,8 @@ export interface ConversationActions {
   /** More time for the open cards, when the hub offers it. */
   moreTime?: () => void | Promise<void>;
   openPhrases: (open: boolean) => void;
+  /** Send these words to Talk to someone (typed words SureSay can't place). */
+  sayToSomeone?: (text: string) => void;
   reset: () => void;
   replay: () => void;
 }
@@ -250,7 +252,7 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
               </div>
             </section>
           )}
-          <ReceiptCard ref={headingRef} receipt={phase.receipt} />
+          <ReceiptCard ref={headingRef} receipt={phase.receipt} motion={motion} />
           {listener && <ListenerView text={listener} onReplay={actions.replay} onClose={() => setListener(null)} />}
         </>
       );
@@ -268,10 +270,16 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
     case "ask_again":
       view = (
         <div className="outcome">
-          <h2 className="stage__title display" ref={headingRef} tabIndex={-1}>
-            {ASK_AGAIN_TEXT.replace("Please say it again.", "")}
-            <em>Please say it again.</em>
-          </h2>
+          {phase.say ? (
+            <h2 className="stage__title ask__read" ref={headingRef} tabIndex={-1}>
+              {phase.say}
+            </h2>
+          ) : (
+            <h2 className="stage__title display" ref={headingRef} tabIndex={-1}>
+              {ASK_AGAIN_TEXT.replace("Please say it again.", "")}
+              <em>Please say it again.</em>
+            </h2>
+          )}
           <div className="actions">
             <ScanButton id="again" className="btn btn--primary" onClick={actions.startRequest}>
               <Icon name="mic" size={26} /> Say it again
@@ -279,6 +287,11 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
             <ScanButton id="type" onClick={typeIt}>
               <Icon name="keyboard" size={24} /> Type it
             </ScanButton>
+            {phase.sayToSomeone && actions.sayToSomeone && (
+              <ScanButton id="say-to-someone" onClick={() => actions.sayToSomeone?.(phase.sayToSomeone ?? "")}>
+                <Icon name="message" size={24} /> Say it to someone
+              </ScanButton>
+            )}
             {phrasebook.length > 0 && (
               <ScanButton id="phrases" onClick={() => actions.openPhrases(!phase.phrases)} aria-keyshortcuts="P">
                 <Icon name="book" size={24} /> {phase.phrases ? "Hide my phrases" : "Pick from my phrases"}

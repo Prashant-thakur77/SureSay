@@ -24,7 +24,7 @@ from .speech import Speaker
 from .state import Home
 
 logger = logging.getLogger(__name__)
-__version__ = "1.8.0"
+__version__ = "1.8.1"
 
 from .catalog import NEGATIONS, has_negation  # noqa: E402,F401 (re-exported for eval/run_adapt_eval.py)
 

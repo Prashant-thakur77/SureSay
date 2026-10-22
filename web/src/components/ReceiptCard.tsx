@@ -90,17 +90,18 @@ interface Props {
   receipt: Receipt;
   said?: string;
   onReplay?: () => void;
+  /** Animation allowed (no reduced motion, Calm mode off): the trail ticks before it folds. */
+  motion?: boolean;
 }
 
-/** The consent trail, then the receipt "stamps" in as a ticket. */
-export const ReceiptCard = forwardRef<HTMLHeadingElement, Props>(function ReceiptCard({ receipt, said, onReplay }, ref) {
+/** The outcome first (the receipt "stamps" in as a ticket), then the consent trail that let it through. */
+export const ReceiptCard = forwardRef<HTMLHeadingElement, Props>(function ReceiptCard({ receipt, said, onReplay, motion = true }, ref) {
   const when = timeOf(receipt.when.executed_at ?? receipt.when.confirmed_at);
   const option = { action: receipt.what.action, args: receipt.what.args };
   const replayScan = useScanMark("replay");
   const delay = receipt.checks.length * TICK_MS + 180;
   return (
     <div className="done" style={{ "--stamp-delay": `${delay}ms` } as CSSProperties}>
-      <ConsentTrail checks={receipt.checks} pendingId={receipt.how.pending_id} />
       <div className="done__slot" aria-hidden="true">
         Checking…
       </div>
@@ -170,6 +171,7 @@ export const ReceiptCard = forwardRef<HTMLHeadingElement, Props>(function Receip
         </div>
       </article>
       </div>
+      <ConsentTrail key={receipt.receipt_id} checks={receipt.checks} pendingId={receipt.how.pending_id} motion={motion} />
     </div>
   );
 });

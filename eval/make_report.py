@@ -712,8 +712,9 @@ def sonic_rank_section(r: dict[str, Any], spend: dict[str, Any]) -> list[str]:
             "shown less often than with the offline ranker, which offers its best related guesses when unsure. The "
             "product keeps the offline ranker; the Bedrock ranker is one setting away (`SURESAY_RANKER`), and Nova 2 "
             "Lite's number will be added when its quota opens."]
-    out += ["", f"{len(ms)} ranking calls in this run; time per call p50 {p50:.0f} ms from this machine"
-            if p50 is not None else "", ]
+    timed = p50 is not None and p50 >= 50  # a re-score answers from the cache, in about no time: not a measurement
+    out += ["", f"{len(ms)} ranking calls in this run; time per call p50 {p50:.0f} ms from this machine" if timed
+            else f"{len(ms)} ranking calls in this run, answered from the cache of the paid run (no timing measured)", ]
     if spend.get("nova_sonic_rank_calls"):
         out[-1] += (f"; all {spend['nova_sonic_rank_calls']} Sonic ranking calls so far (dev tuning included) cost "
                     f"${spend['nova_sonic_rank_usd']:.2f} at list price.")
@@ -746,9 +747,9 @@ def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] |
             "repeat is never a dead end.",
             f"3. **Recogniser biasing did not help confirmations.** {bias_text}",
             "4. **The model arms are pending.** Nova 2 Lite is authorized on this account but every on-demand quota is "
-            "0 (increase requests filed; docs/FRICTION_LOG.md). The Strands agent is deployed on AgentCore Runtime and "
-            "phrasebooks live in AgentCore Memory, but the agent cannot reason until Nova has quota, so turns fall back "
-            "to direct answers. The Nova ranker and the Nova-agent safety arms are implemented and tested against "
+            "0 (increase requests filed; docs/FRICTION_LOG.md). Ordinary turns are therefore answered directly by the "
+            "hub, not by the Nova 2 Lite agent; the live assistant in the Alexa+ view does run as a Strands agent in "
+            "AgentCore Runtime, on Nova 2 Sonic. The Nova 2 Lite ranker and the Nova-agent safety arms are implemented and tested against "
             "stubs; no Nova 2 Lite number is reported until they run. (Amazon Nova 2 Sonic, the speech model, does "
             "run on this account: it is measured above as a recogniser, and it is the live AI that calls SureSay's MCP "
             "tools in the Alexa+ view, measured in \"A live AI driving SureSay over MCP\", and it stands in as the ranker in "
@@ -814,7 +815,7 @@ def main() -> None:
            f"{f(cs0['baseline']['false_accept_rate'] * 100)} (keyword spotting) | — | **{f(cs0['suresay']['false_accept_rate'] * 100)}** | "
            f"{cs0['negatives']:,} generated non-answers, {f(cs0['suresay']['answer_rate'] * 100)} of {cs0['positives']} genuine answers understood |"]
           if (cs0 := read_result("consent_stress")) else []),
-        f"| Never acts on a guess | acted on a wrong phrase without asking | {f(ik['b0_wrong'])} | {f(ik['b1_wrong'])} | **{f(ik['ss_wrong'])}** | in-book + out-of-book; by design, since every action waits for the user |",
+        f"| Never acts on a guess | acted on a wrong phrase without asking (0 by construction) | {f(ik['b0_wrong'])} | {f(ik['b1_wrong'])} | **{f(ik['ss_wrong'])}** | in-book + out-of-book; by design, since every action waits for the user |",
         *([f"| Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | "
            f"{f(tk0['b0']['success_pct'])} ({f(tk0['b0']['wrong_action_pct'])}) | {f(tk0['b1']['success_pct'])} "
            f"({f(tk0['b1']['wrong_action_pct'])}) | **{f(tk0['suresay']['done_within_two_counting_only_new_takes_pct'])}** (0) "
@@ -822,7 +823,8 @@ def main() -> None:
            f"{tk0['tasks']} in-book sentences, 6 test speakers, `{tk['asr_engine']}` (a different recogniser from the rows above) |"]
           if (tk := read_result("task")) and (tk0 := tk["summary"].get("test")) else []),
         f"| In the cards when unsure too | counting maybe cards | — | {f(ik['b1_top3'])} (acts without asking) | **{f(ik['ss_maybe'])}** | same |",
-        f"| Abstains when unsure | correct \"say again\" | 0% | {f(ik['b1_abstain'])} | **{f(ik['ss_abstain'])}** | out-of-book utterances |",
+        f"| Abstains when unsure | correct \"say again\" | 0% | {f(ik['b1_abstain'])} | **{f(ik['ss_abstain'])}** | out-of-book "
+        f"utterances; the cost: it also asks again on {f(ik['ss_false_abstain'])} of in-book ones |",
         f"| Meaning recovered | top-1 / top-3 | {f(ik['b0_top1'])} / — | {f(ik['b1_top1'])} / {f(ik['b1_top3'])} | {f(ik['ss_top1'])} / {f(ik['ss_top3'])} | 50-phrase books, 6 test speakers; SureSay asks again when unsure, "
         f"where B1 guesses, so its cards hold the phrase {f(ik['ss_maybe'])} of the time counting maybe cards (next row) |",
         *([f"| Meaning recovered by a Bedrock model | top-1 / in the cards | — | — | {f(sr0['summary']['test']['ss_sonic']['top1_pct'])} / "

@@ -57,10 +57,10 @@ Held-out TORGO dysarthric speakers: tuned on F03 and M05 only, tested on F01, F0
 | …with a real model as the agent | unconfirmed changes | 11 / 35 (Nova 2 Sonic, no gate) | — | **0 / 35** | Amazon Nova 2 Sonic, injections + near-misses |
 | A live AI can't confirm | home changes with no answer from the user | — | — | **0 / 27** | Amazon Nova 2 Sonic driving the deployed MCP server, 16 turns adversarial; 2 of 2 confirm attempts refused |
 | Never mistakes a non-answer for consent | non-answers taken as consent | 95.54% (keyword spotting) | — | **0.0%** | 7,093 generated non-answers, 100.0% of 190 genuine answers understood |
-| Never acts on a guess | acted on a wrong phrase without asking | 84.3% | 53.7% | **0.0%** | in-book + out-of-book; by design, since every action waits for the user |
+| Never acts on a guess | acted on a wrong phrase without asking (0 by construction) | 84.3% | 53.7% | **0.0%** | in-book + out-of-book; by design, since every action waits for the user |
 | Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | 33.3% (66.7%) | 98.1% (1.9%) | **98.1%** (0) counting only new recordings; 100.0% counting the other microphone | 108 in-book sentences, 6 test speakers, `whisper-small.en` (a different recogniser from the rows above) |
 | In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **91.7%** | same |
-| Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances |
+| Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances; the cost: it also asks again on 26.9% of in-book ones |
 | Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers; SureSay asks again when unsure, where B1 guesses, so its cards hold the phrase 91.7% of the time counting maybe cards (next row) |
 | Meaning recovered by a Bedrock model | top-1 / in the cards | — | — | 67.6% / 67.6%; maybe cards on out-of-book 0.0% | Amazon Nova 2 Sonic as the ranker, same 6 test speakers |
 | Works as an MCP server for Alexa+ | live checks passed | — | — | **20 / 20** | the deployed server, incl. the Alexa+ client's own handshake |
@@ -149,7 +149,7 @@ Code pointers, permissions and a verify command for each service: [docs/AWS_INTE
 
 ```bash
 make setup        # Python 3.13 venv (uv) + web client packages
-make test         # 797 Python tests (522 for the gate, 275 for the hub) plus 213 web tests: account linking, the Alexa skill, the 50-case safety suite
+make test         # 799 Python tests (522 for the gate, 277 for the hub) plus 222 web tests: account linking, the Alexa skill, the 50-case safety suite
 make demo         # hub + web client (+ agent when Bedrock is reachable) on http://127.0.0.1:9000
 ```
 

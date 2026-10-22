@@ -97,6 +97,7 @@ function scanItems(phase: Phase, a: ConversationActions, phrasebook: Phrase[], b
       }
       return [
         { id: "again", label: "Say it again", activate: a.startRequest },
+        ...(phase.sayToSomeone && a.sayToSomeone ? [{ id: "say-to-someone", label: "Say it to someone", activate: () => a.sayToSomeone?.(phase.sayToSomeone ?? "") }] : []),
         ...(phrasebook.length > 0 ? [{ id: "phrases", label: "Pick from my phrases", activate: () => a.openPhrases(true) }] : []),
       ];
     case "problem":
@@ -241,6 +242,11 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
     expire: conv.expire,
     moreTime: hub.moreTime ? conv.moreTime : undefined,
     openPhrases: conv.openPhrases,
+    sayToSomeone: (t) => {
+      setOrigin("people");
+      setTab("talk");
+      void conv.sendText(t, "say");
+    },
     reset: conv.reset,
     replay: conv.replay,
   };
