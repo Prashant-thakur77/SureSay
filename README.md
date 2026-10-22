@@ -203,7 +203,7 @@ Confirmations work in English, Hinglish and Devanagari ("doosra", "teen number",
 | `web/` | The web client (Vite + React + TypeScript) |
 | `eval/` | TORGO preparation, the evaluation scripts (confirm, intent, task success, safety, consent stress, live checks, site audit), tuning, cost, the report |
 | `infra/` | deploy, teardown, smoke test, IAM |
-| `docs/` | Judges' guide, AWS integrations, friction log, product feedback, feature requests, the write-up, video script, images |
+| `docs/` | Judges' guide, AWS integrations, the user-study protocol, friction log, product feedback, feature requests, the write-up, video script, images |
 
 ## Contributing and changes
 
