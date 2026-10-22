@@ -1,7 +1,7 @@
 """Cut the SureSay video: scenes to the narration timeline, voice + ducked music, burned captions, loudness -14 LUFS.
 
 Inputs (all under ~/Videos/suresay): build/timeline.json, audio/lines/*.wav, clips/*.mp4 (+ .marks.json),
-clips/bubble_*.png, stock/*.mp4, music/piano4.mp3 and music/up3.mp3. Output: SureSay.mp4.
+clips/bubble_*.png, stock/*.mp4, music/piano4.mp3. Output: SureSay.mp4.
 """
 
 from __future__ import annotations
@@ -246,8 +246,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
 
 def audio(stems: bool = False) -> str:
-    """Voice lines at their times; piano under the story, the uplifting track after; the music ducks under the voice
-    and gives way in the voice's presence range. With stems=True, writes the voice and the music separately."""
+    """Voice lines at their times over one continuous piano tune; the music ducks under the voice and gives way in
+    the voice's presence range. With stems=True, writes the voice and the music separately."""
     lines = [ln for s in TL["scenes"] for ln in s["lines"]]
     turn = SC["turn"]["start"]
     total = TL["total"]
@@ -262,14 +262,16 @@ def audio(stems: bool = False) -> str:
     fc.append(f"[{len(lines)}:a]aresample=48000,pan=stereo|c0=c0|c1=c0,volume=1.1,adelay={app_at}|{app_at}[l{len(lines)}]")
     n = len(lines) + 1
     fc.append("".join(f"[l{i}]" for i in range(n)) + f"amix=inputs={n}:normalize=0,apad=whole_dur={total:.2f}[voice]")
-    inputs += ["-i", f"{HOME}/music/piano4.mp3", "-i", f"{HOME}/music/up3.mp3"]
-    p, u = n, n + 1  # music inputs follow the voice lines and the app clip
-    fc.append(f"[{p}:a]aresample=48000,atrim=0:{turn + 2.5:.2f},afade=t=in:st=0:d=2,afade=t=out:st={turn - 0.5:.2f}:d=3,"
-              f"volume=0.85[piano]")
-    fc.append(f"[{u}:a]aresample=48000,atrim=0:{total - turn + 2:.2f},afade=t=in:st=0:d=2.5,"
-              f"afade=t=out:st={total - turn - 3.5:.2f}:d=3.5,adelay={int((turn - 0.8) * 1000)}|{int((turn - 0.8) * 1000)},"
-              f"volume={UP_VOLUME}[up]")
-    fc.append(f"[piano][up]amix=inputs=2:normalize=0,atrim=0:{total:.2f},equalizer=f=2500:t=q:w=1.4:g=-5[music]")
+    # one gentle piano tune from the first frame to the last: the track up to its fade, then its body again,
+    # crossfaded so the loop can't be heard; it eases down once the narration runs nonstop and fades out at the end
+    inputs += ["-i", f"{HOME}/music/{MUSIC}", "-i", f"{HOME}/music/{MUSIC}"]
+    p, q = n, n + 1  # music inputs follow the voice lines and the app clip
+    fc.append(f"[{p}:a]aresample=48000,atrim=0:{LOOP_AT}[m1]")
+    fc.append(f"[{q}:a]aresample=48000,atrim=start={LOOP_FROM},asetpts=PTS-STARTPTS[m2]")
+    fc.append(f"[m1][m2]acrossfade=d=6:c1=tri:c2=tri,atrim=0:{total:.2f},afade=t=in:st=0:d=2,"
+              f"afade=t=out:st={total - 4.5:.2f}:d=4.5,"
+              f"volume='{MUSIC_VOLUME}-{MUSIC_VOLUME - MUSIC_UNDER}*clip((t-{turn - 1:.2f})/4,0,1)':eval=frame,"
+              f"equalizer=f=2500:t=q:w=1.4:g=-5[music]")
     fc.append("[voice]asplit=2[v1][v2]")
     fc.append("[music][v2]sidechaincompress=threshold=0.02:ratio=5:attack=20:release=520:makeup=1,volume=0.6[ducked]")
     fc.append("[v1]equalizer=f=3000:t=q:w=1.2:g=2,acompressor=threshold=0.12:ratio=2.5:attack=8:release=120[vp]")
@@ -283,7 +285,11 @@ def audio(stems: bool = False) -> str:
     return out
 
 
-UP_VOLUME = 0.30
+MUSIC = "piano4.mp3"
+MUSIC_VOLUME = 0.85  # under the story
+MUSIC_UNDER = 0.6  # from the title on, eased down over 4 s, under nonstop narration
+LOOP_AT = 130  # the first pass ends here, before the track's own fade out
+LOOP_FROM = 12  # and the second pass starts here, past its intro
 
 
 def check_audio() -> None:
@@ -315,13 +321,12 @@ def check_audio() -> None:
         print(f"{s['name']:9s} music under the voice by {min(gaps):5.1f} to {max(gaps):5.1f} dB")
 
 
-def main() -> None:
+def main(audio_only: bool = False) -> None:
+    """Cut the scenes and the sound, then the final film. audio_only: keep the cut picture, redo the sound."""
     os.makedirs(B, exist_ok=True)
-    scenes = [story(), graphic("turn", "gfx-turn"), demo(), door(), graphic("agent", "gfx-agent"), features(),
-              graphic("proof", "gfx-proof"), graphic("built", "gfx-built"), close()]
     video = f"{B}/video.mp4"
-    open(f"{B}/scenes.txt", "w").write("".join(f"file '{p}'\n" for p in scenes))
-    run("-f", "concat", "-safe", "0", "-i", f"{B}/scenes.txt", *ENC, video)
+    if not audio_only:
+        cut(video)
     mix = audio()
     subs = captions()
     final = f"{HOME}/SureSay.mp4"
@@ -331,7 +336,14 @@ def main() -> None:
     print("wrote", final)
 
 
+def cut(video: str) -> None:
+    scenes = [story(), graphic("turn", "gfx-turn"), demo(), door(), graphic("agent", "gfx-agent"), features(),
+              graphic("proof", "gfx-proof"), graphic("built", "gfx-built"), close()]
+    open(f"{B}/scenes.txt", "w").write("".join(f"file '{p}'\n" for p in scenes))
+    run("-f", "concat", "-safe", "0", "-i", f"{B}/scenes.txt", *ENC, video)
+
+
 if __name__ == "__main__":
     import sys
 
-    check_audio() if "--check-audio" in sys.argv else main()
+    check_audio() if "--check-audio" in sys.argv else main(audio_only="--audio-only" in sys.argv)
