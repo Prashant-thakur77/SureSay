@@ -617,6 +617,18 @@ export function useConversation(deps: ConversationDeps) {
     [begin, showSet],
   );
 
+  /** Show this exact open card set now (a newer request made it): the phone follows the latest request. */
+  const focusPending = useCallback(
+    async (pendingId: string) => {
+      const sets = await depsRef.current.hub.pending().catch(() => [] as PendingSet[]);
+      const set = sets.find((x) => x.pending_id === pendingId && x.state === "waiting_for_user");
+      if (!set) return;
+      const id = begin();
+      showSet(id, set);
+    },
+    [begin, showSet],
+  );
+
   useEffect(
     () => () => {
       flow.current += 1;
@@ -629,6 +641,7 @@ export function useConversation(deps: ConversationDeps) {
   return {
     phase,
     debug,
+    focusPending,
     toggleMic,
     startRequest,
     help,

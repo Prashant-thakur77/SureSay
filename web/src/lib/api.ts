@@ -12,6 +12,7 @@ import type {
   PracticeResult,
   PracticeState,
   SpeakResponse,
+  AssistantTurn,
   TapInput,
   TurnResponse,
 } from "./types";
@@ -54,6 +55,8 @@ export interface HubApi {
   unpairDevice?(deviceId: string): Promise<void>;
   /** A one-time code that pairs another screen (e.g. an assistant's display) for this same user. */
   pairCode?(): Promise<string>;
+  /** One live AI assistant turn (Amazon Nova 2 Sonic driving SureSay over MCP), when the hub offers it. */
+  assistant?(text: string): Promise<AssistantTurn>;
   /** The signing fetch, for the MCP transport. */
   signingFetch: (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 }
@@ -161,6 +164,10 @@ export class HubClient implements HubApi {
 
   async unpairDevice(deviceId: string): Promise<void> {
     await this.call<{ ok: boolean }>("POST", "/device/unpair", { device_id: deviceId });
+  }
+
+  assistant(text: string): Promise<AssistantTurn> {
+    return this.call<AssistantTurn>("POST", "/device/assistant", { text }, 60000);
   }
 
   async pairCode(): Promise<string> {

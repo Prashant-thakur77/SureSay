@@ -42,6 +42,8 @@ class Settings:
     # Who hears spoken answers on the cards: "" = the same recogniser as requests; "nova-sonic" = Amazon Nova 2 Sonic
     evidence_asr: str = field(default_factory=lambda: _env("SURESAY_EVIDENCE_ASR", ""))
     public_demo: bool = field(default_factory=lambda: _env("SURESAY_PUBLIC_DEMO") in ("1", "true", "yes"))
+    # a live AI assistant driving SureSay over MCP from the user's own device ("" off, "nova-sonic": Amazon Nova 2 Sonic)
+    live_agent: str = field(default_factory=lambda: _env("SURESAY_LIVE_AGENT"))
     carer_topic_arn: str = field(default_factory=lambda: _env("SURESAY_CARER_TOPIC_ARN"))
     learn: bool = field(default_factory=lambda: _env("SURESAY_LEARN", "1") not in ("0", "false", "no"))
     public_url: str = field(default_factory=lambda: _env("SURESAY_PUBLIC_URL"))  # "" = derive from the request

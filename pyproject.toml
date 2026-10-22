@@ -1,6 +1,6 @@
 [project]
 name = "suresay"
-version = "1.6.0"
+version = "1.7.0"
 description = "A voice assistant for atypical speech: three big guesses, and nothing happens until you confirm one."
 readme = "README.md"
 license = "MIT"

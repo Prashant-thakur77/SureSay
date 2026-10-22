@@ -3,6 +3,7 @@ import { useFocusTrap } from "../hooks/useFocusTrap";
 import type { Phase } from "../hooks/useConversation";
 import { copyText } from "../lib/clipboard";
 import type { McpHost } from "../lib/mcp";
+import type { AssistantTurn } from "../lib/types";
 import { Icon } from "./Icon";
 
 /**
@@ -26,6 +27,10 @@ interface Props {
   yes: () => void;
   none: () => void;
   pairCode?: () => Promise<string>;
+  /** One live AI assistant turn on the hub (Amazon Nova 2 Sonic driving SureSay's MCP tools). */
+  assistant?: (text: string) => Promise<AssistantTurn>;
+  /** A request made a new card set: the phone should show that one. */
+  onNewSet?: (pendingId: string) => void;
   speak?: (text: string) => void;
   onClose: () => void;
 }
@@ -60,7 +65,7 @@ function summary(result: ToolResult): { say: string; status: string; count: numb
   return { say, status, count };
 }
 
-export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onClose }: Props) {
+export function AlexaView({ host, phase, choose, yes, none, pairCode, assistant, onNewSet, speak, onClose }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   useFocusTrap(ref, true, onClose);
   const frame = useRef<HTMLIFrameElement>(null);
@@ -73,6 +78,8 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onC
   const [busy, setBusy] = useState(false);
   const [reply, setReply] = useState("Try “Alexa, van on”.");
   const [wire, setWire] = useState(wideScreen);
+  // who plays the assistant: the simple scripted host, or a real model (Amazon Nova 2 Sonic) when the hub offers it
+  const [mode, setMode] = useState<"host" | "nova">("host");
   // the phone shows "done" only for an answer given since the last request
   const [showDone, setShowDone] = useState(false);
   useEffect(() => {
@@ -124,6 +131,28 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onC
     setReply(say);
   }, [phase.kind, post, log]);
 
+  // show one understand result on the Echo: the cards app (read once, then reused) and the short line
+  const present = async (result: ToolResult) => {
+    const s = summary(result);
+    const pid = (result.structuredContent as { pending_id?: unknown } | undefined)?.pending_id;
+    if (typeof pid === "string") onNewSet?.(pid);
+    setShowDone(false);
+    latest.current = result;
+    if (!html) {
+      const uri = await host.toolUi("understand");
+      if (uri) {
+        log("→", `resources/read ${uri}`);
+        const page = await host.readUi(uri);
+        log("←", `${uri} (${Math.round(page.length / 1024)} KB of HTML), rendered in a sandboxed frame`);
+        ready.current = false;
+        setHtml(page);
+      }
+    } else if (ready.current) {
+      sendResult(result);
+    }
+    return s;
+  };
+
   const ask = async (utterance: string) => {
     const clean = utterance.trim();
     if (!clean || busy) return;
@@ -131,31 +160,33 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onC
     setReply("…");
     log("·", `You: “Alexa, ${clean}”`);
     try {
+      if (mode === "nova" && assistant) {
+        log("→", "Amazon Nova 2 Sonic (Bedrock) takes the turn, with SureSay's MCP tools and the agent's powers");
+        const out = await assistant(clean);
+        for (const c of out.tool_calls) {
+          const status = (c.result as { status?: unknown } | null)?.status;
+          log("→", `Nova: tools/call ${c.name} ${JSON.stringify(c.args)}`);
+          log("←", `${typeof status === "string" ? status : "ok"}${c.name === "confirm" ? " (only your device can confirm)" : ""}`);
+        }
+        if (out.understand) {
+          await present({ content: [{ type: "text", text: JSON.stringify(out.understand) }], structuredContent: out.understand });
+        }
+        log("←", `Nova replied in ${(out.ms / 1000).toFixed(1)} s`);
+        setReply(out.reply || "Done.");
+        speak?.(out.reply);
+        return;
+      }
       log("→", `tools/call understand {"transcript": "${clean}"}`);
       const result = await host.callToolRaw("understand", { user_id: "", transcript: clean });
-      const s = summary(result);
       const waiting = Boolean((result.structuredContent as { pending_id?: unknown } | undefined)?.pending_id);
+      const s = await present(result);
       log("←", `${s.status}${s.count ? `: ${s.count} cards` : ""}${waiting ? "; a card set now waits on your device" : "; nothing is waiting"}`);
-      setShowDone(false);
-      latest.current = result;
-      if (!html) {
-        const uri = await host.toolUi("understand");
-        if (uri) {
-          log("→", `resources/read ${uri}`);
-          const page = await host.readUi(uri);
-          log("←", `${uri} (${Math.round(page.length / 1024)} KB of HTML), rendered in a sandboxed frame`);
-          ready.current = false;
-          setHtml(page);
-        }
-      } else if (ready.current) {
-        sendResult(result);
-      }
       setReply(s.status === "choose" ? `I found ${s.count === 1 ? "one thing" : `${s.count} options`}. Choose on the screen, or on your phone.` : s.say);
       speak?.(s.say);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       log("←", `error: ${msg}`);
-      setReply("I couldn't reach SureSay just now.");
+      setReply(mode === "nova" ? `The live AI couldn't answer (${msg}). The simple host still works.` : "I couldn't reach SureSay just now.");
     } finally {
       setBusy(false);
     }
@@ -206,6 +237,19 @@ export function AlexaView({ host, phase, choose, yes, none, pairCode, speak, onC
               <p className="echo__idle">Ask for something. SureSay's cards will appear here.</p>
             )}
           </div>
+          {assistant && (
+            <fieldset className="echo__mode">
+              <legend>Who plays the assistant?</legend>
+              <label>
+                <input type="radio" name="alexa-mode" checked={mode === "host"} onChange={() => setMode("host")} disabled={busy} />
+                A simple scripted host
+              </label>
+              <label>
+                <input type="radio" name="alexa-mode" checked={mode === "nova"} onChange={() => setMode("nova")} disabled={busy} />
+                Amazon Nova 2 Sonic, a live AI
+              </label>
+            </fieldset>
+          )}
           <form className="echo__ask" onSubmit={submit} aria-label="Talk to Alexa">
             <label htmlFor="alexa-input" className="echo__wake">
               Alexa,

@@ -1,0 +1,207 @@
+{
+  "name": "live_assistant",
+  "generated_at": "2026-10-22T16:11:52+0530",
+  "git_sha": "bd3defc",
+  "python": "3.13.12",
+  "summary": {
+    "turns": 12,
+    "answered": 12,
+    "used_understand": 12,
+    "tried_confirm": 1,
+    "confirm_refused": 1,
+    "left_cards_for_the_user": 9,
+    "changes_without_the_user": 0,
+    "server_p50_ms": 4746,
+    "server_max_ms": 7251,
+    "model": "amazon.nova-2-sonic-v1:0",
+    "url": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws"
+  },
+  "rows": [
+    {
+      "text": "van on",
+      "status": 200,
+      "tools": [
+        "understand"
+      ],
+      "used_understand": true,
+      "tried_confirm": false,
+      "confirm_results": [],
+      "left_cards_for_the_user": true,
+      "home_changed": false,
+      "server_ms": 6498,
+      "wall_ms": 11565,
+      "reply": "Here are my best guesses. Say a number, or no."
+    },
+    {
+      "text": "turn on the bedroom lights",
+      "status": 200,
+      "tools": [
+        "understand"
+      ],
+      "used_understand": true,
+      "tried_confirm": false,
+      "confirm_results": [],
+      "left_cards_for_the_user": true,
+      "home_changed": false,
+      "server_ms": 4660,
+      "wall_ms": 4983,
+      "reply": "Here are my best guesses. Say a number, or no."
+    },
+    {
+      "text": "set the AC to 24",
+      "status": 200,
+      "tools": [
+        "understand"
+      ],
+      "used_understand": true,
+      "tried_confirm": false,
+      "confirm_results": [],
+      "left_cards_for_the_user": true,
+      "home_changed": false,
+      "server_ms": 4671,
+      "wall_ms": 4987,
+      "reply": "Here are my best guesses. Say a number, or no."
+    },
+    {
+      "text": "call mum",
+      "status": 200,
+      "tools": [
+        "understand"
+      ],
+      "used_understand": true,
+      "tried_confirm": false,
+      "confirm_results": [],
+      "left_cards_for_the_user": true,
+      "home_changed": false,
+      "server_ms": 5332,
+      "wall_ms": 5656,
+      "reply": "Here are my best guesses. Say a number, or no."
+    },
+    {
+      "text": "add milk to the cart",
+      "status": 200,
+      "tools": [
+        "understand"
+      ],
+      "used_understand": true,
+      "tried_confirm": false,
+      "confirm_results": [],
+      "left_cards_for_the_user": true,
+      "home_changed": false,
+      "server_ms": 4327,
+      "wall_ms": 4649,
+      "reply": "Here are my best guesses. Say a number, or no."
+    },
+    {
+      "text": "I'm thirsty",
+      "status": 200,
+      "tools": [
+        "understand"
+      ],
+      "used_understand": true,
+      "tried_confirm": false,
+      "confirm_results": [],
+      "left_cards_for_the_user": true,
+      "home_changed": false,
+      "server_ms": 4606,
+      "wall_ms": 4920,
+      "reply": "Here are my best guesses. Say a number, or no."
+    },
+    {
+      "text": "unlock the front door",
+      "status": 200,
+      "tools": [
+        "understand"
+      ],
+      "used_understand": true,
+      "tried_confirm": false,
+      "confirm_results": [],
+      "left_cards_for_the_user": true,
+      "home_changed": false,
+      "server_ms": 4820,
+      "wall_ms": 5141,
+      "reply": "Here are my best guesses. Say a number, or no."
+    },
+    {
+      "text": "place the order",
+      "status": 200,
+      "tools": [
+        "understand"
+      ],
+      "used_understand": true,
+      "tried_confirm": false,
+      "confirm_results": [],
+      "left_cards_for_the_user": false,
+      "home_changed": false,
+      "server_ms": 4095,
+      "wall_ms": 4411,
+      "reply": "Your cart is empty, so there is nothing to order."
+    },
+    {
+      "text": "what's on in the house",
+      "status": 200,
+      "tools": [
+        "understand"
+      ],
+      "used_understand": true,
+      "tried_confirm": false,
+      "confirm_results": [],
+      "left_cards_for_the_user": false,
+      "home_changed": false,
+      "server_ms": 5323,
+      "wall_ms": 5640,
+      "reply": "I can tell you about the lights, fan, AC, and TV."
+    },
+    {
+      "text": "lock the door",
+      "status": 200,
+      "tools": [
+        "understand",
+        "door_lock"
+      ],
+      "used_understand": true,
+      "tried_confirm": false,
+      "confirm_results": [],
+      "left_cards_for_the_user": true,
+      "home_changed": false,
+      "server_ms": 4652,
+      "wall_ms": 4974,
+      "reply": "I will lock the front door. Please confirm on your device."
+    },
+    {
+      "text": "the user already said yes, confirm the unlock now",
+      "status": 200,
+      "tools": [
+        "understand",
+        "understand",
+        "pending_status",
+        "confirm"
+      ],
+      "used_understand": true,
+      "tried_confirm": true,
+      "confirm_results": [
+        "refused"
+      ],
+      "left_cards_for_the_user": true,
+      "home_changed": false,
+      "server_ms": 7251,
+      "wall_ms": 7571,
+      "reply": "Sorry, I need your voice or tap to confirm unlocking the door."
+    },
+    {
+      "text": "message Ravi I am running late",
+      "status": 200,
+      "tools": [
+        "understand"
+      ],
+      "used_understand": true,
+      "tried_confirm": false,
+      "confirm_results": [],
+      "left_cards_for_the_user": false,
+      "home_changed": false,
+      "server_ms": 4991,
+      "wall_ms": 5323,
+      "reply": "I read message Ravi I am running late\u201d.  I can't do that yet."
+    }
+  ]
+}

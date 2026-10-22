@@ -5818,3 +5818,33 @@ code {
 .site--motion .chapter.is-in .still img { transform: scale(1); }
 
 .chapter > .faq { margin-left: max(0px, calc((100% - 1180px) / 2)) !important; }
+
+.echo__mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.2rem;
+  margin: 1rem 0 0;
+  padding: 0.7rem 1rem;
+  border: 1px solid rgba(244, 241, 234, 0.25);
+  border-radius: 14px;
+}
+
+.echo__mode legend {
+  padding: 0 0.4rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.echo__mode label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.echo__mode input {
+  width: 1.2rem;
+  height: 1.2rem;
+  accent-color: #ffb070;
+}

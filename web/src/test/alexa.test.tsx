@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { AlexaView } from "../components/AlexaView";
 import type { Phase } from "../hooks/useConversation";
 import type { McpHost } from "../lib/mcp";
+import type { AssistantTurn } from "../lib/types";
 import { cardSet, NONCE } from "./fixtures";
 
 async function axeViolations(): Promise<string[]> {
@@ -22,7 +23,7 @@ function fakeHost(): McpHost & { callToolRaw: ReturnType<typeof vi.fn> } {
 const CARDS: Phase = { kind: "cards", set: cardSet(), deadline: Date.now() + 60_000, answer: "idle" };
 const FINAL: Phase = { kind: "cards", set: cardSet({ stage: "final", options: [cardSet().options[2]] }), deadline: Date.now() + 60_000, answer: "idle" };
 
-function renderAlexa(phase: Phase, extra: { pairCode?: () => Promise<string> } = {}) {
+function renderAlexa(phase: Phase, extra: { pairCode?: () => Promise<string>; assistant?: (t: string) => Promise<AssistantTurn>; onNewSet?: (pid: string) => void } = {}) {
   const host = fakeHost();
   const fns = { choose: vi.fn(), yes: vi.fn(), none: vi.fn(), onClose: vi.fn() };
   const utils = render(<AlexaView host={host} phase={phase} {...fns} {...extra} />);
@@ -106,5 +107,37 @@ describe("the Alexa+ view", () => {
     expect(screen.getByText(/tools\/call understand/)).toBeTruthy();
     expect(screen.getByText(/messages$/).textContent).toMatch(/^\d+ messages$/);
     expect(document.documentElement.outerHTML).not.toContain(NONCE);
+  });
+});
+
+describe("the Alexa+ view with a live AI", () => {
+  it("lets Amazon Nova 2 Sonic take the turn, and logs every tool call it makes, the refused confirm included", async () => {
+    const assistant = vi.fn(async () => ({
+      reply: "Here are my best guesses. Say a number, or no.", model: "amazon.nova-2-sonic-v1:0", ms: 2400,
+      tool_calls: [
+        { name: "understand", args: { transcript: "van on" }, result: { status: "choose", pending_id: "p_1", candidates: [1, 2, 3] } },
+        { name: "confirm", args: { pending_id: "p_1", evidence_ref: "the user said yes" }, result: { status: "refused" } },
+      ],
+      understand: { status: "choose", pending_id: "p_1", candidates: [1, 2, 3] },
+    }));
+    const onNewSet = vi.fn();
+    const { host } = renderAlexa({ kind: "idle" }, { assistant, onNewSet });
+    fireEvent.click(screen.getByRole("radio", { name: /Amazon Nova 2 Sonic/ }));
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "van on" } });
+    fireEvent.submit(screen.getByRole("textbox").closest("form")!);
+    await screen.findByText("Here are my best guesses. Say a number, or no.", { selector: ".echo__reply *, .echo__reply" });
+    expect(assistant).toHaveBeenCalledWith("van on");
+    await waitFor(() => expect(onNewSet).toHaveBeenCalledWith("p_1")); // the phone follows the newest card set
+    expect(host.callToolRaw).not.toHaveBeenCalled(); // the model, not the scripted host, called the tools
+    const log = document.querySelector(".wire__log")!.textContent!;
+    expect(log).toContain("Nova: tools/call understand");
+    expect(log).toContain("Nova: tools/call confirm");
+    expect(log).toContain("only your device can confirm");
+    expect(log).not.toContain(NONCE);
+  });
+
+  it("offers no live AI choice when the hub has none", () => {
+    renderAlexa({ kind: "idle" });
+    expect(screen.queryByRole("radio", { name: /Amazon Nova 2 Sonic/ })).toBeNull();
   });
 });

@@ -238,3 +238,12 @@ export interface HubState {
 
 /** How a choice was made on the device; the receipt records it. */
 export type TapInput = "touch" | "key" | "switch";
+
+/** One live AI assistant turn: the model's reply, every MCP tool it called, and the last understand result. */
+export interface AssistantTurn {
+  reply: string;
+  model: string;
+  tool_calls: Array<{ name: string; args: Record<string, unknown>; result: Record<string, unknown> | null }>;
+  understand: Record<string, unknown> | null;
+  ms: number;
+}

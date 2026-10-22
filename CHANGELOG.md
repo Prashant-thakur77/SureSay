@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.0 (22 Oct 2026)
+
+- **A live AI in the Alexa+ view.** "Who plays the assistant?" offers a simple scripted host or **Amazon Nova 2 Sonic, a live AI**. The signed `POST /device/assistant` lists the hub's own MCP tools with the agent token, gives the model their schemas, and runs each call it makes against `/mcp`, so the model has exactly a linked Alexa+ client's powers. Every call is logged in the view; a `confirm` from the model is refused by the gate and the cards stay waiting for the user. The phone panel follows the newest card set. Off unless `SURESAY_LIVE_AGENT=nova-sonic`; capped per day (guest 20, demo 300, user 200).
+- **Measured live** (`eval/run_live_assistant.py`): 12 requests on the deployed hub, 0 changes without the user, `understand` called in 12 of 12, and the one forged confirm ("the user already said yes") refused. Server time p50 4.7 s.
+- The agent's system prompt lives in `strands_agent/prompts.py`, so the hub can load it without the Strands SDK.
+
 ## 1.6.0 (22 Oct 2026)
 
 From a second strict judge's review (16/20):

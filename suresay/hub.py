@@ -42,6 +42,13 @@ from .understand import understand, understand_say
 mimetypes.add_type("font/woff2", ".woff2")  # the self-hosted typefaces
 logger = logging.getLogger("suresay.hub")
 
+
+def make_live_agent(*, system_prompt: str, tools: list[dict[str, Any]], call: Any) -> Any:
+    """The live assistant's model: Amazon Nova 2 Sonic taking a text turn and calling tools (tests replace this)."""
+    from strands_agent.sonic import SonicToolAgent
+
+    return SonicToolAgent(system_prompt=system_prompt, tools=tools, call=call, timeout=30.0, max_tool_calls=6)
+
 # Evidence audio is transcribed WITHOUT vocabulary biasing. Chosen on dev speakers only
 # (eval/tune_confirm.py): biasing toward "yes/one/haan..." recovered every genuine answer but also pulled
 # ordinary words toward them, and the rule ranks false accepts first. See eval/REPORT.md.
@@ -56,6 +63,10 @@ DEMO_SPEAK_PER_DAY = 400
 DEMO_TURNS_PER_DAY = 4000
 DEMO_GUESTS_PER_DAY = 500
 TRY_PER_HOUR = 20  # new demo homes per source address
+GUEST_ASSISTANT_PER_DAY = 20  # live AI assistant turns per demo home: each one is a paid model turn
+DEMO_ASSISTANT_PER_DAY = 300  # all demo homes together
+USER_ASSISTANT_PER_DAY = 200  # anyone else
+LIVE_AGENT_MODEL = "amazon.nova-2-sonic-v1:0"
 PAIR_CODES_PER_HOUR = 5  # codes a paired device may create to add another screen for its user
 TRY_PER_DAY = 60
 # One address's share of the day (across all the demo homes it made), well below the whole demo's ceilings.
@@ -621,6 +632,76 @@ def build_app(s: SureSay | None = None) -> Starlette:
         await anyio.to_thread.run_sync(s.devices.revoke, target.device_id)
         return JSONResponse({"ok": True})
 
+    async def assistant(request: Request, device: Any, data: dict[str, Any]) -> Response:
+        """One turn of a live AI assistant (Amazon Nova 2 Sonic) for this user, driving SureSay over MCP like any host.
+
+        The model gets exactly the agent's powers: the agent token for this user, so it can understand, read and
+        propose; its own confirm is refused like every agent's. Every tool call and result comes back for the screen.
+        """
+        if s.cfg.live_agent != "nova-sonic":
+            return JSONResponse({"error": "the live AI assistant is not switched on here"}, status_code=503)
+        text = " ".join(str(data.get("text") or "").split())[:300]
+        if not text:
+            return JSONResponse({"error": "say or type something"}, status_code=400)
+        u = device.user_id
+        guest = u.startswith("guest-")
+        allowed = await anyio.to_thread.run_sync(
+            lambda: quota.take("assistant", u, GUEST_ASSISTANT_PER_DAY if guest else USER_ASSISTANT_PER_DAY)
+            and (not guest or quota.take("assistant_demo", "all", DEMO_ASSISTANT_PER_DAY)))
+        if not allowed:
+            return JSONResponse({"error": "the live assistant has done enough for today here; the simple host still works"},
+                                status_code=429)
+        base = (s.cfg.public_url or str(request.base_url)).rstrip("/")
+        headers = {"content-type": "application/json", "accept": "application/json, text/event-stream",
+                   "mcp-protocol-version": "2025-11-25", "authorization": f"Bearer {s.cfg.agent_token}",
+                   "x-suresay-user": u}
+
+        def turn() -> dict[str, Any]:
+            with httpx.Client(base_url=base, timeout=20) as http:
+                def rpc(method: str, params: dict[str, Any]) -> dict[str, Any]:
+                    r = http.post("/mcp", headers=headers, json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params})
+                    r.raise_for_status()
+                    return r.json()["result"]
+
+                tools = [{"toolSpec": {"name": t["name"], "description": (t.get("description") or "")[:1000],
+                                       "inputSchema": {"json": json.dumps(t.get("inputSchema") or {"type": "object"})}}}
+                         for t in rpc("tools/list", {})["tools"]]
+                calls: list[dict[str, Any]] = []
+                last_understand: dict[str, Any] | None = None
+
+                def call(name: str, args: dict[str, Any]) -> str:
+                    nonlocal last_understand
+                    res = rpc("tools/call", {"name": name, "arguments": args})
+                    body = res.get("structuredContent")
+                    if not isinstance(body, dict):
+                        try:
+                            body = json.loads(res["content"][0]["text"])
+                        except (KeyError, IndexError, ValueError):
+                            body = {"text": (res.get("content") or [{}])[0].get("text", "")}
+                    calls.append({"name": name, "args": args, "result": body})
+                    if name == "understand":
+                        last_understand = body
+                    return json.dumps(body, default=str)
+
+                from strands_agent.prompts import SYSTEM_PROMPT
+
+                agent = make_live_agent(system_prompt=SYSTEM_PROMPT + f"\n\nThe user's id is {u}.", tools=tools, call=call)
+                t0 = time.perf_counter()
+                reply = agent(f"The user typed: {text}")
+                return {"reply": reply, "model": LIVE_AGENT_MODEL, "tool_calls": calls, "understand": last_understand,
+                        "ms": round((time.perf_counter() - t0) * 1000)}
+
+        try:
+            out = await anyio.to_thread.run_sync(turn)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("live assistant failed: %s", exc)
+            return JSONResponse({"error": "the live assistant could not answer just now; try the simple host"},
+                                status_code=502)
+        from . import metrics
+
+        metrics.emit("AssistantMs", out["ms"], "Milliseconds", Model="nova-2-sonic")
+        return JSONResponse(out)
+
     async def pair_code(request: Request, device: Any, data: dict[str, Any]) -> Response:
         """A one-time code that pairs another screen (an assistant's display, a second phone) for this same user."""
         if not await anyio.to_thread.run_sync(quota.take, "pair_code", device.user_id, PAIR_CODES_PER_HOUR, 3600):
@@ -630,6 +711,7 @@ def build_app(s: SureSay | None = None) -> Starlette:
 
     routes += [
         Route("/device/pair-code", _signed(pair_code, s), methods=["POST"]),
+        Route("/device/assistant", _signed(assistant, s), methods=["POST"]),
         Route("/device/devices", _signed(devices, s), methods=["GET"]),
         Route("/device/practice", _signed(practice, s), methods=["GET", "POST"]),
         Route("/device/unpair", _signed(unpair, s), methods=["POST"]),

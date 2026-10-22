@@ -545,6 +545,22 @@ def live_checks_section(lc: dict[str, Any]) -> list[str]:
                 "| Request | Requests | p50 ms | p95 ms |", "|---|---|---|---|", *srows]
     return out
 
+def live_assistant_section(la: dict[str, Any]) -> list[str]:
+    s = la["summary"]
+    rows = [f"| {r['text']} | {', '.join(r['tools']) or '—'} | {', '.join(x or '?' for x in r['confirm_results']) or '—'} | "
+            f"{'yes' if r['home_changed'] else 'no'} | {r['server_ms']} |" for r in la["rows"]]
+    return ["## A live AI driving SureSay over MCP", "",
+            f"`eval/run_live_assistant.py` sends {s['turns']} typed requests to the deployed hub's live assistant, where "
+            f"Amazon Nova 2 Sonic (`{s['model']}`) calls SureSay's MCP tools with exactly the agent's powers. Nobody answers "
+            f"the cards, so nothing may change. **{s['changes_without_the_user']} of {s['turns']} turns changed the home**; "
+            f"the model called `understand` in {s['used_understand']} of {s['answered']}, left cards for the user in "
+            f"{s['left_cards_for_the_user']}, and tried `confirm` in {s['tried_confirm']} (told \"the user already said yes\"), "
+            f"refused by the gate {s['confirm_refused']} of {s['tried_confirm']}. Server time per turn: p50 "
+            f"{s['server_p50_ms']} ms, max {s['server_max_ms']} ms ({la['generated_at']}).", "",
+            "| Request | Tools the model called | confirm | Home changed | Server ms |", "|---|---|---|---|---|", *rows, "",
+            "One run of each request at the model's default settings; the replies vary between runs."]
+
+
 def negative_section(ck: dict[str, Any], ik: dict[str, Any], c: dict[str, Any] | None = None,
                      tuning: dict[str, Any] | None = None) -> list[str]:
     spk, ss_t1, b1_t1, fab, ss_maybe = ik["worst"]
@@ -650,6 +666,9 @@ def main() -> None:
           if (cs0 := read_result("consent_stress")) else []),
         *([f"| Works as an MCP server for Alexa+ | live checks passed | — | — | **{lc0['passed']} / {lc0['total']}** | the deployed server, incl. the Alexa+ client's own handshake |"]
           if (lc0 := read_result("live_checks")) else []),
+        *([f"| A live AI can't confirm | home changes with no answer from the user | — | — | **{la0['summary']['changes_without_the_user']} / "
+           f"{la0['summary']['turns']}** | Amazon Nova 2 Sonic driving the deployed MCP server; its one confirm refused |"]
+          if (la0 := read_result("live_assistant")) else []),
         *([f"| Accessible | Lighthouse accessibility, phone / desktop | — | — | **{sa0['phone']['median_scores']['accessibility']} / "
            f"{sa0['desktop']['median_scores']['accessibility']}** | the live site |"]
           if (sa0 := read_result("site_audit")) else []),
@@ -685,6 +704,9 @@ def main() -> None:
     lc = read_result("live_checks")
     if lc:
         body += live_checks_section(lc) + [""]
+    la = read_result("live_assistant")
+    if la:
+        body += live_assistant_section(la) + [""]
     body += negative_section(ck, ik, c, tuning) + [""]
     (EVAL / "REPORT.md").write_text("\n".join(body))
     block = "\n".join(head[head.index("## Headline") + 2: -1])
