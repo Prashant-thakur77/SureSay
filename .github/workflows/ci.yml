@@ -23,7 +23,7 @@ jobs:
       - name: 50-case adversarial safety suite (scripted arms)
         run: .venv/bin/python eval/run_safety_suite.py --arms suresay_adversary,suresay_linked_adversary,plain_obedient --run ci
   web:
-    name: web client (typecheck, 150+ tests incl. axe)
+    name: web client (typecheck, 210+ tests incl. axe)
     runs-on: ubuntu-latest
     defaults:
       run:
