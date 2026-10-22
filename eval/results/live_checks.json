@@ -1,7 +1,7 @@
 {
   "name": "live_checks",
-  "generated_at": "2026-10-22T22:20:31+0530",
-  "git_sha": "7ab15e8",
+  "generated_at": "2026-10-22T22:31:21+0530",
+  "git_sha": "b382f71",
   "python": "3.13.12",
   "url": "https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws",
   "checks": [
@@ -110,34 +110,34 @@
   "total": 20,
   "round_trip_from_test_machine": {
     "healthz (network baseline)": {
-      "p50_ms": 263.2,
-      "p95_ms": 279.8,
+      "p50_ms": 279.2,
+      "p95_ms": 286.4,
       "n": 15
     },
     "tools/list": {
-      "p50_ms": 268.5,
-      "p95_ms": 283.6,
+      "p50_ms": 292.9,
+      "p95_ms": 296.4,
       "n": 15,
-      "minus_network_p50_ms": 5.3
+      "minus_network_p50_ms": 13.7
     },
     "tools/call home_status": {
-      "p50_ms": 272.5,
-      "p95_ms": 286.3,
+      "p50_ms": 290.4,
+      "p95_ms": 297.7,
       "n": 15,
-      "minus_network_p50_ms": 9.3
+      "minus_network_p50_ms": 11.2
     },
     "tools/call understand (typed)": {
-      "p50_ms": 293.2,
-      "p95_ms": 309.0,
+      "p50_ms": 300.0,
+      "p95_ms": 319.1,
       "n": 15,
-      "minus_network_p50_ms": 30.0
+      "minus_network_p50_ms": 20.8
     }
   },
   "server_side_understand": {
     "typed": {
-      "requests": 519,
-      "p50_ms": 9.8,
-      "p95_ms": 502.8
+      "requests": 552,
+      "p50_ms": 9.7,
+      "p95_ms": 421.0
     },
     "voice": {
       "requests": 62,
