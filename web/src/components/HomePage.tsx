@@ -115,6 +115,10 @@ function Problem() {
         </span>
         <span className="statement__line statement__line--hit">And it did it.</span>
       </h2>
+      <figure className="still">
+        <img src="/site/alone.jpg" alt="An older man sits alone in a dark room by the window" loading="lazy" width={1800} height={950} />
+        <figcaption className="still__cap">After that night, he stopped talking to it.</figcaption>
+      </figure>
       <div className="chapter__cols">
         <p className="chapter__lead">
           After a stroke, or with Parkinson's, ALS or cerebral palsy, speech can come out slower, softer or slurred. This is dysarthria, and the mind
@@ -504,6 +508,7 @@ function Questions() {
 function Dawn() {
   return (
     <section className="dawn" aria-labelledby="dawn-title">
+      <img className="dawn__img" src="/site/homework.jpg" alt="" loading="lazy" width={1800} height={1012} />
       <h2 id="dawn-title" className="dawn__title display">
         And this time, <em>he is heard.</em>
       </h2>

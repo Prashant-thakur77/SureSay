@@ -5577,3 +5577,56 @@ code {
 @media (max-width: 62em) {
   .sitenav__links { background: #0b1430; }
 }
+
+/* real people, warm and quiet */
+.still {
+  position: relative;
+  margin-top: clamp(32px, 6vh, 64px) !important;
+  margin-bottom: 0 !important;
+  overflow: hidden;
+  border-radius: 28px;
+}
+
+.still img {
+  display: block;
+  width: 100%;
+  height: clamp(260px, 42vw, 520px);
+  object-fit: cover;
+  object-position: 60% 40%;
+  filter: saturate(0.85) contrast(1.05);
+}
+
+.still::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(11, 20, 48, 0) 40%, rgba(11, 20, 48, 0.85) 100%);
+}
+
+.still__cap {
+  position: absolute;
+  left: clamp(20px, 4vw, 48px);
+  right: clamp(20px, 4vw, 48px);
+  bottom: clamp(18px, 3vw, 36px);
+  z-index: 1;
+  font: italic clamp(1.4rem, 3vw, 2.4rem)/1.15 var(--serif);
+  color: #fff;
+}
+
+.dawn > *:not(.dawn__img) { position: relative; z-index: 1; }
+
+.dawn__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
+  opacity: 0.38;
+  mix-blend-mode: luminosity;
+}
+
+.site--motion .still img { transition: transform 1.6s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(1.06); }
+.site--motion .chapter.is-in .still img { transform: scale(1); }
+
+.chapter > .faq { margin-left: max(0px, calc((100% - 1180px) / 2)) !important; }
