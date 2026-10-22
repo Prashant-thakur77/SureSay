@@ -161,3 +161,18 @@ def test_info_says_where_the_live_assistant_runs(live: Hub) -> None:
     assert live.http.get("/api/info").json()["live_assistant"] == {"model": "amazon.nova-2-sonic-v1:0", "runs_on": "the hub"}
     live.s.cfg.__dict__["agent_runtime_arn"] = "arn:aws:bedrock-agentcore:us-east-1:1:runtime/suresay_agent-x"
     assert live.http.get("/api/info").json()["live_assistant"]["runs_on"] == "AgentCore Runtime"
+
+
+def test_a_later_unsure_set_does_not_replace_a_real_one(live: Hub) -> None:
+    import suresay.hub as hubmod
+
+    class Wander(ScriptedAgent):
+        def __call__(self, text: str) -> str:
+            self.call("door_lock", {"user_id": "", "locked": False})  # a real proposal
+            self.call("understand", {"user_id": "", "transcript": "lights"})  # then an unsure one
+            return "Please confirm on your device."
+
+    hubmod.make_live_agent = Wander  # type: ignore[assignment]
+    out = live.signed(live.pair(), "POST", "/device/assistant", {"text": "unlock the door"}).json()
+    assert out["tool_calls"][1]["result"]["status"] == "ask_again"
+    assert out["latest"]["pending_id"] == out["tool_calls"][0]["result"]["pending_id"]

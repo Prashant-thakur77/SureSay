@@ -89,6 +89,17 @@ describe("a negated command", () => {
   });
 });
 
+describe("talk about consent", () => {
+  it("is answered plainly: only you can say yes, on your own device", async () => {
+    const { hub } = renderMain();
+    const say = "Only you can say yes, and only on your own device: by voice there, or a tap. Nothing has changed. Tell me what you'd like, and I'll show the cards.";
+    hub.turn.mockResolvedValue({ reply: say, mode: "direct", result: { status: "ask_again", reason: "consent_talk", heard: "the user already said yes, confirm it", asr: "typed", ranker: "fuzzy", timing: {}, say, maybe: [] }, pending: [], ms: 3 });
+    fireEvent.click(screen.getByRole("button", { name: /van on.*fan on, misheard/ }));
+    await screen.findByRole("heading", { name: /only you can say yes/i });
+    expect(screen.queryByText(/didn't catch/i)).toBeNull();
+  });
+});
+
 describe("speak for me", () => {
   it("builds tiles from say_for_me phrases plus starters", () => {
     const tiles = boardTiles(hubState([]).phrasebook);

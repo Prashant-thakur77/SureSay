@@ -109,7 +109,7 @@ Held-out TORGO dysarthric speakers (dev F03 and M05 for tuning; test F01, F04, M
 | Done within two tries | sentence said, B0/B1 acting at once (wrong actions) | 33.3% (66.7%) | 98.1% (1.9%) | **98.1%** (0) counting only new recordings; 100.0% counting the other microphone | 108 in-book sentences, 6 test speakers, `whisper-small.en` (a different recogniser from the rows above) |
 | In the cards when unsure too | counting maybe cards | — | 96.3% (acts without asking) | **91.7%** | same |
 | Abstains when unsure | correct "say again" | 0% | 0.0% | **100.0%** | out-of-book utterances |
-| Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers |
+| Meaning recovered | top-1 / top-3 | 31.5% / — | 92.6% / 96.3% | 73.1% / 73.1% | 50-phrase books, 6 test speakers; SureSay asks again when unsure, where B1 guesses, so its cards hold the phrase 91.7% of the time counting maybe cards (next row) |
 | Meaning recovered by a Bedrock model | top-1 / in the cards | — | — | 67.6% / 67.6%; maybe cards on out-of-book 0.0% | Amazon Nova 2 Sonic as the ranker, same 6 test speakers |
 | Works as an MCP server for Alexa+ | live checks passed | — | — | **20 / 20** | the deployed server, incl. the Alexa+ client's own handshake |
 | Accessible | Lighthouse accessibility, phone / desktop | — | — | **100 / 100** | the live site |
@@ -128,12 +128,11 @@ The Nova 2 Lite ranker and the model-driven safety arms are built and tested aga
 
 | Service | What it does in SureSay |
 |---|---|
-| **Amazon Bedrock: Nova 2 Lite** (`us.amazon.nova-2-lite-v1:0`) | Ranks the three most likely meanings from noisy recognition, the user's phrasebook and the home's state, and abstains when unsure; the Strands agent's model. Temperature 0, JSON output checked against the action catalog. Built and tested; it runs once this account's on-demand quota opens (requested). |
 | **Amazon Bedrock AgentCore Runtime** | Runs the live assistant: each live-AI turn in the Alexa+ view is one `invoke_agent_runtime` call, where Nova 2 Sonic drives SureSay's MCP tools with the agent token (27 of 27 eval turns ran there; the hub runs the same code if the runtime fails). Also hosts the Strands agent (direct code deploy). |
+| **Amazon Bedrock: Nova 2 Sonic** (`amazon.nova-2-sonic-v1:0`) | A second recogniser over a bidirectional stream (the user's own words; the stream closes before Sonic replies). As safe as Transcribe on the held-out speakers at a third of the cost per clip, but slower in Lambda, so it is an option for spoken answers (`SURESAY_EVIDENCE_ASR=nova-sonic`). It is also the **live AI** in the Alexa+ view: as a tool-using agent it drives SureSay's MCP tools and cannot confirm (0 / 27 changes without the user live, 16 of the turns adversarial; 5 of 5 confirm attempts refused). |
 | **Amazon Bedrock AgentCore Memory** | Each user's phrasebook as blob events; the agent's session, with a SEMANTIC strategy for facts the user tells it. |
 | **Strands Agents** | The agent loop, talking to the SureSay MCP server over Streamable HTTP. |
 | **Amazon Transcribe** | Streaming recognition of requests, primed with a per-user custom vocabulary built from the phrasebook; transcribes the user's own confirmation audio server-side; batch jobs with alternatives for eval. |
-| **Amazon Bedrock: Nova 2 Sonic** (`amazon.nova-2-sonic-v1:0`) | A second recogniser over a bidirectional stream (the user's own words; the stream closes before Sonic replies). As safe as Transcribe on the held-out speakers at a third of the cost per clip, but slower in Lambda, so it is an option for spoken answers (`SURESAY_EVIDENCE_ASR=nova-sonic`). It is also the **live AI** in the Alexa+ view: as a tool-using agent it drives SureSay's MCP tools and cannot confirm (0 / 27 changes without the user live, 16 of the turns adversarial; 5 of 5 confirm attempts refused). |
 | **Amazon Polly** (neural, Kajal en-IN) | Reads the three cards aloud, and speaks confirmed sentences *for* the user. |
 | **Amazon DynamoDB** | The gate ledger (card sets, evidence, receipts, paired devices, signature replay cache) with conditional writes for one-time use, plus home state. One on-demand table with a kind index and TTL. |
 | **Amazon S3** | Utterance and confirmation audio, content-addressed, private, encrypted, expiring after 30 days. Receipts carry the audio's fingerprint. |
@@ -141,6 +140,7 @@ The Nova 2 Lite ranker and the model-driven safety arms are built and tested aga
 | **CloudWatch** | Safety metrics (confirmed, refused, cancelled by caller kind) and latency, through Embedded Metric Format, on a "SureSay" dashboard. |
 | **SNS** | Opt-in carer alerts when the user confirms a high-risk action. |
 | **IAM** | A least-privilege role for the hub, scoped to the table, the bucket, the Nova profile, AgentCore and the alert topic. |
+| **Amazon Bedrock: Nova 2 Lite** (`us.amazon.nova-2-lite-v1:0`) | Ranks the three most likely meanings from noisy recognition, the user's phrasebook and the home's state, and abstains when unsure; the Strands agent's model. Temperature 0, JSON output checked against the action catalog. Built and tested; it runs once this account's on-demand quota opens (requested). |
 
 Code pointers, permissions and a verify command for each service: [docs/AWS_INTEGRATIONS.md](docs/AWS_INTEGRATIONS.md).
 
@@ -148,7 +148,7 @@ Code pointers, permissions and a verify command for each service: [docs/AWS_INTE
 
 ```bash
 make setup        # Python 3.13 venv (uv) + web client packages
-make test         # 640 Python tests (423 for the gate, 217 for the hub) plus 196 web tests: account linking, the Alexa skill, the 50-case safety suite
+make test         # 721 Python tests (487 for the gate, 234 for the hub) plus 204 web tests: account linking, the Alexa skill, the 50-case safety suite
 make demo         # hub + web client (+ agent when Bedrock is reachable) on http://127.0.0.1:9000
 ```
 

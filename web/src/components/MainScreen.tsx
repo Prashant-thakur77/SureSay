@@ -62,26 +62,32 @@ const BACK: Partial<Record<TabId, { label: string; icon: TabDef<TabId>["icon"] }
 function scanItems(phase: Phase, a: ConversationActions, phrasebook: Phrase[], back?: ScanItem): ScanItem[] {
   const mic: ScanItem = { id: "mic", label: "Microphone", activate: a.toggleMic };
   switch (phase.kind) {
-    case "cards":
+    case "cards": {
       if (phase.answer === "listening") return [{ id: "mic", label: "Stop listening", activate: a.toggleMic }];
+      // last, so the scan starts on the cards; there for as long as the hub will give more time
+      const more: ScanItem[] = a.moreTime && phase.moreLeft !== 0 ? [{ id: "more-time", label: "More time", activate: () => void a.moreTime?.() }] : [];
       if (phase.set.context?.unsure) {
         return [
           { id: "again", label: "Say it again", activate: a.startRequest },
           ...phase.set.options.map((o) => ({ id: `card-${o.n}`, label: `Maybe ${o.n}: ${o.text}`, activate: () => a.choose(o.n, "switch") })),
           { id: "none", label: "None of these", activate: () => a.none("switch") },
+          ...more,
         ];
       }
       if (phase.set.stage === "final" || phase.set.options.length === 1) {
         return [
           { id: "yes", label: `Yes: ${phase.set.options[0]?.text ?? ""}`, activate: () => a.yes("switch") },
           { id: "no", label: "No", activate: () => a.none("switch") },
+          ...more,
         ];
       }
       return [
         ...phase.set.options.map((o) => ({ id: `card-${o.n}`, label: `${o.n}: ${o.text}`, activate: () => a.choose(o.n, "switch") })),
         { id: "none", label: "None of these", activate: () => a.none("switch") },
         { id: "again", label: "Say it again", activate: a.startRequest },
+        ...more,
       ];
+    }
     case "ask_again":
       if (phase.phrases) {
         return [
@@ -233,6 +239,7 @@ export function MainScreen({ hub, gate, speaker, settings, bigScreen, onSettings
     none: conv.none,
     stopListening: conv.stopListening,
     expire: conv.expire,
+    moreTime: hub.moreTime ? conv.moreTime : undefined,
     openPhrases: conv.openPhrases,
     reset: conv.reset,
     replay: conv.replay,

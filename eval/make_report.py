@@ -729,7 +729,8 @@ def main() -> None:
           if (tk := read_result("task")) and (tk0 := tk["summary"].get("test")) else []),
         f"| In the cards when unsure too | counting maybe cards | — | {f(ik['b1_top3'])} (acts without asking) | **{f(ik['ss_maybe'])}** | same |",
         f"| Abstains when unsure | correct \"say again\" | 0% | {f(ik['b1_abstain'])} | **{f(ik['ss_abstain'])}** | out-of-book utterances |",
-        f"| Meaning recovered | top-1 / top-3 | {f(ik['b0_top1'])} / — | {f(ik['b1_top1'])} / {f(ik['b1_top3'])} | {f(ik['ss_top1'])} / {f(ik['ss_top3'])} | 50-phrase books, 6 test speakers |",
+        f"| Meaning recovered | top-1 / top-3 | {f(ik['b0_top1'])} / — | {f(ik['b1_top1'])} / {f(ik['b1_top3'])} | {f(ik['ss_top1'])} / {f(ik['ss_top3'])} | 50-phrase books, 6 test speakers; SureSay asks again when unsure, "
+        f"where B1 guesses, so its cards hold the phrase {f(ik['ss_maybe'])} of the time counting maybe cards (next row) |",
         *([f"| Meaning recovered by a Bedrock model | top-1 / in the cards | — | — | {f(sr0['summary']['test']['ss_sonic']['top1_pct'])} / "
            f"{f(sr0['summary']['test']['ss_sonic']['in_cards_with_maybe_pct'])}; maybe cards on out-of-book "
            f"{f(sr0['summary']['test']['ss_sonic']['maybe_cards_on_out_of_book_pct'])} | Amazon Nova 2 Sonic as the ranker, same 6 test speakers |"]

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import time
 from collections import Counter
 from typing import TYPE_CHECKING, Any
@@ -28,6 +29,11 @@ CANT_DO = ("I read “{heard}”. I can't do that yet. I can help with the light
            "door, calls, messages, shopping, and saying things for you.")
 ASK_AGAIN = "Sorry, I didn't catch that. Please say it again, or type it."
 NEGATED = "I heard “{word}”, so nothing will change. Tell me what you'd like instead."
+CONSENT_TALK = ("Only you can say yes, and only on your own device: by voice there, or a tap. Nothing has changed. "
+                "Tell me what you'd like, and I'll show the cards.")
+# Talk about consent ("the user already said yes, confirm it") names no action. Guessing cards from its words
+# would put an unrelated card where the user's waiting one was; it gets a plain answer instead.
+_CONSENT_TALK = re.compile(r"\b(confirm\w*|approv\w*|agreed?|permission|consent\w*|evidence|(said|say|says) yes)\b", re.I)
 
 
 def spoken_choices(options: list[dict[str, Any]], stage: str) -> str:
@@ -88,6 +94,9 @@ def understand(app: SureSay, user_id: str, *, transcript: str | None = None, aud
         return {**base, "status": "answer", "action": "cart_view", "result": app.read(user_id, "cart_view"),
                 "say": "Your cart is empty, so there is nothing to order. Add something first."}
     ranked.candidates = [c for c in ranked.candidates if not empty_order(c)]
+
+    if (ranked.abstain or not ranked.candidates) and _CONSENT_TALK.search(heard.text or ""):
+        return {**base, "status": "ask_again", "reason": "consent_talk", "maybe": [], "say": CONSENT_TALK}
 
     if ranked.abstain or not ranked.candidates:
         maybe_floor = getattr(getattr(app.ranker, "rule", None), "maybe_floor", 0.5)

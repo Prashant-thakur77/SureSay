@@ -177,6 +177,9 @@ export function describeEvents(events: GateEvent[]): ActivityLine[] {
       case "cancelled":
         lines.push({ key, at: e.at, tone: "info", label: "Cancelled", text: "Nothing was changed." });
         break;
+      case "extended":
+        lines.push({ key, at: e.at, tone: "info", label: "More time", text: "You kept the cards open longer." });
+        break;
       case "needs_final_yes":
         lines.push({ key, at: e.at, tone: "info", label: "Asked twice", text: "This one needs a second yes." });
         break;

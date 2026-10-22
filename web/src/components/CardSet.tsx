@@ -11,7 +11,7 @@
  * choosing, so a reflex press of the talk key never picks a card by accident.
  */
 
-import { useEffect, useRef, type CSSProperties, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { formatSeconds, useCountdown } from "../hooks/useCountdown";
 import type { CardOption, HomeDevice, PendingSet } from "../lib/types";
 import { barValue, iconFor, likelihood } from "../lib/words";
@@ -28,6 +28,8 @@ interface Props {
   onSpace: () => void;
   onExpire: (pendingId: string) => void;
   announce: (msg: string) => void;
+  /** Ask the hub for more time (WCAG 2.2.1). Absent when the hub can't, or the set has had all it may have. */
+  onMoreTime?: () => void | Promise<void>;
   /** "Maybe" cards offered after "please say it again". */
   unsure?: boolean;
   /** The doorbell's cards: a heading under the doorbell header. */
@@ -45,25 +47,59 @@ export function AssistantBanner() {
   );
 }
 
-export function Countdown({ deadline, pendingId, onExpire, announce }: { deadline: number; pendingId: string; onExpire: (id: string) => void; announce: (msg: string) => void }) {
+/**
+ * How long the cards stay open, and "More time" (WCAG 2.2.1 Timing Adjustable): a slow speaker or a switch user
+ * restarts the clock from their own device as often as the hub allows. The 30-second warning says so, politely.
+ */
+export function Countdown({
+  deadline,
+  pendingId,
+  onExpire,
+  announce,
+  onMoreTime,
+}: {
+  deadline: number;
+  pendingId: string;
+  onExpire: (id: string) => void;
+  announce: (msg: string) => void;
+  onMoreTime?: () => void | Promise<void>;
+}) {
   const left = useCountdown(deadline);
   const warned = useRef(false);
+  const [asking, setAsking] = useState(false);
+  const scan = useScanMark("more-time");
+  const canAsk = !!onMoreTime;
   useEffect(() => {
     if (left == null) return;
+    if (left > 30) warned.current = false; // more time given: warn again when it runs low
     if (left === 0) onExpire(pendingId);
     else if (left <= 30 && !warned.current) {
       warned.current = true;
-      announce(`${left} seconds left to answer.`);
+      announce(canAsk ? `${left} seconds left. Choose More time to keep these cards.` : `${left} seconds left to answer.`);
     }
-  }, [left, pendingId, onExpire, announce]);
+  }, [left, pendingId, onExpire, announce, canAsk]);
   if (left == null) return null;
-  return (
+  const clock = (
     <p className={`countdown${left <= 30 ? " countdown--low" : ""}`}>
       <Icon name="clock" size={20} />
       <span>
         Open for <span className="countdown__time">{formatSeconds(left)}</span>
       </span>
     </p>
+  );
+  if (!onMoreTime) return clock;
+  const more = () => {
+    if (asking) return;
+    setAsking(true);
+    void Promise.resolve(onMoreTime()).finally(() => setAsking(false));
+  };
+  return (
+    <div className="countdown-row">
+      {clock}
+      <button type="button" className="btn btn--secondary countdown__more" aria-disabled={asking || undefined} onClick={more} {...scan}>
+        <Icon name="clock" size={22} /> More time
+      </button>
+    </div>
   );
 }
 
@@ -147,7 +183,7 @@ function ChoiceCard({
   );
 }
 
-export function CardSet({ set, deadline, busy, tv, devices, onChoose, onSpace, onExpire, announce, unsure = false, doorbell = false }: Props) {
+export function CardSet({ set, deadline, busy, tv, devices, onChoose, onSpace, onExpire, announce, onMoreTime, unsure = false, doorbell = false }: Props) {
   const listRef = useRef<HTMLOListElement>(null);
   const assistant = set.origin === "assistant";
 
@@ -195,7 +231,7 @@ export function CardSet({ set, deadline, busy, tv, devices, onChoose, onSpace, o
             Did you <em>mean</em>…
           </h2>
         )}
-        <Countdown deadline={deadline} pendingId={set.pending_id} onExpire={onExpire} announce={announce} />
+        <Countdown deadline={deadline} pendingId={set.pending_id} onExpire={onExpire} announce={announce} onMoreTime={onMoreTime} />
       </div>
       {assistant && <AssistantBanner />}
       <ol className="cards" ref={listRef} aria-busy={busy || undefined}>

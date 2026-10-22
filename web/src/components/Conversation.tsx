@@ -26,6 +26,8 @@ export interface ConversationActions {
   none: (input?: TapInput) => void;
   stopListening: () => void;
   expire: (pendingId: string) => void;
+  /** More time for the open cards, when the hub offers it. */
+  moreTime?: () => void | Promise<void>;
   openPhrases: (open: boolean) => void;
   reset: () => void;
   replay: () => void;
@@ -149,6 +151,7 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
       const unsure = isUnsure(phase.set);
       const door = isDoorbell(phase.set);
       const single = phase.set.stage === "final" || phase.set.options.length === 1;
+      const moreTime = phase.moreLeft === 0 ? undefined : actions.moreTime;
       view = (
         <>
           {door && <DoorbellHeader visitor={phase.set.context?.visitor} />}
@@ -169,9 +172,9 @@ export function Conversation({ phase, actions, mic, level, tv, devices, phrasebo
             </p>
           )}
           {single && !unsure ? (
-            <FinalCheck set={phase.set} deadline={phase.deadline} busy={busy} devices={devices} onYes={actions.yes} onNo={actions.none} onExpire={actions.expire} announce={announce} single={phase.set.stage === "choose"} />
+            <FinalCheck set={phase.set} deadline={phase.deadline} busy={busy} devices={devices} onYes={actions.yes} onNo={actions.none} onExpire={actions.expire} announce={announce} onMoreTime={moreTime} single={phase.set.stage === "choose"} />
           ) : (
-            <CardSet set={phase.set} deadline={phase.deadline} busy={busy} tv={tv} devices={devices} onChoose={actions.choose} onSpace={actions.toggleMic} onExpire={actions.expire} announce={announce} unsure={unsure} doorbell={door} />
+            <CardSet set={phase.set} deadline={phase.deadline} busy={busy} tv={tv} devices={devices} onChoose={actions.choose} onSpace={actions.toggleMic} onExpire={actions.expire} announce={announce} onMoreTime={moreTime} unsure={unsure} doorbell={door} />
           )}
           {phase.heardAnswer && <p className="heard heard--answer">Heard: “{phase.heardAnswer}”</p>}
           {busy && (

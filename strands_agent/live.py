@@ -55,7 +55,8 @@ def assistant_turn(text: str, user_id: str, *, mcp_url: str, token: str,
             calls.append({"name": name, "args": args, "result": body})
             if name == "understand":
                 last_understand = body
-            if body.get("pending_id"):
+            # an unsure ("maybe") set never replaces a set the model already proposed in this turn
+            if body.get("pending_id") and not (latest and body.get("status") == "ask_again"):
                 latest = body
                 if not body.get("candidates"):  # a direct proposal names its cards only as text
                     view = tool("pending_status", {"pending_id": body["pending_id"]})

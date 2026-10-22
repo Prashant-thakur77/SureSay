@@ -14,12 +14,14 @@ interface Props {
   onNo: () => void;
   onExpire: (pendingId: string) => void;
   announce: (msg: string) => void;
+  /** Ask the hub for more time (WCAG 2.2.1). */
+  onMoreTime?: () => void | Promise<void>;
   /** A one-card set (a tapped tile, a phrase to learn): "Is this right?" rather than a second check. */
   single?: boolean;
 }
 
 /** The second yes for risky actions: one big card and two huge buttons. */
-export function FinalCheck({ set, deadline, busy, devices, onYes, onNo, onExpire, announce, single = false }: Props) {
+export function FinalCheck({ set, deadline, busy, devices, onYes, onNo, onExpire, announce, onMoreTime, single = false }: Props) {
   const option = set.options[0];
   // focus the question, not YES: a reflex Enter must never confirm a risky action
   const cardRef = useRef<HTMLDivElement>(null);
@@ -45,7 +47,7 @@ export function FinalCheck({ set, deadline, busy, devices, onYes, onNo, onExpire
             </>
           )}
         </h2>
-        <Countdown deadline={deadline} pendingId={set.pending_id} onExpire={onExpire} announce={announce} />
+        <Countdown deadline={deadline} pendingId={set.pending_id} onExpire={onExpire} announce={announce} onMoreTime={onMoreTime} />
       </div>
       {set.origin === "assistant" && <AssistantBanner />}
       <div className="final__card" ref={cardRef} tabIndex={-1}>

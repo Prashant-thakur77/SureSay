@@ -57,6 +57,9 @@ export interface CardOption {
  * One open card set, as the device channel returns it. `nonce` is a one-time
  * secret: it is sent back with evidence and must never be rendered or logged.
  */
+/** The hub's answer to "More time": the set's public view (never its nonce) and how many more times it may be asked. */
+export type MoreTimeResponse = Omit<PendingSet, "nonce" | "context"> & { extensions_left: number };
+
 export interface PendingSet {
   pending_id: string;
   state: string;
@@ -179,7 +182,7 @@ export interface HomeDevice {
   temperature?: number;
 }
 
-export type EventType = "proposed" | "evidence" | "refused" | "cancelled" | "needs_final_yes" | "done" | "failed";
+export type EventType = "proposed" | "evidence" | "refused" | "cancelled" | "needs_final_yes" | "done" | "failed" | "extended";
 
 export interface GateEvent {
   type: EventType;

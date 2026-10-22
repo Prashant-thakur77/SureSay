@@ -7,6 +7,7 @@ import type {
   DeviceCreds,
   EvidenceResponse,
   HubState,
+  MoreTimeResponse,
   PairedDevice,
   PendingSet,
   PracticeResult,
@@ -57,6 +58,8 @@ export interface HubApi {
   pairCode?(): Promise<string>;
   /** One live AI assistant turn (Amazon Nova 2 Sonic driving SureSay over MCP), when the hub offers it. */
   assistant?(text: string): Promise<AssistantTurn>;
+  /** More time for one of this user's waiting card sets (WCAG 2.2.1). Device channel only: never the agent's. */
+  moreTime?(pendingId: string): Promise<MoreTimeResponse>;
   /** The signing fetch, for the MCP transport. */
   signingFetch: (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 }
@@ -172,6 +175,10 @@ export class HubClient implements HubApi {
 
   async pairCode(): Promise<string> {
     return (await this.call<{ code: string }>("POST", "/device/pair-code", {})).code;
+  }
+
+  moreTime(pendingId: string): Promise<MoreTimeResponse> {
+    return this.call<MoreTimeResponse>("POST", "/device/more-time", { pending_id: pendingId });
   }
 
   async pending(): Promise<PendingSet[]> {

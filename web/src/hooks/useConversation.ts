@@ -34,6 +34,8 @@ export type Phase =
       answer: AnswerState;
       note?: string;
       heardAnswer?: string;
+      /** How many more times "More time" may be asked for this set (unknown until the first ask). */
+      moreLeft?: number;
     }
   | { kind: "done"; receipt: Receipt; said?: string; atDoor?: string; heardAnswer?: string }
   | { kind: "cancelled" }
@@ -71,6 +73,12 @@ export interface ConversationDeps {
   announce: (message: string, level?: Politeness) => void;
   refreshState: () => Promise<HubState | null>;
   sessionId: string;
+}
+
+function spokenSeconds(s: number): string {
+  if (s < 60) return `${s} seconds`;
+  const m = Math.round(s / 60);
+  return m === 1 ? "1 minute" : `${m} minutes`;
 }
 
 const ADOPTABLE: Phase["kind"][] = ["idle", "done", "cancelled", "answer", "reply", "problem"];
@@ -399,8 +407,8 @@ export function useConversation(deps: ConversationDeps) {
           announce(ASK_AGAIN_TEXT, "assertive");
           void speak(r.say || ASK_AGAIN_TEXT);
         }
-      } else if (r.status === "ask_again" && r.reason === "negation") {
-        // "don't unlock the door": no cards, and the screen says the same as the voice: nothing will change
+      } else if (r.status === "ask_again" && (r.reason === "negation" || r.reason === "consent_talk")) {
+        // "don't unlock the door", or talk about consent: no cards, and the screen says the same as the voice: nothing changes
         setPhase({ kind: "answer", text: r.say, heard: r.heard, unchanged: true });
         announce(r.say, "assertive");
         void speak(r.say);
@@ -526,6 +534,30 @@ export function useConversation(deps: ConversationDeps) {
     },
     [begin, problem],
   );
+
+  /** More time for the open cards (WCAG 2.2.1): the hub restarts their clock. Only this paired device can ask. */
+  const moreTime = useCallback(async () => {
+    const p = phaseRef.current;
+    const { hub, announce } = depsRef.current;
+    if (p.kind !== "cards" || !hub.moreTime) return;
+    const pendingId = p.set.pending_id;
+    const same = (q: Phase): q is Extract<Phase, { kind: "cards" }> => q.kind === "cards" && q.set.pending_id === pendingId;
+    try {
+      const out = await hub.moreTime(pendingId);
+      setPhase((q) => (same(q) ? { ...q, deadline: Date.now() + Math.max(0, out.expires_in_s) * 1000, moreLeft: out.extensions_left } : q));
+      announce(`More time. These cards stay open for ${spokenSeconds(out.expires_in_s)}.`, "polite");
+    } catch (err) {
+      if (err instanceof HubError && err.status === 409 && /more time/i.test(err.message)) {
+        setPhase((q) => (same(q) ? { ...q, moreLeft: 0 } : q));
+        announce("No more time can be added to these cards. Please answer, or say it again.", "polite");
+      } else if (err instanceof HubError && (err.status === 404 || err.status === 409)) {
+        announce("These cards are no longer open.", "polite");
+        void depsRef.current.refreshState();
+      } else {
+        announce("I couldn't add more time just now. Please try again.", "polite");
+      }
+    }
+  }, [setPhase]);
 
   const openPhrases = useCallback(
     (open: boolean) => setPhase((p) => (p.kind === "ask_again" ? { ...p, phrases: open } : p)),
@@ -654,6 +686,7 @@ export function useConversation(deps: ConversationDeps) {
     answerByVoice,
     stopListening,
     expire,
+    moreTime,
     openPhrases,
     reset,
     replay,

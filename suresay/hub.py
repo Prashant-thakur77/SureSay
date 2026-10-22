@@ -23,7 +23,7 @@ from typing import Any
 
 import anyio
 import httpx
-from confirm_gate import AuthError, device_routes
+from confirm_gate import AuthError, NotWaiting, device_routes
 from confirm_gate.device import authenticate
 from mcp.server.transport_security import TransportSecuritySettings
 from starlette.applications import Starlette
@@ -701,7 +701,21 @@ def build_app(s: SureSay | None = None) -> Starlette:
         code = await anyio.to_thread.run_sync(lambda: s.devices.start_pairing(device.user_id, minted_by=device.device_id))
         return JSONResponse({"code": code, "expires_in_s": 600})
 
+    async def more_time(request: Request, device: Any, data: dict[str, Any]) -> Response:
+        """More time for one of the user's own waiting card sets (WCAG 2.2.1). Device channel only, never MCP."""
+        pid = data.get("pending_id")
+        if not isinstance(pid, str) or not pid:
+            return JSONResponse({"error": "no such card set"}, status_code=404)
+        try:
+            out = await anyio.to_thread.run_sync(lambda: s.gate.extend(pid, user_id=device.user_id))
+        except KeyError:
+            return JSONResponse({"error": "no such card set"}, status_code=404)
+        except NotWaiting as exc:
+            return JSONResponse({"error": str(exc)}, status_code=409)
+        return JSONResponse(out)
+
     routes += [
+        Route("/device/more-time", _signed(more_time, s), methods=["POST"]),
         Route("/device/pair-code", _signed(pair_code, s), methods=["POST"]),
         Route("/device/assistant", _signed(assistant, s), methods=["POST"]),
         Route("/device/devices", _signed(devices, s), methods=["GET"]),

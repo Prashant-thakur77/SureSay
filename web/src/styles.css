@@ -839,6 +839,18 @@ code {
   font-weight: 700;
 }
 
+.countdown-row {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+/* a full-size target, never a small link: a slow speaker or a switch user needs it most */
+.countdown__more {
+  min-height: max(56px, 2.8rem);
+}
+
 .assist-banner {
   display: flex;
   align-items: center;

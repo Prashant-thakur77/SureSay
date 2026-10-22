@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.7.2 (22 Oct 2026)
+
+- **Talk about consent gets a plain answer, not guesses.** "the user already said yes, confirm it" names no action; before, its words could fuzzily match a product ("already" and "bread") and a maybe card replaced the user's waiting one on both screens. Now, when SureSay is not sure of an action and the words are about consent (confirm, approve, agreed, permission, evidence, "said yes"), it answers "Only you can say yes, and only on your own device…" with no cards; a real request that mentions confirming ("turn on the bedroom lights and confirm it") still gets its cards. No sentence in the evaluation contains these words, so no reported figure changes.
+- In a live-AI turn, an unsure set never replaces a set the model already proposed.
+- **More time** (WCAG 2.2.1 Timing Adjustable): every card set and second yes has a "More time" button beside its countdown, reachable by touch, Tab and one-switch scanning; at 30 seconds left the screen reader hears "30 seconds left. Choose More time to keep these cards." `POST /device/more-time` (signed, the user's own device only) calls the gate's new `extend`, up to 10 times per set; it is not an MCP tool, so the agent cannot keep a card alive. confirm-gate-mcp 0.7.0.
+- The AWS tables lead with what runs (AgentCore Runtime with the live assistant, Nova 2 Sonic); Nova 2 Lite, awaiting quota, comes last. The headline's "Meaning recovered" row says why B1's top-1 is higher. The submission text is current (four reviews, the live AI, AgentCore).
+
 ## 1.7.1 (22 Oct 2026)
 
 - **A Bedrock model ranks** (`SonicRanker`, `SURESAY_RANKER=sonic`): Amazon Nova 2 Sonic gets Nova 2 Lite's prompt and returns its ranking as a `submit_ranking` tool call, closing the stream before any speech. Tuned on dev speakers only; on the test speakers 67.6% top-1 (offline ranker 73.1%), 100% correct "say again" on out-of-book, and no unrelated maybe cards (offline 25.9%). 400 calls, $0.59. Two harmless prompt lines had to be reworded past Sonic's content filter (friction log #19).
