@@ -1,7 +1,7 @@
 """Cut the SureSay video: scenes to the narration timeline, voice + ducked music, burned captions, loudness -14 LUFS.
 
 Inputs (all under ~/Videos/suresay): build/timeline.json, audio/lines/*.wav, clips/*.mp4 (+ .marks.json),
-clips/bubble_*.png, stock/*.mp4, music/piano4.mp3. Output: SureSay.mp4.
+clips/bubble_*.png, stock/*.mp4, music/theme.wav (video/music.py). Output: SureSay.mp4.
 """
 
 from __future__ import annotations
@@ -262,13 +262,10 @@ def audio(stems: bool = False) -> str:
     fc.append(f"[{len(lines)}:a]aresample=48000,pan=stereo|c0=c0|c1=c0,volume=1.1,adelay={app_at}|{app_at}[l{len(lines)}]")
     n = len(lines) + 1
     fc.append("".join(f"[l{i}]" for i in range(n)) + f"amix=inputs={n}:normalize=0,apad=whole_dur={total:.2f}[voice]")
-    # one gentle piano tune from the first frame to the last: the track up to its fade, then its body again,
-    # crossfaded so the loop can't be heard; it eases down once the narration runs nonstop and fades out at the end
-    inputs += ["-i", f"{HOME}/music/{MUSIC}", "-i", f"{HOME}/music/{MUSIC}"]
-    p, q = n, n + 1  # music inputs follow the voice lines and the app clip
-    fc.append(f"[{p}:a]aresample=48000,atrim=0:{LOOP_AT}[m1]")
-    fc.append(f"[{q}:a]aresample=48000,atrim=start={LOOP_FROM},asetpts=PTS-STARTPTS[m2]")
-    fc.append(f"[m1][m2]acrossfade=d=6:c1=tri:c2=tri,atrim=0:{total:.2f},afade=t=in:st=0:d=2,"
+    # SureSay's own piano theme (video/music.py), written to this timeline: one tune from the first frame to the last.
+    # It eases down once the narration runs nonstop and fades out under the closing chord.
+    inputs += ["-i", f"{HOME}/music/{MUSIC}"]
+    fc.append(f"[{n}:a]aresample=48000,atrim=0:{total:.2f},afade=t=in:st=0:d=2,"
               f"afade=t=out:st={total - 4.5:.2f}:d=4.5,"
               f"volume='{MUSIC_VOLUME}-{MUSIC_VOLUME - MUSIC_UNDER}*clip((t-{turn - 1:.2f})/4,0,1)':eval=frame,"
               f"equalizer=f=2500:t=q:w=1.4:g=-5[music]")
@@ -285,11 +282,9 @@ def audio(stems: bool = False) -> str:
     return out
 
 
-MUSIC = "piano4.mp3"
+MUSIC = "theme.wav"  # from video/music.py: composed for the film, so no recording can match it
 MUSIC_VOLUME = 0.85  # under the story
-MUSIC_UNDER = 0.6  # from the title on, eased down over 4 s, under nonstop narration
-LOOP_AT = 130  # the first pass ends here, before the track's own fade out
-LOOP_FROM = 12  # and the second pass starts here, past its intro
+MUSIC_UNDER = 0.52  # from the title on, eased down over 4 s, under nonstop narration
 
 
 def check_audio() -> None:
