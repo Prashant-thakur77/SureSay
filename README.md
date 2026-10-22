@@ -10,12 +10,12 @@
 
 **A voice assistant for people whose speech other assistants mishear. It shows its three best guesses, and nothing happens until you choose one.**
 
-[![Watch the 3-minute film](docs/img/video-poster.jpg)](https://youtu.be/dvMJsOJvrfg)
+[![Watch the film (3:41)](docs/img/video-poster.jpg)](https://youtu.be/85hVEOd3uaw)
 
 <p align="center">
 <a href="https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws"><b>Live demo</b></a> (no sign-up) ·
 <a href="https://fig5s4lcztnov5vd3us22pnmoi0srphu.lambda-url.us-east-1.on.aws/?alexa=1"><b>Alexa+ view</b></a> (simulated Echo Show) ·
-<a href="https://youtu.be/dvMJsOJvrfg"><b>3-min film</b></a> (2:58) ·
+<a href="https://youtu.be/85hVEOd3uaw"><b>The film</b></a> (3:41) ·
 <a href="docs/JUDGES.md"><b>Judges' guide</b></a> (5 minutes)
 </p>
 

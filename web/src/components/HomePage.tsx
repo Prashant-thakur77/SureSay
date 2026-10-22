@@ -12,7 +12,7 @@ import { Wordmark } from "./TopBar";
 
 const REPO = "https://github.com/Prashant-thakur77/SureSay";
 const GATE_REPO = "https://github.com/Prashant-thakur77/confirm-gate-mcp";
-const FILM = "https://youtu.be/dvMJsOJvrfg";
+const FILM = "https://youtu.be/85hVEOd3uaw";
 
 const NAV: Array<[string, string]> = [
   ["#how", "How it works"],

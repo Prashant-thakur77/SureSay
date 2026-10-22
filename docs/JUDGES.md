@@ -1,6 +1,6 @@
 # SureSay in five minutes (for judges)
 
-**Watch first (2:58):** https://youtu.be/dvMJsOJvrfg
+**Watch first (3:41):** https://youtu.be/85hVEOd3uaw
 
 ## Try it (two minutes, no setup)
 
