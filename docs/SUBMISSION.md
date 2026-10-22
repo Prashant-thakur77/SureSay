@@ -174,7 +174,7 @@ Your YouTube link. Upload `SureSay.mp4` from https://github.com/Prashant-thakur7
   Built for the Build, Ship, Shape Amazon Developer Hackathon (Alexa+ track) with Amazon Bedrock AgentCore, Strands Agents, Amazon Nova, Transcribe, Polly, DynamoDB and Lambda.
   ```
 
-- **YouTube thumbnail:** `devpost/00-thumbnail.jpg`.
+- **YouTube thumbnail:** [`devpost/youtube-thumbnail.jpg`](devpost/youtube-thumbnail.jpg) (1280×720, 16:9; in YouTube Studio: Details → Thumbnail → Upload file).
 
 ### Image gallery
 
