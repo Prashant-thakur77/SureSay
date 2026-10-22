@@ -672,14 +672,14 @@ def build_app(s: SureSay | None = None) -> Starlette:
         base = (s.cfg.public_url or str(request.base_url)).rstrip("/")
 
         def turn() -> dict[str, Any]:
-            from strands_agent.live import assistant_turn
-
             if s.cfg.agent_runtime_arn:  # the same turn, run by the agent deployed on AgentCore Runtime
                 try:
                     return {**invoke_assistant_runtime(s.cfg, {"mode": "assistant", "prompt": text, "user_id": u}),
                             "runs_on": "AgentCore Runtime"}
                 except Exception as exc:  # noqa: BLE001
                     logger.warning("AgentCore Runtime turn failed, running it here: %s", exc)
+            from strands_agent.live import assistant_turn
+
             out = assistant_turn(text, u, mcp_url=f"{base}/mcp", token=s.cfg.agent_token, agent_factory=make_live_agent)
             return {**out, "runs_on": "the hub"}
 
