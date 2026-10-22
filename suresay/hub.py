@@ -684,6 +684,9 @@ def build_app(s: SureSay | None = None) -> Starlette:
                         last_understand = body
                     if body.get("pending_id"):
                         latest = body
+                        if not body.get("candidates"):  # a direct proposal names its cards only as text
+                            view = s.gate.pending_status(body["pending_id"], user_id=u)
+                            latest = {**body, "stage": view.get("stage"), "candidates": view.get("options", [])}
                     return json.dumps(body, default=str)
 
                 from strands_agent.prompts import SYSTEM_PROMPT

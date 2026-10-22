@@ -100,6 +100,8 @@ def test_the_newest_card_set_comes_back_whichever_tool_made_it(live: Hub) -> Non
     door = out["tool_calls"][1]["result"]
     assert door.get("pending_id") and out["latest"]["pending_id"] == door["pending_id"]
     assert out["understand"]["pending_id"] != door["pending_id"]
+    assert [c["text"] for c in out["latest"]["candidates"]] == ["Unlock the front door"]  # numbered cards to draw
+    assert out["latest"]["stage"] == "final" and "nonce" not in json.dumps(out["latest"])
 
 
 def test_info_names_only_the_protocol_versions_the_server_answers(hub: Hub) -> None:
